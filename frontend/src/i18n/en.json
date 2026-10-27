@@ -1,0 +1,199 @@
+{
+  "common": {
+    "app": { "name": "Learning World" },
+    "language": {
+      "label": "Language",
+      "en": "English",
+      "fr": "Français",
+      "ar": "العربية",
+      "ar-TN": "تونسي (Darija)"
+    },
+    "counters": {
+      "coins": "{count, plural, one {coin} other {coins}}",
+      "points": "{count, plural, one {point} other {points}}",
+      "streak": "{count, plural, one {day streak} other {day streak}}",
+      "refillIn": "Refill in",
+      "duration": "{h}h {m}m"
+    },
+    "banner": {
+      "queue": "High demand, your quiz is in line (about {seconds} s).",
+      "offline": "Offline demo mode – showing saved results.",
+      "quickMode": "Quick mode: a faster model answered this time.",
+      "placement": "Take the 8-question placement quiz to set your level."
+    },
+    "chip": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced",
+      "cost": "{count, plural, one {# coin} other {# coins}}",
+      "free": "Free",
+      "quickMode": "Quick mode",
+      "weakSpot": "Weak spot",
+      "confidence": "Confidence: {level}",
+      "pinned": "Pinned best answer"
+    },
+    "confidence": { "high": "high", "medium": "medium", "low": "low" },
+    "progress": {
+      "ratio": "{value} / {max}",
+      "questionShort": "Q{n}",
+      "questionOf": "Question {n} of {total}",
+      "mastery": "Mastery {percent}%"
+    },
+    "loading": {
+      "done": "Done",
+      "inProgress": "In progress",
+      "next": "Next",
+      "stages": {
+        "reading_chapter": "Reading the chapter",
+        "matching_level": "Matching your level",
+        "writing_questions": "Writing questions",
+        "writing_hints": "Writing hints"
+      }
+    },
+    "wisdom": {
+      "title": "Class wisdom",
+      "sample": "3 classmates mixed up 0/0 with 0 here. Try factoring first."
+    },
+    "errors": { "code_not_found": "That code doesn't match any world." },
+    "mascot": {
+      "waving": "The Sidi Bou Said cat, waving",
+      "reading": "The Sidi Bou Said cat, reading",
+      "thinking": "The Sidi Bou Said cat, thinking",
+      "celebrating": "The Sidi Bou Said cat, celebrating"
+    },
+    "icons": {
+      "lantern": "Hint",
+      "lock": "Locked",
+      "trophy": "Trophy",
+      "chest": "Chest",
+      "coin": "Coins",
+      "star": "Points",
+      "flame": "Streak",
+      "hourglass": "Refill timer"
+    }
+  },
+  "styleguide": {
+    "title": "Learning World · style guide",
+    "subtitle": "16-bit pixel art in Mediterranean colors. Pixels for the world, clean type for everything you read.",
+    "switcher": {
+      "sideBySide": "Compare English and Arabic side by side",
+      "reducedMotion": "Reduce motion"
+    },
+    "colors": {
+      "title": "Colors",
+      "whitewash": "Whitewash",
+      "whitewashUse": "page",
+      "primary": "Sidi Bou Said",
+      "primaryUse": "primary",
+      "sea": "Sea teal",
+      "seaUse": "sea, focus",
+      "terracotta": "Terracotta",
+      "terracottaUse": "actions, coins",
+      "olive": "Olive",
+      "oliveUse": "success",
+      "sand": "Sand",
+      "sandUse": "surfaces",
+      "ink": "Ink",
+      "inkUse": "text, outlines",
+      "danger": "Soft red",
+      "dangerUse": "errors only",
+      "inkShades": "AA-safe text shades",
+      "islandAccents": "Island accents",
+      "courses": {
+        "calculus": "Calculus I",
+        "physics": "Physics II",
+        "dataStructures": "Data Structures",
+        "english": "Technical English",
+        "chemistry": "Chemistry",
+        "statistics": "Statistics"
+      },
+      "note": "Pixel art adds darker and lighter steps of each color, plus cat orange and bougainvillea pink in small doses."
+    },
+    "type": {
+      "title": "Type",
+      "headingsLabel": "Baloo Bhaijaan 2 · 600 · headings",
+      "display": "Display 64",
+      "h1": "Heading 1 · 40",
+      "h2": "Heading 2 · 28",
+      "h3": "Heading 3 · 20",
+      "bodyLabel": "IBM Plex Sans Arabic · 400 and 600 · body",
+      "body": "Body 16 / 1.5. The AI gives hints and asks guiding questions.",
+      "bodyEmphasis": "Semibold 600 for emphasis.",
+      "small": "Small 13 · captions, helper text, counters",
+      "bilingualTitle": "جزرك في انتظارك",
+      "bilingualLine": "نص عربي واضح دائمًا، بدون خطوط بكسل.",
+      "bilingualLatin": "Bilingual text stays readable."
+    },
+    "buttons": {
+      "title": "Buttons",
+      "note": "2px stepped corners, 4px raised lip. Press moves the button down 2px and flips the lip inside.",
+      "primary": "Primary",
+      "spend": "Spend / reward",
+      "success": "Success",
+      "secondary": "Secondary",
+      "pressed": "Pressed",
+      "focus": "Keyboard focus",
+      "disabled": "Disabled"
+    },
+    "inputs": {
+      "title": "Inputs",
+      "nickname": "Nickname",
+      "focused": "Focused",
+      "inviteCode": "Invite code",
+      "withError": "With error"
+    },
+    "cards": {
+      "title": "Cards, banners and chips",
+      "pixelPanel": "Pixel panel",
+      "pixelPanelText": "Ink outline. Dialogs, map labels, focus surfaces.",
+      "softCard": "Soft card",
+      "softCardText": "Sand outline. Lists, challenges, feeds."
+    },
+    "counters": {
+      "title": "Counters and progress",
+      "bar": "Bar",
+      "segmented": "Segmented",
+      "masteryRing": "Mastery ring",
+      "masteryNote": "in the island's accent"
+    },
+    "loading": { "title": "Loading stages" },
+    "world": {
+      "title": "World pieces",
+      "water": "Water tile · animated",
+      "tileBorder": "Tile border",
+      "blueDoor": "Blue door",
+      "bougainvillea": "Bougainvillea",
+      "oliveBranch": "Olive branch",
+      "jasmine": "Jasmine",
+      "iconsLegend": "Lantern = hint · lock · trophy · chest",
+      "avatars": "Avatars",
+      "avatar": "Avatar {n}"
+    },
+    "buildings": {
+      "title": "The five buildings · same on every island",
+      "quiz": "Quiz Hall",
+      "quizText": "El Jem amphitheatre · quizzes with hints",
+      "tutor": "Socratic Tutor",
+      "tutorText": "Blue-door café, mint tea · guiding questions",
+      "studio": "Study Studio",
+      "studioText": "Domed medina library · notes, cards, maps",
+      "audio": "Audio Studio",
+      "audioText": "Music house with an oud sign · podcasts",
+      "arena": "Teach-Back Arena",
+      "arenaText": "Carthage columns · explain and get scored"
+    },
+    "mascot": {
+      "title": "Mascot · the Sidi Bou Said cat",
+      "note": "Loading screens, empty states, tips and the onboarding result. Never inside focused study screens.",
+      "waving": "Waving",
+      "wavingUse": "Empty states, out of coins",
+      "reading": "Reading",
+      "readingUse": "Indexing, uploads",
+      "thinking": "Thinking",
+      "thinkingUse": "Loading, queues",
+      "celebrating": "Celebrating",
+      "celebratingUse": "Onboarding result, milestones"
+    },
+    "placeholderNote": "Placeholder sprites: real pixel art drops into the same Sprite component later."
+  }
+}

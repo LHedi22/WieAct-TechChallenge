@@ -1,0 +1,199 @@
+{
+  "common": {
+    "app": { "name": "Learning World" },
+    "language": {
+      "label": "Langue",
+      "en": "English",
+      "fr": "Français",
+      "ar": "العربية",
+      "ar-TN": "تونسي (Darija)"
+    },
+    "counters": {
+      "coins": "{count, plural, one {pièce} other {pièces}}",
+      "points": "{count, plural, one {point} other {points}}",
+      "streak": "{count, plural, one {jour de série} other {jours de série}}",
+      "refillIn": "Recharge dans",
+      "duration": "{h} h {m} min"
+    },
+    "banner": {
+      "queue": "Forte affluence : ton quiz est dans la file (environ {seconds} s).",
+      "offline": "Mode démo hors ligne – résultats enregistrés affichés.",
+      "quickMode": "Mode rapide : un modèle plus rapide a répondu cette fois.",
+      "placement": "Fais le quiz de positionnement (8 questions) pour fixer ton niveau."
+    },
+    "chip": {
+      "beginner": "Débutant",
+      "intermediate": "Intermédiaire",
+      "advanced": "Avancé",
+      "cost": "{count, plural, one {# pièce} other {# pièces}}",
+      "free": "Gratuit",
+      "quickMode": "Mode rapide",
+      "weakSpot": "Point faible",
+      "confidence": "Confiance : {level}",
+      "pinned": "Meilleure réponse épinglée"
+    },
+    "confidence": { "high": "élevée", "medium": "moyenne", "low": "faible" },
+    "progress": {
+      "ratio": "{value} / {max}",
+      "questionShort": "Q{n}",
+      "questionOf": "Question {n} sur {total}",
+      "mastery": "Maîtrise {percent} %"
+    },
+    "loading": {
+      "done": "Terminé",
+      "inProgress": "En cours",
+      "next": "À venir",
+      "stages": {
+        "reading_chapter": "Lecture du chapitre",
+        "matching_level": "Adaptation à ton niveau",
+        "writing_questions": "Rédaction des questions",
+        "writing_hints": "Rédaction des indices"
+      }
+    },
+    "wisdom": {
+      "title": "Sagesse de la classe",
+      "sample": "3 camarades ont confondu 0/0 et 0 ici. Essaie d'abord de factoriser."
+    },
+    "errors": { "code_not_found": "Ce code ne correspond à aucun monde." },
+    "mascot": {
+      "waving": "Le chat de Sidi Bou Saïd fait coucou",
+      "reading": "Le chat de Sidi Bou Saïd lit",
+      "thinking": "Le chat de Sidi Bou Saïd réfléchit",
+      "celebrating": "Le chat de Sidi Bou Saïd fait la fête"
+    },
+    "icons": {
+      "lantern": "Indice",
+      "lock": "Verrouillé",
+      "trophy": "Trophée",
+      "chest": "Coffre",
+      "coin": "Pièces",
+      "star": "Points",
+      "flame": "Série",
+      "hourglass": "Minuteur de recharge"
+    }
+  },
+  "styleguide": {
+    "title": "Learning World · guide de style",
+    "subtitle": "Pixel art 16 bits aux couleurs méditerranéennes. Des pixels pour le monde, une typo nette pour tout ce qui se lit.",
+    "switcher": {
+      "sideBySide": "Comparer l'anglais et l'arabe côte à côte",
+      "reducedMotion": "Réduire les animations"
+    },
+    "colors": {
+      "title": "Couleurs",
+      "whitewash": "Blanc chaux",
+      "whitewashUse": "page",
+      "primary": "Sidi Bou Saïd",
+      "primaryUse": "principal",
+      "sea": "Bleu mer",
+      "seaUse": "mer, focus",
+      "terracotta": "Terre cuite",
+      "terracottaUse": "actions, pièces",
+      "olive": "Olive",
+      "oliveUse": "succès",
+      "sand": "Sable",
+      "sandUse": "surfaces",
+      "ink": "Encre",
+      "inkUse": "texte, contours",
+      "danger": "Rouge doux",
+      "dangerUse": "erreurs uniquement",
+      "inkShades": "Teintes de texte conformes AA",
+      "islandAccents": "Couleurs des îles",
+      "courses": {
+        "calculus": "Analyse I",
+        "physics": "Physique II",
+        "dataStructures": "Structures de données",
+        "english": "Anglais technique",
+        "chemistry": "Chimie",
+        "statistics": "Statistiques"
+      },
+      "note": "Le pixel art ajoute des nuances plus sombres et plus claires de chaque couleur, plus l'orange du chat et le rose bougainvillier par petites touches."
+    },
+    "type": {
+      "title": "Typographie",
+      "headingsLabel": "Baloo Bhaijaan 2 · 600 · titres",
+      "display": "Display 64",
+      "h1": "Titre 1 · 40",
+      "h2": "Titre 2 · 28",
+      "h3": "Titre 3 · 20",
+      "bodyLabel": "IBM Plex Sans Arabic · 400 et 600 · texte",
+      "body": "Texte 16 / 1,5. L'IA donne des indices et pose des questions qui guident.",
+      "bodyEmphasis": "Semi-gras 600 pour insister.",
+      "small": "Petit 13 · légendes, aide, compteurs",
+      "bilingualTitle": "جزرك في انتظارك",
+      "bilingualLine": "نص عربي واضح دائمًا، بدون خطوط بكسل.",
+      "bilingualLatin": "Le texte bilingue reste lisible."
+    },
+    "buttons": {
+      "title": "Boutons",
+      "note": "Coins en escalier de 2 px, rebord en relief de 4 px. Appuyer descend le bouton de 2 px et rentre le rebord.",
+      "primary": "Principal",
+      "spend": "Dépenser / gagner",
+      "success": "Succès",
+      "secondary": "Secondaire",
+      "pressed": "Appuyé",
+      "focus": "Focus clavier",
+      "disabled": "Désactivé"
+    },
+    "inputs": {
+      "title": "Champs",
+      "nickname": "Pseudo",
+      "focused": "Avec focus",
+      "inviteCode": "Code d'invitation",
+      "withError": "Avec erreur"
+    },
+    "cards": {
+      "title": "Cartes, bannières et puces",
+      "pixelPanel": "Panneau pixel",
+      "pixelPanelText": "Contour encre. Dialogues, étiquettes de carte, surfaces de focus.",
+      "softCard": "Carte douce",
+      "softCardText": "Contour sable. Listes, défis, fils."
+    },
+    "counters": {
+      "title": "Compteurs et progression",
+      "bar": "Barre",
+      "segmented": "Segmentée",
+      "masteryRing": "Anneau de maîtrise",
+      "masteryNote": "dans la couleur de l'île"
+    },
+    "loading": { "title": "Étapes de chargement" },
+    "world": {
+      "title": "Éléments du monde",
+      "water": "Tuile d'eau · animée",
+      "tileBorder": "Bordure en zellige",
+      "blueDoor": "Porte bleue",
+      "bougainvillea": "Bougainvillier",
+      "oliveBranch": "Branche d'olivier",
+      "jasmine": "Jasmin",
+      "iconsLegend": "Lanterne = indice · cadenas · trophée · coffre",
+      "avatars": "Avatars",
+      "avatar": "Avatar {n}"
+    },
+    "buildings": {
+      "title": "Les cinq bâtiments · les mêmes sur chaque île",
+      "quiz": "Salle des quiz",
+      "quizText": "Amphithéâtre d'El Jem · quiz avec indices",
+      "tutor": "Tuteur socratique",
+      "tutorText": "Café à la porte bleue, thé à la menthe · questions qui guident",
+      "studio": "Studio d'étude",
+      "studioText": "Bibliothèque à coupole de la médina · fiches, cartes, schémas",
+      "audio": "Studio audio",
+      "audioText": "Maison de la musique à l'enseigne de oud · podcasts",
+      "arena": "Arène Teach-Back",
+      "arenaText": "Colonnes de Carthage · explique et reçois une note"
+    },
+    "mascot": {
+      "title": "Mascotte · le chat de Sidi Bou Saïd",
+      "note": "Écrans de chargement, états vides, astuces et résultat d'accueil. Jamais dans les écrans d'étude.",
+      "waving": "Coucou",
+      "wavingUse": "États vides, plus de pièces",
+      "reading": "Lecture",
+      "readingUse": "Indexation, envois",
+      "thinking": "Réflexion",
+      "thinkingUse": "Chargement, files d'attente",
+      "celebrating": "Fête",
+      "celebratingUse": "Résultat d'accueil, étapes"
+    },
+    "placeholderNote": "Sprites provisoires : le vrai pixel art viendra dans le même composant Sprite."
+  }
+}

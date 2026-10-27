@@ -1,0 +1,199 @@
+{
+  "common": {
+    "app": { "name": "Learning World" },
+    "language": {
+      "label": "اللغة",
+      "en": "English",
+      "fr": "Français",
+      "ar": "العربية",
+      "ar-TN": "تونسي (Darija)"
+    },
+    "counters": {
+      "coins": "{count, plural, zero {عملة} one {عملة} two {عملتان} few {عملات} many {عملة} other {عملة}}",
+      "points": "{count, plural, zero {نقطة} one {نقطة} two {نقطتان} few {نقاط} many {نقطة} other {نقطة}}",
+      "streak": "{count, plural, zero {يوم متتالٍ} one {يوم متتالٍ} two {يومان متتاليان} few {أيام متتالية} many {يومًا متتاليًا} other {يوم متتالٍ}}",
+      "refillIn": "التعبئة بعد",
+      "duration": "{h} س {m} د"
+    },
+    "banner": {
+      "queue": "ضغط كبير، اختبارك في قائمة الانتظار (حوالي {seconds} ث).",
+      "offline": "وضع العرض دون اتصال – نعرض النتائج المحفوظة.",
+      "quickMode": "الوضع السريع: أجاب نموذج أسرع هذه المرة.",
+      "placement": "أجرِ اختبار تحديد المستوى (8 أسئلة) لتحديد مستواك."
+    },
+    "chip": {
+      "beginner": "مبتدئ",
+      "intermediate": "متوسط",
+      "advanced": "متقدم",
+      "cost": "{count, plural, zero {# عملة} one {عملة واحدة} two {عملتان} few {# عملات} many {# عملة} other {# عملة}}",
+      "free": "مجاني",
+      "quickMode": "الوضع السريع",
+      "weakSpot": "نقطة ضعف",
+      "confidence": "الثقة: {level}",
+      "pinned": "أفضل إجابة مثبتة"
+    },
+    "confidence": { "high": "عالية", "medium": "متوسطة", "low": "منخفضة" },
+    "progress": {
+      "ratio": "{value} / {max}",
+      "questionShort": "س{n}",
+      "questionOf": "السؤال {n} من {total}",
+      "mastery": "الإتقان {percent}%"
+    },
+    "loading": {
+      "done": "تم",
+      "inProgress": "جارٍ",
+      "next": "التالي",
+      "stages": {
+        "reading_chapter": "قراءة الفصل",
+        "matching_level": "مطابقة مستواك",
+        "writing_questions": "كتابة الأسئلة",
+        "writing_hints": "كتابة التلميحات"
+      }
+    },
+    "wisdom": {
+      "title": "حكمة القسم",
+      "sample": "خلط 3 من زملائك بين 0/0 و0 هنا. جرّب التحليل إلى عوامل أولًا."
+    },
+    "errors": { "code_not_found": "هذا الرمز لا يطابق أي عالم." },
+    "mascot": {
+      "waving": "قطّ سيدي بوسعيد يلوّح",
+      "reading": "قطّ سيدي بوسعيد يقرأ",
+      "thinking": "قطّ سيدي بوسعيد يفكّر",
+      "celebrating": "قطّ سيدي بوسعيد يحتفل"
+    },
+    "icons": {
+      "lantern": "تلميح",
+      "lock": "مقفل",
+      "trophy": "كأس",
+      "chest": "صندوق",
+      "coin": "عملات",
+      "star": "نقاط",
+      "flame": "أيام متتالية",
+      "hourglass": "مؤقت التعبئة"
+    }
+  },
+  "styleguide": {
+    "title": "Learning World · دليل الأسلوب",
+    "subtitle": "فن بكسل 16 بت بألوان المتوسط. البكسل للعالم، وخط واضح لكل ما تقرؤه.",
+    "switcher": {
+      "sideBySide": "قارن الإنجليزية والعربية جنبًا إلى جنب",
+      "reducedMotion": "تقليل الحركة"
+    },
+    "colors": {
+      "title": "الألوان",
+      "whitewash": "أبيض الجير",
+      "whitewashUse": "الصفحة",
+      "primary": "سيدي بوسعيد",
+      "primaryUse": "أساسي",
+      "sea": "أزرق البحر",
+      "seaUse": "البحر، التركيز",
+      "terracotta": "الطين المشوي",
+      "terracottaUse": "الإجراءات، العملات",
+      "olive": "الزيتوني",
+      "oliveUse": "النجاح",
+      "sand": "الرملي",
+      "sandUse": "الأسطح",
+      "ink": "الحبر",
+      "inkUse": "النص، الحدود",
+      "danger": "الأحمر الهادئ",
+      "dangerUse": "للأخطاء فقط",
+      "inkShades": "درجات نص متوافقة مع AA",
+      "islandAccents": "ألوان الجزر",
+      "courses": {
+        "calculus": "التحليل 1",
+        "physics": "الفيزياء 2",
+        "dataStructures": "هياكل البيانات",
+        "english": "الإنجليزية التقنية",
+        "chemistry": "الكيمياء",
+        "statistics": "الإحصاء"
+      },
+      "note": "يضيف فن البكسل درجات أغمق وأفتح من كل لون، مع برتقالي القط ووردي الجهنمية بكميات صغيرة."
+    },
+    "type": {
+      "title": "الخطوط",
+      "headingsLabel": "Baloo Bhaijaan 2 · 600 · العناوين",
+      "display": "عرض 64",
+      "h1": "عنوان 1 · 40",
+      "h2": "عنوان 2 · 28",
+      "h3": "عنوان 3 · 20",
+      "bodyLabel": "IBM Plex Sans Arabic · 400 و600 · النص",
+      "body": "النص 16 / 1.5. يقدّم الذكاء الاصطناعي تلميحات ويطرح أسئلة توجيهية.",
+      "bodyEmphasis": "سميك 600 للتأكيد.",
+      "small": "صغير 13 · التعليقات، نص المساعدة، العدّادات",
+      "bilingualTitle": "جزرك في انتظارك",
+      "bilingualLine": "نص عربي واضح دائمًا، بدون خطوط بكسل.",
+      "bilingualLatin": "Bilingual text stays readable."
+    },
+    "buttons": {
+      "title": "الأزرار",
+      "note": "زوايا متدرجة 2 بكسل وحافة بارزة 4 بكسل. عند الضغط ينزل الزر 2 بكسل وتنقلب الحافة إلى الداخل.",
+      "primary": "أساسي",
+      "spend": "إنفاق / مكافأة",
+      "success": "نجاح",
+      "secondary": "ثانوي",
+      "pressed": "مضغوط",
+      "focus": "تركيز لوحة المفاتيح",
+      "disabled": "معطّل"
+    },
+    "inputs": {
+      "title": "حقول الإدخال",
+      "nickname": "الاسم المستعار",
+      "focused": "في حالة التركيز",
+      "inviteCode": "رمز الدعوة",
+      "withError": "مع خطأ"
+    },
+    "cards": {
+      "title": "البطاقات واللافتات والشارات",
+      "pixelPanel": "لوحة بكسل",
+      "pixelPanelText": "حدود بالحبر. النوافذ، تسميات الخريطة، أسطح التركيز.",
+      "softCard": "بطاقة ناعمة",
+      "softCardText": "حدود رملية. القوائم، التحديات، الخلاصات."
+    },
+    "counters": {
+      "title": "العدّادات والتقدّم",
+      "bar": "شريط",
+      "segmented": "مقسّم",
+      "masteryRing": "حلقة الإتقان",
+      "masteryNote": "بلون الجزيرة"
+    },
+    "loading": { "title": "مراحل التحميل" },
+    "world": {
+      "title": "قطع العالم",
+      "water": "بلاطة ماء · متحركة",
+      "tileBorder": "إطار زليج",
+      "blueDoor": "باب أزرق",
+      "bougainvillea": "جهنمية",
+      "oliveBranch": "غصن زيتون",
+      "jasmine": "ياسمين",
+      "iconsLegend": "فانوس = تلميح · قفل · كأس · صندوق",
+      "avatars": "الصور الرمزية",
+      "avatar": "صورة رمزية {n}"
+    },
+    "buildings": {
+      "title": "المباني الخمسة · نفسها في كل جزيرة",
+      "quiz": "قاعة الاختبارات",
+      "quizText": "مدرج الجم · اختبارات مع تلميحات",
+      "tutor": "المعلّم السقراطي",
+      "tutorText": "مقهى الباب الأزرق، شاي بالنعناع · أسئلة توجيهية",
+      "studio": "استوديو المراجعة",
+      "studioText": "مكتبة المدينة ذات القبة · ملخصات، بطاقات، خرائط",
+      "audio": "الاستوديو الصوتي",
+      "audioText": "دار الموسيقى بلافتة العود · بودكاست",
+      "arena": "ساحة الشرح",
+      "arenaText": "أعمدة قرطاج · اشرح واحصل على تقييم"
+    },
+    "mascot": {
+      "title": "التميمة · قطّ سيدي بوسعيد",
+      "note": "شاشات التحميل، الحالات الفارغة، النصائح ونتيجة التسجيل. أبدًا داخل شاشات المراجعة.",
+      "waving": "يلوّح",
+      "wavingUse": "الحالات الفارغة، نفاد العملات",
+      "reading": "يقرأ",
+      "readingUse": "الفهرسة، الرفع",
+      "thinking": "يفكّر",
+      "thinkingUse": "التحميل، قوائم الانتظار",
+      "celebrating": "يحتفل",
+      "celebratingUse": "نتيجة التسجيل، الإنجازات"
+    },
+    "placeholderNote": "صور مؤقتة: فن البكسل الحقيقي يُضاف لاحقًا في مكوّن Sprite نفسه."
+  }
+}

@@ -30,3 +30,4 @@ test-results/
 *.log
 backend/tests/evals/*/outputs/raw_*
 scripts/out/
+*.tsbuildinfo

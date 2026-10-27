@@ -1,0 +1,200 @@
+{
+  "_review": "Darija drafted by Claude Code on 2026-10-27; every string needs native-speaker review (BUILD_PLAN M8).",
+  "common": {
+    "app": { "name": "Learning World" },
+    "language": {
+      "label": "اللغة",
+      "en": "English",
+      "fr": "Français",
+      "ar": "العربية",
+      "ar-TN": "تونسي (Darija)"
+    },
+    "counters": {
+      "coins": "{count, plural, zero {عملة} one {عملة} two {عملات} few {عملات} many {عملة} other {عملة}}",
+      "points": "{count, plural, zero {نقطة} one {نقطة} two {نقاط} few {نقاط} many {نقطة} other {نقطة}}",
+      "streak": "{count, plural, zero {نهار ورا بعضو} one {نهار ورا بعضو} two {أيامات ورا بعضهم} few {أيامات ورا بعضهم} many {نهار ورا بعضهم} other {نهار ورا بعضهم}}",
+      "refillIn": "تتعبّى بعد",
+      "duration": "{h} س {m} د"
+    },
+    "banner": {
+      "queue": "برشة عباد توّا، الكويز متاعك في الصف (قريب {seconds} ث).",
+      "offline": "وضع العرض بلاش كونيكسيون – نوريوك النتائج المحفوظة.",
+      "quickMode": "الوضع السريع: موديل أسرع جاوب المرة هاذي.",
+      "placement": "اعمل كويز تحديد المستوى (8 أسئلة) باش نعرفو مستواك."
+    },
+    "chip": {
+      "beginner": "مبتدئ",
+      "intermediate": "متوسط",
+      "advanced": "متقدم",
+      "cost": "{count, plural, zero {# عملة} one {عملة وحدة} two {زوز عملات} few {# عملات} many {# عملة} other {# عملة}}",
+      "free": "بلاش",
+      "quickMode": "الوضع السريع",
+      "weakSpot": "نقطة ضعف",
+      "confidence": "الثقة: {level}",
+      "pinned": "أحسن جواب مثبّت"
+    },
+    "confidence": { "high": "عالية", "medium": "متوسطة", "low": "ضعيفة" },
+    "progress": {
+      "ratio": "{value} / {max}",
+      "questionShort": "س{n}",
+      "questionOf": "السؤال {n} من {total}",
+      "mastery": "الإتقان {percent}%"
+    },
+    "loading": {
+      "done": "كمل",
+      "inProgress": "قاعد يصير",
+      "next": "اللي بعدو",
+      "stages": {
+        "reading_chapter": "نقراو في الفصل",
+        "matching_level": "نظبطو على مستواك",
+        "writing_questions": "نكتبو في الأسئلة",
+        "writing_hints": "نكتبو في التلميحات"
+      }
+    },
+    "wisdom": {
+      "title": "حكمة القسم",
+      "sample": "3 من صحابك خلطو بين 0/0 و0 هوني. جرّب فكّك لعوامل الأول."
+    },
+    "errors": { "code_not_found": "الكود هذا ما يتطابق مع حتى عالم." },
+    "mascot": {
+      "waving": "قطوس سيدي بوسعيد يسلّم",
+      "reading": "قطوس سيدي بوسعيد يقرا",
+      "thinking": "قطوس سيدي بوسعيد يخمّم",
+      "celebrating": "قطوس سيدي بوسعيد فرحان"
+    },
+    "icons": {
+      "lantern": "تلميح",
+      "lock": "مسكّر",
+      "trophy": "كاس",
+      "chest": "صندوق",
+      "coin": "عملات",
+      "star": "نقاط",
+      "flame": "أيامات ورا بعضهم",
+      "hourglass": "وقت التعبئة"
+    }
+  },
+  "styleguide": {
+    "title": "Learning World · دليل الستيل",
+    "subtitle": "بكسل آرت 16 بت بألوان المتوسط. البكسل للعالم، وخط واضح لكل شي تقراه.",
+    "switcher": {
+      "sideBySide": "قارن الإنجليزي والعربي جنب بعضهم",
+      "reducedMotion": "نقّص الحركة"
+    },
+    "colors": {
+      "title": "الألوان",
+      "whitewash": "أبيض الجير",
+      "whitewashUse": "الصفحة",
+      "primary": "سيدي بوسعيد",
+      "primaryUse": "الأساسي",
+      "sea": "زرقة البحر",
+      "seaUse": "البحر، الفوكوس",
+      "terracotta": "لون الفخار",
+      "terracottaUse": "الأكشنز، العملات",
+      "olive": "زيتوني",
+      "oliveUse": "النجاح",
+      "sand": "رملي",
+      "sandUse": "السطوح",
+      "ink": "حبر",
+      "inkUse": "النص، الحدود",
+      "danger": "أحمر خفيف",
+      "dangerUse": "للغلطات برك",
+      "inkShades": "درجات نص متوافقة مع AA",
+      "islandAccents": "ألوان الجزر",
+      "courses": {
+        "calculus": "التحليل 1",
+        "physics": "الفيزياء 2",
+        "dataStructures": "هياكل البيانات",
+        "english": "الإنجليزي التقني",
+        "chemistry": "الكيمياء",
+        "statistics": "الإحصاء"
+      },
+      "note": "البكسل آرت يزيد درجات أغمق وأفتح من كل لون، مع برتقالي القطوس ووردي المجنونة شوية برك."
+    },
+    "type": {
+      "title": "الخطوط",
+      "headingsLabel": "Baloo Bhaijaan 2 · 600 · العناوين",
+      "display": "عرض 64",
+      "h1": "عنوان 1 · 40",
+      "h2": "عنوان 2 · 28",
+      "h3": "عنوان 3 · 20",
+      "bodyLabel": "IBM Plex Sans Arabic · 400 و600 · النص",
+      "body": "النص 16 / 1.5. الذكاء الاصطناعي يعطيك تلميحات ويسألك أسئلة توجّهك.",
+      "bodyEmphasis": "سميك 600 باش تأكّد.",
+      "small": "صغير 13 · تعليقات، نص مساعدة، عدّادات",
+      "bilingualTitle": "جزرك في انتظارك",
+      "bilingualLine": "نص عربي واضح ديما، من غير خطوط بكسل.",
+      "bilingualLatin": "Bilingual text stays readable."
+    },
+    "buttons": {
+      "title": "البوتونات",
+      "note": "زوايا مدرّجة 2 بكسل وحافة بارزة 4 بكسل. كي تنزل عليه البوتون يهبط 2 بكسل والحافة تدخل لداخل.",
+      "primary": "أساسي",
+      "spend": "اصرف / ربح",
+      "success": "نجاح",
+      "secondary": "ثانوي",
+      "pressed": "منزول عليه",
+      "focus": "فوكوس بالكلافيي",
+      "disabled": "مطفي"
+    },
+    "inputs": {
+      "title": "الخانات",
+      "nickname": "الاسم المستعار",
+      "focused": "في الفوكوس",
+      "inviteCode": "كود الدعوة",
+      "withError": "فيها غلطة"
+    },
+    "cards": {
+      "title": "الكروت واللافتات والشارات",
+      "pixelPanel": "لوحة بكسل",
+      "pixelPanelText": "حدود بالحبر. النوافذ، أسامي الخريطة، سطوح الفوكوس.",
+      "softCard": "كارت ناعمة",
+      "softCardText": "حدود رملية. القوايم، التحديات، الأخبار."
+    },
+    "counters": {
+      "title": "العدّادات والتقدّم",
+      "bar": "بارة",
+      "segmented": "مقسومة",
+      "masteryRing": "حلقة الإتقان",
+      "masteryNote": "بلون الجزيرة"
+    },
+    "loading": { "title": "مراحل التحميل" },
+    "world": {
+      "title": "قطع العالم",
+      "water": "بلاطة ماء · تتحرك",
+      "tileBorder": "إطار زليج",
+      "blueDoor": "باب أزرق",
+      "bougainvillea": "مجنونة",
+      "oliveBranch": "غصن زيتون",
+      "jasmine": "ياسمين",
+      "iconsLegend": "فنار = تلميح · قفل · كاس · صندوق",
+      "avatars": "الأفاتارات",
+      "avatar": "أفاتار {n}"
+    },
+    "buildings": {
+      "title": "الخمسة بنايات · كيف كيف في كل جزيرة",
+      "quiz": "قاعة الكويزات",
+      "quizText": "مسرح الجم · كويزات بالتلميحات",
+      "tutor": "المعلّم السقراطي",
+      "tutorText": "قهوة الباب الأزرق، تاي بالنعناع · أسئلة توجّهك",
+      "studio": "ستوديو المراجعة",
+      "studioText": "مكتبة المدينة بالقبّة · ملخصات، كروت، خرايط",
+      "audio": "الستوديو الصوتي",
+      "audioText": "دار الموسيقى بلافتة العود · بودكاست",
+      "arena": "ساحة الشرح",
+      "arenaText": "سواري قرطاج · اشرح وخوذ تقييم"
+    },
+    "mascot": {
+      "title": "الماسكوت · قطوس سيدي بوسعيد",
+      "note": "شاشات التحميل، الحالات الفارغة، النصايح ونتيجة التسجيل. أبدًا وسط شاشات المراجعة.",
+      "waving": "يسلّم",
+      "wavingUse": "الحالات الفارغة، العملات وفاو",
+      "reading": "يقرا",
+      "readingUse": "الفهرسة، الرفع",
+      "thinking": "يخمّم",
+      "thinkingUse": "التحميل، الصف",
+      "celebrating": "فرحان",
+      "celebratingUse": "نتيجة التسجيل، المراحل"
+    },
+    "placeholderNote": "تصاور مؤقتة: البكسل آرت الحقيقي يتحط بعد في نفس مكوّن Sprite."
+  }
+}
