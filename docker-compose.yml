@@ -1,0 +1,75 @@
+# Skeleton — Dockerfiles for backend/, mock-llm/ and frontend/ are created in milestone M0/M1.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: lw
+      POSTGRES_PASSWORD: lw
+      POSTGRES_DB: learningworld
+    ports: ["5432:5432"]
+    volumes: [dbdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lw -d learningworld"]
+      interval: 5s
+      retries: 10
+
+  qdrant:
+    # Local Qdrant for dev/tests. In production point QDRANT_URL at the platform's Qdrant
+    # (or our hosted one) — same client code, one collection, payload filters.
+    image: qdrant/qdrant:v1.12.4
+    ports: ["6333:6333", "6334:6334"]
+    volumes: [qdrantdata:/qdrant/storage]
+
+  mock-llm:
+    build: ./mock-llm
+    ports: ["9000:9000"]
+    environment:
+      MOCK_RPM: 20
+      MOCK_MAX_CONCURRENCY: 2
+      MOCK_P_503_MID: 0.15
+      MOCK_BLOCKED: ${MOCK_BLOCKED:-false}   # true = 401 "Key is blocked", like the platform outside our slot
+
+  backend:
+    build: ./backend
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://lw:lw@db:5432/learningworld
+      QDRANT_URL: ${QDRANT_URL_DOCKER:-http://qdrant:6333}
+      # Provider profiles as seen from inside the container (LLM_PROVIDER itself comes from .env).
+      # Ollama runs on the host, not in compose.
+      MOCK_BASE_URL: http://mock-llm:9000/v1
+      LOCAL_BASE_URL: ${LOCAL_BASE_URL_DOCKER:-http://host.docker.internal:11434/v1}
+    extra_hosts: ["host.docker.internal:host-gateway"]   # needed on Linux; harmless on Docker Desktop
+    ports: ["8000:8000"]
+    depends_on:
+      db: { condition: service_healthy }
+      qdrant: { condition: service_started }
+    command: uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes: ["./backend:/app"]
+
+  worker:
+    build: ./backend
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://lw:lw@db:5432/learningworld
+      QDRANT_URL: ${QDRANT_URL_DOCKER:-http://qdrant:6333}
+      MOCK_BASE_URL: http://mock-llm:9000/v1
+      LOCAL_BASE_URL: ${LOCAL_BASE_URL_DOCKER:-http://host.docker.internal:11434/v1}
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    depends_on:
+      db: { condition: service_healthy }
+      qdrant: { condition: service_started }
+    command: uv run python -m app.worker
+    volumes: ["./backend:/app"]
+
+  frontend:
+    build: ./frontend
+    ports: ["5173:5173"]
+    environment:
+      VITE_API_URL: http://localhost:8000
+    command: pnpm dev --host
+    volumes: ["./frontend:/app", "/app/node_modules"]
+
+volumes:
+  dbdata:
+  qdrantdata:

@@ -1,0 +1,54 @@
+name: ci
+on: [push, pull_request]
+
+jobs:
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: gitleaks/gitleaks-action@v2
+        env: { GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
+      - name: Platform constraints
+        run: |
+          fail=0
+          if git ls-files | grep -E '(^|/)\.env$'; then echo "::error::.env is committed"; fail=1; fi
+          if grep -rn "felcloud" --include='*.py' --include='*.ts' --include='*.tsx' backend frontend mock-llm 2>/dev/null; then echo "::error::hard-coded platform URL"; fail=1; fi
+          if grep -rln "import openai\|from openai" backend/app 2>/dev/null | grep -v '/gateway/'; then echo "::error::openai used outside gateway"; fail=1; fi
+          if grep -rnE "chat/completions|(CLOUD|LOCAL|MOCK)_API_KEY" frontend/src 2>/dev/null; then echo "::error::frontend touches the LLM"; fail=1; fi
+          exit $fail
+
+  backend:
+    runs-on: ubuntu-latest
+    if: hashFiles('backend/pyproject.toml') != ''
+    services:
+      db:
+        image: postgres:16
+        env: { POSTGRES_USER: lw, POSTGRES_PASSWORD: lw, POSTGRES_DB: learningworld }
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U lw" --health-interval 5s --health-retries 10
+    defaults: { run: { working-directory: backend } }
+    env:
+      DATABASE_URL: postgresql+asyncpg://lw:lw@localhost:5432/learningworld
+      APP_ENV: development
+      LLM_PROVIDER: mock
+      MOCK_BASE_URL: http://mock
+      MOCK_API_KEY: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync
+      - run: uv run ruff check . && uv run ruff format --check .
+      - run: uv run pytest -q
+
+  frontend:
+    runs-on: ubuntu-latest
+    if: hashFiles('frontend/package.json') != ''
+    defaults: { run: { working-directory: frontend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm, cache-dependency-path: frontend/pnpm-lock.yaml }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint && pnpm typecheck && pnpm test --run && pnpm i18n:check
