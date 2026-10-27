@@ -1,4 +1,5 @@
-# Skeleton — Dockerfiles for backend/, mock-llm/ and frontend/ are created in milestone M0/M1.
+# Fresh clone: cp .env.example .env && docker compose up --build
+# mock-llm is an M0 stub (health only); the fake platform is built in M1.
 services:
   db:
     image: postgres:16
@@ -44,8 +45,12 @@ services:
     depends_on:
       db: { condition: service_healthy }
       qdrant: { condition: service_started }
-    command: uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: sh -c "uv run alembic upgrade head && uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     volumes: ["./backend:/app"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 10s
+      retries: 10
 
   worker:
     build: ./backend
@@ -57,18 +62,19 @@ services:
       LOCAL_BASE_URL: ${LOCAL_BASE_URL_DOCKER:-http://host.docker.internal:11434/v1}
     extra_hosts: ["host.docker.internal:host-gateway"]
     depends_on:
-      db: { condition: service_healthy }
-      qdrant: { condition: service_started }
+      backend: { condition: service_healthy }   # migrations have run
     command: uv run python -m app.worker
     volumes: ["./backend:/app"]
 
   frontend:
-    build: ./frontend
+    # Root context: the Tailwind theme reads ../design/tokens.json.
+    build: { context: ., dockerfile: frontend/Dockerfile }
     ports: ["5173:5173"]
     environment:
       VITE_API_URL: http://localhost:8000
+      VITE_POLLING: "true"   # bind mounts from Windows don't deliver file events
     command: pnpm dev --host
-    volumes: ["./frontend:/app", "/app/node_modules"]
+    volumes: ["./frontend:/app", "/app/node_modules", "./design:/design:ro"]
 
 volumes:
   dbdata:
