@@ -42,7 +42,9 @@ function Section({
   className?: string;
 }) {
   return (
-    <section className={cx("rounded-soft border-2 border-sand bg-white p-6", className)}>
+    <section
+      className={cx("min-w-0 rounded-soft border-2 border-sand bg-white p-4 sm:p-6", className)}
+    >
       <h2 className="mb-4 text-h2">{title}</h2>
       {children}
     </section>
@@ -392,7 +394,8 @@ function MascotSection() {
 /** Everything below the header; rendered once, or twice (EN | AR) in side-by-side mode. */
 function StyleguideContent({ compact }: { compact: boolean }) {
   return (
-    <div className={cx("grid gap-6", !compact && "lg:grid-cols-2")}>
+    // Compact: one column; override the sections' col-span-2, which would add an implicit track.
+    <div className={cx("grid gap-6", compact ? "[&>*]:!col-span-1" : "lg:grid-cols-2")}>
       <Colors />
       <Type />
       <ButtonsAndInputs />

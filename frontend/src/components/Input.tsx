@@ -22,6 +22,8 @@ export function Input({ label, error, code, forceFocus, className, id, ...rest }
       </label>
       <input
         id={inputId}
+        // Typed text follows its own script: a Latin nickname stays LTR inside an Arabic form.
+        dir="auto"
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? errorId : undefined}
         className={cx(
