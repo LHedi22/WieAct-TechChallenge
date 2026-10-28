@@ -68,7 +68,11 @@ services:
 
   frontend:
     # Root context: the Tailwind theme reads ../design/tokens.json.
-    build: { context: ., dockerfile: frontend/Dockerfile }
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      # Set NPM_REGISTRY=https://registry.yarnpkg.com/ if your network blocks registry.npmjs.org.
+      args: { NPM_REGISTRY: "${NPM_REGISTRY:-https://registry.npmjs.org/}" }
     ports: ["5173:5173"]
     environment:
       VITE_API_URL: http://localhost:8000
