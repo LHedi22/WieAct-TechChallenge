@@ -55,7 +55,7 @@ def test_auto_resolves_to_local_in_m0(monkeypatch):
 
 def test_cloud_without_key_refuses(monkeypatch):
     env = CLOUD_ENV | {"CLOUD_API_KEY": ""}
-    with pytest.raises(ValidationError, match="CLOUD_API_KEY is empty"):
+    with pytest.raises(ValidationError, match="CLOUD_API_KEY or CLOUD_BASE_URL is empty"):
         make(monkeypatch, LLM_PROVIDER="cloud", **env)
 
 
@@ -95,3 +95,16 @@ def test_production_cloud_starts(monkeypatch):
         **CLOUD_ENV,
     )
     assert s.llm.provider == "cloud"
+
+
+def test_profile_for_reads_each_profile_without_changing_default(monkeypatch):
+    s = make(monkeypatch, LLM_PROVIDER="auto", **CLOUD_ENV)
+    assert s.llm.provider == "local"
+    assert s.profile_for("cloud").model_mid == "c-mid"
+    assert s.profile_for("mock").embedding_dim == 384
+    assert s.cloud_configured
+
+
+def test_auto_without_cloud_key_is_allowed(monkeypatch):
+    s = make(monkeypatch, LLM_PROVIDER="auto")
+    assert not s.cloud_configured and s.llm.provider == "local"

@@ -76,6 +76,10 @@ class Settings(BaseSettings):
     LLM_MAX_CONCURRENCY: int = 2
     LLM_MAX_TOKENS_DEFAULT: int = 700
     LLM_SLOT_GROUP: Literal["A", "B"] = "A"
+    # auto: send response_format=json_object, drop it for that model on a 400 (support is OPEN)
+    LLM_JSON_MODE: Literal["auto", "on", "off"] = "auto"
+    # Dev/test only, ignored in production: pretend our slot is live/off (tests LLM_PROVIDER=auto)
+    LLM_SLOT_FORCE: Literal["", "live", "off"] = ""
 
     # --- vector store ---
     QDRANT_URL: str = "http://localhost:6333"
@@ -92,6 +96,8 @@ class Settings(BaseSettings):
     LOG_PROMPTS: bool = False
     UPLOAD_MAX_MB: int = 50
     TESSERACT_LANGS: str = "ara+fra+eng"
+    # If set, /api/admin/stats requires the X-Admin-Token header
+    ADMIN_TOKEN: SecretStr = SecretStr("")
 
     _llm: LLMProfile = PrivateAttr()
 
@@ -105,19 +111,22 @@ class Settings(BaseSettings):
                 )
             if self.SECRET_KEY.get_secret_value() in ("", "change-me-in-.env"):
                 raise ValueError("APP_ENV=production requires a real SECRET_KEY")
-        self._llm = self._resolve_llm()
-        if self._llm.provider == "cloud":
-            if not self.CLOUD_API_KEY.get_secret_value():
-                raise ValueError(
-                    "LLM provider is cloud but CLOUD_API_KEY is empty (set it in .env)"
-                )
-            if not self.CLOUD_BASE_URL:
-                raise ValueError("LLM provider is cloud but CLOUD_BASE_URL is empty")
+        # auto: this is only the fallback profile; app/gateway/providers.py picks cloud per job
+        # while our slot is live and the key works.
+        default: Provider = "local" if self.LLM_PROVIDER == "auto" else self.LLM_PROVIDER
+        self._llm = self.profile_for(default)
+        if self._llm.provider == "cloud" and not self.cloud_configured:
+            raise ValueError(
+                "LLM provider is cloud but CLOUD_API_KEY or CLOUD_BASE_URL is empty (set in .env)"
+            )
         return self
 
-    def _resolve_llm(self) -> LLMProfile:
-        # M0: auto -> local. Slot-aware per-job resolution (cloud while our slot is live) is M1.
-        provider: Provider = "local" if self.LLM_PROVIDER == "auto" else self.LLM_PROVIDER
+    @property
+    def cloud_configured(self) -> bool:
+        return bool(self.CLOUD_API_KEY.get_secret_value() and self.CLOUD_BASE_URL)
+
+    def profile_for(self, provider: Provider) -> LLMProfile:
+        """The only place the CLOUD_/LOCAL_/MOCK_ variables are read."""
         p = provider.upper()
         return LLMProfile(
             provider=provider,
@@ -131,11 +140,16 @@ class Settings(BaseSettings):
 
     @property
     def llm(self) -> LLMProfile:
+        """The configured provider's profile (for auto: the local fallback)."""
         return self._llm
+
+    def collection_for(self, profile: LLMProfile) -> str:
+        """Qdrant collection per provider + embedding model, so vectors never mix."""
+        return f"{self.QDRANT_COLLECTION_PREFIX}-{profile.provider}-{profile.embedding_slug}"
 
     @property
     def qdrant_collection(self) -> str:
-        return f"{self.QDRANT_COLLECTION_PREFIX}-{self.llm.provider}-{self.llm.embedding_slug}"
+        return self.collection_for(self.llm)
 
     @property
     def cors_origins(self) -> list[str]:
