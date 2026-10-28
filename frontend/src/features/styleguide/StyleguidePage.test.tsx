@@ -19,7 +19,7 @@ describe("/styleguide", () => {
     ]) {
       expect(screen.getByRole("heading", { name })).toBeInTheDocument();
     }
-    expect(screen.getAllByRole("status")).toHaveLength(4);
+    expect(screen.getAllByRole("status")).toHaveLength(5); // queue, offline, quick mode, placement, error
   });
 
   it("renders in Arabic", () => {

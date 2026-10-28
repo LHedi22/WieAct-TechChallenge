@@ -1,6 +1,8 @@
 {
   "common": {
-    "app": { "name": "Learning World" },
+    "app": {
+      "name": "Learning World"
+    },
     "language": {
       "label": "Langue",
       "en": "English",
@@ -32,7 +34,11 @@
       "confidence": "Confiance : {level}",
       "pinned": "Meilleure réponse épinglée"
     },
-    "confidence": { "high": "élevée", "medium": "moyenne", "low": "faible" },
+    "confidence": {
+      "high": "élevée",
+      "medium": "moyenne",
+      "low": "faible"
+    },
     "progress": {
       "ratio": "{value} / {max}",
       "questionShort": "Q{n}",
@@ -47,14 +53,25 @@
         "reading_chapter": "Lecture du chapitre",
         "matching_level": "Adaptation à ton niveau",
         "writing_questions": "Rédaction des questions",
-        "writing_hints": "Rédaction des indices"
+        "writing_hints": "Rédaction des indices",
+        "writing_summary": "Rédaction du résumé"
       }
     },
     "wisdom": {
       "title": "Sagesse de la classe",
       "sample": "3 camarades ont confondu 0/0 et 0 ici. Essaie d'abord de factoriser."
     },
-    "errors": { "code_not_found": "Ce code ne correspond à aucun monde." },
+    "errors": {
+      "code_not_found": "Ce code ne correspond à aucun monde.",
+      "ai_failed": "Un problème est survenu avec l'IA. Tes pièces ont été remboursées.",
+      "quota_queue": "La plateforme d'IA est très sollicitée. Réessaie dans quelques minutes.",
+      "offline": "Mode démo hors ligne : les nouvelles actions IA reprennent à notre prochain créneau.",
+      "job_not_found": "Cette activité n'existe plus.",
+      "job_not_cancellable": "Trop tard pour annuler : l'IA y travaille déjà.",
+      "network": "Impossible de joindre le serveur. Vérifie ta connexion.",
+      "unexpected": "Un problème est survenu. Réessaie.",
+      "forbidden": "Tu n'as pas accès à cette page."
+    },
     "mascot": {
       "waving": "Le chat de Sidi Bou Saïd fait coucou",
       "reading": "Le chat de Sidi Bou Saïd lit",
@@ -70,6 +87,31 @@
       "star": "Points",
       "flame": "Série",
       "hourglass": "Minuteur de recharge"
+    },
+    "jobs": {
+      "queue": "Forte affluence : tu es numéro {position} dans la file (environ {seconds} s).",
+      "cancel": "Annuler et garder mes pièces",
+      "cancelled": "Annulé. Tes pièces ont été conservées.",
+      "waiting": {
+        "quota": "La plateforme d'IA nous demande de patienter. Ta demande garde sa place.",
+        "saturated": "L'IA est occupée. Nouvel essai dans un instant.",
+        "transient": "Petit souci de connexion. Nouvel essai dans un instant.",
+        "default": "En attente de l'IA. Ta demande garde sa place."
+      },
+      "status": {
+        "queued": "Dans la file",
+        "running": "En cours",
+        "done": "Prêt",
+        "failed": "Échec",
+        "cancelled": "Annulé"
+      }
+    },
+    "provider": {
+      "label": "IA",
+      "mock": "Simulée",
+      "local": "Locale",
+      "cloud": "Cloud",
+      "auto": "auto"
     }
   },
   "styleguide": {
@@ -156,7 +198,9 @@
       "masteryRing": "Anneau de maîtrise",
       "masteryNote": "dans la couleur de l'île"
     },
-    "loading": { "title": "Étapes de chargement" },
+    "loading": {
+      "title": "Étapes de chargement"
+    },
     "world": {
       "title": "Éléments du monde",
       "water": "Tuile d'eau · animée",
@@ -195,5 +239,16 @@
       "celebratingUse": "Résultat d'accueil, étapes"
     },
     "placeholderNote": "Sprites provisoires : le vrai pixel art viendra dans le même composant Sprite."
+  },
+  "dev": {
+    "title": "Démo des tâches",
+    "intro": "Lance la tâche de démo M1 : un résumé par le modèle moyen via la passerelle IA. Les pannes viennent de mock-llm (/_mock/config).",
+    "lane": "File",
+    "lanes": {
+      "interactive": "Interactive (un étudiant attend)",
+      "background": "Arrière-plan"
+    },
+    "start": "Lancer la tâche de démo",
+    "result": "Résumé"
   }
 }

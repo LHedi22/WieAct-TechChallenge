@@ -51,6 +51,8 @@ def pct(values: list[float], q: float) -> float:
 
 
 async def main() -> int:
+    if hasattr(sys.stdout, "reconfigure"):  # Windows pipes default to cp1252
+        sys.stdout.reconfigure(errors="replace")
     ap = argparse.ArgumentParser()
     ap.add_argument("--api", default="http://127.0.0.1:8000")
     ap.add_argument("--mock", default="http://127.0.0.1:9000")

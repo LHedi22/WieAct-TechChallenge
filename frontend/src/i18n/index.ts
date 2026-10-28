@@ -7,7 +7,7 @@ import en from "./en.json";
 import fr from "./fr.json";
 import type { Language } from "./languages";
 
-export const NAMESPACES = ["common", "styleguide"] as const;
+export const NAMESPACES = ["common", "styleguide", "dev"] as const;
 
 /** Locale files hold one object per namespace; `_review` (Darija review notes) is metadata. */
 function toResource(file: Record<string, unknown>): Resource[string] {

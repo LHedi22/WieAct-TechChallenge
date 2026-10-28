@@ -203,6 +203,7 @@ function CardsBannersChips() {
         <Banner kind="offline">{tc("banner.offline")}</Banner>
         <Banner kind="quickMode">{tc("banner.quickMode")}</Banner>
         <Banner kind="placement">{tc("banner.placement")}</Banner>
+        <Banner kind="error">{tc("errors.ai_failed")}</Banner>
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
         <Chip kind="beginner">{tc("chip.beginner")}</Chip>

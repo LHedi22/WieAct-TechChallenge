@@ -3,13 +3,14 @@ import { cx } from "./cx";
 import { Sprite } from "./sprite/Sprite";
 import type { SpriteName } from "./sprite/registry";
 
-export type BannerKind = "queue" | "offline" | "quickMode" | "placement";
+export type BannerKind = "queue" | "offline" | "quickMode" | "placement" | "error";
 
 const STYLES: Record<BannerKind, string> = {
   queue: "border-sea-ink bg-sea-foam text-ink",
   offline: "border-ink bg-ink text-white",
   quickMode: "border-sea-ink bg-white text-sea-ink",
   placement: "border-primary bg-primary/10 text-ink",
+  error: "border-danger bg-danger/10 text-ink",
 };
 
 const ICONS: Partial<Record<BannerKind, SpriteName>> = {
@@ -24,7 +25,7 @@ interface BannerProps {
   className?: string;
 }
 
-/** Status line for the queue, offline demo mode, quick mode and the placement prompt. */
+/** Status line: queue, offline demo mode, quick mode, placement prompt, failed AI action. */
 export function Banner({ kind, children, action, className }: BannerProps) {
   const icon = ICONS[kind];
   return (

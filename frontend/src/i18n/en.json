@@ -1,6 +1,8 @@
 {
   "common": {
-    "app": { "name": "Learning World" },
+    "app": {
+      "name": "Learning World"
+    },
     "language": {
       "label": "Language",
       "en": "English",
@@ -32,7 +34,11 @@
       "confidence": "Confidence: {level}",
       "pinned": "Pinned best answer"
     },
-    "confidence": { "high": "high", "medium": "medium", "low": "low" },
+    "confidence": {
+      "high": "high",
+      "medium": "medium",
+      "low": "low"
+    },
     "progress": {
       "ratio": "{value} / {max}",
       "questionShort": "Q{n}",
@@ -47,14 +53,25 @@
         "reading_chapter": "Reading the chapter",
         "matching_level": "Matching your level",
         "writing_questions": "Writing questions",
-        "writing_hints": "Writing hints"
+        "writing_hints": "Writing hints",
+        "writing_summary": "Writing the summary"
       }
     },
     "wisdom": {
       "title": "Class wisdom",
       "sample": "3 classmates mixed up 0/0 with 0 here. Try factoring first."
     },
-    "errors": { "code_not_found": "That code doesn't match any world." },
+    "errors": {
+      "code_not_found": "That code doesn't match any world.",
+      "ai_failed": "Something went wrong with the AI. Your coins were refunded.",
+      "quota_queue": "The AI platform is very busy. Please try again in a few minutes.",
+      "offline": "Offline demo mode: new AI actions are paused until our next time slot.",
+      "job_not_found": "This activity no longer exists.",
+      "job_not_cancellable": "Too late to cancel: the AI is already working on it.",
+      "network": "Can't reach the server. Check your connection.",
+      "unexpected": "Something went wrong. Please try again.",
+      "forbidden": "You don't have access to this."
+    },
     "mascot": {
       "waving": "The Sidi Bou Said cat, waving",
       "reading": "The Sidi Bou Said cat, reading",
@@ -70,6 +87,31 @@
       "star": "Points",
       "flame": "Streak",
       "hourglass": "Refill timer"
+    },
+    "jobs": {
+      "queue": "High demand: you're number {position} in line (about {seconds} s).",
+      "cancel": "Cancel and keep my coins",
+      "cancelled": "Cancelled. Your coins were kept.",
+      "waiting": {
+        "quota": "The AI platform asked us to wait a moment. Your request keeps its place.",
+        "saturated": "The AI is busy. Trying again shortly.",
+        "transient": "Connection hiccup. Trying again shortly.",
+        "default": "Waiting for the AI. Your request keeps its place."
+      },
+      "status": {
+        "queued": "In line",
+        "running": "Working",
+        "done": "Ready",
+        "failed": "Failed",
+        "cancelled": "Cancelled"
+      }
+    },
+    "provider": {
+      "label": "AI",
+      "mock": "Mock",
+      "local": "Local",
+      "cloud": "Cloud",
+      "auto": "auto"
     }
   },
   "styleguide": {
@@ -156,7 +198,9 @@
       "masteryRing": "Mastery ring",
       "masteryNote": "in the island's accent"
     },
-    "loading": { "title": "Loading stages" },
+    "loading": {
+      "title": "Loading stages"
+    },
     "world": {
       "title": "World pieces",
       "water": "Water tile · animated",
@@ -195,5 +239,16 @@
       "celebratingUse": "Onboarding result, milestones"
     },
     "placeholderNote": "Placeholder sprites: real pixel art drops into the same Sprite component later."
+  },
+  "dev": {
+    "title": "Job demo",
+    "intro": "Starts the M1 demo job: a mid-size summary through the AI gateway. Faults come from mock-llm (/_mock/config).",
+    "lane": "Lane",
+    "lanes": {
+      "interactive": "Interactive (a student is waiting)",
+      "background": "Background"
+    },
+    "start": "Start demo job",
+    "result": "Summary"
   }
 }
