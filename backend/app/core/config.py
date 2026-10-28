@@ -55,14 +55,14 @@ class Settings(BaseSettings):
     CLOUD_EMBEDDING_MODEL: str = "pending-probe"
     CLOUD_EMBEDDING_DIM: int = 1024
 
-    LOCAL_BASE_URL: str = "http://localhost:11434/v1"
+    LOCAL_BASE_URL: str = "http://127.0.0.1:11434/v1"
     LOCAL_API_KEY: SecretStr = SecretStr("ollama")
     LOCAL_MODEL_COMPACT: str = "qwen3:1.7b"
     LOCAL_MODEL_MID: str = "qwen3:8b"
     LOCAL_EMBEDDING_MODEL: str = "bge-m3"
     LOCAL_EMBEDDING_DIM: int = 1024
 
-    MOCK_BASE_URL: str = "http://localhost:9000/v1"
+    MOCK_BASE_URL: str = "http://127.0.0.1:9000/v1"
     MOCK_API_KEY: SecretStr = SecretStr("mock")
     MOCK_MODEL_COMPACT: str = "mock-compact"
     MOCK_MODEL_MID: str = "mock-mid"
@@ -82,13 +82,13 @@ class Settings(BaseSettings):
     LLM_SLOT_FORCE: Literal["", "live", "off"] = ""
 
     # --- vector store ---
-    QDRANT_URL: str = "http://localhost:6333"
+    QDRANT_URL: str = "http://127.0.0.1:6333"
     QDRANT_API_KEY: SecretStr = SecretStr("")
     QDRANT_COLLECTION_PREFIX: str = "hack-04-chunks"
 
     # --- app ---
     APP_ENV: Literal["development", "production"] = "development"
-    DATABASE_URL: str = "postgresql+asyncpg://lw:lw@localhost:5432/learningworld"
+    DATABASE_URL: str = "postgresql+asyncpg://lw:lw@127.0.0.1:5432/learningworld"
     SECRET_KEY: SecretStr = SecretStr("change-me-in-.env")
     APP_TIMEZONE: str = "Africa/Tunis"
     CORS_ORIGINS: str = "http://localhost:5173"

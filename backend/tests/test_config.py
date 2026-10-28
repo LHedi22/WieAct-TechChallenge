@@ -31,7 +31,7 @@ def test_mock_profile(monkeypatch):
 def test_local_profile(monkeypatch):
     s = make(monkeypatch, LLM_PROVIDER="local", LOCAL_MODEL_MID="qwen3:14b")
     assert s.llm.provider == "local"
-    assert s.llm.base_url == "http://localhost:11434/v1"
+    assert s.llm.base_url == "http://127.0.0.1:11434/v1"
     assert s.llm.model_compact == "qwen3:1.7b"
     assert s.llm.model_mid == "qwen3:14b"
     assert s.llm.embedding_model == "bge-m3"
