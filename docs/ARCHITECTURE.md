@@ -114,6 +114,11 @@ and on failure do ONE compact "fix this JSON" repair call. Small models break JS
 | TRANSLATE_SHORT | compact | rewriting | background | text+lang |
 | PLACEMENT_QUIZ (8 Q) | compact | narrow-before-generating | interactive | world+chapter+lang |
 | any mid task when saturated | compact | fallback (`quick_mode`) | — | — |
+| JSON_REPAIR (internal: fix one broken JSON reply) | compact | repair | same as the task | none |
+| DEMO_SUMMARY (dev-only M1 demo job) | mid | narrow-before-generating | interactive / background | optional |
+
+Identical cacheable tasks in flight at the same time are single-flighted: one model call, the
+others read the cache when it lands.
 
 ## RAG
 - Parse → normalise text per page/slide → chunk (~500 tokens, 60 overlap, keep page/slide refs).

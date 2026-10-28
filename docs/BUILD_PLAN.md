@@ -22,29 +22,29 @@ scroll. ruff, pytest (22 pass incl. the migration test against Postgres), eslint
 in `.github/workflows/ci.yml`, but there is no git remote yet, so CI has never run.
 
 ## M1 · Mock LLM + AI gateway (28–30 Oct) — 40% of platform score lives here
-- [ ] `mock-llm/`: `/v1/models`, `/v1/chat/completions`, `/v1/embeddings`; configurable latency per tier; fault injection via env or header: `503+Retry-After`, quota-exhausted+delay, `400` ceiling message, malformed JSON, concurrency > 2 rejected; quota headers emitted
-- [ ] Gateway: router table, cache, RPM bucket + concurrency semaphore, priority lanes, error contract handling, compact fallback with `quick_mode`, 400 shrink-and-retry-once, JSON repair, call log
+- [x] `mock-llm/`: `/v1/models`, `/v1/chat/completions`, `/v1/embeddings`; configurable latency per tier; fault injection via env or header: `503+Retry-After`, quota-exhausted+delay, `400` ceiling message, malformed JSON, concurrency > 2 rejected; quota headers emitted
+- [x] Gateway: router table, cache, RPM bucket + concurrency semaphore, priority lanes, error contract handling, compact fallback with `quick_mode`, 400 shrink-and-retry-once, JSON repair, call log
 - [ ] **Provider switching (local / cloud / mock)** — decision 2026-10-27 in DECISIONS.md; ARCHITECTURE.md §Providers
   - [x] HUMAN (done 27/10: qwen3:8b on the 15.4 GB laptop; restart Ollama to apply the env vars): install Ollama (`winget install Ollama.Ollama`); set `OLLAMA_NUM_PARALLEL=2`,
         `OLLAMA_CONTEXT_LENGTH=8192`, `OLLAMA_KEEP_ALIVE=30m`; `ollama pull qwen3:1.7b qwen3:14b bge-m3`
         (`qwen3:8b` if under 16 GB RAM). Not blocking: dev runs on mock until this is done.
-  - [ ] `LLM_PROVIDER=local|cloud|mock|auto` with `CLOUD_*`, `LOCAL_*`, `MOCK_*` profile variables
+  - [x] `LLM_PROVIDER=local|cloud|mock|auto` with `CLOUD_*`, `LOCAL_*`, `MOCK_*` profile variables
         (base URL, key, compact/mid/embedding model, embedding dim). `config.py` resolves one
         `settings.llm` object, and nothing else reads the profile variables. Default: mock until
         Ollama is installed, then local.
-  - [ ] `auto` = cloud when our slot is live (slot logic moved into `app/core/slot.py`) and no 401
+  - [x] `auto` = cloud when our slot is live (slot logic moved into `app/core/slot.py`) and no 401
         "Key is blocked" has been seen since the slot started; otherwise local. Evaluated per job.
-  - [ ] Production guard: `APP_ENV=production` allows only cloud. Outside the slot or on 401:
+  - [x] Production guard: `APP_ENV=production` allows only cloud. Outside the slot or on 401:
         Offline demo mode with cached cloud results only. Refuse to start with local or mock.
-  - [ ] Same limiter (2 concurrent, `LLM_MAX_RPM`) for every provider.
-  - [ ] `scripts/llm.py`: `use local|cloud|mock|auto` (rewrites only the `LLM_PROVIDER` line in `.env`,
+  - [x] Same limiter (2 concurrent, `LLM_MAX_RPM`) for every provider.
+  - [x] `scripts/llm.py`: `use local|cloud|mock|auto` (rewrites only the `LLM_PROVIDER` line in `.env`,
         creating `.env` from `.env.example` if missing), `status` (provider, host, models, dim,
         collection, slot; shows the key only as set/empty), `check` (`GET /models`; for local, lists
         pulled models via `/api/tags` and prints the `ollama pull` command for any missing).
         Standard library only, works on Windows.
   - [ ] `scripts/setup_ollama.ps1` + `.sh`: check install, pull the models, warm them up, run
         `llm.py check`.
-  - [ ] Qwen3 thinking off: append `" /no_think"` to the system message for qwen3 models; for cloud
+  - [x] Qwen3 thinking off: append `" /no_think"` to the system message for qwen3 models; for cloud
         also send `chat_template_kwargs` `enable_thinking=false` and drop it on a 400; always strip
         `<think>…</think>`. Tested.
   - [ ] Providers kept apart: Qdrant collection = `{prefix}-{provider}-{embedding model slug}` with
@@ -54,14 +54,24 @@ in `.github/workflows/ci.yml`, but there is no git remote yet, so CI has never r
         cache only; a dev-only Local/Cloud/Mock badge in the top bar.
   - [ ] Docker: backend and worker reach host Ollama at `http://host.docker.internal:11434/v1`
         (`extra_hosts: host-gateway` on Linux). Ollama runs on the host, not in compose.
-  - [ ] `probe_models.py` gets `--provider local|cloud`, uses the profile variables, and tags its
+  - [x] `probe_models.py` gets `--provider local|cloud`, uses the profile variables, and tags its
         MODELS.md section with the provider.
-- [ ] Jobs: create, worker loop (SKIP LOCKED), stages, `not_before`, queue position + ETA, coin reserve/commit/refund hooks
-- [ ] `useJob` hook + `LoadingStages` + queue/quick-mode banners wired to a demo job
-- [ ] `/api/admin/stats`: calls per tier, split %, tokens, cache hits, refusals, fallbacks
-- [ ] Tests for every row of the error contract in PLATFORM.md
+- [x] Jobs: create, worker loop (SKIP LOCKED), stages, `not_before`, queue position + ETA, coin reserve/commit/refund hooks
+- [x] `useJob` hook + `LoadingStages` + queue/quick-mode banners wired to a demo job
+- [x] `/api/admin/stats`: calls per tier, split %, tokens, cache hits, refusals, fallbacks
+- [x] Tests for every row of the error contract in PLATFORM.md
 - [ ] **In-slot model probe:** `python3 scripts/probe_models.py` → fills docs/MODELS.md results, prints recommended `.env` lines (models, embedding dim, ceilings, quota header names); record in DECISIONS.md
 **Done when:** a load script firing 30 jobs at mock (with 503 and quota faults on) completes all jobs, never exceeds 2 concurrent, shows fallbacks in stats, and the UI shows queue position, and `python scripts/llm.py use auto` switches between local and cloud at slot boundaries without restarting (verified against mock with `MOCK_BLOCKED`).
+
+_Status 28/10:_ load test PASS — `load.py --jobs 30 --faults 503,quota` against the compose stack:
+30/30 done, 53 calls (15×503, 8×quota, all handled), max 1 in flight (≤ 2), 1 compact fallback,
+interactive p50 38 s vs background 126 s; `/dev/jobs` shows queue position + ETA (#32, ~94 s) in EN
+and AR. auto switching is covered by the contract tests with the real gateway and a blocked mock key
+(in-slot 401 → local on the same job, next job local without restart, back to cloud in the next
+slot); not yet re-run in Docker (one compose mock can't block only the cloud profile). Tests: 99
+backend, 16 mock-llm, 23 frontend. **Open:** setup_ollama scripts written + syntax-checked but not run
+(Ollama not started); Docker → host Ollama untested; reindex CLI moves to M2; the dev provider badge
+is on /dev/jobs (no top bar until M3); the in-slot probe (human).
 
 ## M2 · Upload & indexing (30 Oct–1 Nov)
 - [ ] Parsers: PDF (PyMuPDF), PPTX, DOCX, TXT, images + scanned pages via Tesseract (ara+fra+eng)

@@ -18,6 +18,16 @@ that isn't in the docs. Humans resolve OPEN items.
 - OPEN: Darija TTS — pregenerate with silma-tts-derja or transcript-only?
 
 ## Decided
+- 2026-10-28 · M1 quota signal (OPEN upstream): a 429, or any error whose message says "quota"/"rate limit", is quota; delay from `Retry-After` → `x-ratelimit-reset*` → a number in the message → 30 s. The job is requeued with `not_before`; the UI shows position + ETA
+- 2026-10-28 · M1 503: interactive retries once (waiting `Retry-After`, capped at 5 s), then mid falls back to compact (`quick_mode`); background never falls back, it is requeued. Quick-mode answers are not cached, so the class later gets the mid-size version
+- 2026-10-28 · M1 400 ceiling: resend once with the ceiling parsed from the message (else ×0.6), and remember it per provider so later calls don't hit it again
+- 2026-10-28 · M1 `LLM_JSON_MODE=auto`: send `response_format=json_object`, drop it per model on a 400; always tolerant-parse, then ONE compact repair call
+- 2026-10-28 · M1 single-flight: identical cacheable tasks in flight at once share one model call (found by the stats test: two classmates opening the same notes made two calls)
+- 2026-10-28 · M1 worker: one process (the limiter is process-local); background jobs in flight capped at `LLM_MAX_CONCURRENCY`, interactive up to 6, so a waiting student is never stuck behind precompute; a job fails after 8 attempts (deferrals included) and coins are refunded
+- 2026-10-28 · M1 `auto`: cloud while the slot is live, the cloud profile is set and no cloud 401 is in `ai_call_log` since the slot started; else local. Production + cloud outside the slot → offline demo mode (cached cloud results only)
+- 2026-10-28 · M1 queue ETA = position × average latency of the last 30 successful calls ÷ concurrency (8 s default), or the `not_before` wait if longer
+- 2026-10-28 · Tests use a separate `<db>_test` database (created on demand) so they never touch dev data; mock-llm runs in-process for backend tests
+- 2026-10-28 · `python -m app.rag.reindex --provider cloud` needs chunks, so it lands with M2; M1 ships the per-provider collection naming (`collection_for`)
 - 2026-10-28 · Our network blocks `registry.npmjs.org` by hostname (same Cloudflare IPs answer as `registry.yarnpkg.com`); the frontend image takes `NPM_REGISTRY` (default npmjs) for Corepack and pnpm — set `NPM_REGISTRY=https://registry.yarnpkg.com/` locally
 - 2026-10-27 · M0: `LLM_PROVIDER=auto` resolves to `local` until M1 adds slot-aware per-job resolution (`app/core/slot.py`); the cloud key is required only when the resolved provider is cloud
 - 2026-10-27 · M0: production refuses any `LLM_PROVIDER` other than `cloud` (including `auto`) and the default `SECRET_KEY`
