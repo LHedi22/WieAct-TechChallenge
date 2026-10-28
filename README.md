@@ -40,6 +40,9 @@ Migrations run automatically when the backend container starts.
 (`copy .env.example .env` in cmd). The repo forces LF line endings (`.gitattributes`), so a
 Windows clone builds the Linux images unchanged.
 
+**If `pnpm install` times out during the build** (some networks block `registry.npmjs.org`):
+`NPM_REGISTRY=https://registry.yarnpkg.com/ docker compose up --build` — same packages, same hashes.
+
 Without Docker (dev loop):
 
 ```bash

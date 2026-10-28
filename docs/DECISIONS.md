@@ -18,6 +18,7 @@ that isn't in the docs. Humans resolve OPEN items.
 - OPEN: Darija TTS — pregenerate with silma-tts-derja or transcript-only?
 
 ## Decided
+- 2026-10-28 · Our network blocks `registry.npmjs.org` by hostname (same Cloudflare IPs answer as `registry.yarnpkg.com`); the frontend image takes `NPM_REGISTRY` (default npmjs) for Corepack and pnpm — set `NPM_REGISTRY=https://registry.yarnpkg.com/` locally
 - 2026-10-27 · M0: `LLM_PROVIDER=auto` resolves to `local` until M1 adds slot-aware per-job resolution (`app/core/slot.py`); the cloud key is required only when the resolved provider is cloud
 - 2026-10-27 · M0: production refuses any `LLM_PROVIDER` other than `cloud` (including `auto`) and the default `SECRET_KEY`
 - 2026-10-27 · M0: `mock-llm` is a health-only stub and `app.worker` an idle heartbeat so compose runs; both are built in M1
