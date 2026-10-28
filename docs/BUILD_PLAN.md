@@ -6,12 +6,17 @@ guard in CLAUDE.md early. M0–M2 are the critical path — everything AI depend
 
 ## M0 · Foundations (27–28 Oct)
 - [ ] Monorepo layout from ARCHITECTURE.md; `docker compose up` brings db (postgres), qdrant, mock-llm, backend, worker, frontend
-- [ ] `backend/app/core/config.py` (pydantic-settings) reads every var in `.env.example`; app refuses to start if `CLOUD_API_KEY` is missing **only** when the resolved provider is cloud
+- [x] `backend/app/core/config.py` (pydantic-settings) reads every var in `.env.example`; app refuses to start if `CLOUD_API_KEY` is missing **only** when the resolved provider is cloud
 - [ ] `.env` in `.gitignore`; `.env.example` complete; gitleaks runs in CI
 - [ ] Alembic initial migration; SQLAlchemy models for users, worlds, jobs, ai_cache, ai_call_log
-- [ ] Frontend: Vite + TS + Tailwind with tokens, fonts, i18n (4 locales, RTL switch), router, `/styleguide` route with all primitives from DESIGN.md
+- [x] Frontend: Vite + TS + Tailwind with tokens, fonts, i18n (4 locales, RTL switch), router, `/styleguide` route with all primitives from DESIGN.md
 - [ ] CI: ruff, pytest, eslint, tsc, vitest
 **Done when:** fresh clone → `cp .env.example .env` → `docker compose up` → styleguide renders in EN and AR (RTL) and `/api/health` is green.
+
+_Status 28/10:_ all code for M0 is written and committed; ruff, pytest (21 pass), eslint, tsc, vitest (17),
+`i18n:check` and the constraint greps pass locally; `/styleguide` checked in a browser at 1440×900 and
+390×844 in EN, AR and side by side. **Still open:** the Docker run (layout box, migration test against
+Postgres — skipped without a DB) and the first CI run (no git remote yet, so gitleaks/CI haven't executed).
 
 ## M1 · Mock LLM + AI gateway (28–30 Oct) — 40% of platform score lives here
 - [ ] `mock-llm/`: `/v1/models`, `/v1/chat/completions`, `/v1/embeddings`; configurable latency per tier; fault injection via env or header: `503+Retry-After`, quota-exhausted+delay, `400` ceiling message, malformed JSON, concurrency > 2 rejected; quota headers emitted

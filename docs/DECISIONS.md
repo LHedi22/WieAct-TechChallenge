@@ -18,6 +18,14 @@ that isn't in the docs. Humans resolve OPEN items.
 - OPEN: Darija TTS — pregenerate with silma-tts-derja or transcript-only?
 
 ## Decided
+- 2026-10-27 · M0: `LLM_PROVIDER=auto` resolves to `local` until M1 adds slot-aware per-job resolution (`app/core/slot.py`); the cloud key is required only when the resolved provider is cloud
+- 2026-10-27 · M0: production refuses any `LLM_PROVIDER` other than `cloud` (including `auto`) and the default `SECRET_KEY`
+- 2026-10-27 · M0: `mock-llm` is a health-only stub and `app.worker` an idle heartbeat so compose runs; both are built in M1
+- 2026-10-27 · Frontend: Tailwind 3.4 with `tailwind.config.ts` reading `design/tokens.json` (no new colour tokens; tints via opacity); React 19, Vite 6, ESLint 9 (jsx-a11y doesn't support ESLint 10 yet)
+- 2026-10-27 · Stepped corners = `radius.pixelStep` (2px) + ink border + lip shadow; no clip-path, which would clip the lip and the focus ring
+- 2026-10-27 · Sprites: `Sprite` draws generated placeholders; `design/assets/sprites/<name>.png` replaces them with no code change
+- 2026-10-27 · Darija strings are Claude drafts, flagged by `_review` in `ar-TN.json`, for native-speaker review (M8); `ar-TN` falls back to `ar`, then `en`
+- 2026-10-27 · Docker: the backend venv lives at `/opt/venv` so the `./backend` bind mount (possibly holding a Windows `.venv`) never shadows it; the frontend image is built from the repo root so it can read `design/`
 - 2026-10-27 · One team member does all the work (backend, AI, frontend, product, report, video), milestones in sequence with Claude Code; the 3-person split is dropped. Dates kept; the scope guard in CLAUDE.md applies early
 - 2026-10-27 · Local dev models (Ollama) = qwen3:1.7b (compact), qwen3:14b (mid; qwen3:8b on laptops under 16 GB RAM), bge-m3 (embeddings, 1024 dims); fallbacks qwen2.5:1.5b / qwen2.5:14b. Cloud models come from `scripts/probe_models.py` in our slot; prefer the Qwen3 family if the platform lists it
 - 2026-10-27 · Local models are dev-only, switched via `LLM_PROVIDER=local|cloud|mock|auto` (work scheduled in M1). Production and the demo use only the platform: the rules forbid replacement services during the demo, and live AI output must come from the platform
