@@ -34,6 +34,7 @@ class AICallLog(Base):
         DateTime(timezone=True), server_default=func.now(), index=True
     )
     task_kind: Mapped[str] = mapped_column(String(32))
+    lane: Mapped[str | None] = mapped_column(String(16))
     model_tier: Mapped[str] = mapped_column(String(8))
     provider: Mapped[str] = mapped_column(String(8), index=True)
     model: Mapped[str] = mapped_column(String(128))
@@ -45,3 +46,5 @@ class AICallLog(Base):
     cache_hit: Mapped[bool] = mapped_column(Boolean, default=False)
     fallback: Mapped[bool] = mapped_column(Boolean, default=False)
     refusal_reason: Mapped[str | None] = mapped_column(String(64))
+    # Hash of (provider, model, messages, params): repeats are the organisers' cache indicator.
+    request_hash: Mapped[str | None] = mapped_column(String(64), index=True)
