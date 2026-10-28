@@ -1,10 +1,23 @@
 import os
+import sys
+from pathlib import Path
 
+import httpx
 import pytest
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.core import config
 
-_PREFIXES = ("LLM_", "CLOUD_", "LOCAL_", "MOCK_", "QDRANT_", "APP_ENV", "SECRET_KEY")
+REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO / "mock-llm" / "src"))  # the mock runs in-process (ASGI transport)
+
+from mock_llm.app import create_app as create_mock_app  # noqa: E402
+from mock_llm.config import MockConfig  # noqa: E402
+
+from tests.db import prepare, test_url  # noqa: E402
+
+_PREFIXES = ("LLM_", "CLOUD_", "LOCAL_", "MOCK_", "QDRANT_", "APP_ENV", "SECRET_KEY", "ADMIN_")
 
 # Module-level too: test modules that import app.main build the app at import time, before any
 # fixture runs, and must not see the developer's .env or shell.
@@ -13,6 +26,9 @@ for _name in list(os.environ):
     if _name.startswith(_PREFIXES):
         del os.environ[_name]
 os.environ["LLM_PROVIDER"] = "mock"
+
+DEV_DB_URL = os.environ.get("DATABASE_URL", config.Settings().DATABASE_URL)
+TABLES = "ai_call_log, ai_cache, jobs, world_members, worlds, users"
 
 
 @pytest.fixture(autouse=True)
@@ -23,6 +39,39 @@ def isolated_settings(monkeypatch):
         if name.startswith(_PREFIXES):
             monkeypatch.delenv(name)
     monkeypatch.setenv("LLM_PROVIDER", "mock")
+    monkeypatch.setenv("MOCK_BASE_URL", "http://mock/v1")
     config.get_settings.cache_clear()
     yield
     config.get_settings.cache_clear()
+
+
+@pytest.fixture(scope="session")
+def pg_url() -> str:
+    url = test_url(DEV_DB_URL)
+    if not prepare(url):
+        pytest.skip("Postgres not reachable at DATABASE_URL (docker compose up -d db)")
+    return url
+
+
+@pytest.fixture
+async def sm(pg_url, monkeypatch):
+    """Session factory on a clean test database."""
+    monkeypatch.setenv("DATABASE_URL", pg_url)
+    engine = create_async_engine(pg_url)
+    async with engine.begin() as conn:
+        await conn.execute(text(f"TRUNCATE {TABLES} RESTART IDENTITY CASCADE"))
+    yield async_sessionmaker(engine, expire_on_commit=False)
+    await engine.dispose()
+
+
+FAST_MOCK = dict(latency_compact_ms=(0, 0), latency_mid_ms=(0, 0), p_503_mid=0, p_bad_json=0)
+
+
+@pytest.fixture
+def mock_llm():
+    """In-process mock platform; tweak `mock_llm.state.cfg` per test."""
+    return create_mock_app(MockConfig(**FAST_MOCK), seed=7)
+
+
+def mock_transport(app) -> httpx.AsyncClient:
+    return httpx.AsyncClient(transport=httpx.ASGITransport(app=app))
