@@ -1,0 +1,8 @@
+{
+  "summary": "Une limite décrit la valeur dont une fonction s'approche près d'un point ({topic}). Si la substitution donne 0/0, il faut d'abord simplifier : factoriser, simplifier ou multiplier par le conjugué.",
+  "key_points": [
+    "La limite peut exister même si f(a) n'est pas définie.",
+    "0/0 est une forme indéterminée, pas une réponse.",
+    "Les deux limites latérales doivent être égales."
+  ]
+}

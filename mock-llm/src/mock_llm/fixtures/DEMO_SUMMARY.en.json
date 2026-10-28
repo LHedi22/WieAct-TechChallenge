@@ -1,0 +1,8 @@
+{
+  "summary": "A limit describes the value a function approaches near a point ({topic}). When substitution gives 0/0, simplify first: factor, cancel or rationalise.",
+  "key_points": [
+    "The limit can exist even if f(a) is undefined.",
+    "0/0 is an indeterminate form, not an answer.",
+    "Both one-sided limits must agree."
+  ]
+}
