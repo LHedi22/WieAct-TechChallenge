@@ -1,25 +1,26 @@
-"""Job worker (python -m app.worker).
-
-M0 stub: validates settings and idles with a heartbeat so docker compose has a running worker.
-The real loop (SELECT … FOR UPDATE SKIP LOCKED, lanes, not_before) arrives in M1.
-"""
+"""Job worker entry point: `python -m app.worker`. One process — the gateway's limiter (2 in
+flight, RPM) is process-local, so there must be exactly one worker (backend/CLAUDE.md)."""
 
 import asyncio
 import logging
 
 from app.core.config import get_settings
+from app.core.db import get_sessionmaker
+from app.jobs.worker import Worker
 
 log = logging.getLogger("worker")
-
-HEARTBEAT_S = 60
 
 
 async def main() -> None:
     settings = get_settings()
-    log.info("worker started (provider=%s, app_env=%s)", settings.llm.provider, settings.APP_ENV)
-    while True:
-        log.info("worker idle: job runner arrives in M1")
-        await asyncio.sleep(HEARTBEAT_S)
+    log.info(
+        "worker started (provider=%s, app_env=%s, max %d in flight, %d rpm)",
+        settings.LLM_PROVIDER,
+        settings.APP_ENV,
+        settings.LLM_MAX_CONCURRENCY,
+        settings.LLM_MAX_RPM,
+    )
+    await Worker(get_sessionmaker(), background_slots=settings.LLM_MAX_CONCURRENCY).run_forever()
 
 
 if __name__ == "__main__":
