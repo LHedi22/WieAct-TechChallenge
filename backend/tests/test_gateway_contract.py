@@ -390,3 +390,12 @@ async def test_call_log_counts_compact_mid_split(monkeypatch, sm, mock_llm):
             )
         ).all()
     assert dict(rows) == {"mid": 1, "compact": 1}
+
+
+async def test_concurrent_identical_requests_make_one_call(monkeypatch, sm, mock_llm):
+    mock_llm.state.cfg = mock_llm.state.cfg.model_copy(update={"latency_mid_ms": (50, 50)})
+    gw, _ = make_gateway(make_settings(monkeypatch), sm, {"mock": mock_llm})
+    results = await asyncio.gather(*[gw.run(task(cache_key="ch1:notes:en")) for _ in range(5)])
+    assert mock_llm.state.stats.calls == 1
+    assert sum(r.cached for r in results) == 4
+    assert len({str(r.content) for r in results}) == 1

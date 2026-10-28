@@ -77,6 +77,7 @@ class Gateway:
         self._client_factory = client_factory or self._default_client
         self._clients: dict[str, LLMClient] = {}
         self._ceilings: dict[str, int] = {}  # learned max_tokens ceiling per provider
+        self._inflight: dict[tuple[str, str, str], asyncio.Future[None]] = {}
         self._sleep = sleep
         self._now = now or (lambda: datetime.now(UTC))
 
@@ -142,6 +143,22 @@ class Gateway:
 
     # --- the contract -----------------------------------------------------------------------------
     async def run(self, task: Task) -> Result:
+        """Single-flight for cacheable tasks: while one request for a cache key is in progress,
+        identical tasks (classmates opening the same notes at once) wait for it and then read
+        the cache instead of calling the model again."""
+        if not task.cache_key:
+            return await self._run(task)
+        flight = (task.kind.value, task.prompt_version, task.cache_key)
+        if (pending := self._inflight.get(flight)) is not None:
+            await asyncio.shield(pending)
+            return await self._run(task)  # a cache hit now (or a fresh try if the first failed)
+        self._inflight[flight] = asyncio.get_running_loop().create_future()
+        try:
+            return await self._run(task)
+        finally:
+            self._inflight.pop(flight).set_result(None)
+
+    async def _run(self, task: Task) -> Result:
         route = route_for(task.kind)
         tier: Tier = task.tier or route.tier
         pattern = route.pattern
