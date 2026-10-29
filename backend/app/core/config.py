@@ -74,6 +74,8 @@ class Settings(BaseSettings):
     LLM_TIMEOUT_S: float = 90
     LLM_MAX_RPM: int = 18
     LLM_MAX_CONCURRENCY: int = 2
+    # Embeddings are metered separately (own quota); they share the per-key concurrency limit
+    LLM_EMBED_MAX_RPM: int = 18
     LLM_MAX_TOKENS_DEFAULT: int = 700
     LLM_SLOT_GROUP: Literal["A", "B"] = "A"
     # auto: send response_format=json_object, drop it for that model on a 400 (support is OPEN)
@@ -95,7 +97,10 @@ class Settings(BaseSettings):
     OFFLINE_DEMO_MODE: Literal["auto", "on", "off"] = "auto"
     LOG_PROMPTS: bool = False
     UPLOAD_MAX_MB: int = 50
+    UPLOAD_DIR: str = "./data/uploads"
     TESSERACT_LANGS: str = "ara+fra+eng"
+    # Empty = find `tesseract` on PATH (or the default Windows install folder)
+    TESSERACT_CMD: str = ""
     # If set, /api/admin/stats requires the X-Admin-Token header
     ADMIN_TOKEN: SecretStr = SecretStr("")
 
