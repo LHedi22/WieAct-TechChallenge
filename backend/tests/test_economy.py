@@ -2,6 +2,7 @@
 
 from datetime import UTC, datetime
 
+from app.api.economy import EconomyOut
 from app.core import economy
 from tests.test_auth import SIGNUP, api  # noqa: F401  (fixture)
 
@@ -27,7 +28,8 @@ def test_refill_is_next_tunis_midnight():
 
 async def test_economy_endpoint_is_public_and_wallet_needs_sign_in(api):  # noqa: F811
     eco = (await api.get("/api/economy")).json()
-    assert eco == economy.as_dict()
+    assert eco == EconomyOut.model_validate(economy.as_dict()).model_dump(mode="json")
+    assert eco["buildings"]["quiz_hall"]["cost"] == economy.COST["quiz"]
     assert (await api.get("/api/wallet")).status_code == 401
     await api.post("/api/auth/signup", json=SIGNUP)
     wallet = (await api.get("/api/wallet")).json()
