@@ -29,7 +29,8 @@ os.environ["LLM_PROVIDER"] = "mock"
 
 DEV_DB_URL = os.environ.get("DATABASE_URL", config.Settings().DATABASE_URL)
 TABLES = (
-    "ai_call_log, ai_cache, jobs, quiz_sets, chunks, documents, chapters, courses, "
+    "ai_call_log, ai_cache, jobs, presence, placement_sets, chapter_mastery, course_levels, "
+    "profiles, quiz_sets, chunks, documents, chapters, courses, "
     "world_members, worlds, users"
 )
 
