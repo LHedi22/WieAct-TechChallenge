@@ -7,10 +7,10 @@ guard in CLAUDE.md early. M0–M2 are the critical path — everything AI depend
 ## M0 · Foundations (27–28 Oct)
 - [x] Monorepo layout from ARCHITECTURE.md; `docker compose up` brings db (postgres), qdrant, mock-llm, backend, worker, frontend
 - [x] `backend/app/core/config.py` (pydantic-settings) reads every var in `.env.example`; app refuses to start if `CLOUD_API_KEY` is missing **only** when the resolved provider is cloud
-- [ ] `.env` in `.gitignore`; `.env.example` complete; gitleaks runs in CI
+- [x] `.env` in `.gitignore`; `.env.example` complete; gitleaks runs in CI
 - [x] Alembic initial migration; SQLAlchemy models for users, worlds, jobs, ai_cache, ai_call_log
 - [x] Frontend: Vite + TS + Tailwind with tokens, fonts, i18n (4 locales, RTL switch), router, `/styleguide` route with all primitives from DESIGN.md
-- [ ] CI: ruff, pytest, eslint, tsc, vitest
+- [x] CI: ruff, pytest, eslint, tsc, vitest
 **Done when:** fresh clone → `cp .env.example .env` → `docker compose up` → styleguide renders in EN and AR (RTL) and `/api/health` is green.
 
 _Status 28/10:_ **Done-when passes.** Fresh clone → `cp .env.example .env` → `docker compose up --build`
@@ -18,8 +18,9 @@ _Status 28/10:_ **Done-when passes.** Fresh clone → `cp .env.example .env` →
 up, `/api/health` = `{"status":"ok","db":"ok","qdrant":"ok","provider":"mock"}`, Alembic at `0001 (head)`,
 `/styleguide` renders in EN and AR (RTL) at 1440×900 and 390×844 with no console errors or horizontal
 scroll. ruff, pytest (22 pass incl. the migration test against Postgres), eslint, tsc, vitest (17),
-`i18n:check` and the constraint greps pass. **Open:** the two CI boxes — the workflow and gitleaks job are
-in `.github/workflows/ci.yml`, but there is no git remote yet, so CI has never run.
+`i18n:check` and the constraint greps pass. CI (29/10, after the first push to GitHub): gitleaks +
+constraint greps, backend (ruff, pytest against Postgres, Tesseract), mock-llm, frontend (eslint, tsc,
+vitest, i18n) all green.
 
 ## M1 · Mock LLM + AI gateway (28–30 Oct) — 40% of platform score lives here
 - [x] `mock-llm/`: `/v1/models`, `/v1/chat/completions`, `/v1/embeddings`; configurable latency per tier; fault injection via env or header: `503+Retry-After`, quota-exhausted+delay, `400` ceiling message, malformed JSON, concurrency > 2 rejected; quota headers emitted
