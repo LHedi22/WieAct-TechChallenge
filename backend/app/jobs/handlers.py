@@ -2,4 +2,4 @@
 
 from app.features.quiz import pool  # noqa: F401
 from app.jobs import demo  # noqa: F401
-from app.rag import indexing  # noqa: F401
+from app.rag import indexing, search  # noqa: F401

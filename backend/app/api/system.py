@@ -24,6 +24,7 @@ class SystemStatus(BaseModel):
     next_slot: str | None
     offline_demo_mode: bool
     reason: str | None
+    upload_max_mb: int
 
 
 @router.get("/status", response_model=SystemStatus)
@@ -45,4 +46,5 @@ async def status(
         next_slot=nxt.label() if nxt else None,
         offline_demo_mode=offline,
         reason=res.reason or None,
+        upload_max_mb=settings.UPLOAD_MAX_MB,
     )

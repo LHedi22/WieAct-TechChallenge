@@ -2,6 +2,7 @@
 (mock) → in-memory Qdrant → search. Includes the M2 Done-when: a 30-page PDF + a PPTX are
 indexed and search("limit 0/0") returns the Limits pages."""
 
+import asyncio
 from pathlib import Path
 
 import pytest
@@ -52,7 +53,7 @@ def files(tmp_path_factory) -> dict[str, Path]:
 
 
 async def stream(path: Path):
-    data = path.read_bytes()
+    data = await asyncio.to_thread(path.read_bytes)
     for i in range(0, len(data), 64 * 1024):
         yield data[i : i + 64 * 1024]
 

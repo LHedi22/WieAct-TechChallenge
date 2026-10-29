@@ -13,6 +13,7 @@ from sqlalchemy import select
 from app import gateway
 from app.core import db
 from app.core.config import get_settings
+from app.jobs.registry import JobContext, job
 from app.models import Chunk
 from app.rag.store import get_store
 
@@ -67,3 +68,25 @@ async def search(
         for h in hits
         if h.id in rows  # a vector whose chunk was deleted is skipped
     ]
+
+
+@job("DEV_SEARCH", stages=("searching",))
+async def dev_search(ctx: JobContext) -> dict[str, Any]:
+    """Dev-only (POST /api/dev/search-jobs): a search run in the worker, like every AI call."""
+    await ctx.set_stage("searching")
+    hits = await search(
+        uuid.UUID(ctx.payload["world_id"]), ctx.payload["query"], k=ctx.payload.get("k", 8)
+    )
+    return {
+        "hits": [
+            {
+                "chunk_id": str(h.chunk_id),
+                "score": round(h.score, 4),
+                "chapter_id": str(h.chapter_id),
+                "page_ref": h.page_ref,
+                "tags": h.tags,
+                "text": h.text[:400],
+            }
+            for h in hits
+        ]
+    }
