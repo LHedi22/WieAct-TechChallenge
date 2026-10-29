@@ -18,6 +18,14 @@ that isn't in the docs. Humans resolve OPEN items.
 - OPEN: Darija TTS — pregenerate with silma-tts-derja or transcript-only?
 
 ## Decided
+- 2026-10-29 · M2 users before sign-in: one seam `api/deps.py::current_user`; outside production the `X-Dev-User` header (nickname only, created on first sight, default `demo`) and `X-UI-Language`; production answers 401 until M3 adds cookie sessions
+- 2026-10-29 · M2 embeddings go through `gateway.embed` (same contract: quota/503 → Defer, 400 → shrink the batch once and remember, 401 under auto → restart every batch on the new provider so one document never mixes providers); own RPM bucket `LLM_EMBED_MAX_RPM`, shared 2-concurrent limit; logged with tier `embed`, excluded from the compact/mid split
+- 2026-10-29 · M2 request economy: CHUNK_TAG 8 chunks/call (first 1,200 characters of each), embeddings 32/call → ~5 calls for a 30-page PDF; CHUNK_TAG cached by file hash; same file twice in a chapter is indexed once; search queries' embeddings cached
+- 2026-10-29 · M2 chunking without a tokenizer: 2,000 characters ≈ 500 tokens, 240 overlap, never across a page or slide; scanned PDF pages (< 25 characters of text) and images through Tesseract `ara+fra+eng` at 200 dpi
+- 2026-10-29 · M2 Qdrant (OPEN upstream: platform Qdrant reachable?): our own Qdrant (compose) by default, as already declared
+- 2026-10-29 · M2 precompute: one QUIZ_POOL per chapter (intermediate, creator's language, compact, one call) when its last file is ready; the mockup's "Recording audio chapters" row is dropped (Audio is first to cut). Mock embeddings are hashed bag-of-words so search is meaningful offline
+- 2026-10-29 · M2 island accents `island-1…6` are assigned by the server in creation order (DESIGN.md), not chosen in the wizard; join codes `WORD-XXX` from 20 Mediterranean words + 3 unambiguous characters; the world is created only after its courses and chapters are entered
+- 2026-10-29 · M2 dev search runs as a `DEV_SEARCH` job (`POST /api/dev/search-jobs`) so even a dev query goes through the worker's limiter; "Go to my world" on the indexing screen waits for the M3 map
 - 2026-10-28 · M1 quota signal (OPEN upstream): a 429, or any error whose message says "quota"/"rate limit", is quota; delay from `Retry-After` → `x-ratelimit-reset*` → a number in the message → 30 s. The job is requeued with `not_before`; the UI shows position + ETA
 - 2026-10-28 · M1 503: interactive retries once (waiting `Retry-After`, capped at 5 s), then mid falls back to compact (`quick_mode`); background never falls back, it is requeued. Quick-mode answers are not cached, so the class later gets the mid-size version
 - 2026-10-28 · M1 400 ceiling: resend once with the ceiling parsed from the message (else ×0.6), and remember it per provider so later calls don't hit it again

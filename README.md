@@ -51,6 +51,13 @@ cd backend && uv sync && uv run alembic upgrade head && uv run uvicorn app.main:
 cd frontend && pnpm install && pnpm dev
 ```
 
+Demo world (synthetic CC0 material: a 30-page Calculus PDF with one scanned page, a Data Structures
+PPTX, a Word exercise sheet, a photo of the board): `cd backend && uv run python -m app.seed`
+(join code `OLIVE-7Q2`; add `--run` to index without a worker). Create your own at
+http://localhost:5173/worlds/new. OCR needs Tesseract with `ara`/`fra` (in the Docker image; on
+Windows `winget install UB-Mannheim.TesseractOCR`). Rebuild a provider's vectors:
+`uv run python -m app.rag.reindex --provider cloud` (in our slot).
+
 Checks: `cd backend && uv run ruff check . && uv run pytest -q` ·
 `cd frontend && pnpm lint && pnpm typecheck && pnpm test --run && pnpm i18n:check`.
 `LLM_PROVIDER` in `.env` picks the model provider: `mock` (default), `local` (Ollama on your machine,

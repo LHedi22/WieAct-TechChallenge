@@ -116,12 +116,19 @@ and on failure do ONE compact "fix this JSON" repair call. Small models break JS
 | any mid task when saturated | compact | fallback (`quick_mode`) | — | — |
 | JSON_REPAIR (internal: fix one broken JSON reply) | compact | repair | same as the task | none |
 | DEMO_SUMMARY (dev-only M1 demo job) | mid | narrow-before-generating | interactive / background | optional |
+| EMBED (embeddings endpoint, own quota; logged as tier `embed`) | — | batch (32 texts/call) | background (upload) / interactive (search query) | search query text |
 
 Identical cacheable tasks in flight at the same time are single-flighted: one model call, the
 others read the cache when it lands.
 
 ## RAG
-- Parse → normalise text per page/slide → chunk (~500 tokens, 60 overlap, keep page/slide refs).
+- Parse → normalise text per page/slide → chunk (~500 tokens ≈ 2,000 characters, 240 characters
+  of overlap, never across a page/slide, so each chunk keeps one ref: `page:12`, `slide:18`,
+  `section:3`, `part:2`, `image:1`). PDF pages with < 25 characters of text and image files go
+  through Tesseract (`ara+fra+eng`).
+- `INDEX_DOCUMENT` job (background): parse → CHUNK_TAG (8 chunks per compact call, cached by file
+  hash) → EMBED (32 per call) → Qdrant; ~5 calls for a 30-page PDF. Resumable after a Defer; the
+  same file twice in a chapter is indexed once. `documents.progress/detail` drive the indexing screen.
 - Embeddings via the platform endpoint (own quota) through the gateway, batched.
 - `VectorStore` interface: `upsert(chunks)`, `search(query_vec, filters={world_id, course_id, chapter_id}, k)`,
   `delete(document_id)`. Implementation: **`QdrantVectorStore`** with `qdrant-client` (async).
@@ -133,7 +140,10 @@ others read the cache when it lands.
 - Tests use an in-memory Qdrant (`QdrantClient(":memory:")`) — no network.
 - narrow-before-generating: top-k=8 by vector → compact filter keeps the 3–4 most relevant → prompt.
 - Precompute right after upload (background lane, burst reserve): chunk tags, quiz pool per level,
-  notes for "intermediate" in the creator's language.
+  notes for "intermediate" in the creator's language. M2 ships the quiz pool: when a chapter's
+  last file is ready, `QUIZ_POOL` makes ONE compact QUIZ_GENERATE call (10 questions) from up to 8
+  chunks picked round-robin across the chapter's concepts → `quiz_sets`.
+- `python -m app.rag.reindex --provider cloud` rebuilds a provider's collection from Postgres.
 
 ## Data model (Postgres)
 `users(id, nickname, password_hash, ui_language, created_at)` — nothing else identifying

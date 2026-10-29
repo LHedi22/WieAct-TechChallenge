@@ -74,13 +74,25 @@ backend, 16 mock-llm, 23 frontend. **Open:** setup_ollama scripts written + synt
 is on /dev/jobs (no top bar until M3); the in-slot probe (human).
 
 ## M2 · Upload & indexing (30 Oct–1 Nov)
-- [ ] Parsers: PDF (PyMuPDF), PPTX, DOCX, TXT, images + scanned pages via Tesseract (ara+fra+eng)
-- [ ] Chunking with page/slide refs; batched CHUNK_TAG (background lane, burst); embeddings batched
-- [ ] `VectorStore` interface + `QdrantVectorStore` (qdrant-client async): create the provider's collection if missing with `settings.llm` embedding dim + cosine, payload indexes on `world_id`, `course_id`, `chapter_id`, `level_tags`; idempotent upserts keyed by chunk UUID; delete-by-document
-- [ ] Create-world wizard + join by code; staged indexing screen with real per-document progress
-- [ ] Precompute after upload: quiz pool (intermediate, creator language)
-- [ ] Seed script with 2 public/synthetic courses (e.g. Calculus I limits, Data Structures stacks/queues) — openly licensed
+- [x] Parsers: PDF (PyMuPDF), PPTX, DOCX, TXT, images + scanned pages via Tesseract (ara+fra+eng)
+- [x] Chunking with page/slide refs; batched CHUNK_TAG (background lane, burst); embeddings batched
+- [x] `VectorStore` interface + `QdrantVectorStore` (qdrant-client async): create the provider's collection if missing with `settings.llm` embedding dim + cosine, payload indexes on `world_id`, `course_id`, `chapter_id`, `level_tags`; idempotent upserts keyed by chunk UUID; delete-by-document
+- [x] Create-world wizard + join by code; staged indexing screen with real per-document progress
+- [x] Precompute after upload: quiz pool (intermediate, creator language)
+- [x] Seed script with 2 public/synthetic courses (e.g. Calculus I limits, Data Structures stacks/queues) — openly licensed
 **Done when:** upload of a 30-page PDF + a PPTX finishes indexing and `search("limit 0/0")` returns the right chapter chunks.
+
+_Status 29/10:_ **Done-when passes**, through the real UI (host: API + worker + mock-llm, compose db +
+Qdrant): `/worlds/new` wizard → upload the synthetic 30-page Calculus PDF (one scanned page, OCR'd) and
+a 12-slide Data Structures PPTX → both `ready` in 35 s, 2 quiz pools → `search("limit 0/0")` top 5 are
+all Limits pages (p. 1-13) of the Calculus chapter; "push pop LIFO stack" → the stack slides. Cost: 6
+CHUNK_TAG + 2 EMBED calls for both files (+ 2 query embeddings), 0 repeated identical. Also a pytest
+(`test_done_when_…`). Indexing screen checked in EN and AR at 1440×900 and 390×844 (RTL, no overflow,
+no console errors). Backend image builds with Tesseract ara/eng/fra. Tests: 150 backend, 19 mock-llm,
+29 frontend; load smoke (10 jobs, 503 + quota) PASS. M1's reindex CLI landed here
+(`python -m app.rag.reindex --provider cloud`). **Open:** Arabic OCR on a real Arabic scan not yet
+tried; real embeddings (bge-m3 / platform) not yet run — the mock's bag-of-words vectors only prove the
+pipeline; sign-in is a dev seam (`X-Dev-User`) until M3.
 
 ## M3 · Onboarding + map (1–3 Nov)
 - [ ] Sign up/login (nickname+password, argon2), landing with language picker
