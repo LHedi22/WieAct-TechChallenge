@@ -155,7 +155,7 @@ async def quiz_pool(ctx: JobContext) -> dict[str, Any]:
                 language=language,
                 questions=questions,
             )
-            .on_conflict_do_nothing(index_elements=["chapter_id", "level", "language"])
+            .on_conflict_do_nothing(index_elements=["chapter_id", "level", "language", "seed"])
         )
         await s.commit()
     return {"chapter_id": str(chapter_id), "questions": len(questions), "cached": result.cached}
