@@ -226,7 +226,30 @@ def _placement(user: str, lang: str) -> dict[str, Any]:
     return {"questions": questions}
 
 
-GENERATORS = {"CHUNK_TAG": _chunk_tags, "QUIZ_GENERATE": _quiz, "PLACEMENT_QUIZ": _placement}
+ITEM_MARK = re.compile(r"^\[(\d+)\] Q: (.*)$", re.MULTILINE)
+MISTAKE_TYPES = ("misconception", "calculation", "misread", "definition", "procedure")
+
+
+def _grade_tag(user: str, lang: str) -> dict[str, Any]:
+    """One tag per "[i] Q: ..." item: a concept from the question, a rotating mistake type."""
+    out = []
+    for n, (i, question) in enumerate(ITEM_MARK.findall(user)):
+        out.append(
+            {
+                "i": int(i),
+                "concept": (_concepts(question, 1) or ["the topic"])[0],
+                "mistake_type": MISTAKE_TYPES[n % len(MISTAKE_TYPES)],
+            }
+        )
+    return {"mistakes": out}
+
+
+GENERATORS = {
+    "CHUNK_TAG": _chunk_tags,
+    "QUIZ_GENERATE": _quiz,
+    "PLACEMENT_QUIZ": _placement,
+    "QUIZ_GRADE_TAG": _grade_tag,
+}
 
 
 def _break_json(text: str) -> str:

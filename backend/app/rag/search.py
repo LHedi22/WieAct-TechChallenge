@@ -13,6 +13,7 @@ from sqlalchemy import select
 from app import gateway
 from app.core import db
 from app.core.config import get_settings
+from app.gateway import Lane
 from app.jobs.registry import JobContext, job
 from app.models import Chunk
 from app.rag.store import get_store
@@ -37,8 +38,9 @@ async def search(
     chapter_id: uuid.UUID | None = None,
     levels: list[str] | None = None,
     k: int = 8,
+    lane: Lane = "interactive",
 ) -> list[SearchHit]:
-    res = await gateway.embed([query], "interactive", cache_query=True)
+    res = await gateway.embed([query], lane, cache_query=True)
     store = get_store(get_settings().profile_for(res.provider))
     filters: dict[str, Any] = {
         "world_id": world_id,

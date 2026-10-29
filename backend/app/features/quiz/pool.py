@@ -1,8 +1,12 @@
-"""Precompute after upload: one shared quiz pool per chapter (intermediate, creator's language).
+"""Shared quiz sets: QUIZ_GENERATE, compact, narrow-before-generating, ONE call for 10 questions.
 
-QUIZ_GENERATE, compact, narrow-before-generating: instead of the whole chapter, up to 8 chunks
-chosen round-robin across the chapter's tagged concepts go into ONE call for 10 questions.
-Stored in quiz_sets and reused by the whole class (M4 builds the Quiz Hall on it)."""
+Narrowing without an extra call: vector search in the chapter (cached query embedding of the
+chapter title + level), then up to 6 chunks picked round-robin across their tagged concepts,
+rotated by the set's seed so each new set looks at different material. Sets are shared by the
+class: generated once per (chapter, level, language, seed), then free (economy: cached content).
+
+Precompute after upload (M2): when a chapter's last file is ready, seed 1 at intermediate level in
+the creator's language is generated on the background lane."""
 
 from __future__ import annotations
 
@@ -10,7 +14,7 @@ import uuid
 from typing import Any
 
 from pydantic import BaseModel, Field, ValidationError, field_validator
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
 
 from app import gateway, prompts
@@ -19,11 +23,13 @@ from app.gateway import BadOutput, Task, TaskKind
 from app.jobs.registry import JobContext, job
 from app.jobs.service import create_job
 from app.models import Chapter, Chunk, Course, Document, Job, QuizSet, User, World
+from app.rag.search import search
 
 KIND = "QUIZ_POOL"
 POOL_LEVEL = "intermediate"
 POOL_SIZE = 10
-CONTEXT_CHUNKS = 8
+CONTEXT_CHUNKS = 6
+SEARCH_K = 12
 MIN_VALID = 5
 
 
@@ -54,21 +60,48 @@ def valid_questions(content: Any) -> list[dict[str, Any]]:
     return out
 
 
-def pick_context(chunks: list[Chunk], k: int = CONTEXT_CHUNKS) -> list[Chunk]:
-    """Round-robin over each chunk's first concept so the pool covers the whole chapter."""
+def pick_context(chunks: list[Chunk], k: int = CONTEXT_CHUNKS, offset: int = 0) -> list[Chunk]:
+    """Round-robin over each chunk's first concept so the set covers the chapter; `offset`
+    rotates the starting concept (a new seed looks at different material first)."""
     groups: dict[str, list[Chunk]] = {}
     for c in sorted(chunks, key=lambda c: (c.document_id, c.idx)):
         groups.setdefault(c.tags[0] if c.tags else "-", []).append(c)
+    keys = list(groups)
+    if keys:
+        r = offset % len(keys)
+        keys = keys[r:] + keys[:r]
     picked: list[Chunk] = []
     while len(picked) < k and any(groups.values()):
-        for key in list(groups):
+        for key in keys:
             if groups[key] and len(picked) < k:
                 picked.append(groups[key].pop(0))
     return sorted(picked, key=lambda c: (c.document_id, c.idx))
 
 
+async def next_seed(s, chapter_id: uuid.UUID, level: str, language: str) -> int:
+    top = await s.scalar(
+        select(func.max(QuizSet.seed)).where(
+            QuizSet.chapter_id == chapter_id, QuizSet.level == level, QuizSet.language == language
+        )
+    )
+    return (top or 0) + 1
+
+
+async def pending_generation(s, chapter_id: uuid.UUID, level: str, language: str):
+    """A generation already queued or running for this chapter + level + language (shared)."""
+    return await s.scalar(
+        select(Job.id).where(
+            Job.kind == KIND,
+            Job.status.in_(("queued", "running")),
+            Job.payload["chapter_id"].astext == str(chapter_id),
+            Job.payload["level"].astext == level,
+            Job.payload["language"].astext == language,
+        )
+    )
+
+
 async def maybe_precompute(chapter_id: uuid.UUID) -> uuid.UUID | None:
-    """When every document of the chapter is ready, queue the pool once (background lane)."""
+    """When every document of the chapter is ready, queue the first set once (background lane)."""
     async with db.get_sessionmaker()() as s:
         statuses = list(
             await s.scalars(select(Document.status).where(Document.chapter_id == chapter_id))
@@ -89,36 +122,68 @@ async def maybe_precompute(chapter_id: uuid.UUID) -> uuid.UUID | None:
                 QuizSet.language == language,
             )
         )
-        pending = await s.scalar(
-            select(Job.id).where(
-                Job.kind == KIND,
-                Job.status.in_(("queued", "running")),
-                Job.payload["chapter_id"].astext == str(chapter_id),
-            )
-        )
-        if exists or pending:
+        if exists or await pending_generation(s, chapter_id, POOL_LEVEL, language):
             return None
         created = await create_job(
             s,
             kind=KIND,
             lane="background",
-            payload={"chapter_id": str(chapter_id), "level": POOL_LEVEL, "language": language},
+            payload={
+                "chapter_id": str(chapter_id),
+                "level": POOL_LEVEL,
+                "language": language,
+                "seed": 1,
+            },
             world_id=world.id,
         )
         return created.id
 
 
-@job(KIND, stages=("matching_level", "writing_questions"))
+async def _context(ctx: JobContext, chapter: Chapter, course: Course, level: str, seed: int):
+    try:
+        hits = await search(
+            course.world_id,
+            f"{chapter.title} ({level})",
+            chapter_id=chapter.id,
+            k=SEARCH_K,
+            lane=ctx.lane,
+        )
+    except gateway.Defer:
+        raise
+    except gateway.GatewayError:
+        hits = []
+    async with db.get_sessionmaker()() as s:
+        if hits:
+            rows = list(
+                await s.scalars(select(Chunk).where(Chunk.id.in_([h.chunk_id for h in hits])))
+            )
+        else:  # nothing in the vector store (yet) for this provider: use the chapter's chunks
+            rows = list(await s.scalars(select(Chunk).where(Chunk.chapter_id == chapter.id)))
+    return pick_context(rows, CONTEXT_CHUNKS, offset=seed - 1)
+
+
+@job(KIND, stages=("reading_chapter", "matching_level", "writing_questions", "writing_hints"))
 async def quiz_pool(ctx: JobContext) -> dict[str, Any]:
     chapter_id = uuid.UUID(ctx.payload["chapter_id"])
     level, language = ctx.payload["level"], ctx.payload["language"]
-    await ctx.set_stage("matching_level")
+    seed = int(ctx.payload.get("seed", 1))
+    await ctx.set_stage("reading_chapter")
     async with db.get_sessionmaker()() as s:
         chapter = await s.get(Chapter, chapter_id)
         course = await s.get(Course, chapter.course_id)
-        chunks = list(await s.scalars(select(Chunk).where(Chunk.chapter_id == chapter_id)))
-    context_rows = pick_context(chunks)
-    context = "\n\n".join(f"[{c.page_ref}] {c.text}" for c in context_rows)
+        existing = await s.scalar(
+            select(QuizSet.id).where(
+                QuizSet.chapter_id == chapter_id,
+                QuizSet.level == level,
+                QuizSet.language == language,
+                QuizSet.seed == seed,
+            )
+        )
+    if existing:
+        return {"quiz_set_id": str(existing), "cached": True}
+    await ctx.set_stage("matching_level")
+    rows = await _context(ctx, chapter, course, level, seed)
+    context = "\n\n".join(f"[{c.page_ref}] {c.text}" for c in rows)
     await ctx.set_stage("writing_questions")
     version, messages = prompts.render(
         "quiz_generate",
@@ -133,14 +198,15 @@ async def quiz_pool(ctx: JobContext) -> dict[str, Any]:
         await gateway.run(
             Task(
                 kind=TaskKind.QUIZ_GENERATE,
-                lane="background",
+                lane=ctx.lane,
                 messages=messages,
                 language=language,
-                cache_key=f"pool:{chapter_id}:{level}:{language}",
+                cache_key=f"quiz:{chapter_id}:{level}:{language}:{seed}",
                 prompt_version=version,
             )
         )
     )
+    await ctx.set_stage("writing_hints")
     questions = valid_questions(result.content)
     if len(questions) < MIN_VALID:
         raise BadOutput(f"only {len(questions)} valid questions", refusal="bad_quiz")
@@ -153,9 +219,19 @@ async def quiz_pool(ctx: JobContext) -> dict[str, Any]:
                 chapter_id=chapter_id,
                 level=level,
                 language=language,
+                seed=seed,
                 questions=questions,
             )
             .on_conflict_do_nothing(index_elements=["chapter_id", "level", "language", "seed"])
         )
         await s.commit()
-    return {"chapter_id": str(chapter_id), "questions": len(questions), "cached": result.cached}
+        set_id = await s.scalar(
+            select(QuizSet.id).where(
+                QuizSet.chapter_id == chapter_id,
+                QuizSet.level == level,
+                QuizSet.language == language,
+                QuizSet.seed == seed,
+            )
+        )
+    # Public job result (GET /api/jobs/{id}): ids only, never questions or answers.
+    return {"quiz_set_id": str(set_id), "questions": len(questions), "cached": result.cached}

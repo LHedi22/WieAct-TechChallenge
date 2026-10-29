@@ -104,7 +104,8 @@ async def test_done_when_pdf_and_pptx_indexed_and_search_finds_limits(sm, gw, fi
 
     # Request economy: one tag call per 8 chunks, one embeddings call per 32
     assert await calls(sm, "CHUNK_TAG") == -(-n_chunks // 8) + -(-12 // 8)
-    assert await calls(sm, "EMBED") == -(-n_chunks // 32) + 1
+    # one per 32 chunks per file + one query embedding per precomputed quiz set (2 chapters)
+    assert await calls(sm, "EMBED") == -(-n_chunks // 32) + 1 + 2
 
     hits = await search(world.id, "limit 0/0")
     assert hits, "search returned nothing"
