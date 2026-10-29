@@ -7,7 +7,8 @@ from tests.test_auth import SIGNUP, api  # noqa: F401  (fixture)
 def test_style_mix_sums_to_100_and_nobody_is_zero():
     mix = style_mix(["visual", "visual", "practice", "visual"])
     assert sum(mix.values()) == 100 and min(mix.values()) > 0
-    assert mix["visual"] > mix["practice"] > mix["listening"] == mix["teaching"]
+    assert mix["visual"] > mix["practice"] > max(mix["listening"], mix["teaching"])
+    assert abs(mix["listening"] - mix["teaching"]) <= 1  # 12.5 + 12.5: one rounds up
     assert style_mix(["teaching"] * 4)["teaching"] == 63  # 5/8
     even = style_mix(["visual", "practice", "listening", "teaching"])
     assert set(even.values()) == {25}
