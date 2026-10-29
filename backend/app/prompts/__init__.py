@@ -33,7 +33,10 @@ def _load(name: str) -> tuple[str, dict[str, str]]:
     m = _VERSION.search(text)
     version = m.group(1) if m else "0"
     parts = _SECTION.split(text)
-    sections = {parts[i]: parts[i + 1].strip() for i in range(1, len(parts) - 1, 2)}
+    sections = {
+        parts[i]: "\n".join(line.strip() for line in parts[i + 1].strip().splitlines())
+        for i in range(1, len(parts) - 1, 2)
+    }
     return version, sections
 
 

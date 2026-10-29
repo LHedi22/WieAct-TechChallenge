@@ -12,7 +12,8 @@ case "$path" in
   *.py)
     (cd backend 2>/dev/null && uv run --quiet ruff format "$path" >/dev/null 2>&1 && uv run --quiet ruff check --fix "$path" >/dev/null 2>&1) || true ;;
   *.ts|*.tsx|*.js|*.jsx|*.css|*.json|*.md)
-    case "$path" in */docs/*|*/.claude/*) exit 0;; esac
+    # prompts are model input: prettier would re-indent lines that follow a list
+    case "$path" in */docs/*|*/.claude/*|*/app/prompts/*) exit 0;; esac
     (cd frontend 2>/dev/null && pnpm exec prettier --write "$path" >/dev/null 2>&1) || true ;;
 esac
 exit 0
