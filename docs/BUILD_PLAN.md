@@ -95,12 +95,24 @@ tried; real embeddings (bge-m3 / platform) not yet run — the mock's bag-of-wor
 pipeline; sign-in is a dev seam (`X-Dev-User`) until M3.
 
 ## M3 · Onboarding + map (1–3 Nov)
-- [ ] Sign up/login (nickname+password, argon2), landing with language picker
-- [ ] Style test steps, result card, avatar builder
-- [ ] World map (pixel scene, islands from layout JSON, mastery rings, top bar, side panel), list view, island view, building entry dialog with live costs
-- [ ] Placement quiz (8 Q, free) sets course level
-- [ ] Empty-world and island-locked states
+- [x] Sign up/login (nickname+password, argon2), landing with language picker
+- [x] Style test steps, result card, avatar builder
+- [x] World map (pixel scene, islands from layout JSON, mastery rings, top bar, side panel), list view, island view, building entry dialog with live costs
+- [x] Placement quiz (8 Q, free) sets course level
+- [x] Empty-world and island-locked states
 **Done when:** a new user goes landing → sign up → style test → join demo world → placement → island in < 5 min.
+
+_Status 29/10:_ **Done-when passes** through the real UI (Playwright, host API + worker + mock-llm,
+compose db + Qdrant, seeded world `OLIVE-7Q2`): a brand-new user goes landing → sign up → 4-question
+style test → goals → result + avatar → languages → join with "olive 7q2" → map (islands locked) →
+placement (8 questions; generated on first use, then shared) → result → island in **11 s scripted**
+(first run, incl. generating the placement set) / 5 s when the set is cached — a human reading and
+answering everything fits well inside 5 minutes. EN and AR (RTL panels, un-mirrored geography) at
+1440×900 and 390×844, no horizontal scroll, no console errors. Tests: 177 backend, 20 mock-llm, 37
+frontend; load smoke (10 jobs, 503 + quota) PASS. **Open / deferred:** side panel shows "Your class"
+until M5 (leaderboard) and M6 (challenges); wallet numbers are economy placeholders until M5;
+building Confirm leads to "opens soon" until M4; sprites are placeholders; on the CPU platform the
+first placement generation will take longer than on the mock (one compact call, then cached).
 
 ## M4 · Quiz Hall + Socratic Tutor (2–4 Nov)
 - [ ] Quiz: one-call generation (narrow-before-generating), hint + second try, explanations, results with next step, mistake tagging job, points

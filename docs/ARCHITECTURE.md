@@ -112,7 +112,7 @@ and on failure do ONE compact "fix this JSON" repair call. Small models break JS
 | TEACHBACK_GRADE | compact score; mid reviews low-confidence or top answers | draft-then-revise | interactive | answer id |
 | MODERATE_POST | compact | classification | interactive | text hash |
 | TRANSLATE_SHORT | compact | rewriting | background | text+lang |
-| PLACEMENT_QUIZ (8 Q) | compact | narrow-before-generating | interactive | world+chapter+lang |
+| PLACEMENT_QUIZ (8 Q per course, 2 chunks per chapter, one call; graded server-side) | compact | narrow-before-generating | interactive | course+lang (shared by the class) |
 | any mid task when saturated | compact | fallback (`quick_mode`) | — | — |
 | JSON_REPAIR (internal: fix one broken JSON reply) | compact | repair | same as the task | none |
 | DEMO_SUMMARY (dev-only M1 demo job) | mid | narrow-before-generating | interactive / background | optional |
@@ -152,6 +152,7 @@ others read the cache when it lands.
 `courses(id, world_id, name, color_key, exam_date)` · `chapters(id, course_id, idx, title)`
 `documents(id, chapter_id, filename, kind, size, status, error)` · `chunks(id, document_id, chapter_id, text, page_ref, tags[], lang)` — vectors in Qdrant
 `course_levels(user_id, course_id, level, placed_at, goal)` · `chapter_mastery(user_id, chapter_id, mastery, weak)`
+`placement_sets(id, course_id, language, questions jsonb)` — answers never leave the server · `presence(user_id, course_id, chapter_id, seen_at)` — "on this island now", 2-minute window
 `jobs(id, user_id, world_id, kind, lane, status, stage, stages, not_before, attempts, cost, result jsonb, error, quick_mode, created_at, finished_at)`
 `ai_cache(key PK, task_kind, content jsonb, model_tier, created_at, hits)`
 `ai_call_log(id, ts, task_kind, model_tier, pattern, status_code, tokens_in, tokens_out, latency_ms, cache_hit, fallback, refusal_reason)`
@@ -170,7 +171,8 @@ Balances are derived from ledgers (with a cached balance column if needed). Ever
 a ledger row — never mutate a balance without one.
 
 ## API surface (REST, JSON, cookie session)
-`/api/auth/{signup,login,logout,me}` · `/api/profile` · `/api/onboarding/style`
+`/api/auth/{signup,login,logout,me,session}` (signed HttpOnly cookie) · `/api/profile` · `/api/onboarding/style`
+`/api/worlds/{id}/map` · `/api/courses/{id}` (island) · `/api/courses/{id}/presence` · `/api/placement/{course_id}`
 `/api/worlds` (create) · `/api/worlds/join` · `/api/worlds/{id}` (map data) · `/api/worlds/{id}/courses|chapters|documents`
 `/api/jobs/{id}` · `/api/economy` · `/api/wallet` · `/api/daily`
 `/api/quiz/{start,answer,finish}` · `/api/placement/{start,finish}` · `/api/tutor/{start,turn,stuck,end}`
