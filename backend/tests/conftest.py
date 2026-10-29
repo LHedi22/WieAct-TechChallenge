@@ -7,7 +7,7 @@ import pytest
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from app.core import config
+from app.core import config, db
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "mock-llm" / "src"))  # the mock runs in-process (ASGI transport)
@@ -63,7 +63,11 @@ async def sm(pg_url, monkeypatch):
     engine = create_async_engine(pg_url)
     async with engine.begin() as conn:
         await conn.execute(text(f"TRUNCATE {TABLES} RESTART IDENTITY CASCADE"))
-    yield async_sessionmaker(engine, expire_on_commit=False)
+    factory = async_sessionmaker(engine, expire_on_commit=False)
+    # Code that opens its own sessions (job handlers, rag) calls db.get_sessionmaker() at run
+    # time: point it at this test's engine (the cached app engine belongs to another loop).
+    monkeypatch.setattr(db, "get_sessionmaker", lambda: factory)
+    yield factory
     await engine.dispose()
 
 

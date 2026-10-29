@@ -99,7 +99,8 @@ class QdrantVectorStore:
         return [Hit(uuid.UUID(str(p.id)), p.score, p.payload or {}) for p in res.points]
 
     async def delete_document(self, document_id: uuid.UUID) -> None:
-        await self.ensure_collection()
+        if not self._ready and not await self.client.collection_exists(self.collection):
+            return  # nothing indexed for this provider yet
         await self.client.delete(
             self.collection,
             points_selector=models.FilterSelector(filter=_filter({"document_id": document_id})),
@@ -136,3 +137,10 @@ def get_store(profile: LLMProfile) -> QdrantVectorStore:
 def reset_clients() -> None:
     """Tests: drop cached clients (an in-memory Qdrant starts empty again)."""
     _clients.clear()
+
+
+async def delete_document_everywhere(document_id: uuid.UUID) -> None:
+    """A deleted file disappears from every provider's collection, not only the current one."""
+    s = get_settings()
+    for provider in ("cloud", "local", "mock"):
+        await get_store(s.profile_for(provider)).delete_document(document_id)
