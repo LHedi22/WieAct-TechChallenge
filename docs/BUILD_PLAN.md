@@ -115,10 +115,23 @@ building Confirm leads to "opens soon" until M4; sprites are placeholders; on th
 first placement generation will take longer than on the mock (one compact call, then cached).
 
 ## M4 · Quiz Hall + Socratic Tutor (2–4 Nov)
-- [ ] Quiz: one-call generation (narrow-before-generating), hint + second try, explanations, results with next step, mistake tagging job, points
-- [ ] Tutor: compact turns with answer-leak guard, escalation to mid on stuck, hint counter, ideas found, session summary
+- [x] Quiz: one-call generation (narrow-before-generating), hint + second try, explanations, results with next step, mistake tagging job, points
+- [x] Tutor: compact turns with answer-leak guard, escalation to mid on stuck, hint counter, ideas found, session summary
 - [ ] Prompt eval script: 20 generated questions per language reviewed for correctness (store results for the report)
 **Done when:** full quiz + tutor sessions work in EN, FR, AR on seeded material, under mock faults.
+
+_Status 29/10:_ **Done-when passes** through the real UI (Playwright, host API + worker + mock-llm with
+`p_503_mid` 0.15 + `p_quota` 0.1, compose db + Qdrant, seeded `OLIVE-7Q2`): for each of EN, FR, AR a new
+user signs up → joins → placement → Quiz Hall (wrong answer → hint → second try on 6 questions, one skip,
+results with points, weak spot and the Tutor next step) → Socratic Tutor (a message, 2× "I'm stuck" →
+mid turn, a hint, End → summary) in 36–39 s scripted; no console errors; AR at 390×844 has no horizontal
+scroll. Final run: 18 compact + 3 mid calls (mid only from escalation), quiz and placement sets from the
+class cache, **0 repeated identical requests** (the first run found 32 — double starts under StrictMode,
+per-attempt tag keys, unshared tutor plans — fixed and tested); the first run drew 23 faults (503, quota,
+ceiling), all handled, 2 compact fallbacks. Tests: 194 backend, 42 frontend. **Open:** the eval box —
+the script and its automatic checks run on the mock, but "reviewed for correctness" needs real-model
+outputs from our slot (prompt-evaluator agent or a human); KaTeX replaced by the built-in `MathText`
+(npm registry blocked); coins for Quiz/Tutor are recorded on jobs, charged from M5.
 
 ## M5 · Economy, leaderboards, Teach-Back (4–6 Nov)
 - [ ] Wallet ledgers, daily refill (Africa/Tunis), earn cap, refunds, demo purchase, out-of-coins screen

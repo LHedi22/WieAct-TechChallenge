@@ -101,8 +101,9 @@ and on failure do ONE compact "fix this JSON" repair call. Small models break JS
 | INTENT_LANG (detect intent + language) | compact | triage | interactive | text hash |
 | CHUNK_TAG (batch of chunks → concepts, chapter) | compact | batch at upload (burst) | background | doc hash |
 | QUIZ_GENERATE (10 Q, one call) | compact | narrow-before-generating | interactive / background pool | world+chapter+level+lang+seed |
-| QUIZ_GRADE_TAG (wrong answers → concept + mistake type) | compact | extraction | background | attempt id |
-| TUTOR_TURN | compact → mid when stuck ≥ 2 turns or "complex" flag | escalation | interactive | none |
+| QUIZ_GRADE_TAG (wrong answers → concept + mistake type) | compact | extraction | background | lang + missed items hash |
+| TUTOR_TURN | compact → mid when stuck ≥ 2 turns or "complex" flag | escalation | interactive | plan: chapter+level+lang+style; turns: none |
+| TUTOR_GUARD (rewrite a reply that leaks the answer as a guiding question; only flagged replies) | compact | guard | interactive | none |
 | TUTOR_SUMMARY | compact | summary | interactive | session id |
 | NOTES_WRITE / MAP_WRITE / AUDIO_SCRIPT | mid | narrow-before-generating, once then cached | background | world+chapter+level+lang |
 | FLASHCARDS (from notes) | compact | execute-compact | background | world+chapter+level+lang |
@@ -156,12 +157,12 @@ others read the cache when it lands.
 `jobs(id, user_id, world_id, kind, lane, status, stage, stages, not_before, attempts, cost, result jsonb, error, quick_mode, created_at, finished_at)`
 `ai_cache(key PK, task_kind, content jsonb, model_tier, created_at, hits)`
 `ai_call_log(id, ts, task_kind, model_tier, pattern, status_code, tokens_in, tokens_out, latency_ms, cache_hit, fallback, refusal_reason)`
-`quiz_sets(id, world_id, chapter_id, level, language, questions jsonb)` · `quiz_attempts(id, user_id, quiz_set_id, answers jsonb, score, second_tries)`
-`mistakes(id, user_id, world_id, chapter_id, concept, mistake_type, created_at)`
+`quiz_sets(id, world_id, course_id, chapter_id, level, language, seed, questions jsonb)` · `quiz_attempts(id, user_id, quiz_set_id, world_id, course_id, chapter_id, level, language, answers jsonb, current, score, points, second_tries, status, finished_at)`
+`mistakes(id, user_id, world_id, chapter_id, attempt_id, question_idx, concept, mistake_type, created_at)`
 `wisdom_tips(id, world_id, course_id, concept, mistake_type, language, text, student_count)`
 `study_assets(id, world_id, chapter_id, level, language, kind[notes|flashcards|map|audio_script], content jsonb)`
 `flashcard_reviews(user_id, card_id, due_at, interval, ease)`
-`tutor_sessions(id, user_id, chapter_id, goal, hints_used, ideas_found jsonb, turns jsonb, summary)`
+`tutor_sessions(id, user_id, world_id, course_id, chapter_id, level, language, goal, ideas jsonb, hints_used, stuck_count, escalate_next, turns jsonb, pending_job_id, status, summary jsonb, ended_at)`
 `peer_questions(id, world_id, chapter_id, author_id, text, status, pinned_answer_id)` · `peer_answers(id, question_id, author_id, text, ai_score, ai_confidence, ai_feedback jsonb, helpful_count)`
 `coin_ledger(id, user_id, delta, kind[daily|earned|purchased|spend|refund|pool], ref, created_at)` · `points_ledger(id, user_id, world_id, delta, reason, created_at)`
 `daily_state(user_id, date, free_coins_left, earned_today, plan jsonb, challenges jsonb, streak)`
@@ -175,7 +176,7 @@ a ledger row — never mutate a balance without one.
 `/api/worlds/{id}/map` · `/api/courses/{id}` (island) · `/api/courses/{id}/presence` · `/api/placement/{course_id}`
 `/api/worlds` (create) · `/api/worlds/join` · `/api/worlds/{id}` (map data) · `/api/worlds/{id}/courses|chapters|documents`
 `/api/jobs/{id}` · `/api/economy` · `/api/wallet` · `/api/daily`
-`/api/quiz/{start,answer,finish}` · `/api/placement/{start,finish}` · `/api/tutor/{start,turn,stuck,end}`
+`/api/quiz/price` · `/api/quiz/start` · `/api/quiz/attempts/{id}` (+ `/answer`, `/skip`, `/finish`; `/api/quiz/attempts/from-job/{job}`) · `/api/placement/{start,finish}` · `/api/tutor/start` · `/api/tutor/{id}` (+ `/turn` with action message|hint|another_way|stuck, `/end`)
 `/api/studio/{chapter}/{notes|flashcards|map}` · `/api/audio/{chapter}`
 `/api/arena/questions` · `/api/arena/questions/{id}/answers` · `/api/arena/solo`
 `/api/leaderboard?scope=world|global&period=week|all` · `/api/wisdom?world&course`
