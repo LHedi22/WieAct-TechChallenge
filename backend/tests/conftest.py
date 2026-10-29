@@ -28,7 +28,10 @@ for _name in list(os.environ):
 os.environ["LLM_PROVIDER"] = "mock"
 
 DEV_DB_URL = os.environ.get("DATABASE_URL", config.Settings().DATABASE_URL)
-TABLES = "ai_call_log, ai_cache, jobs, world_members, worlds, users"
+TABLES = (
+    "ai_call_log, ai_cache, jobs, quiz_sets, chunks, documents, chapters, courses, "
+    "world_members, worlds, users"
+)
 
 
 @pytest.fixture(autouse=True)

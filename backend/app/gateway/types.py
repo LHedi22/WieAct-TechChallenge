@@ -27,6 +27,7 @@ class TaskKind(StrEnum):
     PLACEMENT_QUIZ = "PLACEMENT_QUIZ"
     JSON_REPAIR = "JSON_REPAIR"  # internal: one compact "fix this JSON" call
     DEMO_SUMMARY = "DEMO_SUMMARY"  # M1 demo job (mid, background-friendly)
+    EMBED = "EMBED"  # embeddings endpoint (separately metered); logged as model_tier="embed"
 
 
 class Task(BaseModel):
@@ -54,3 +55,11 @@ class Result(BaseModel):
     tokens_out: int = 0
     latency_ms: int = 0
     notes: list[str] = Field(default_factory=list)  # e.g. "shrunk max_tokens to 1024"
+
+
+class EmbedResult(BaseModel):
+    vectors: list[list[float]]
+    provider: str  # the profile whose collection these vectors belong in
+    model: str
+    cached: bool = False
+    calls: int = 0

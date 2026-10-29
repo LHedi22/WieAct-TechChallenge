@@ -34,12 +34,13 @@ from app.gateway.limiter import Limiter
 from app.gateway.providers import Resolution, resolve
 from app.gateway.quota import QuotaTracker
 from app.gateway.router import route_for
-from app.gateway.types import Result, Task, TaskKind, Tier
+from app.gateway.types import EmbedResult, Lane, Result, Task, TaskKind, Tier
 
 logger = logging.getLogger("gateway")
 
 ClientFactory = Callable[[LLMProfile], LLMClient]
 MAX_ATTEMPTS = 6
+EMBED_BATCH = 32  # texts per embeddings call
 INTERACTIVE_503_WAIT_CAP_S = 5.0
 
 
@@ -72,11 +73,13 @@ class Gateway:
         self.limiter = limiter or Limiter(
             settings.LLM_MAX_RPM,
             settings.LLM_MAX_CONCURRENCY,
+            embed_rpm=settings.LLM_EMBED_MAX_RPM,
             background_pause=self._background_pause,
         )
         self._client_factory = client_factory or self._default_client
         self._clients: dict[str, LLMClient] = {}
         self._ceilings: dict[str, int] = {}  # learned max_tokens ceiling per provider
+        self._embed_ceilings: dict[str, int] = {}  # learned inputs-per-call ceiling per provider
         self._inflight: dict[tuple[str, str, str], asyncio.Future[None]] = {}
         self._sleep = sleep
         self._now = now or (lambda: datetime.now(UTC))
@@ -358,3 +361,137 @@ class Gateway:
             "tokens_out": reply.tokens_out,
             "latency_ms": reply.latency_ms,
         }
+
+    # --- embeddings -------------------------------------------------------------------------------
+    async def embed(
+        self, texts: list[str], lane: Lane, *, cache_query: bool = False
+    ) -> EmbedResult:
+        """Embeddings in batches of EMBED_BATCH, through the same contract as chat:
+        quota / 503 / network → Defer (the job resumes later), 400 ceiling → split the batch once,
+        401 under auto → re-resolve and restart every batch on the new provider, so one
+        document's vectors never mix providers. `cache_query` caches a single search query."""
+        res = await resolve(self.settings, self.sm, self._now())
+        if res.offline:
+            raise OfflineMode(res.reason)
+        profile = res.profile
+        key = None
+        if cache_query and len(texts) == 1:
+            key = cache.cache_key(
+                profile.provider, profile.embedding_model, TaskKind.EMBED.value, "1", texts[0]
+            )
+            if (hit := await cache.get(self.sm, key)) is not None:
+                await self._log_embed(lane, profile, cache_hit=True)
+                return EmbedResult(
+                    vectors=[hit.content["value"]],
+                    provider=profile.provider,
+                    model=profile.embedding_model,
+                    cached=True,
+                )
+        rerouted = False
+        while True:
+            try:
+                vectors, calls = await self._embed_all(texts, lane, profile)
+                break
+            except _Reroute:
+                if not rerouted:
+                    rerouted = True
+                    res = await resolve(self.settings, self.sm, self._now())
+                    if res.profile.provider != profile.provider:
+                        profile = res.profile
+                        continue
+            if self.settings.APP_ENV == "production":
+                raise OfflineMode("blocked")
+            raise KeyBlocked("embeddings key blocked")
+        if key:
+            await cache.put(
+                self.sm,
+                key=key,
+                kind=TaskKind.EMBED.value,
+                content=vectors[0],
+                tier="embed",
+                provider=profile.provider,
+                model=profile.embedding_model,
+            )
+        return EmbedResult(
+            vectors=vectors, provider=profile.provider, model=profile.embedding_model, calls=calls
+        )
+
+    async def _log_embed(self, lane: Lane, profile: LLMProfile, **f) -> None:
+        await log.write(
+            self.sm,
+            task_kind=TaskKind.EMBED.value,
+            lane=lane,
+            model_tier="embed",
+            provider=profile.provider,
+            model=profile.embedding_model,
+            pattern="batch",
+            **f,
+        )
+
+    async def _embed_all(
+        self, texts: list[str], lane: Lane, profile: LLMProfile
+    ) -> tuple[list[list[float]], int]:
+        vectors: list[list[float]] = []
+        calls = 0
+        size = min(EMBED_BATCH, self._embed_ceilings.get(profile.provider, EMBED_BATCH))
+        pending = list(texts)
+        shrunk = False
+        while pending:
+            batch, pending = pending[:size], pending[size:]
+            retried = False
+            while True:
+                failed: CallFailed | None = None
+                try:
+                    async with self.limiter.slot(lane, "embed"):
+                        calls += 1
+                        reply = await self.client(profile).embed(profile.embedding_model, batch)
+                except CallFailed as e:
+                    failed = e
+                    self.quota.update(profile.provider, e.headers)
+                if failed is None:
+                    break
+                err = failed.error
+                await self._log_embed(
+                    lane,
+                    profile,
+                    status_code=err.status,
+                    latency_ms=failed.latency_ms,
+                    refusal_reason=err.kind,
+                )
+                if err.kind == "blocked":
+                    if self.settings.LLM_PROVIDER == "auto":
+                        raise _Reroute
+                    if self.settings.APP_ENV == "production":
+                        raise OfflineMode("blocked")
+                    raise KeyBlocked(err.message)
+                if err.kind == "ceiling" and not shrunk and len(batch) > 1:
+                    # Shrink once: the ceiling named in the message (else half), remembered
+                    # per provider so later documents never hit it again.
+                    shrunk = True
+                    limit = err.ceiling if err.ceiling and err.ceiling < len(batch) else 0
+                    size = max(1, limit or len(batch) // 2)
+                    self._embed_ceilings[profile.provider] = size
+                    batch, pending = batch[:size], batch[size:] + pending
+                    continue
+                if err.kind in ("saturated", "transient") and lane == "interactive" and not retried:
+                    retried = True
+                    await self._sleep(min(err.retry_after_s or 1, INTERACTIVE_503_WAIT_CAP_S))
+                    continue
+                if err.kind in ("quota", "saturated", "transient"):
+                    default = 30 if err.kind == "quota" else 5
+                    raise Defer(err.retry_after_s or default, err.kind)
+                raise RequestRejected(err.message, refusal=err.kind)
+            self.quota.update(profile.provider, reply.headers)
+            await self._log_embed(
+                lane,
+                profile,
+                status_code=200,
+                tokens_in=reply.tokens_in,
+                latency_ms=reply.latency_ms,
+            )
+            vectors.extend(reply.vectors)
+        return vectors, calls
+
+
+class _Reroute(Exception):  # noqa: N818 - internal control flow
+    """auto provider: the key was blocked mid-way; start over on the re-resolved provider."""

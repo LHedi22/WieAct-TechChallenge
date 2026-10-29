@@ -27,6 +27,14 @@ class Reply:
 
 
 @dataclass
+class EmbedReply:
+    vectors: list[list[float]]
+    headers: dict[str, str]
+    tokens_in: int
+    latency_ms: int
+
+
+@dataclass
 class CallFailed(Exception):  # noqa: N818 - reads better at call sites than CallFailedError
     error: CallError
     headers: dict[str, str] = field(default_factory=dict)
@@ -160,3 +168,27 @@ class LLMClient:
                 latency_ms=ms,
             )
         raise CallFailed(classify(400, {}, "request rejected after dropping optional fields"))
+
+    async def embed(self, model: str, texts: list[str]) -> EmbedReply:
+        """One embeddings call for a batch of texts (the gateway batches and paces)."""
+        t0 = time.monotonic()
+        try:
+            raw = await self._sdk.embeddings.with_raw_response.create(
+                model=model, input=texts, encoding_format="float"
+            )
+        except openai.APIStatusError as e:
+            ms = int((time.monotonic() - t0) * 1000)
+            headers = dict(e.response.headers)
+            raise CallFailed(classify(e.status_code, headers, _error_text(e)), headers, ms) from e
+        except openai.APIConnectionError as e:
+            ms = int((time.monotonic() - t0) * 1000)
+            raise CallFailed(classify(None, {}, type(e).__name__), {}, ms) from e
+        ms = int((time.monotonic() - t0) * 1000)
+        result = raw.parse()
+        vectors = [d.embedding for d in sorted(result.data, key=lambda d: d.index)]
+        return EmbedReply(
+            vectors=vectors,
+            headers=dict(raw.headers),
+            tokens_in=result.usage.prompt_tokens if result.usage else 0,
+            latency_ms=ms,
+        )

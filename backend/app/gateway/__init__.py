@@ -13,11 +13,12 @@ from app.gateway.errors import (
     RequestRejected,
 )
 from app.gateway.service import Gateway
-from app.gateway.types import Lane, Result, Task, TaskKind, Tier
+from app.gateway.types import EmbedResult, Lane, Result, Task, TaskKind, Tier
 
 __all__ = [
     "BadOutput",
     "Defer",
+    "EmbedResult",
     "Gateway",
     "GatewayError",
     "KeyBlocked",
@@ -29,6 +30,7 @@ __all__ = [
     "TaskKind",
     "Tier",
     "get_gateway",
+    "embed",
     "run",
 ]
 
@@ -41,3 +43,7 @@ def get_gateway() -> Gateway:
 
 async def run(task: Task) -> Result:
     return await get_gateway().run(task)
+
+
+async def embed(texts: list[str], lane: Lane, *, cache_query: bool = False) -> EmbedResult:
+    return await get_gateway().embed(texts, lane, cache_query=cache_query)
