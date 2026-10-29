@@ -63,7 +63,8 @@ export function QuizAttemptPage() {
 
   const i = shown ?? Math.min(attempt.current, attempt.questions.length - 1);
   const q = attempt.questions[i]!;
-  const update = (nq: QuizQuestion) =>
+  const update = (nq: QuizQuestion) => {
+    setShown(nq.i); // stay on this question (hint / explanation) until the student taps Next
     qc.setQueryData<QuizAttempt>(["attempt", attemptId], (a) =>
       a
         ? {
@@ -73,6 +74,7 @@ export function QuizAttemptPage() {
           }
         : a,
     );
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-whitewash">
