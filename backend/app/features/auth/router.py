@@ -127,6 +127,12 @@ async def me(s: Session, user: OptionalUser) -> Me:
     return await _me(s, user)
 
 
+@router.get("/session", response_model=Me | None)
+async def session(s: Session, user: OptionalUser) -> Me | None:
+    """Like /me but 200 with null when signed out (public pages check without an error)."""
+    return await _me(s, user) if user else None
+
+
 @router.patch("/me", response_model=Me)
 async def update_me(body: MeIn, s: Session, user: CurrentUser) -> Me:
     user.ui_language = body.ui_language

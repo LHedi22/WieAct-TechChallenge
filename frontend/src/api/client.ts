@@ -108,6 +108,7 @@ export const api = {
   indexing: (worldId: string) => request<IndexingOut>(`/api/worlds/${worldId}/indexing`),
 
   me: () => request<Me>("/api/auth/me"),
+  session: () => request<Me | null>("/api/auth/session"),
   signup: (nickname: string, password: string, ui_language: Language) =>
     post<Me>("/api/auth/signup", { nickname, password, ui_language }),
   login: (nickname: string, password: string) =>

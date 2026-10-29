@@ -57,7 +57,7 @@ export function MapPage() {
                     zoom={zoom}
                     onOpen={open}
                     onPlacement={place}
-                    className="h-full max-h-[calc(100vh-4.5rem)] rounded-none"
+                    className="h-[calc(100vh-4.5rem)] rounded-none"
                   />
                 ) : (
                   <ListView data={data} onOpen={open} onPlacement={place} />

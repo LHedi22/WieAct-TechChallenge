@@ -177,11 +177,11 @@ function Result({ result, onDone }: { result: PlacementResult; onDone: () => voi
       </p>
       <ul className="flex w-full flex-col gap-2 text-start">
         {result.chapters.map((c) => (
-          <li key={String(c.chapter_id)}>
+          <li key={c.chapter_id}>
             <SoftCard className="flex items-center justify-between p-3">
-              <Bidi className="font-semibold">{String(c.title)}</Bidi>
+              <Bidi className="font-semibold">{c.title}</Bidi>
               <span className="text-small">
-                {t("result.chapter", { correct: Number(c.correct), asked: Number(c.asked) })}
+                {t("result.chapter", { correct: c.correct, asked: c.asked })}
               </span>
             </SoftCard>
           </li>

@@ -118,3 +118,10 @@ async def test_production_ignores_the_dev_header(monkeypatch):
     with pytest.raises(deps.HTTPException) as e:
         await deps.current_user(user)
     assert e.value.status_code == 401 and e.value.detail == "errors.sign_in_required"
+
+
+async def test_session_is_null_when_signed_out(api):
+    r = await api.get("/api/auth/session")
+    assert r.status_code == 200 and r.json() is None
+    await api.post("/api/auth/signup", json=SIGNUP)
+    assert (await api.get("/api/auth/session")).json()["nickname"] == "SeaTurtle42"

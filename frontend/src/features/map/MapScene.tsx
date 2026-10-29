@@ -33,7 +33,7 @@ export function MapScene({ courses, zoom = 1, onOpen, onPlacement, preview, clas
   const [boat, setBoat] = useState(BOAT);
   const slots = slotsFor(courses.length);
   const dir = i18n.dir();
-  const scale = (2 + zoom) as 3 | 4 | 5;
+  const scale = (preview ? 2 : 2 + zoom) as 2 | 3 | 4 | 5;
 
   const sail = (course: MapCourse, i: number) => {
     const slot = slots[i % slots.length]!;
@@ -44,11 +44,16 @@ export function MapScene({ courses, zoom = 1, onOpen, onPlacement, preview, clas
 
   return (
     <div className={cx("overflow-auto rounded-pixel-step", className)}>
-      <WaterTile className="relative">
+      <WaterTile className="relative min-h-full">
         <div
           dir="ltr"
           className="relative"
-          style={{ minWidth: `${640 + zoom * 320}px`, aspectRatio: "16 / 10" }}
+          // the landing preview fits its box; the real map scrolls when zoomed or on small screens
+          style={
+            preview
+              ? { aspectRatio: "16 / 10" }
+              : { minWidth: `${640 + zoom * 320}px`, minHeight: "100%", aspectRatio: "16 / 10" }
+          }
           data-testid="map-scene"
         >
           {courses.slice(0, slots.length).map((course, i) => {

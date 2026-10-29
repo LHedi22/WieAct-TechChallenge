@@ -141,12 +141,19 @@ async def generate(ctx: JobContext) -> dict[str, Any]:
     return {"course_id": str(course_id), "ready": True}
 
 
+class ChapterResult(BaseModel):
+    chapter_id: str
+    title: str
+    correct: int
+    asked: int
+
+
 class Graded(BaseModel):
     level: str
     correct: int
     total: int
     percent: int
-    chapters: list[dict[str, Any]]
+    chapters: list[ChapterResult]
 
 
 async def grade(
@@ -201,5 +208,9 @@ async def grade(
             )
         await s.commit()
     return Graded(
-        level=level, correct=got, total=len(questions), percent=percent, chapters=list(per.values())
+        level=level,
+        correct=got,
+        total=len(questions),
+        percent=percent,
+        chapters=[ChapterResult(**c) for c in per.values()],
     )

@@ -54,7 +54,7 @@ export function TopBar({ worldId }: { worldId?: string }) {
             onChange={(e) =>
               void navigate(e.target.value === "new" ? "/worlds/new" : `/worlds/${e.target.value}`)
             }
-            className="min-h-11 max-w-48 rounded-pixel-step border-2 border-ink bg-white px-2 font-semibold"
+            className="min-h-11 max-w-64 truncate rounded-pixel-step border-2 border-ink bg-white ps-2 pe-8 font-semibold"
           >
             {!worldId && <option value="">—</option>}
             {worlds.map((w) => (

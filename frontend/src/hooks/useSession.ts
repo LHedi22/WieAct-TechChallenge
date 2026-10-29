@@ -1,18 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { api, ApiError, type Me } from "@/api/client";
+import { api, type Me } from "@/api/client";
 
 /** The signed-in user, or null when signed out (401). */
 export function useMe() {
   return useQuery<Me | null>({
     queryKey: ["me"],
-    queryFn: async () => {
-      try {
-        return await api.me();
-      } catch (e) {
-        if (e instanceof ApiError && e.status === 401) return null;
-        throw e;
-      }
-    },
+    queryFn: api.session, // 200 with null when signed out: no 401 noise on public pages
     staleTime: 60_000,
     retry: false,
   });

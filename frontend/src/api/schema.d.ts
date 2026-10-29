@@ -164,6 +164,26 @@ export interface paths {
     patch: operations["update_me_api_auth_me_patch"];
     trace?: never;
   };
+  "/api/auth/session": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Session
+     * @description Like /me but 200 with null when signed out (public pages check without an error).
+     */
+    get: operations["session_api_auth_session_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/economy": {
     parameters: {
       query?: never;
@@ -595,6 +615,17 @@ export interface components {
       /** Documents */
       documents?: components["schemas"]["DocumentOut"][];
     };
+    /** ChapterResult */
+    ChapterResult: {
+      /** Chapter Id */
+      chapter_id: string;
+      /** Title */
+      title: string;
+      /** Correct */
+      correct: number;
+      /** Asked */
+      asked: number;
+    };
     /** CourseIn */
     CourseIn: {
       /** Name */
@@ -731,9 +762,7 @@ export interface components {
       /** Percent */
       percent: number;
       /** Chapters */
-      chapters: {
-        [key: string]: unknown;
-      }[];
+      chapters: components["schemas"]["ChapterResult"][];
     };
     /** HTTPValidationError */
     HTTPValidationError: {
@@ -1582,6 +1611,40 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Me"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  session_api_auth_session_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Me"] | null;
         };
       };
       /** @description Validation Error */
