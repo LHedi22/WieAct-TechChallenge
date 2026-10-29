@@ -218,3 +218,30 @@ async def test_rejects_unknown_type_and_oversize(sm, gw, tmp_path, monkeypatch):
         await upload(sm, user, chapters["Calculus I"], txt)
     assert e.value.key == "errors.file_too_large"
     assert not list((tmp_path / "uploads").rglob("*.txt"))  # partial file removed
+
+
+async def test_reindex_rebuilds_the_collection_from_postgres(sm, gw, files):
+    from app.rag.reindex import reindex
+
+    user, world, chapters = await world_with_courses(sm)
+    await upload(sm, user, chapters["Data Structures"], files["pptx"])
+    await Worker(sm).drain(timeout_s=60)
+    vs = store.get_store(get_settings().llm)
+    n = await vs.count({"world_id": world.id})
+    await vs.client.delete_collection(vs.collection)  # e.g. a fresh provider collection
+    vs._ready = False
+    assert await reindex("mock", world.id) == 0
+    assert await store.get_store(get_settings().llm).count({"world_id": world.id}) == n > 0
+
+
+async def test_seed_is_idempotent(sm, gw, monkeypatch):
+    from app.seed.__main__ import DEMO_CODE, seed
+
+    assert await seed(run=False) == 0
+    assert await seed(run=False) == 0
+    async with sm() as s:
+        docs = list(await s.scalars(select(Document)))
+        jobs = await s.scalar(select(func.count()).select_from(Job))
+    assert len(docs) == 4 and jobs == 4
+    assert {d.kind for d in docs} == {"pdf", "docx", "image", "pptx"}
+    assert DEMO_CODE == "OLIVE-7Q2"

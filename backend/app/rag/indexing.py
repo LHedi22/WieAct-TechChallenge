@@ -138,7 +138,7 @@ async def _tag(ctx: JobContext, doc: Document, course: str, chapter: str, rows: 
         await _update_doc(doc.id, progress=progress, detail={"key": "ideas", "n": b + 1})
 
 
-async def _embed(doc: Document, course: str, chapter: str, rows: list[Chunk]) -> str:
+async def embed_document(doc: Document, course: str, chapter: str, rows: list[Chunk]) -> str:
     # The course and chapter titles help retrieval; the stored text stays the chunk itself.
     texts = [f"{course} · {chapter}\n{r.text}" for r in rows]
     res = await gateway.embed(texts, "background")
@@ -219,7 +219,7 @@ async def index_document(ctx: JobContext) -> dict[str, Any]:
         status = "embedding"
         await ctx.set_stage("saving_search_index")
         await _update_doc(doc_id, status=status, detail={"key": "saving"})
-        provider = await _embed(doc, course.name, chapter.title, rows)
+        provider = await embed_document(doc, course.name, chapter.title, rows)
     except Defer:
         await _update_doc(doc_id, status=status, detail={"key": "waiting"})
         raise
