@@ -54,7 +54,12 @@
         "matching_level": "Matching your level",
         "writing_questions": "Writing questions",
         "writing_hints": "Writing hints",
-        "writing_summary": "Writing the summary"
+        "writing_summary": "Writing the summary",
+        "parsing_file": "Opening the file",
+        "reading_pages": "Reading the pages",
+        "finding_key_ideas": "Finding key ideas",
+        "saving_search_index": "Saving the search index",
+        "searching": "Searching"
       }
     },
     "wisdom": {
@@ -70,7 +75,18 @@
       "job_not_cancellable": "Too late to cancel: the AI is already working on it.",
       "network": "Can't reach the server. Check your connection.",
       "unexpected": "Something went wrong. Please try again.",
-      "forbidden": "You don't have access to this."
+      "forbidden": "You don't have access to this.",
+      "world_not_found": "This world doesn't exist, or you're not a member yet.",
+      "join_code_unknown": "That code doesn't match any world. Check the letters and try again.",
+      "file_type": "This file type isn't supported. Use PDF, slides, Word, images or text.",
+      "file_too_large": "This file is over the size limit.",
+      "document_empty": "We couldn't find any text in this file.",
+      "document_unreadable": "This file looks damaged or protected. Try exporting it again.",
+      "document_not_found": "This file no longer exists.",
+      "indexing_failed": "We couldn't read this file. Try uploading it again.",
+      "nickname_invalid": "Nicknames use 3 to 32 letters, digits, - or _.",
+      "sign_in_required": "Please sign in first.",
+      "try_again": "Something went wrong. Please try again."
     },
     "mascot": {
       "waving": "The Sidi Bou Said cat, waving",
@@ -250,5 +266,139 @@
     },
     "start": "Start demo job",
     "result": "Summary"
+  },
+  "worlds": {
+    "title": "Create or join a world",
+    "intro": "A world is one shared archipelago for your class. Everyone explores the same islands.",
+    "join": {
+      "title": "Join a world",
+      "subtitle": "A classmate shared a code with you",
+      "label": "Invite code",
+      "placeholder": "e.g. OLIVE-7Q2",
+      "submit": "Join",
+      "joining": "Joining {code}…"
+    },
+    "create": {
+      "title": "Create a new world",
+      "subtitle": "Upload your class's courses and invite everyone",
+      "progress": "Creating · step {n} of {total}",
+      "start": "Start"
+    },
+    "steps": {
+      "label": "Steps",
+      "name": "Name",
+      "courses": "Courses",
+      "chapters": "Chapters",
+      "upload": "Upload files",
+      "current": "Step {n} of {total}: {name}"
+    },
+    "name": {
+      "label": "World name",
+      "placeholder": "e.g. Engineering 2B",
+      "help": "Usually your class or group name."
+    },
+    "courses": {
+      "heading": "Which courses does your class take?",
+      "label": "Course name",
+      "placeholder": "e.g. Calculus I",
+      "add": "Add course",
+      "remove": "Remove {name}",
+      "help": "Each course becomes an island on your map.",
+      "needOne": "Add at least one course."
+    },
+    "chapters": {
+      "heading": "Chapters of {course}",
+      "label": "Chapter title",
+      "placeholder": "e.g. Limits",
+      "add": "Add chapter",
+      "remove": "Remove {title}",
+      "needOne": "Each course needs at least one chapter."
+    },
+    "summary": {
+      "world": "World",
+      "courses": "Courses",
+      "edit": "Edit"
+    },
+    "upload": {
+      "heading": "Add material for {course}",
+      "chapter": "Chapter",
+      "drop": "Drop files here, or",
+      "browse": "browse",
+      "types": {
+        "pdf": "PDF",
+        "slides": "Slides",
+        "word": "Word",
+        "images": "Images",
+        "text": "Text"
+      },
+      "limit": "Up to {mb} MB per file. We read photos of the board too.",
+      "meta": "{size} · Chapter {idx} · {title}",
+      "status": {
+        "uploading": "Uploading",
+        "waiting": "Waiting",
+        "reading": "Reading",
+        "ready": "Ready",
+        "failed": "Failed",
+        "reused": "Already added"
+      },
+      "progress": "{name}: {percent}%",
+      "remove": "Remove {name}",
+      "remaining": "{count, plural, =0 {Every course has material.} one {# more course to fill.} other {# more courses to fill.}} You can add files any time later."
+    },
+    "size": {
+      "kb": "{n} KB",
+      "mb": "{n} MB"
+    },
+    "nav": {
+      "back": "Back",
+      "next": "Next",
+      "build": "Build my islands"
+    },
+    "indexing": {
+      "title": "Raising your islands",
+      "progress": "Indexing progress",
+      "eta": "About {minutes, plural, one {# minute} other {# minutes}} left",
+      "etaSoon": "Almost there",
+      "done": "Your islands are ready!",
+      "now": "Reading {title}…",
+      "detail": {
+        "page": "{file} · page {n} of {of}",
+        "slide": "{file} · slide {n} of {of}",
+        "section": "{file} · section {n} of {of}",
+        "part": "{file} · part {n} of {of}",
+        "image": "{file} · reading the photo",
+        "ideas": "{file} · finding key ideas",
+        "saving": "{file} · saving the search index",
+        "waiting": "{file} · waiting for the AI platform"
+      },
+      "row": "Reading Chapter {idx} · {title}",
+      "files": "{count, plural, one {# file} other {# files}}",
+      "pages": "{count, plural, one {# page} other {# pages}}",
+      "state": {
+        "done": "Done",
+        "in_progress": "In progress",
+        "waiting": "Next",
+        "failed": "Couldn't read"
+      },
+      "quizzes": "Building practice quizzes",
+      "quizzesState": {
+        "waiting": "Waiting",
+        "in_progress": "In progress",
+        "done": "Done"
+      },
+      "tip": "While you wait: the first island you finish gets a free placement quiz, so every building starts at your level.",
+      "tipLabel": "While you wait:"
+    },
+    "invite": {
+      "title": "Invite your class",
+      "body": "Classmates join with this code and explore the same islands. Everyone gets their own progress.",
+      "code": "Class code",
+      "copy": "Copy code",
+      "copied": "Copied!",
+      "share": "Share invite",
+      "shareText": "Join our class world with the code {code}",
+      "hint": "Works in WhatsApp, Messenger, email, anywhere you share a link."
+    },
+    "worldLabel": "World"
   }
 }

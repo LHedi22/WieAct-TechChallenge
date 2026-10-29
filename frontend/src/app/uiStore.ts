@@ -6,8 +6,11 @@ import type { Language } from "@/i18n/languages";
 interface UiState {
   language: Language;
   reducedMotion: boolean;
+  /** Dev-only identity until sign-in exists (M3): sent as X-Dev-User. */
+  devUser: string;
   setLanguage: (language: Language) => void;
   setReducedMotion: (reducedMotion: boolean) => void;
+  setDevUser: (devUser: string) => void;
 }
 
 /** localStorage can be missing or throw (private mode); fall back to memory. */
@@ -37,8 +40,10 @@ export const useUiStore = create<UiState>()(
     (set) => ({
       language: "en",
       reducedMotion: false,
+      devUser: "demo",
       setLanguage: (language) => set({ language }),
       setReducedMotion: (reducedMotion) => set({ reducedMotion }),
+      setDevUser: (devUser) => set({ devUser }),
     }),
     { name: "lw-ui", storage: createJSONStorage(safeStorage) },
   ),

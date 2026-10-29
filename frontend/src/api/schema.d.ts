@@ -95,6 +95,167 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/worlds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Worlds */
+        get: operations["my_worlds_api_worlds_get"];
+        put?: never;
+        /** Create World */
+        post: operations["create_world_api_worlds_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/worlds/join": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Join World */
+        post: operations["join_world_api_worlds_join_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/worlds/{world_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get World */
+        get: operations["get_world_api_worlds__world_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/worlds/{world_id}/courses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add Course */
+        post: operations["add_course_api_worlds__world_id__courses_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/courses/{course_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Course */
+        delete: operations["delete_course_api_courses__course_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/courses/{course_id}/chapters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add Chapter */
+        post: operations["add_chapter_api_courses__course_id__chapters_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chapters/{chapter_id}/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Upload Document
+         * @description One file per request (the UI uploads several in parallel and shows each one's state).
+         *     Indexing runs as a background job; poll GET /api/worlds/{id}/indexing.
+         */
+        post: operations["upload_document_api_chapters__chapter_id__documents_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/documents/{document_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Document */
+        delete: operations["delete_document_api_documents__document_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/worlds/{world_id}/indexing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Indexing
+         * @description Polled every 1.5 s by the "Raising your islands" screen.
+         */
+        get: operations["indexing_api_worlds__world_id__indexing_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/dev/demo-jobs": {
         parameters: {
             query?: never;
@@ -112,10 +273,79 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/dev/search-jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create Search Job
+         * @description Vector search in a world (the M2 Done-when check); poll GET /api/jobs/{id} for hits.
+         */
+        post: operations["create_search_job_api_dev_search_jobs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** Body_upload_document_api_chapters__chapter_id__documents_post */
+        Body_upload_document_api_chapters__chapter_id__documents_post: {
+            /** File */
+            file: string;
+        };
+        /** ChapterIn */
+        ChapterIn: {
+            /** Title */
+            title: string;
+        };
+        /** ChapterOut */
+        ChapterOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Idx */
+            idx: number;
+            /** Title */
+            title: string;
+            /** Documents */
+            documents?: components["schemas"]["DocumentOut"][];
+        };
+        /** CourseIn */
+        CourseIn: {
+            /** Name */
+            name: string;
+            /** Chapters */
+            chapters?: string[];
+            /** Exam Date */
+            exam_date?: string | null;
+        };
+        /** CourseOut */
+        CourseOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Color Key */
+            color_key: string;
+            /** Exam Date */
+            exam_date: string | null;
+            /** Chapters */
+            chapters?: components["schemas"]["ChapterOut"][];
+        };
         /** DemoJobIn */
         DemoJobIn: {
             /**
@@ -135,6 +365,45 @@ export interface components {
              * @description set to make the result shareable/cached
              */
             cache_key?: string | null;
+        };
+        /** DocumentOut */
+        DocumentOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Chapter Id
+             * Format: uuid
+             */
+            chapter_id: string;
+            /** Filename */
+            filename: string;
+            /** Kind */
+            kind: string;
+            /** Size */
+            size: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "uploaded" | "parsing" | "tagging" | "embedding" | "ready" | "failed";
+            /** Progress */
+            progress: number;
+            /** Detail */
+            detail: {
+                [key: string]: unknown;
+            } | null;
+            /** Page Count */
+            page_count: number | null;
+            /** Error */
+            error: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -162,6 +431,63 @@ export interface components {
             provider: string;
             /** App Env */
             app_env: string;
+        };
+        /** IndexingChapter */
+        IndexingChapter: {
+            /**
+             * Chapter Id
+             * Format: uuid
+             */
+            chapter_id: string;
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /** Course Name */
+            course_name: string;
+            /** Idx */
+            idx: number;
+            /** Title */
+            title: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "waiting" | "in_progress" | "done" | "failed";
+            /** Documents */
+            documents: components["schemas"]["DocumentOut"][];
+        };
+        /** IndexingOut */
+        IndexingOut: {
+            /**
+             * World Id
+             * Format: uuid
+             */
+            world_id: string;
+            /** Name */
+            name: string;
+            /** Join Code */
+            join_code: string;
+            /** Percent */
+            percent: number;
+            /** Eta S */
+            eta_s: number;
+            /** Done */
+            done: boolean;
+            /** Chapters */
+            chapters: components["schemas"]["IndexingChapter"][];
+            quizzes: components["schemas"]["IndexingQuizzes"];
+        };
+        /** IndexingQuizzes */
+        IndexingQuizzes: {
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "waiting" | "in_progress" | "done";
+            /** Ready */
+            ready: number;
         };
         /** JobCreated */
         JobCreated: {
@@ -216,6 +542,26 @@ export interface components {
             /** Finished At */
             finished_at: string | null;
         };
+        /** JoinIn */
+        JoinIn: {
+            /** Code */
+            code: string;
+        };
+        /** SearchIn */
+        SearchIn: {
+            /**
+             * World Id
+             * Format: uuid
+             */
+            world_id: string;
+            /** Query */
+            query: string;
+            /**
+             * K
+             * @default 8
+             */
+            k: number;
+        };
         /** Stats */
         Stats: {
             /** Provider */
@@ -263,6 +609,8 @@ export interface components {
             offline_demo_mode: boolean;
             /** Reason */
             reason: string | null;
+            /** Upload Max Mb */
+            upload_max_mb: number;
         };
         /** TierStats */
         TierStats: {
@@ -274,6 +622,14 @@ export interface components {
             tokens_out: number;
             /** Avg Latency Ms */
             avg_latency_ms: number;
+        };
+        /** UploadOut */
+        UploadOut: {
+            document: components["schemas"]["DocumentOut"];
+            /** Job Id */
+            job_id: string | null;
+            /** Reused */
+            reused: boolean;
         };
         /** ValidationError */
         ValidationError: {
@@ -287,6 +643,41 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** WorldIn */
+        WorldIn: {
+            /** Name */
+            name: string;
+        };
+        /** WorldOut */
+        WorldOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Join Code */
+            join_code: string;
+            /** Is Creator */
+            is_creator: boolean;
+            /** Members */
+            members: number;
+            /** Courses */
+            courses: components["schemas"]["CourseOut"][];
+        };
+        /** WorldSummary */
+        WorldSummary: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Join Code */
+            join_code: string;
         };
     };
     responses: never;
@@ -432,6 +823,356 @@ export interface operations {
             };
         };
     };
+    my_worlds_api_worlds_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-dev-user"?: string | null;
+                "x-ui-language"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorldSummary"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_world_api_worlds_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-dev-user"?: string | null;
+                "x-ui-language"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorldIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorldOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    join_world_api_worlds_join_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-dev-user"?: string | null;
+                "x-ui-language"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JoinIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorldOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_world_api_worlds__world_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-dev-user"?: string | null;
+                "x-ui-language"?: string | null;
+            };
+            path: {
+                world_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorldOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_course_api_worlds__world_id__courses_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-dev-user"?: string | null;
+                "x-ui-language"?: string | null;
+            };
+            path: {
+                world_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourseIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_course_api_courses__course_id__delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-dev-user"?: string | null;
+                "x-ui-language"?: string | null;
+            };
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_chapter_api_courses__course_id__chapters_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-dev-user"?: string | null;
+                "x-ui-language"?: string | null;
+            };
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChapterIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChapterOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upload_document_api_chapters__chapter_id__documents_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-dev-user"?: string | null;
+                "x-ui-language"?: string | null;
+            };
+            path: {
+                chapter_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_upload_document_api_chapters__chapter_id__documents_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_document_api_documents__document_id__delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-dev-user"?: string | null;
+                "x-ui-language"?: string | null;
+            };
+            path: {
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    indexing_api_worlds__world_id__indexing_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-dev-user"?: string | null;
+                "x-ui-language"?: string | null;
+            };
+            path: {
+                world_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IndexingOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     create_demo_job_api_dev_demo_jobs_post: {
         parameters: {
             query?: never;
@@ -442,6 +1183,42 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["DemoJobIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobCreated"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_search_job_api_dev_search_jobs_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-dev-user"?: string | null;
+                "x-ui-language"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SearchIn"];
             };
         };
         responses: {

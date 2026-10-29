@@ -54,7 +54,12 @@
         "matching_level": "Adaptation à ton niveau",
         "writing_questions": "Rédaction des questions",
         "writing_hints": "Rédaction des indices",
-        "writing_summary": "Rédaction du résumé"
+        "writing_summary": "Rédaction du résumé",
+        "parsing_file": "Ouverture du fichier",
+        "reading_pages": "Lecture des pages",
+        "finding_key_ideas": "Recherche des idées clés",
+        "saving_search_index": "Enregistrement de l'index de recherche",
+        "searching": "Recherche"
       }
     },
     "wisdom": {
@@ -70,7 +75,18 @@
       "job_not_cancellable": "Trop tard pour annuler : l'IA y travaille déjà.",
       "network": "Impossible de joindre le serveur. Vérifie ta connexion.",
       "unexpected": "Un problème est survenu. Réessaie.",
-      "forbidden": "Tu n'as pas accès à cette page."
+      "forbidden": "Tu n'as pas accès à cette page.",
+      "world_not_found": "Ce monde n'existe pas, ou tu n'en fais pas encore partie.",
+      "join_code_unknown": "Ce code ne correspond à aucun monde. Vérifie les lettres et réessaie.",
+      "file_type": "Ce type de fichier n'est pas pris en charge. Utilise PDF, diapos, Word, images ou texte.",
+      "file_too_large": "Ce fichier dépasse la taille maximale.",
+      "document_empty": "Nous n'avons trouvé aucun texte dans ce fichier.",
+      "document_unreadable": "Ce fichier semble abîmé ou protégé. Essaie de l'exporter à nouveau.",
+      "document_not_found": "Ce fichier n'existe plus.",
+      "indexing_failed": "Nous n'avons pas pu lire ce fichier. Essaie de le téléverser à nouveau.",
+      "nickname_invalid": "Un pseudo contient 3 à 32 lettres, chiffres, - ou _.",
+      "sign_in_required": "Connecte-toi d'abord.",
+      "try_again": "Un problème est survenu. Réessaie."
     },
     "mascot": {
       "waving": "Le chat de Sidi Bou Saïd fait coucou",
@@ -250,5 +266,139 @@
     },
     "start": "Lancer la tâche de démo",
     "result": "Résumé"
+  },
+  "worlds": {
+    "title": "Créer ou rejoindre un monde",
+    "intro": "Un monde est un archipel partagé par ta classe. Tout le monde explore les mêmes îles.",
+    "join": {
+      "title": "Rejoindre un monde",
+      "subtitle": "Un·e camarade t'a partagé un code",
+      "label": "Code d'invitation",
+      "placeholder": "ex. OLIVE-7Q2",
+      "submit": "Rejoindre",
+      "joining": "On rejoint {code}…"
+    },
+    "create": {
+      "title": "Créer un nouveau monde",
+      "subtitle": "Ajoute les cours de ta classe et invite tout le monde",
+      "progress": "Création · étape {n} sur {total}",
+      "start": "Commencer"
+    },
+    "steps": {
+      "label": "Étapes",
+      "name": "Nom",
+      "courses": "Cours",
+      "chapters": "Chapitres",
+      "upload": "Fichiers",
+      "current": "Étape {n} sur {total} : {name}"
+    },
+    "name": {
+      "label": "Nom du monde",
+      "placeholder": "ex. Ingénierie 2B",
+      "help": "En général, le nom de ta classe ou de ton groupe."
+    },
+    "courses": {
+      "heading": "Quels cours suit ta classe ?",
+      "label": "Nom du cours",
+      "placeholder": "ex. Analyse I",
+      "add": "Ajouter un cours",
+      "remove": "Retirer {name}",
+      "help": "Chaque cours devient une île sur ta carte.",
+      "needOne": "Ajoute au moins un cours."
+    },
+    "chapters": {
+      "heading": "Chapitres de {course}",
+      "label": "Titre du chapitre",
+      "placeholder": "ex. Limites",
+      "add": "Ajouter un chapitre",
+      "remove": "Retirer {title}",
+      "needOne": "Chaque cours a besoin d'au moins un chapitre."
+    },
+    "summary": {
+      "world": "Monde",
+      "courses": "Cours",
+      "edit": "Modifier"
+    },
+    "upload": {
+      "heading": "Ajouter du contenu pour {course}",
+      "chapter": "Chapitre",
+      "drop": "Dépose tes fichiers ici, ou",
+      "browse": "parcours",
+      "types": {
+        "pdf": "PDF",
+        "slides": "Diapos",
+        "word": "Word",
+        "images": "Images",
+        "text": "Texte"
+      },
+      "limit": "Jusqu'à {mb} Mo par fichier. Nous lisons aussi les photos du tableau.",
+      "meta": "{size} · Chapitre {idx} · {title}",
+      "status": {
+        "uploading": "Envoi",
+        "waiting": "En attente",
+        "reading": "Lecture",
+        "ready": "Prêt",
+        "failed": "Échec",
+        "reused": "Déjà ajouté"
+      },
+      "progress": "{name} : {percent} %",
+      "remove": "Retirer {name}",
+      "remaining": "{count, plural, =0 {Chaque cours a du contenu.} one {Encore # cours à remplir.} other {Encore # cours à remplir.}} Tu pourras ajouter des fichiers plus tard."
+    },
+    "size": {
+      "kb": "{n} Ko",
+      "mb": "{n} Mo"
+    },
+    "nav": {
+      "back": "Retour",
+      "next": "Suivant",
+      "build": "Construire mes îles"
+    },
+    "indexing": {
+      "title": "Tes îles émergent",
+      "progress": "Progression de l'indexation",
+      "eta": "Environ {minutes, plural, one {# minute} other {# minutes}} restantes",
+      "etaSoon": "Presque fini",
+      "done": "Tes îles sont prêtes !",
+      "now": "Lecture de {title}…",
+      "detail": {
+        "page": "{file} · page {n} sur {of}",
+        "slide": "{file} · diapo {n} sur {of}",
+        "section": "{file} · section {n} sur {of}",
+        "part": "{file} · partie {n} sur {of}",
+        "image": "{file} · lecture de la photo",
+        "ideas": "{file} · recherche des idées clés",
+        "saving": "{file} · enregistrement de l'index",
+        "waiting": "{file} · en attente de la plateforme IA"
+      },
+      "row": "Lecture du chapitre {idx} · {title}",
+      "files": "{count, plural, one {# fichier} other {# fichiers}}",
+      "pages": "{count, plural, one {# page} other {# pages}}",
+      "state": {
+        "done": "Terminé",
+        "in_progress": "En cours",
+        "waiting": "Ensuite",
+        "failed": "Illisible"
+      },
+      "quizzes": "Préparation des quiz d'entraînement",
+      "quizzesState": {
+        "waiting": "En attente",
+        "in_progress": "En cours",
+        "done": "Terminé"
+      },
+      "tip": "Pendant l'attente : la première île terminée t'offre un quiz de placement gratuit, pour que chaque bâtiment démarre à ton niveau.",
+      "tipLabel": "Pendant l'attente :"
+    },
+    "invite": {
+      "title": "Invite ta classe",
+      "body": "Tes camarades rejoignent avec ce code et explorent les mêmes îles. Chacun garde sa propre progression.",
+      "code": "Code de la classe",
+      "copy": "Copier le code",
+      "copied": "Copié !",
+      "share": "Partager l'invitation",
+      "shareText": "Rejoins le monde de notre classe avec le code {code}",
+      "hint": "Fonctionne sur WhatsApp, Messenger, par e-mail, partout où tu partages un lien."
+    },
+    "worldLabel": "Monde"
   }
 }
