@@ -92,6 +92,9 @@ class Settings(BaseSettings):
     APP_ENV: Literal["development", "production"] = "development"
     DATABASE_URL: str = "postgresql+asyncpg://lw:lw@127.0.0.1:5432/learningworld"
     SECRET_KEY: SecretStr = SecretStr("change-me-in-.env")
+    # Session cookie: lax for same-site dev; a cross-site deploy needs none + secure
+    SESSION_COOKIE_SAMESITE: Literal["lax", "strict", "none"] = "lax"
+    SESSION_COOKIE_SECURE: bool = False
     APP_TIMEZONE: str = "Africa/Tunis"
     CORS_ORIGINS: str = "http://localhost:5173"
     OFFLINE_DEMO_MODE: Literal["auto", "on", "off"] = "auto"

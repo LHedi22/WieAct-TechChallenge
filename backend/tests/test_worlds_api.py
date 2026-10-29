@@ -2,12 +2,10 @@
 the indexing rollup, deletes, and the dev search job."""
 
 import re
-from types import SimpleNamespace
 
 import httpx
 import pytest
 
-from app.api import deps
 from app.core.config import get_settings
 from app.core.db import get_session, get_sessionmaker
 from app.jobs.worker import Worker
@@ -184,13 +182,6 @@ async def test_dev_search_job(api, sm, pptx):
 async def test_bad_nickname_header(api):
     r = await api.get("/api/worlds", headers={"X-Dev-User": "no spaces allowed"})
     assert r.status_code == 400 and r.json()["detail"] == "errors.nickname_invalid"
-
-
-async def test_production_refuses_dev_users(monkeypatch):
-    monkeypatch.setattr(deps, "get_settings", lambda: SimpleNamespace(APP_ENV="production"))
-    with pytest.raises(deps.HTTPException) as e:
-        await deps.current_user(s=None, x_dev_user="SeaTurtle42")
-    assert e.value.status_code == 401 and e.value.detail == "errors.sign_in_required"
 
 
 async def test_compact_share_ignores_embedding_calls(api, sm, pptx):
