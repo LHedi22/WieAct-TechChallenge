@@ -103,7 +103,7 @@ def _content(messages: list[dict[str, Any]], json_wanted: bool) -> str:
     topic = _topic(messages)
     if task and task.group(1) in GENERATORS:
         user = "\n".join(str(m.get("content", "")) for m in messages if m.get("role") == "user")
-        return json.dumps(GENERATORS[task.group(1)](user, lang), ensure_ascii=False)
+        return json.dumps(GENERATORS[task.group(1)](user, lang, system), ensure_ascii=False)
     if task:
         for name in (
             f"{task.group(1)}.{lang}.json",
@@ -145,7 +145,7 @@ def _lang_of(text: str) -> str:
     return "en"
 
 
-def _chunk_tags(user: str, lang: str) -> dict[str, Any]:
+def _chunk_tags(user: str, lang: str, system: str = "") -> dict[str, Any]:
     parts = CHUNK_MARK.split(user)  # ["", id1, text1, id2, text2, ...]
     chunks = []
     for cid, text in zip(parts[1::2], parts[2::2], strict=True):
@@ -185,7 +185,7 @@ QUIZ_TEXT = {
 }
 
 
-def _quiz(user: str, lang: str) -> dict[str, Any]:
+def _quiz(user: str, lang: str, system: str = "") -> dict[str, Any]:
     q, hint, expl, right, wrong = QUIZ_TEXT.get(lang[:2], QUIZ_TEXT["en"])
     concepts = _concepts(user, 10) or ["the topic"]
     questions = []
@@ -211,7 +211,7 @@ CHAPTER_MARK = re.compile(r"\[chapter (\d+) [^\]]*\]")
 DIFFICULTY = ("beginner", "beginner", "intermediate", "intermediate", "intermediate", "advanced")
 
 
-def _placement(user: str, lang: str) -> dict[str, Any]:
+def _placement(user: str, lang: str, system: str = "") -> dict[str, Any]:
     """8 questions across the chapters named in the excerpt labels, mixed difficulty."""
     chapters = [int(n) for n in dict.fromkeys(CHAPTER_MARK.findall(user))] or [1]
     base = _quiz(user, lang)["questions"]
@@ -230,7 +230,7 @@ ITEM_MARK = re.compile(r"^\[(\d+)\] Q: (.*)$", re.MULTILINE)
 MISTAKE_TYPES = ("misconception", "calculation", "misread", "definition", "procedure")
 
 
-def _grade_tag(user: str, lang: str) -> dict[str, Any]:
+def _grade_tag(user: str, lang: str, system: str = "") -> dict[str, Any]:
     """One tag per "[i] Q: ..." item: a concept from the question, a rotating mistake type."""
     out = []
     for n, (i, question) in enumerate(ITEM_MARK.findall(user)):
@@ -244,7 +244,90 @@ def _grade_tag(user: str, lang: str) -> dict[str, Any]:
     return {"mistakes": out}
 
 
+TUTOR_TEXT = {
+    "en": {
+        "goal": "Understand {c} in your own words",
+        "ideas": ["What {c} means", "Why the first step matters", "How to check the result"],
+        "open": "Let's work on {c} together. What do you already know about it?",
+        "reply": "Good start. What happens if you try the first step on a small example?",
+        "stuck": "No problem, let's make it smaller. What is the first thing you would write down?",
+        "leak": "The answer is 4.",
+        "guard": "You're close. What do you get if you simplify before substituting?",
+        "summary": "You found what {c} means and why the first step matters.",
+        "next": "Try a quiz on this chapter to check it sticks.",
+    },
+    "fr": {
+        "goal": "Comprendre {c} avec tes propres mots",
+        "ideas": [
+            "Ce que signifie {c}",
+            "Pourquoi la première étape compte",
+            "Comment vérifier le résultat",
+        ],
+        "open": "Travaillons {c} ensemble. Que sais-tu déjà à ce sujet ?",
+        "reply": "Bon début. Que se passe-t-il si tu essaies la première étape sur un exemple ?",
+        "stuck": "Pas de souci, faisons plus petit. Quelle est la première chose que tu écrirais ?",
+        "leak": "La réponse est 4.",
+        "guard": "Tu es proche. Qu'obtiens-tu si tu simplifies avant de remplacer ?",
+        "summary": "Tu as trouvé ce que signifie {c} et pourquoi la première étape compte.",
+        "next": "Fais un quiz sur ce chapitre pour vérifier que c'est acquis.",
+    },
+    "ar": {
+        "goal": "فهم {c} بكلماتك الخاصة",
+        "ideas": ["معنى {c}", "لماذا تهمّ الخطوة الأولى", "كيف نتحقّق من النتيجة"],
+        "open": "لنعمل على {c} معًا. ماذا تعرف عنه حتى الآن؟",
+        "reply": "بداية جيدة. ماذا يحدث إذا جرّبت الخطوة الأولى على مثال صغير؟",
+        "stuck": "لا بأس، لنصغّر المسألة. ما أول شيء ستكتبه؟",
+        "leak": "الجواب هو 4.",
+        "guard": "أنت قريب. ماذا تجد إذا بسّطت قبل التعويض؟",
+        "summary": "وجدت معنى {c} ولماذا تهمّ الخطوة الأولى.",
+        "next": "جرّب اختبارًا في هذا الفصل لتتأكّد من الفهم.",
+    },
+}
+IDEA_LINE = re.compile(r"^(\d+): .* — not yet$", re.MULTILINE)
+STUDENT_LINE = re.compile(r"^Student \((\w+)\): (.*)$", re.MULTILINE)
+
+
+def _tt(lang: str) -> dict[str, Any]:
+    return TUTOR_TEXT.get(lang[:2], TUTOR_TEXT["en"])
+
+
+def _tutor(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    tx = _tt(lang)
+    concept = (_concepts(user, 1) or ["this idea"])[0]
+    if "MODE: plan" in user:
+        return {
+            "goal": tx["goal"].format(c=concept),
+            "ideas": [i.format(c=concept) for i in tx["ideas"]],
+            "reply": tx["open"].format(c=concept),
+        }
+    student = STUDENT_LINE.findall(user)
+    action, message = student[-1] if student else ("message", "")
+    if "leak" in message.lower():  # lets tests exercise the answer-leak guard
+        return {"reply": tx["leak"], "ideas_found": [], "complex": False, "confidence": "ok"}
+    open_ideas = [int(i) for i in IDEA_LINE.findall(system)]
+    found = open_ideas[:1] if action == "message" else []
+    return {
+        "reply": tx["stuck"] if action == "stuck" else tx["reply"],
+        "ideas_found": found,
+        "complex": False,
+        "confidence": "ok",
+    }
+
+
+def _guard(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    return {"reply": _tt(lang)["guard"]}
+
+
+def _summary(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    tx = _tt(lang)
+    concept = (_concepts(user, 1) or ["this idea"])[0]
+    return {"summary": tx["summary"].format(c=concept), "next_step": tx["next"]}
+
+
 GENERATORS = {
+    "TUTOR_TURN": _tutor,
+    "TUTOR_GUARD": _guard,
+    "TUTOR_SUMMARY": _summary,
     "CHUNK_TAG": _chunk_tags,
     "QUIZ_GENERATE": _quiz,
     "PLACEMENT_QUIZ": _placement,

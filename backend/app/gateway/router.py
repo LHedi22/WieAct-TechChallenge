@@ -22,6 +22,7 @@ ROUTES: dict[TaskKind, Route] = {
     K.QUIZ_GRADE_TAG: Route("compact", "extraction", 120),
     K.TUTOR_TURN: Route("compact", "escalation", 220),
     K.TUTOR_SUMMARY: Route("compact", "summary", 200),
+    K.TUTOR_GUARD: Route("compact", "guard", 160),
     K.NOTES_WRITE: Route("mid", "narrow-before-generating", 700),
     K.MAP_WRITE: Route("mid", "narrow-before-generating", 600),
     K.AUDIO_SCRIPT: Route("mid", "narrow-before-generating", 700),

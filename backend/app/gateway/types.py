@@ -14,6 +14,7 @@ class TaskKind(StrEnum):
     QUIZ_GRADE_TAG = "QUIZ_GRADE_TAG"
     TUTOR_TURN = "TUTOR_TURN"
     TUTOR_SUMMARY = "TUTOR_SUMMARY"
+    TUTOR_GUARD = "TUTOR_GUARD"  # rewrite a tutor reply that leaked the final answer
     NOTES_WRITE = "NOTES_WRITE"
     MAP_WRITE = "MAP_WRITE"
     AUDIO_SCRIPT = "AUDIO_SCRIPT"

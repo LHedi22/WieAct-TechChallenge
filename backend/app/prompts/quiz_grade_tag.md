@@ -7,10 +7,10 @@ For EACH item give:
 
 - "concept": the course concept behind the question, 1-4 words, in {language_name},
 - "mistake_type": one of "misconception" (believed something wrong), "calculation" (right idea,
-  wrong arithmetic), "misread" (misread the question), "definition" (did not know a definition),
-  "procedure" (wrong or missing step).
-  Judge the mistake, never the student. Keep every item number "i" exactly as given.
-  Reply with JSON only: {{"mistakes": [{{"i": 0, "concept": "...", "mistake_type": "misconception"}}]}}
+wrong arithmetic), "misread" (misread the question), "definition" (did not know a definition),
+"procedure" (wrong or missing step).
+Judge the mistake, never the student. Keep every item number "i" exactly as given.
+Reply with JSON only: {{"mistakes": [{{"i": 0, "concept": "...", "mistake_type": "misconception"}}]}}
 
 ## user
 

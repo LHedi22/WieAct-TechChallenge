@@ -7,6 +7,7 @@ from app.features.auth import router as auth
 from app.features.onboarding import router as onboarding
 from app.features.placement import router as placement
 from app.features.quiz import router as quiz
+from app.features.tutor import router as tutor
 from app.features.worlds import map as world_map
 from app.features.worlds import router as worlds
 
@@ -35,6 +36,7 @@ def create_app() -> FastAPI:
     app.include_router(onboarding.router)
     app.include_router(placement.router)
     app.include_router(quiz.router)
+    app.include_router(tutor.router)
     app.include_router(worlds.router)
     app.include_router(world_map.router)
     if settings.APP_ENV != "production":
