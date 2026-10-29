@@ -10,6 +10,11 @@ ENV UV_PROJECT_ENVIRONMENT=/opt/venv \
     UV_PYTHON_DOWNLOADS=never \
     PYTHONUNBUFFERED=1
 
+# OCR for scanned pages and photos of the board (declared service: Tesseract, local)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-ara tesseract-ocr-fra \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 COPY pyproject.toml uv.lock .python-version ./
 RUN uv sync --frozen --no-install-project
