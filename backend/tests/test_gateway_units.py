@@ -170,7 +170,7 @@ def test_strip_think():
 
 
 def test_every_task_kind_is_routed_and_mid_is_rare():
-    assert set(ROUTES) == set(TaskKind)
+    assert set(ROUTES) == set(TaskKind) - {TaskKind.EMBED}  # embeddings have no chat tier
     mid = [k for k, r in ROUTES.items() if r.tier == "mid"]
     assert len(mid) < len(ROUTES) / 2  # compact handles most traffic (PLATFORM.md)
     assert ROUTES[TaskKind.TUTOR_TURN].pattern == "escalation"
