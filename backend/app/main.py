@@ -5,6 +5,7 @@ from app.api import admin, dev, economy, health, jobs, system
 from app.core.config import get_settings
 from app.features.auth import router as auth
 from app.features.onboarding import router as onboarding
+from app.features.worlds import map as world_map
 from app.features.worlds import router as worlds
 
 
@@ -31,6 +32,7 @@ def create_app() -> FastAPI:
     app.include_router(economy.router)
     app.include_router(onboarding.router)
     app.include_router(worlds.router)
+    app.include_router(world_map.router)
     if settings.APP_ENV != "production":
         app.include_router(dev.router)
     return app
