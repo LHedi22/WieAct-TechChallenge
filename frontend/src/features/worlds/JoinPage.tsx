@@ -13,7 +13,7 @@ export function JoinPage() {
   const navigate = useNavigate();
   const join = useMutation({
     mutationFn: () => api.joinWorld(code),
-    onSuccess: (world) => void navigate(`/worlds/${world.id}/indexing`, { replace: true }),
+    onSuccess: (world) => void navigate(`/worlds/${world.id}`, { replace: true }),
   });
   const { mutate } = join;
   useEffect(() => mutate(), [mutate]);

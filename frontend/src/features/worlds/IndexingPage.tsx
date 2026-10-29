@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { api, type DocumentOut, type IndexingChapter, type IndexingOut } from "@/api/client";
 import {
   Bidi,
@@ -82,6 +82,12 @@ export function IndexingPage() {
               <Sprite name="lantern" scale={2} />
               <span>{t("indexing.tip")}</span>
             </p>
+            <Link
+              to={`/worlds/${worldId}`}
+              className="inline-flex min-h-11 items-center self-start rounded-pixel-step bg-primary px-4 font-semibold text-white shadow-lip"
+            >
+              {t("indexing.goToWorld")}
+            </Link>
           </aside>
         </div>
       )}

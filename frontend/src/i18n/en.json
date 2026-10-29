@@ -86,7 +86,15 @@
       "indexing_failed": "We couldn't read this file. Try uploading it again.",
       "nickname_invalid": "Nicknames use 3 to 32 letters, digits, - or _.",
       "sign_in_required": "Please sign in first.",
-      "try_again": "Something went wrong. Please try again."
+      "try_again": "Something went wrong. Please try again.",
+      "nickname_taken": "That nickname is taken. Try adding a number.",
+      "login_failed": "Nickname or password doesn't match.",
+      "password_short": "Use at least 8 characters for your password.",
+      "avatar_invalid": "That avatar option doesn't exist.",
+      "cosmetic_locked": "Earn more points to unlock this.",
+      "placement_no_material": "This island has no course material yet. Upload some first.",
+      "placement_not_ready": "The placement quiz isn't ready yet.",
+      "placement_incomplete": "Answer every question first."
     },
     "mascot": {
       "waving": "The Sidi Bou Said cat, waving",
@@ -128,6 +136,13 @@
       "local": "Local",
       "cloud": "Cloud",
       "auto": "auto"
+    },
+    "buildings": {
+      "quiz_hall": "Quiz Hall",
+      "socratic_tutor": "Socratic Tutor",
+      "study_studio": "Study Studio",
+      "audio_studio": "Audio Studio",
+      "teachback_arena": "Teach-Back Arena"
     }
   },
   "styleguide": {
@@ -387,7 +402,8 @@
         "done": "Done"
       },
       "tip": "While you wait: the first island you finish gets a free placement quiz, so every building starts at your level.",
-      "tipLabel": "While you wait:"
+      "tipLabel": "While you wait:",
+      "goToWorld": "Go to my world"
     },
     "invite": {
       "title": "Invite your class",
@@ -400,5 +416,308 @@
       "hint": "Works in WhatsApp, Messenger, email, anywhere you share a link."
     },
     "worldLabel": "World"
+  },
+  "landing": {
+    "title": "Your courses, turned into islands you explore",
+    "body": "Upload your slides and notes. Each course becomes an island with five places to learn — quizzes, a tutor that asks you questions back, flashcards, audio and a forum to explain ideas to your class.",
+    "start": "Start exploring",
+    "continue": "Continue",
+    "free": "Free to start. Hints, not answers.",
+    "haveAccount": "Already exploring?",
+    "signIn": "Sign in",
+    "buildings": "The five buildings on every island",
+    "sample": {
+      "calculus": "Calculus I",
+      "dataStructures": "Data Structures",
+      "english": "Technical English"
+    }
+  },
+  "auth": {
+    "nickname": "Nickname",
+    "nicknameHelp": "Your class sees this name. No real names or photos.",
+    "nicknameRequired": "Pick a nickname.",
+    "password": "Password",
+    "passwordHelp": "At least {min} characters.",
+    "signup": {
+      "title": "Make your explorer",
+      "submit": "Create my account",
+      "other": "Already have an account?",
+      "otherLink": "Sign in"
+    },
+    "signin": {
+      "title": "Welcome back",
+      "submit": "Sign in",
+      "other": "New here?",
+      "otherLink": "Create an account"
+    }
+  },
+  "onboarding": {
+    "progress": "Step {n} of {total} · {name}",
+    "steps": {
+      "profile": "About you",
+      "style": "How you learn",
+      "goals": "Goals and time",
+      "avatar": "Your avatar",
+      "languages": "Languages"
+    },
+    "skip": "Skip for now",
+    "back": "Back",
+    "continue": "Continue",
+    "setSail": "Set sail",
+    "profile": {
+      "title": "A little about your studies",
+      "body": "All optional. We use it only to suggest what to study, never to judge you.",
+      "university": "University",
+      "field": "Field of study",
+      "year": "Year"
+    },
+    "style": {
+      "question": "Question {n} of {total}",
+      "help": "Pick the one that feels most like you. There's no wrong answer, and you can change it later.",
+      "selected": "Selected",
+      "formula": {
+        "title": "You're learning a new formula. You'd rather…",
+        "visual": {
+          "title": "See it as a diagram",
+          "body": "Draw it out so I can see where each part comes from."
+        },
+        "practice": {
+          "title": "Try a few examples",
+          "body": "Give me three problems and let me get my hands dirty."
+        },
+        "listening": {
+          "title": "Hear it explained",
+          "body": "Talk me through it, like a podcast on the way to class."
+        },
+        "teaching": {
+          "title": "Explain it to a friend",
+          "body": "I only really get it once I've said it out loud."
+        }
+      },
+      "exam": {
+        "title": "An exam is next week. You'd start by…",
+        "visual": {
+          "title": "Making a mind map",
+          "body": "One page that shows how the chapters connect."
+        },
+        "practice": {
+          "title": "Doing past questions",
+          "body": "Practise until the questions feel familiar."
+        },
+        "listening": {
+          "title": "Listening to a recap",
+          "body": "A short audio summary of each chapter."
+        },
+        "teaching": {
+          "title": "Studying with a classmate",
+          "body": "Taking turns explaining the hard parts."
+        }
+      },
+      "lecture": {
+        "title": "After a lecture, what helps it stick?",
+        "visual": {
+          "title": "Rewriting it as a chart",
+          "body": "Boxes, arrows and colours."
+        },
+        "practice": {
+          "title": "A quick quiz",
+          "body": "Five questions to check I got it."
+        },
+        "listening": {
+          "title": "Replaying the key points",
+          "body": "Hearing it again in my own time."
+        },
+        "teaching": {
+          "title": "Teaching it back",
+          "body": "Explaining it to someone who missed it."
+        }
+      },
+      "stuck": {
+        "title": "You're stuck on a problem. You'd like…",
+        "visual": {
+          "title": "A picture of the idea",
+          "body": "A sketch that shows what is going on."
+        },
+        "practice": {
+          "title": "A similar solved example",
+          "body": "Then I try mine again."
+        },
+        "listening": {
+          "title": "Someone to talk me through it",
+          "body": "Step by step, out loud."
+        },
+        "teaching": {
+          "title": "To explain where I'm stuck",
+          "body": "Saying it often shows me the gap."
+        }
+      }
+    },
+    "goals": {
+      "title": "What are you aiming for?",
+      "goal": "My goal",
+      "pass": "Pass the exam",
+      "grade": "Get a target grade",
+      "deep": "Really understand it",
+      "minutes": "Time per day",
+      "minutesValue": "{m} min",
+      "reminder": "Daily reminder (optional)"
+    },
+    "result": {
+      "kicker": "Your learning style",
+      "title": "You learn best with {a} and {b}",
+      "titleSkipped": "Every building is open to you",
+      "styles": {
+        "visual": "visuals",
+        "practice": "practice",
+        "listening": "listening",
+        "teaching": "teaching others"
+      },
+      "labels": {
+        "visual": "Visual",
+        "practice": "Practice",
+        "listening": "Listening",
+        "teaching": "Teaching"
+      },
+      "suggest": "We'll point you to {a} and {b} first. Every building stays open to you."
+    },
+    "avatar": {
+      "title": "Make your explorer",
+      "preview": "Your avatar",
+      "nickname": "Nickname",
+      "nicknameHelp": "Your class sees this name. No real names or photos.",
+      "skin": "Skin tone",
+      "outfit": "Outfit",
+      "extras": "Extras",
+      "unlockMore": "Unlock more with points",
+      "locked": "Locked",
+      "points": "{count, plural, one {# pt} other {# pts}}",
+      "wearing": "Wearing",
+      "free": "Free",
+      "option": "{legend} {n}",
+      "items": {
+        "cap": "Blue cap",
+        "glasses": "Glasses",
+        "scarf": "Blue scarf",
+        "chechia": "Chechia",
+        "headphones": "Headphones"
+      }
+    },
+    "languages": {
+      "title": "Your languages",
+      "body": "The AI answers in the language you write in. Pick the ones you study in.",
+      "study": "I study in",
+      "ui": "App language",
+      "leaderboard": "Show me on the class leaderboard",
+      "leaderboardHelp": "Only your nickname and points. You can change this any time."
+    }
+  },
+  "map": {
+    "title": "World {name}",
+    "hint": "Click an island to sail there",
+    "view": {
+      "label": "View",
+      "map": "Map",
+      "list": "List view"
+    },
+    "zoom": {
+      "label": "Zoom",
+      "in": "Zoom in",
+      "out": "Zoom out"
+    },
+    "island": {
+      "mastery": "{percent}% mastery",
+      "rising": "Rising soon: waiting for material",
+      "waitingPlacement": "Waiting for your placement quiz",
+      "startPlacement": "Start 3-minute quiz",
+      "startPlacementFor": "Start the placement quiz for {name}",
+      "open": "Sail to {name}"
+    },
+    "list": {
+      "chapters": "{count, plural, one {# chapter} other {# chapters}}",
+      "open": "Open"
+    },
+    "class": {
+      "title": "Your class",
+      "members": "{count, plural, one {# explorer} other {# explorers}}",
+      "you": "(you)",
+      "code": "Class code",
+      "copy": "Copy code",
+      "copied": "Copied!",
+      "addMaterial": "Add course material"
+    },
+    "empty": {
+      "title": "This world is still all sea",
+      "body": "{creator} created {world} and invited you. Islands rise here as soon as someone uploads course material.",
+      "bodyCreator": "You created {world}. Islands rise here as soon as course material is uploaded.",
+      "step1": "A classmate uploads a course",
+      "step2": "We read it in a few minutes",
+      "step3": "Your island appears",
+      "upload": "Upload course material",
+      "waiting": "{count, plural, =0 {Invite your class} one {# classmate is waiting with you} other {# classmates are waiting with you}}",
+      "code": "class code"
+    },
+    "topbar": {
+      "world": "World",
+      "newWorld": "Create or join another world…",
+      "account": "Account of {nickname}",
+      "signOut": "Sign out"
+    }
+  },
+  "island": {
+    "back": "World map",
+    "hint": "Click a building to enter",
+    "placement": {
+      "title": "Take a 3-minute placement quiz to unlock your level.",
+      "body": "8 questions, no coins needed. Every building then starts at the right difficulty.",
+      "start": "Start placement quiz"
+    },
+    "costs": {
+      "teachback": "Ask {ask} · Answer free",
+      "freeIfCached": "Free if made · {cost}"
+    },
+    "mastery": "{percent}% mastery",
+    "levelNotSet": "level not set yet",
+    "chapters": "Chapters",
+    "chapterMastery": "Mastery of {title}",
+    "notStarted": "Not started",
+    "noMaterial": "No material yet",
+    "now": {
+      "title": "On this island now",
+      "studying": "{count, plural, one {# classmate studying} other {# classmates studying}}",
+      "studyingChapter": "{count, plural, one {# classmate studying {chapter}} other {# classmates studying {chapter}}}",
+      "nobody": "Nobody else right now."
+    },
+    "freeNote": "Notes, flashcards and past quizzes your class already made here stay free to open.",
+    "dialog": {
+      "chapter": "Chapter",
+      "level": "Level",
+      "cost": "Cost",
+      "balanceAfter": "Balance after",
+      "short": "Not enough coins today. Coins refill at midnight.",
+      "cancel": "Cancel",
+      "confirm": "Enter"
+    },
+    "soon": {
+      "body": "This building opens in the next update. Your coins were not spent.",
+      "back": "Back to the island"
+    }
+  },
+  "placement": {
+    "title": "Placement quiz",
+    "leave": "Leave",
+    "options": "Answers",
+    "noPressure": "No coins, no score on the leaderboard: this only sets your starting level.",
+    "back": "Back",
+    "next": "Next",
+    "finish": "See my level",
+    "result": {
+      "title": "Your starting level",
+      "beginner": "We'll start from the foundations and build up.",
+      "intermediate": "You know the basics: we'll practise and go further.",
+      "advanced": "You're ahead: expect harder questions and deeper ideas.",
+      "score": "{correct} of {total} right",
+      "chapter": "{correct} / {asked}",
+      "toIsland": "Go to the island"
+    }
   }
 }

@@ -40,7 +40,7 @@ export function JoinCard({ initialCode = "" }: { initialCode?: string }) {
   const [code, setCode] = useState(initialCode);
   const join = useMutation({
     mutationFn: (c: string) => api.joinWorld(c),
-    onSuccess: (world) => void navigate(`/worlds/${world.id}/indexing`),
+    onSuccess: (world) => void navigate(`/worlds/${world.id}`),
   });
   const submit = (e: FormEvent) => {
     e.preventDefault();

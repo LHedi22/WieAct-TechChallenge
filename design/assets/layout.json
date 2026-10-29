@@ -1,0 +1,64 @@
+{
+  "$comment": "Positions for the world map and the island view, in % of the scene (x from the start edge of the scene, which is NOT mirrored in RTL). islands[n] = slots for a world with n courses, in course order. Each slot reserves its label space (below or above the island) so labels never overlap in either direction (DESIGN.md mockup fix 11). w = island width in % of the scene width.",
+  "islands": {
+    "1": [{ "x": 50, "y": 45, "w": 34, "label": "below" }],
+    "2": [
+      { "x": 28, "y": 40, "w": 28, "label": "below" },
+      { "x": 72, "y": 52, "w": 28, "label": "below" }
+    ],
+    "3": [
+      { "x": 22, "y": 32, "w": 24, "label": "below" },
+      { "x": 75, "y": 36, "w": 24, "label": "below" },
+      { "x": 45, "y": 70, "w": 24, "label": "above" }
+    ],
+    "4": [
+      { "x": 20, "y": 26, "w": 22, "label": "below" },
+      { "x": 62, "y": 22, "w": 20, "label": "below" },
+      { "x": 80, "y": 62, "w": 22, "label": "above" },
+      { "x": 30, "y": 72, "w": 22, "label": "above" }
+    ],
+    "5": [
+      { "x": 16, "y": 24, "w": 20, "label": "below" },
+      { "x": 50, "y": 18, "w": 18, "label": "below" },
+      { "x": 82, "y": 34, "w": 20, "label": "below" },
+      { "x": 22, "y": 72, "w": 20, "label": "above" },
+      { "x": 58, "y": 70, "w": 18, "label": "above" }
+    ],
+    "6": [
+      { "x": 14, "y": 24, "w": 18, "label": "below" },
+      { "x": 46, "y": 18, "w": 17, "label": "below" },
+      { "x": 80, "y": 26, "w": 18, "label": "below" },
+      { "x": 18, "y": 74, "w": 18, "label": "above" },
+      { "x": 50, "y": 70, "w": 17, "label": "above" },
+      { "x": 82, "y": 74, "w": 18, "label": "above" }
+    ],
+    "7": [
+      { "x": 12, "y": 22, "w": 16, "label": "below" },
+      { "x": 38, "y": 16, "w": 15, "label": "below" },
+      { "x": 64, "y": 20, "w": 15, "label": "below" },
+      { "x": 88, "y": 30, "w": 15, "label": "below" },
+      { "x": 20, "y": 74, "w": 16, "label": "above" },
+      { "x": 50, "y": 72, "w": 15, "label": "above" },
+      { "x": 80, "y": 76, "w": 15, "label": "above" }
+    ],
+    "8": [
+      { "x": 12, "y": 22, "w": 15, "label": "below" },
+      { "x": 37, "y": 16, "w": 14, "label": "below" },
+      { "x": 62, "y": 20, "w": 14, "label": "below" },
+      { "x": 88, "y": 26, "w": 14, "label": "below" },
+      { "x": 12, "y": 76, "w": 15, "label": "above" },
+      { "x": 37, "y": 72, "w": 14, "label": "above" },
+      { "x": 62, "y": 76, "w": 14, "label": "above" },
+      { "x": 88, "y": 72, "w": 14, "label": "above" }
+    ]
+  },
+  "boat": { "x": 40, "y": 46 },
+  "buildings": {
+    "quiz_hall": { "x": 24, "y": 32 },
+    "socratic_tutor": { "x": 50, "y": 20 },
+    "study_studio": { "x": 76, "y": 32 },
+    "audio_studio": { "x": 28, "y": 68 },
+    "teachback_arena": { "x": 70, "y": 68 }
+  },
+  "explorer": { "x": 50, "y": 48 }
+}

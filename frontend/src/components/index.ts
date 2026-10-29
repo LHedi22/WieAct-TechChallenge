@@ -1,3 +1,13 @@
+export { Avatar } from "./Avatar";
+export {
+  type AvatarLook,
+  DEFAULT_LOOK,
+  EXTRAS,
+  OUTFIT_SWATCH,
+  OUTFITS,
+  SKIN_SWATCH,
+  SKINS,
+} from "./avatarLook";
 export { Banner, type BannerKind } from "./Banner";
 export { Bidi } from "./Bidi";
 export { Chip, type ChipKind } from "./Chip";

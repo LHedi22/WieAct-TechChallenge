@@ -7,7 +7,18 @@ import en from "./en.json";
 import fr from "./fr.json";
 import type { Language } from "./languages";
 
-export const NAMESPACES = ["common", "styleguide", "dev", "worlds"] as const;
+export const NAMESPACES = [
+  "common",
+  "styleguide",
+  "dev",
+  "worlds",
+  "landing",
+  "auth",
+  "onboarding",
+  "map",
+  "island",
+  "placement",
+] as const;
 
 /** Locale files hold one object per namespace; `_review` (Darija review notes) is metadata. */
 function toResource(file: Record<string, unknown>): Resource[string] {

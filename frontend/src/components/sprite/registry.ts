@@ -41,6 +41,10 @@ export const SPRITES = {
   avatar4: { w: 16, h: 16, fill: c.sand.DEFAULT, accent: c.sea.DEFAULT, motif: "band" },
   avatar5: { w: 16, h: 16, fill: c.sand.DEFAULT, accent: c.bougainvillea, motif: "band" },
   avatar6: { w: 16, h: 16, fill: c.sand.DEFAULT, accent: c.island[4]!, motif: "band" },
+  // map pieces
+  island: { w: 48, h: 32, fill: c.olive.light, accent: c.sand.DEFAULT, motif: "band" },
+  islandLocked: { w: 48, h: 32, fill: c.sand.dark, accent: c.whitewash, motif: "band" },
+  boat: { w: 16, h: 16, fill: c.whitewash, accent: c.terracotta.DEFAULT, motif: "roof" },
   // buildings (32×32)
   quizHall: { w: 32, h: 32, fill: c.sand.dark, accent: c.terracotta.DEFAULT, motif: "columns" },
   tutorCafe: { w: 32, h: 32, fill: c.whitewash, accent: c.primary.DEFAULT, motif: "roof" },

@@ -86,7 +86,15 @@
       "indexing_failed": "Nous n'avons pas pu lire ce fichier. Essaie de le téléverser à nouveau.",
       "nickname_invalid": "Un pseudo contient 3 à 32 lettres, chiffres, - ou _.",
       "sign_in_required": "Connecte-toi d'abord.",
-      "try_again": "Un problème est survenu. Réessaie."
+      "try_again": "Un problème est survenu. Réessaie.",
+      "nickname_taken": "Ce pseudo est déjà pris. Ajoute un chiffre.",
+      "login_failed": "Pseudo ou mot de passe incorrect.",
+      "password_short": "Utilise au moins 8 caractères pour ton mot de passe.",
+      "avatar_invalid": "Cette option d'avatar n'existe pas.",
+      "cosmetic_locked": "Gagne plus de points pour débloquer ceci.",
+      "placement_no_material": "Cette île n'a pas encore de contenu. Ajoute-en d'abord.",
+      "placement_not_ready": "Le quiz de placement n'est pas encore prêt.",
+      "placement_incomplete": "Réponds d'abord à toutes les questions."
     },
     "mascot": {
       "waving": "Le chat de Sidi Bou Saïd fait coucou",
@@ -128,6 +136,13 @@
       "local": "Locale",
       "cloud": "Cloud",
       "auto": "auto"
+    },
+    "buildings": {
+      "quiz_hall": "Salle des quiz",
+      "socratic_tutor": "Tuteur socratique",
+      "study_studio": "Studio d'étude",
+      "audio_studio": "Studio audio",
+      "teachback_arena": "Arène Teach-Back"
     }
   },
   "styleguide": {
@@ -387,7 +402,8 @@
         "done": "Terminé"
       },
       "tip": "Pendant l'attente : la première île terminée t'offre un quiz de placement gratuit, pour que chaque bâtiment démarre à ton niveau.",
-      "tipLabel": "Pendant l'attente :"
+      "tipLabel": "Pendant l'attente :",
+      "goToWorld": "Aller à mon monde"
     },
     "invite": {
       "title": "Invite ta classe",
@@ -400,5 +416,308 @@
       "hint": "Fonctionne sur WhatsApp, Messenger, par e-mail, partout où tu partages un lien."
     },
     "worldLabel": "Monde"
+  },
+  "landing": {
+    "title": "Tes cours, transformés en îles à explorer",
+    "body": "Ajoute tes diapos et tes notes. Chaque cours devient une île avec cinq lieux pour apprendre : des quiz, un tuteur qui te pose des questions, des fiches, de l'audio et un forum pour expliquer à ta classe.",
+    "start": "Commencer l'exploration",
+    "continue": "Continuer",
+    "free": "Gratuit pour commencer. Des indices, pas des réponses.",
+    "haveAccount": "Tu explores déjà ?",
+    "signIn": "Se connecter",
+    "buildings": "Les cinq bâtiments de chaque île",
+    "sample": {
+      "calculus": "Analyse I",
+      "dataStructures": "Structures de données",
+      "english": "Anglais technique"
+    }
+  },
+  "auth": {
+    "nickname": "Pseudo",
+    "nicknameHelp": "Ta classe voit ce nom. Pas de vrai nom ni de photo.",
+    "nicknameRequired": "Choisis un pseudo.",
+    "password": "Mot de passe",
+    "passwordHelp": "Au moins {min} caractères.",
+    "signup": {
+      "title": "Crée ton explorateur",
+      "submit": "Créer mon compte",
+      "other": "Déjà un compte ?",
+      "otherLink": "Se connecter"
+    },
+    "signin": {
+      "title": "Bon retour",
+      "submit": "Se connecter",
+      "other": "Nouveau ici ?",
+      "otherLink": "Créer un compte"
+    }
+  },
+  "onboarding": {
+    "progress": "Étape {n} sur {total} · {name}",
+    "steps": {
+      "profile": "À propos de toi",
+      "style": "Comment tu apprends",
+      "goals": "Objectifs et temps",
+      "avatar": "Ton avatar",
+      "languages": "Langues"
+    },
+    "skip": "Passer pour l'instant",
+    "back": "Retour",
+    "continue": "Continuer",
+    "setSail": "Larguer les amarres",
+    "profile": {
+      "title": "Un peu sur tes études",
+      "body": "Tout est facultatif. Cela sert seulement à te proposer quoi réviser, jamais à te juger.",
+      "university": "Université",
+      "field": "Filière",
+      "year": "Année"
+    },
+    "style": {
+      "question": "Question {n} sur {total}",
+      "help": "Choisis ce qui te ressemble le plus. Il n'y a pas de mauvaise réponse, et tu pourras changer plus tard.",
+      "selected": "Choisi",
+      "formula": {
+        "title": "Tu découvres une nouvelle formule. Tu préfères…",
+        "visual": {
+          "title": "La voir en schéma",
+          "body": "La dessiner pour voir d'où vient chaque partie."
+        },
+        "practice": {
+          "title": "Essayer quelques exemples",
+          "body": "Trois exercices et je mets les mains dedans."
+        },
+        "listening": {
+          "title": "L'entendre expliquer",
+          "body": "Qu'on me l'explique, comme un podcast en allant en cours."
+        },
+        "teaching": {
+          "title": "L'expliquer à un ami",
+          "body": "Je ne comprends vraiment qu'en le disant à voix haute."
+        }
+      },
+      "exam": {
+        "title": "L'examen est la semaine prochaine. Tu commences par…",
+        "visual": {
+          "title": "Faire une carte mentale",
+          "body": "Une page qui montre les liens entre les chapitres."
+        },
+        "practice": {
+          "title": "Refaire des annales",
+          "body": "M'entraîner jusqu'à ce que les questions me soient familières."
+        },
+        "listening": {
+          "title": "Écouter un résumé",
+          "body": "Un court résumé audio de chaque chapitre."
+        },
+        "teaching": {
+          "title": "Réviser avec un camarade",
+          "body": "Chacun son tour explique les parties difficiles."
+        }
+      },
+      "lecture": {
+        "title": "Après un cours, qu'est-ce qui t'aide à retenir ?",
+        "visual": {
+          "title": "Le remettre en schéma",
+          "body": "Des cases, des flèches et des couleurs."
+        },
+        "practice": {
+          "title": "Un petit quiz",
+          "body": "Cinq questions pour vérifier que j'ai compris."
+        },
+        "listening": {
+          "title": "Réécouter les points clés",
+          "body": "L'entendre encore, à mon rythme."
+        },
+        "teaching": {
+          "title": "Le réexpliquer",
+          "body": "L'expliquer à quelqu'un qui était absent."
+        }
+      },
+      "stuck": {
+        "title": "Tu bloques sur un exercice. Tu voudrais…",
+        "visual": {
+          "title": "Une image de l'idée",
+          "body": "Un croquis qui montre ce qui se passe."
+        },
+        "practice": {
+          "title": "Un exemple corrigé proche",
+          "body": "Puis je réessaie le mien."
+        },
+        "listening": {
+          "title": "Qu'on m'accompagne",
+          "body": "Étape par étape, à voix haute."
+        },
+        "teaching": {
+          "title": "Expliquer où je bloque",
+          "body": "Le dire me montre souvent ce qui manque."
+        }
+      }
+    },
+    "goals": {
+      "title": "Quel est ton objectif ?",
+      "goal": "Mon objectif",
+      "pass": "Valider l'examen",
+      "grade": "Viser une note",
+      "deep": "Vraiment comprendre",
+      "minutes": "Temps par jour",
+      "minutesValue": "{m} min",
+      "reminder": "Rappel quotidien (facultatif)"
+    },
+    "result": {
+      "kicker": "Ton style d'apprentissage",
+      "title": "Tu apprends le mieux avec {a} et {b}",
+      "titleSkipped": "Tous les bâtiments te sont ouverts",
+      "styles": {
+        "visual": "le visuel",
+        "practice": "la pratique",
+        "listening": "l'écoute",
+        "teaching": "l'explication aux autres"
+      },
+      "labels": {
+        "visual": "Visuel",
+        "practice": "Pratique",
+        "listening": "Écoute",
+        "teaching": "Enseigner"
+      },
+      "suggest": "On te guidera d'abord vers {a} et {b}. Tous les bâtiments restent ouverts."
+    },
+    "avatar": {
+      "title": "Crée ton explorateur",
+      "preview": "Ton avatar",
+      "nickname": "Pseudo",
+      "nicknameHelp": "Ta classe voit ce nom. Pas de vrai nom ni de photo.",
+      "skin": "Teint",
+      "outfit": "Tenue",
+      "extras": "Accessoires",
+      "unlockMore": "Débloque-en plus avec des points",
+      "locked": "Verrouillé",
+      "points": "{count, plural, one {# pt} other {# pts}}",
+      "wearing": "Porté",
+      "free": "Gratuit",
+      "option": "{legend} {n}",
+      "items": {
+        "cap": "Casquette bleue",
+        "glasses": "Lunettes",
+        "scarf": "Écharpe bleue",
+        "chechia": "Chéchia",
+        "headphones": "Casque audio"
+      }
+    },
+    "languages": {
+      "title": "Tes langues",
+      "body": "L'IA répond dans la langue où tu écris. Choisis celles de tes cours.",
+      "study": "J'étudie en",
+      "ui": "Langue de l'application",
+      "leaderboard": "M'afficher dans le classement de la classe",
+      "leaderboardHelp": "Seulement ton pseudo et tes points. Modifiable à tout moment."
+    }
+  },
+  "map": {
+    "title": "Monde {name}",
+    "hint": "Clique sur une île pour y naviguer",
+    "view": {
+      "label": "Affichage",
+      "map": "Carte",
+      "list": "Liste"
+    },
+    "zoom": {
+      "label": "Zoom",
+      "in": "Zoom avant",
+      "out": "Zoom arrière"
+    },
+    "island": {
+      "mastery": "{percent} % de maîtrise",
+      "rising": "Bientôt : en attente de contenu",
+      "waitingPlacement": "En attente de ton quiz de placement",
+      "startPlacement": "Quiz de 3 minutes",
+      "startPlacementFor": "Commencer le quiz de placement de {name}",
+      "open": "Naviguer vers {name}"
+    },
+    "list": {
+      "chapters": "{count, plural, one {# chapitre} other {# chapitres}}",
+      "open": "Ouvrir"
+    },
+    "class": {
+      "title": "Ta classe",
+      "members": "{count, plural, one {# explorateur} other {# explorateurs}}",
+      "you": "(toi)",
+      "code": "Code de la classe",
+      "copy": "Copier le code",
+      "copied": "Copié !",
+      "addMaterial": "Ajouter du contenu"
+    },
+    "empty": {
+      "title": "Ce monde n'est encore que la mer",
+      "body": "{creator} a créé {world} et t'a invité. Les îles émergent dès que quelqu'un ajoute du contenu.",
+      "bodyCreator": "Tu as créé {world}. Les îles émergent dès que du contenu est ajouté.",
+      "step1": "Un camarade ajoute un cours",
+      "step2": "On le lit en quelques minutes",
+      "step3": "Ton île apparaît",
+      "upload": "Ajouter du contenu",
+      "waiting": "{count, plural, =0 {Invite ta classe} one {# camarade attend avec toi} other {# camarades attendent avec toi}}",
+      "code": "code de la classe"
+    },
+    "topbar": {
+      "world": "Monde",
+      "newWorld": "Créer ou rejoindre un autre monde…",
+      "account": "Compte de {nickname}",
+      "signOut": "Se déconnecter"
+    }
+  },
+  "island": {
+    "back": "Carte du monde",
+    "hint": "Clique sur un bâtiment pour entrer",
+    "placement": {
+      "title": "Fais un quiz de placement de 3 minutes pour fixer ton niveau.",
+      "body": "8 questions, sans pièces. Chaque bâtiment démarre ensuite à la bonne difficulté.",
+      "start": "Commencer le quiz"
+    },
+    "costs": {
+      "teachback": "Demander {ask} · Répondre gratuit",
+      "freeIfCached": "Gratuit si déjà fait · {cost}"
+    },
+    "mastery": "{percent} % de maîtrise",
+    "levelNotSet": "niveau pas encore fixé",
+    "chapters": "Chapitres",
+    "chapterMastery": "Maîtrise de {title}",
+    "notStarted": "Pas commencé",
+    "noMaterial": "Pas encore de contenu",
+    "now": {
+      "title": "Sur cette île en ce moment",
+      "studying": "{count, plural, one {# camarade révise} other {# camarades révisent}}",
+      "studyingChapter": "{count, plural, one {# camarade révise {chapter}} other {# camarades révisent {chapter}}}",
+      "nobody": "Personne d'autre pour l'instant."
+    },
+    "freeNote": "Les fiches, notes et anciens quiz déjà créés par ta classe ici restent gratuits.",
+    "dialog": {
+      "chapter": "Chapitre",
+      "level": "Niveau",
+      "cost": "Coût",
+      "balanceAfter": "Solde après",
+      "short": "Pas assez de pièces aujourd'hui. Elles se rechargent à minuit.",
+      "cancel": "Annuler",
+      "confirm": "Entrer"
+    },
+    "soon": {
+      "body": "Ce bâtiment ouvre à la prochaine mise à jour. Tes pièces n'ont pas été dépensées.",
+      "back": "Retour à l'île"
+    }
+  },
+  "placement": {
+    "title": "Quiz de placement",
+    "leave": "Quitter",
+    "options": "Réponses",
+    "noPressure": "Sans pièces, sans classement : cela fixe seulement ton niveau de départ.",
+    "back": "Retour",
+    "next": "Suivant",
+    "finish": "Voir mon niveau",
+    "result": {
+      "title": "Ton niveau de départ",
+      "beginner": "On part des bases et on construit ensemble.",
+      "intermediate": "Tu connais les bases : on s'entraîne et on va plus loin.",
+      "advanced": "Tu es en avance : attends-toi à des questions plus poussées.",
+      "score": "{correct} sur {total} justes",
+      "chapter": "{correct} / {asked}",
+      "toIsland": "Aller à l'île"
+    }
   }
 }

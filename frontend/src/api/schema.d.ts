@@ -4,2422 +4,2422 @@
  */
 
 export interface paths {
-    "/api/health": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Health */
-        get: operations["health_api_health_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  "/api/health": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/system/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Status */
-        get: operations["status_api_system_status_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Health */
+    get: operations["health_api_health_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/system/status": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/jobs/{job_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Job
-         * @description Polled by the UI every 1.5 s (no streaming on the platform).
-         */
-        get: operations["get_job_api_jobs__job_id__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Status */
+    get: operations["status_api_system_status_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/jobs/{job_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/jobs/{job_id}/cancel": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Cancel Job
-         * @description "Cancel and keep my coins" — only while the job is still in the queue.
-         */
-        post: operations["cancel_job_api_jobs__job_id__cancel_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Get Job
+     * @description Polled by the UI every 1.5 s (no streaming on the platform).
+     */
+    get: operations["get_job_api_jobs__job_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/jobs/{job_id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/admin/stats": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Stats */
-        get: operations["stats_api_admin_stats_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Cancel Job
+     * @description "Cancel and keep my coins" — only while the job is still in the queue.
+     */
+    post: operations["cancel_job_api_jobs__job_id__cancel_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/stats": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/auth/signup": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Signup */
-        post: operations["signup_api_auth_signup_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Stats */
+    get: operations["stats_api_admin_stats_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/auth/signup": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/auth/login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Login */
-        post: operations["login_api_auth_login_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Signup */
+    post: operations["signup_api_auth_signup_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/auth/login": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/auth/logout": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Logout */
-        post: operations["logout_api_auth_logout_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Login */
+    post: operations["login_api_auth_login_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/auth/logout": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/auth/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Me */
-        get: operations["me_api_auth_me_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Update Me */
-        patch: operations["update_me_api_auth_me_patch"];
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Logout */
+    post: operations["logout_api_auth_logout_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/auth/me": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/economy": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Economy */
-        get: operations["get_economy_api_economy_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Me */
+    get: operations["me_api_auth_me_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Update Me */
+    patch: operations["update_me_api_auth_me_patch"];
+    trace?: never;
+  };
+  "/api/economy": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/wallet": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Wallet */
-        get: operations["get_wallet_api_wallet_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get Economy */
+    get: operations["get_economy_api_economy_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/wallet": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/onboarding/style": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Score Style */
-        post: operations["score_style_api_onboarding_style_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get Wallet */
+    get: operations["get_wallet_api_wallet_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/onboarding/style": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/profile": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Profile */
-        get: operations["get_profile_api_profile_get"];
-        /** Put Profile */
-        put: operations["put_profile_api_profile_put"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Score Style */
+    post: operations["score_style_api_onboarding_style_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/profile": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/placement/start": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Start */
-        post: operations["start_api_placement_start_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get Profile */
+    get: operations["get_profile_api_profile_get"];
+    /** Put Profile */
+    put: operations["put_profile_api_profile_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/placement/start": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/placement/{course_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Questions */
-        get: operations["questions_api_placement__course_id__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Start */
+    post: operations["start_api_placement_start_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/placement/{course_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/placement/finish": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Finish */
-        post: operations["finish_api_placement_finish_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Questions */
+    get: operations["questions_api_placement__course_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/placement/finish": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/worlds": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** My Worlds */
-        get: operations["my_worlds_api_worlds_get"];
-        put?: never;
-        /** Create World */
-        post: operations["create_world_api_worlds_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Finish */
+    post: operations["finish_api_placement_finish_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/worlds": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/worlds/join": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Join World */
-        post: operations["join_world_api_worlds_join_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** My Worlds */
+    get: operations["my_worlds_api_worlds_get"];
+    put?: never;
+    /** Create World */
+    post: operations["create_world_api_worlds_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/worlds/join": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/worlds/{world_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get World */
-        get: operations["get_world_api_worlds__world_id__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Join World */
+    post: operations["join_world_api_worlds_join_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/worlds/{world_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/worlds/{world_id}/courses": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Add Course */
-        post: operations["add_course_api_worlds__world_id__courses_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get World */
+    get: operations["get_world_api_worlds__world_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/worlds/{world_id}/courses": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/courses/{course_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Island */
-        get: operations["island_api_courses__course_id__get"];
-        put?: never;
-        post?: never;
-        /** Delete Course */
-        delete: operations["delete_course_api_courses__course_id__delete"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Add Course */
+    post: operations["add_course_api_worlds__world_id__courses_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/courses/{course_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/courses/{course_id}/chapters": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Add Chapter */
-        post: operations["add_chapter_api_courses__course_id__chapters_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Island */
+    get: operations["island_api_courses__course_id__get"];
+    put?: never;
+    post?: never;
+    /** Delete Course */
+    delete: operations["delete_course_api_courses__course_id__delete"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/courses/{course_id}/chapters": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/chapters/{chapter_id}/documents": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Upload Document
-         * @description One file per request (the UI uploads several in parallel and shows each one's state).
-         *     Indexing runs as a background job; poll GET /api/worlds/{id}/indexing.
-         */
-        post: operations["upload_document_api_chapters__chapter_id__documents_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Add Chapter */
+    post: operations["add_chapter_api_courses__course_id__chapters_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/chapters/{chapter_id}/documents": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/documents/{document_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Delete Document */
-        delete: operations["delete_document_api_documents__document_id__delete"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Upload Document
+     * @description One file per request (the UI uploads several in parallel and shows each one's state).
+     *     Indexing runs as a background job; poll GET /api/worlds/{id}/indexing.
+     */
+    post: operations["upload_document_api_chapters__chapter_id__documents_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/documents/{document_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/worlds/{world_id}/indexing": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Indexing
-         * @description Polled every 1.5 s by the "Raising your islands" screen.
-         */
-        get: operations["indexing_api_worlds__world_id__indexing_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete Document */
+    delete: operations["delete_document_api_documents__document_id__delete"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/worlds/{world_id}/indexing": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/worlds/{world_id}/map": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** World Map */
-        get: operations["world_map_api_worlds__world_id__map_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Indexing
+     * @description Polled every 1.5 s by the "Raising your islands" screen.
+     */
+    get: operations["indexing_api_worlds__world_id__indexing_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/worlds/{world_id}/map": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/courses/{course_id}/presence": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Presence
-         * @description The island view calls this every 30 s while open.
-         */
-        post: operations["presence_api_courses__course_id__presence_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** World Map */
+    get: operations["world_map_api_worlds__world_id__map_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/courses/{course_id}/presence": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/dev/demo-jobs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Create Demo Job */
-        post: operations["create_demo_job_api_dev_demo_jobs_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Presence
+     * @description The island view calls this every 30 s while open.
+     */
+    post: operations["presence_api_courses__course_id__presence_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/dev/demo-jobs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/dev/search-jobs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Create Search Job
-         * @description Vector search in a world (the M2 Done-when check); poll GET /api/jobs/{id} for hits.
-         */
-        post: operations["create_search_job_api_dev_search_jobs_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Create Demo Job */
+    post: operations["create_demo_job_api_dev_demo_jobs_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/dev/search-jobs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    get?: never;
+    put?: never;
+    /**
+     * Create Search Job
+     * @description Vector search in a world (the M2 Done-when check); poll GET /api/jobs/{id} for hits.
+     */
+    post: operations["create_search_job_api_dev_search_jobs_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        /**
-         * AskedQuestion
-         * @description A placement question as the student sees it: no answer, no difficulty.
-         */
-        AskedQuestion: {
-            /** I */
-            i: number;
-            /** Question */
-            question: string;
-            /** Options */
-            options: string[];
-        };
-        /** Avatar */
-        Avatar: {
-            /** Skin */
-            skin: string;
-            /** Outfit */
-            outfit: string;
-            /** Extra */
-            extra?: string | null;
-        };
-        /** Body_upload_document_api_chapters__chapter_id__documents_post */
-        Body_upload_document_api_chapters__chapter_id__documents_post: {
-            /** File */
-            file: string;
-        };
-        /** Building */
-        Building: {
-            /** Key */
-            key: string;
-            /** Cost */
-            cost: number;
-            /**
-             * Free If Cached
-             * @default false
-             */
-            free_if_cached: boolean;
-            /** Answer Cost */
-            answer_cost?: number | null;
-        };
-        /** BuildingCost */
-        BuildingCost: {
-            /** Cost */
-            cost: number;
-            /**
-             * Free If Cached
-             * @default false
-             */
-            free_if_cached: boolean;
-            /** Answer Cost */
-            answer_cost?: number | null;
-        };
-        /** ChapterIn */
-        ChapterIn: {
-            /** Title */
-            title: string;
-        };
-        /** ChapterOut */
-        ChapterOut: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Idx */
-            idx: number;
-            /** Title */
-            title: string;
-            /** Documents */
-            documents?: components["schemas"]["DocumentOut"][];
-        };
-        /** CourseIn */
-        CourseIn: {
-            /** Name */
-            name: string;
-            /** Chapters */
-            chapters?: string[];
-            /** Exam Date */
-            exam_date?: string | null;
-        };
-        /** CourseOut */
-        CourseOut: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Name */
-            name: string;
-            /** Color Key */
-            color_key: string;
-            /** Exam Date */
-            exam_date: string | null;
-            /** Chapters */
-            chapters?: components["schemas"]["ChapterOut"][];
-        };
-        /** DemoJobIn */
-        DemoJobIn: {
-            /**
-             * Lane
-             * @default interactive
-             * @enum {string}
-             */
-            lane: "interactive" | "background";
-            /**
-             * Language
-             * @default en
-             * @enum {string}
-             */
-            language: "en" | "fr" | "ar" | "ar-TN";
-            /**
-             * Cache Key
-             * @description set to make the result shareable/cached
-             */
-            cache_key?: string | null;
-        };
-        /** DocumentOut */
-        DocumentOut: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /**
-             * Chapter Id
-             * Format: uuid
-             */
-            chapter_id: string;
-            /** Filename */
-            filename: string;
-            /** Kind */
-            kind: string;
-            /** Size */
-            size: number;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "uploaded" | "parsing" | "tagging" | "embedding" | "ready" | "failed";
-            /** Progress */
-            progress: number;
-            /** Detail */
-            detail: {
-                [key: string]: unknown;
-            } | null;
-            /** Page Count */
-            page_count: number | null;
-            /** Error */
-            error: string | null;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-        };
-        /** EconomyOut */
-        EconomyOut: {
-            /** Daily Free Coins */
-            daily_free_coins: number;
-            /** Daily Earn Cap */
-            daily_earn_cap: number;
-            /** Exam Pass Daily Limit */
-            exam_pass_daily_limit: number;
-            /** Cost */
-            cost: {
-                [key: string]: number;
-            };
-            /** Earn */
-            earn: {
-                [key: string]: number;
-            };
-            /** Points */
-            points: {
-                [key: string]: number;
-            };
-            /** Peer Answer Threshold */
-            peer_answer_threshold: number;
-            /** Cosmetics */
-            cosmetics: {
-                [key: string]: number;
-            };
-            /** Buildings */
-            buildings: {
-                [key: string]: components["schemas"]["BuildingCost"];
-            };
-        };
-        /** FinishIn */
-        FinishIn: {
-            /**
-             * Course Id
-             * Format: uuid
-             */
-            course_id: string;
-            /** Answers */
-            answers: (number | null)[];
-        };
-        /** Graded */
-        Graded: {
-            /** Level */
-            level: string;
-            /** Correct */
-            correct: number;
-            /** Total */
-            total: number;
-            /** Percent */
-            percent: number;
-            /** Chapters */
-            chapters: {
-                [key: string]: unknown;
-            }[];
-        };
-        /** HTTPValidationError */
-        HTTPValidationError: {
-            /** Detail */
-            detail?: components["schemas"]["ValidationError"][];
-        };
-        /** Health */
-        Health: {
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "ok" | "error";
-            /**
-             * Db
-             * @enum {string}
-             */
-            db: "ok" | "error";
-            /**
-             * Qdrant
-             * @enum {string}
-             */
-            qdrant: "ok" | "error";
-            /** Provider */
-            provider: string;
-            /** App Env */
-            app_env: string;
-        };
-        /** IndexingChapter */
-        IndexingChapter: {
-            /**
-             * Chapter Id
-             * Format: uuid
-             */
-            chapter_id: string;
-            /**
-             * Course Id
-             * Format: uuid
-             */
-            course_id: string;
-            /** Course Name */
-            course_name: string;
-            /** Idx */
-            idx: number;
-            /** Title */
-            title: string;
-            /**
-             * State
-             * @enum {string}
-             */
-            state: "waiting" | "in_progress" | "done" | "failed";
-            /** Documents */
-            documents: components["schemas"]["DocumentOut"][];
-        };
-        /** IndexingOut */
-        IndexingOut: {
-            /**
-             * World Id
-             * Format: uuid
-             */
-            world_id: string;
-            /** Name */
-            name: string;
-            /** Join Code */
-            join_code: string;
-            /** Percent */
-            percent: number;
-            /** Eta S */
-            eta_s: number;
-            /** Done */
-            done: boolean;
-            /** Chapters */
-            chapters: components["schemas"]["IndexingChapter"][];
-            quizzes: components["schemas"]["IndexingQuizzes"];
-        };
-        /** IndexingQuizzes */
-        IndexingQuizzes: {
-            /**
-             * State
-             * @enum {string}
-             */
-            state: "waiting" | "in_progress" | "done";
-            /** Ready */
-            ready: number;
-        };
-        /** IslandChapter */
-        IslandChapter: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Idx */
-            idx: number;
-            /** Title */
-            title: string;
-            /** Ready */
-            ready: boolean;
-            /** Mastery */
-            mastery: number | null;
-            /** Weak */
-            weak: boolean;
-        };
-        /** IslandOut */
-        IslandOut: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /**
-             * World Id
-             * Format: uuid
-             */
-            world_id: string;
-            /** Name */
-            name: string;
-            /** Color Key */
-            color_key: string;
-            /** Level */
-            level: string | null;
-            /** Mastery */
-            mastery: number;
-            /** Chapters */
-            chapters: components["schemas"]["IslandChapter"][];
-            /** Buildings */
-            buildings: components["schemas"]["Building"][];
-            /** Visitors */
-            visitors: components["schemas"]["Visitor"][];
-        };
-        /** JobCreated */
-        JobCreated: {
-            /** Job Id */
-            job_id: string;
-            /** Cost */
-            cost: number;
-            /** Cached */
-            cached: boolean;
-        };
-        /** JobView */
-        JobView: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Kind */
-            kind: string;
-            /** Lane */
-            lane: string;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "queued" | "running" | "done" | "failed" | "cancelled";
-            /** Stage */
-            stage: string | null;
-            /** Stages */
-            stages: string[];
-            /** Queue Position */
-            queue_position: number | null;
-            /** Eta S */
-            eta_s: number | null;
-            /** Waiting Reason */
-            waiting_reason: string | null;
-            /** Quick Mode */
-            quick_mode: boolean;
-            /** Cost */
-            cost: number;
-            /** Result */
-            result: {
-                [key: string]: unknown;
-            } | null;
-            /** Error */
-            error: string | null;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /** Finished At */
-            finished_at: string | null;
-        };
-        /** JoinIn */
-        JoinIn: {
-            /** Code */
-            code: string;
-        };
-        /** LoginIn */
-        LoginIn: {
-            /** Nickname */
-            nickname: string;
-            /** Password */
-            password: string;
-        };
-        /** MapCourse */
-        MapCourse: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Name */
-            name: string;
-            /** Color Key */
-            color_key: string;
-            /** Ready */
-            ready: boolean;
-            /** Chapters */
-            chapters: number;
-            /** Level */
-            level: string | null;
-            /** Mastery */
-            mastery: number;
-        };
-        /** MapOut */
-        MapOut: {
-            /**
-             * World Id
-             * Format: uuid
-             */
-            world_id: string;
-            /** Name */
-            name: string;
-            /** Join Code */
-            join_code: string;
-            /** Creator */
-            creator: string;
-            /** Is Creator */
-            is_creator: boolean;
-            /** Members */
-            members: components["schemas"]["Member"][];
-            /** Courses */
-            courses: components["schemas"]["MapCourse"][];
-        };
-        /** Me */
-        Me: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Nickname */
-            nickname: string;
-            /** Ui Language */
-            ui_language: string;
-            /** Onboarded */
-            onboarded: boolean;
-            /** Avatar */
-            avatar: {
-                [key: string]: unknown;
-            } | null;
-            /** Has Worlds */
-            has_worlds: boolean;
-        };
-        /** MeIn */
-        MeIn: {
-            /**
-             * Ui Language
-             * @enum {string}
-             */
-            ui_language: "en" | "fr" | "ar" | "ar-TN";
-        };
-        /** Member */
-        Member: {
-            /** Nickname */
-            nickname: string;
-            /** Avatar */
-            avatar: {
-                [key: string]: unknown;
-            } | null;
-            /** Is Me */
-            is_me: boolean;
-        };
-        /** PresenceIn */
-        PresenceIn: {
-            /** Chapter Id */
-            chapter_id?: string | null;
-        };
-        /** ProfileIn */
-        ProfileIn: {
-            /** University */
-            university?: string | null;
-            /** Field */
-            field?: string | null;
-            /** Year */
-            year?: number | null;
-            /** Languages */
-            languages?: ("en" | "fr" | "ar" | "ar-TN")[] | null;
-            /** Daily Minutes */
-            daily_minutes?: number | null;
-            /** Reminder Time */
-            reminder_time?: string | null;
-            /** Goal */
-            goal?: ("pass" | "grade" | "deep") | null;
-            /** Leaderboard Opt In */
-            leaderboard_opt_in?: boolean | null;
-            avatar?: components["schemas"]["Avatar"] | null;
-            /**
-             * Finish
-             * @default false
-             */
-            finish: boolean;
-        };
-        /** ProfileOut */
-        ProfileOut: {
-            /** University */
-            university: string | null;
-            /** Field */
-            field: string | null;
-            /** Year */
-            year: number | null;
-            /** Mix */
-            mix: {
-                [key: string]: number;
-            };
-            /** Languages */
-            languages: string[];
-            /** Daily Minutes */
-            daily_minutes: number | null;
-            /** Reminder Time */
-            reminder_time: string | null;
-            /** Goal */
-            goal: string | null;
-            /** Leaderboard Opt In */
-            leaderboard_opt_in: boolean;
-            /** Avatar */
-            avatar: {
-                [key: string]: unknown;
-            } | null;
-            /** Onboarded */
-            onboarded: boolean;
-        };
-        /** QuestionsOut */
-        QuestionsOut: {
-            /**
-             * Course Id
-             * Format: uuid
-             */
-            course_id: string;
-            /** Questions */
-            questions: components["schemas"]["AskedQuestion"][];
-        };
-        /** SearchIn */
-        SearchIn: {
-            /**
-             * World Id
-             * Format: uuid
-             */
-            world_id: string;
-            /** Query */
-            query: string;
-            /**
-             * K
-             * @default 8
-             */
-            k: number;
-        };
-        /** SignupIn */
-        SignupIn: {
-            /** Nickname */
-            nickname: string;
-            /** Password */
-            password: string;
-            /**
-             * Ui Language
-             * @default en
-             * @enum {string}
-             */
-            ui_language: "en" | "fr" | "ar" | "ar-TN";
-        };
-        /** StartIn */
-        StartIn: {
-            /**
-             * Course Id
-             * Format: uuid
-             */
-            course_id: string;
-        };
-        /** StartOut */
-        StartOut: {
-            /**
-             * Course Id
-             * Format: uuid
-             */
-            course_id: string;
-            /** Cached */
-            cached: boolean;
-            /** Cost */
-            cost: number;
-            /** Job Id */
-            job_id: string | null;
-            /** Questions */
-            questions: components["schemas"]["AskedQuestion"][] | null;
-        };
-        /** Stats */
-        Stats: {
-            /** Provider */
-            provider: string;
-            /** Calls */
-            calls: number;
-            /** Ok */
-            ok: number;
-            /** Cache Hits */
-            cache_hits: number;
-            /** Repeated Identical */
-            repeated_identical: number;
-            /** Compact Share */
-            compact_share: number;
-            /** By Tier */
-            by_tier: {
-                [key: string]: components["schemas"]["TierStats"];
-            };
-            /** By Task */
-            by_task: {
-                [key: string]: number;
-            };
-            /** Refusals */
-            refusals: {
-                [key: string]: number;
-            };
-            /** Fallbacks */
-            fallbacks: number;
-            /** Quota Headers Seen */
-            quota_headers_seen: string[];
-        };
-        /** StyleIn */
-        StyleIn: {
-            /** Answers */
-            answers: ("visual" | "practice" | "listening" | "teaching")[];
-        };
-        /** StyleOut */
-        StyleOut: {
-            /** Mix */
-            mix: {
-                [key: string]: number;
-            };
-            /** Top */
-            top: ("visual" | "practice" | "listening" | "teaching")[];
-            /** Suggested Buildings */
-            suggested_buildings: string[];
-        };
-        /** SystemStatus */
-        SystemStatus: {
-            /** App Env */
-            app_env: string;
-            /** Configured Provider */
-            configured_provider: string;
-            /** Provider */
-            provider: string;
-            /** Slot Live */
-            slot_live: boolean;
-            /** Next Slot */
-            next_slot: string | null;
-            /** Offline Demo Mode */
-            offline_demo_mode: boolean;
-            /** Reason */
-            reason: string | null;
-            /** Upload Max Mb */
-            upload_max_mb: number;
-        };
-        /** TierStats */
-        TierStats: {
-            /** Calls */
-            calls: number;
-            /** Tokens In */
-            tokens_in: number;
-            /** Tokens Out */
-            tokens_out: number;
-            /** Avg Latency Ms */
-            avg_latency_ms: number;
-        };
-        /** UploadOut */
-        UploadOut: {
-            document: components["schemas"]["DocumentOut"];
-            /** Job Id */
-            job_id: string | null;
-            /** Reused */
-            reused: boolean;
-        };
-        /** ValidationError */
-        ValidationError: {
-            /** Location */
-            loc: (string | number)[];
-            /** Message */
-            msg: string;
-            /** Error Type */
-            type: string;
-            /** Input */
-            input?: unknown;
-            /** Context */
-            ctx?: Record<string, never>;
-        };
-        /** Visitor */
-        Visitor: {
-            /** Nickname */
-            nickname: string;
-            /** Avatar */
-            avatar: {
-                [key: string]: unknown;
-            } | null;
-            /** Chapter */
-            chapter: string | null;
-        };
-        /** Wallet */
-        Wallet: {
-            /** Coins */
-            coins: number;
-            /** Free Today */
-            free_today: number;
-            /** Earned */
-            earned: number;
-            /** Purchased */
-            purchased: number;
-            /** Points */
-            points: number;
-            /** Streak */
-            streak: number;
-            /**
-             * Refill At
-             * Format: date-time
-             */
-            refill_at: string;
-            /** Placeholder */
-            placeholder: boolean;
-        };
-        /** WorldIn */
-        WorldIn: {
-            /** Name */
-            name: string;
-        };
-        /** WorldOut */
-        WorldOut: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Name */
-            name: string;
-            /** Join Code */
-            join_code: string;
-            /** Is Creator */
-            is_creator: boolean;
-            /** Members */
-            members: number;
-            /** Courses */
-            courses: components["schemas"]["CourseOut"][];
-        };
-        /** WorldSummary */
-        WorldSummary: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Name */
-            name: string;
-            /** Join Code */
-            join_code: string;
-        };
+  schemas: {
+    /**
+     * AskedQuestion
+     * @description A placement question as the student sees it: no answer, no difficulty.
+     */
+    AskedQuestion: {
+      /** I */
+      i: number;
+      /** Question */
+      question: string;
+      /** Options */
+      options: string[];
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    /** Avatar */
+    Avatar: {
+      /** Skin */
+      skin: string;
+      /** Outfit */
+      outfit: string;
+      /** Extra */
+      extra?: string | null;
+    };
+    /** Body_upload_document_api_chapters__chapter_id__documents_post */
+    Body_upload_document_api_chapters__chapter_id__documents_post: {
+      /** File */
+      file: string;
+    };
+    /** Building */
+    Building: {
+      /** Key */
+      key: string;
+      /** Cost */
+      cost: number;
+      /**
+       * Free If Cached
+       * @default false
+       */
+      free_if_cached: boolean;
+      /** Answer Cost */
+      answer_cost?: number | null;
+    };
+    /** BuildingCost */
+    BuildingCost: {
+      /** Cost */
+      cost: number;
+      /**
+       * Free If Cached
+       * @default false
+       */
+      free_if_cached: boolean;
+      /** Answer Cost */
+      answer_cost?: number | null;
+    };
+    /** ChapterIn */
+    ChapterIn: {
+      /** Title */
+      title: string;
+    };
+    /** ChapterOut */
+    ChapterOut: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Idx */
+      idx: number;
+      /** Title */
+      title: string;
+      /** Documents */
+      documents?: components["schemas"]["DocumentOut"][];
+    };
+    /** CourseIn */
+    CourseIn: {
+      /** Name */
+      name: string;
+      /** Chapters */
+      chapters?: string[];
+      /** Exam Date */
+      exam_date?: string | null;
+    };
+    /** CourseOut */
+    CourseOut: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Name */
+      name: string;
+      /** Color Key */
+      color_key: string;
+      /** Exam Date */
+      exam_date: string | null;
+      /** Chapters */
+      chapters?: components["schemas"]["ChapterOut"][];
+    };
+    /** DemoJobIn */
+    DemoJobIn: {
+      /**
+       * Lane
+       * @default interactive
+       * @enum {string}
+       */
+      lane: "interactive" | "background";
+      /**
+       * Language
+       * @default en
+       * @enum {string}
+       */
+      language: "en" | "fr" | "ar" | "ar-TN";
+      /**
+       * Cache Key
+       * @description set to make the result shareable/cached
+       */
+      cache_key?: string | null;
+    };
+    /** DocumentOut */
+    DocumentOut: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /**
+       * Chapter Id
+       * Format: uuid
+       */
+      chapter_id: string;
+      /** Filename */
+      filename: string;
+      /** Kind */
+      kind: string;
+      /** Size */
+      size: number;
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: "uploaded" | "parsing" | "tagging" | "embedding" | "ready" | "failed";
+      /** Progress */
+      progress: number;
+      /** Detail */
+      detail: {
+        [key: string]: unknown;
+      } | null;
+      /** Page Count */
+      page_count: number | null;
+      /** Error */
+      error: string | null;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+    };
+    /** EconomyOut */
+    EconomyOut: {
+      /** Daily Free Coins */
+      daily_free_coins: number;
+      /** Daily Earn Cap */
+      daily_earn_cap: number;
+      /** Exam Pass Daily Limit */
+      exam_pass_daily_limit: number;
+      /** Cost */
+      cost: {
+        [key: string]: number;
+      };
+      /** Earn */
+      earn: {
+        [key: string]: number;
+      };
+      /** Points */
+      points: {
+        [key: string]: number;
+      };
+      /** Peer Answer Threshold */
+      peer_answer_threshold: number;
+      /** Cosmetics */
+      cosmetics: {
+        [key: string]: number;
+      };
+      /** Buildings */
+      buildings: {
+        [key: string]: components["schemas"]["BuildingCost"];
+      };
+    };
+    /** FinishIn */
+    FinishIn: {
+      /**
+       * Course Id
+       * Format: uuid
+       */
+      course_id: string;
+      /** Answers */
+      answers: (number | null)[];
+    };
+    /** Graded */
+    Graded: {
+      /** Level */
+      level: string;
+      /** Correct */
+      correct: number;
+      /** Total */
+      total: number;
+      /** Percent */
+      percent: number;
+      /** Chapters */
+      chapters: {
+        [key: string]: unknown;
+      }[];
+    };
+    /** HTTPValidationError */
+    HTTPValidationError: {
+      /** Detail */
+      detail?: components["schemas"]["ValidationError"][];
+    };
+    /** Health */
+    Health: {
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: "ok" | "error";
+      /**
+       * Db
+       * @enum {string}
+       */
+      db: "ok" | "error";
+      /**
+       * Qdrant
+       * @enum {string}
+       */
+      qdrant: "ok" | "error";
+      /** Provider */
+      provider: string;
+      /** App Env */
+      app_env: string;
+    };
+    /** IndexingChapter */
+    IndexingChapter: {
+      /**
+       * Chapter Id
+       * Format: uuid
+       */
+      chapter_id: string;
+      /**
+       * Course Id
+       * Format: uuid
+       */
+      course_id: string;
+      /** Course Name */
+      course_name: string;
+      /** Idx */
+      idx: number;
+      /** Title */
+      title: string;
+      /**
+       * State
+       * @enum {string}
+       */
+      state: "waiting" | "in_progress" | "done" | "failed";
+      /** Documents */
+      documents: components["schemas"]["DocumentOut"][];
+    };
+    /** IndexingOut */
+    IndexingOut: {
+      /**
+       * World Id
+       * Format: uuid
+       */
+      world_id: string;
+      /** Name */
+      name: string;
+      /** Join Code */
+      join_code: string;
+      /** Percent */
+      percent: number;
+      /** Eta S */
+      eta_s: number;
+      /** Done */
+      done: boolean;
+      /** Chapters */
+      chapters: components["schemas"]["IndexingChapter"][];
+      quizzes: components["schemas"]["IndexingQuizzes"];
+    };
+    /** IndexingQuizzes */
+    IndexingQuizzes: {
+      /**
+       * State
+       * @enum {string}
+       */
+      state: "waiting" | "in_progress" | "done";
+      /** Ready */
+      ready: number;
+    };
+    /** IslandChapter */
+    IslandChapter: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Idx */
+      idx: number;
+      /** Title */
+      title: string;
+      /** Ready */
+      ready: boolean;
+      /** Mastery */
+      mastery: number | null;
+      /** Weak */
+      weak: boolean;
+    };
+    /** IslandOut */
+    IslandOut: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /**
+       * World Id
+       * Format: uuid
+       */
+      world_id: string;
+      /** Name */
+      name: string;
+      /** Color Key */
+      color_key: string;
+      /** Level */
+      level: string | null;
+      /** Mastery */
+      mastery: number;
+      /** Chapters */
+      chapters: components["schemas"]["IslandChapter"][];
+      /** Buildings */
+      buildings: components["schemas"]["Building"][];
+      /** Visitors */
+      visitors: components["schemas"]["Visitor"][];
+    };
+    /** JobCreated */
+    JobCreated: {
+      /** Job Id */
+      job_id: string;
+      /** Cost */
+      cost: number;
+      /** Cached */
+      cached: boolean;
+    };
+    /** JobView */
+    JobView: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Kind */
+      kind: string;
+      /** Lane */
+      lane: string;
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: "queued" | "running" | "done" | "failed" | "cancelled";
+      /** Stage */
+      stage: string | null;
+      /** Stages */
+      stages: string[];
+      /** Queue Position */
+      queue_position: number | null;
+      /** Eta S */
+      eta_s: number | null;
+      /** Waiting Reason */
+      waiting_reason: string | null;
+      /** Quick Mode */
+      quick_mode: boolean;
+      /** Cost */
+      cost: number;
+      /** Result */
+      result: {
+        [key: string]: unknown;
+      } | null;
+      /** Error */
+      error: string | null;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      /** Finished At */
+      finished_at: string | null;
+    };
+    /** JoinIn */
+    JoinIn: {
+      /** Code */
+      code: string;
+    };
+    /** LoginIn */
+    LoginIn: {
+      /** Nickname */
+      nickname: string;
+      /** Password */
+      password: string;
+    };
+    /** MapCourse */
+    MapCourse: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Name */
+      name: string;
+      /** Color Key */
+      color_key: string;
+      /** Ready */
+      ready: boolean;
+      /** Chapters */
+      chapters: number;
+      /** Level */
+      level: string | null;
+      /** Mastery */
+      mastery: number;
+    };
+    /** MapOut */
+    MapOut: {
+      /**
+       * World Id
+       * Format: uuid
+       */
+      world_id: string;
+      /** Name */
+      name: string;
+      /** Join Code */
+      join_code: string;
+      /** Creator */
+      creator: string;
+      /** Is Creator */
+      is_creator: boolean;
+      /** Members */
+      members: components["schemas"]["Member"][];
+      /** Courses */
+      courses: components["schemas"]["MapCourse"][];
+    };
+    /** Me */
+    Me: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Nickname */
+      nickname: string;
+      /** Ui Language */
+      ui_language: string;
+      /** Onboarded */
+      onboarded: boolean;
+      /** Avatar */
+      avatar: {
+        [key: string]: unknown;
+      } | null;
+      /** Has Worlds */
+      has_worlds: boolean;
+    };
+    /** MeIn */
+    MeIn: {
+      /**
+       * Ui Language
+       * @enum {string}
+       */
+      ui_language: "en" | "fr" | "ar" | "ar-TN";
+    };
+    /** Member */
+    Member: {
+      /** Nickname */
+      nickname: string;
+      /** Avatar */
+      avatar: {
+        [key: string]: unknown;
+      } | null;
+      /** Is Me */
+      is_me: boolean;
+    };
+    /** PresenceIn */
+    PresenceIn: {
+      /** Chapter Id */
+      chapter_id?: string | null;
+    };
+    /** ProfileIn */
+    ProfileIn: {
+      /** University */
+      university?: string | null;
+      /** Field */
+      field?: string | null;
+      /** Year */
+      year?: number | null;
+      /** Languages */
+      languages?: ("en" | "fr" | "ar" | "ar-TN")[] | null;
+      /** Daily Minutes */
+      daily_minutes?: number | null;
+      /** Reminder Time */
+      reminder_time?: string | null;
+      /** Goal */
+      goal?: ("pass" | "grade" | "deep") | null;
+      /** Leaderboard Opt In */
+      leaderboard_opt_in?: boolean | null;
+      avatar?: components["schemas"]["Avatar"] | null;
+      /**
+       * Finish
+       * @default false
+       */
+      finish: boolean;
+    };
+    /** ProfileOut */
+    ProfileOut: {
+      /** University */
+      university: string | null;
+      /** Field */
+      field: string | null;
+      /** Year */
+      year: number | null;
+      /** Mix */
+      mix: {
+        [key: string]: number;
+      };
+      /** Languages */
+      languages: string[];
+      /** Daily Minutes */
+      daily_minutes: number | null;
+      /** Reminder Time */
+      reminder_time: string | null;
+      /** Goal */
+      goal: string | null;
+      /** Leaderboard Opt In */
+      leaderboard_opt_in: boolean;
+      /** Avatar */
+      avatar: {
+        [key: string]: unknown;
+      } | null;
+      /** Onboarded */
+      onboarded: boolean;
+    };
+    /** QuestionsOut */
+    QuestionsOut: {
+      /**
+       * Course Id
+       * Format: uuid
+       */
+      course_id: string;
+      /** Questions */
+      questions: components["schemas"]["AskedQuestion"][];
+    };
+    /** SearchIn */
+    SearchIn: {
+      /**
+       * World Id
+       * Format: uuid
+       */
+      world_id: string;
+      /** Query */
+      query: string;
+      /**
+       * K
+       * @default 8
+       */
+      k: number;
+    };
+    /** SignupIn */
+    SignupIn: {
+      /** Nickname */
+      nickname: string;
+      /** Password */
+      password: string;
+      /**
+       * Ui Language
+       * @default en
+       * @enum {string}
+       */
+      ui_language: "en" | "fr" | "ar" | "ar-TN";
+    };
+    /** StartIn */
+    StartIn: {
+      /**
+       * Course Id
+       * Format: uuid
+       */
+      course_id: string;
+    };
+    /** StartOut */
+    StartOut: {
+      /**
+       * Course Id
+       * Format: uuid
+       */
+      course_id: string;
+      /** Cached */
+      cached: boolean;
+      /** Cost */
+      cost: number;
+      /** Job Id */
+      job_id: string | null;
+      /** Questions */
+      questions: components["schemas"]["AskedQuestion"][] | null;
+    };
+    /** Stats */
+    Stats: {
+      /** Provider */
+      provider: string;
+      /** Calls */
+      calls: number;
+      /** Ok */
+      ok: number;
+      /** Cache Hits */
+      cache_hits: number;
+      /** Repeated Identical */
+      repeated_identical: number;
+      /** Compact Share */
+      compact_share: number;
+      /** By Tier */
+      by_tier: {
+        [key: string]: components["schemas"]["TierStats"];
+      };
+      /** By Task */
+      by_task: {
+        [key: string]: number;
+      };
+      /** Refusals */
+      refusals: {
+        [key: string]: number;
+      };
+      /** Fallbacks */
+      fallbacks: number;
+      /** Quota Headers Seen */
+      quota_headers_seen: string[];
+    };
+    /** StyleIn */
+    StyleIn: {
+      /** Answers */
+      answers: ("visual" | "practice" | "listening" | "teaching")[];
+    };
+    /** StyleOut */
+    StyleOut: {
+      /** Mix */
+      mix: {
+        [key: string]: number;
+      };
+      /** Top */
+      top: ("visual" | "practice" | "listening" | "teaching")[];
+      /** Suggested Buildings */
+      suggested_buildings: string[];
+    };
+    /** SystemStatus */
+    SystemStatus: {
+      /** App Env */
+      app_env: string;
+      /** Configured Provider */
+      configured_provider: string;
+      /** Provider */
+      provider: string;
+      /** Slot Live */
+      slot_live: boolean;
+      /** Next Slot */
+      next_slot: string | null;
+      /** Offline Demo Mode */
+      offline_demo_mode: boolean;
+      /** Reason */
+      reason: string | null;
+      /** Upload Max Mb */
+      upload_max_mb: number;
+    };
+    /** TierStats */
+    TierStats: {
+      /** Calls */
+      calls: number;
+      /** Tokens In */
+      tokens_in: number;
+      /** Tokens Out */
+      tokens_out: number;
+      /** Avg Latency Ms */
+      avg_latency_ms: number;
+    };
+    /** UploadOut */
+    UploadOut: {
+      document: components["schemas"]["DocumentOut"];
+      /** Job Id */
+      job_id: string | null;
+      /** Reused */
+      reused: boolean;
+    };
+    /** ValidationError */
+    ValidationError: {
+      /** Location */
+      loc: (string | number)[];
+      /** Message */
+      msg: string;
+      /** Error Type */
+      type: string;
+      /** Input */
+      input?: unknown;
+      /** Context */
+      ctx?: Record<string, never>;
+    };
+    /** Visitor */
+    Visitor: {
+      /** Nickname */
+      nickname: string;
+      /** Avatar */
+      avatar: {
+        [key: string]: unknown;
+      } | null;
+      /** Chapter */
+      chapter: string | null;
+    };
+    /** Wallet */
+    Wallet: {
+      /** Coins */
+      coins: number;
+      /** Free Today */
+      free_today: number;
+      /** Earned */
+      earned: number;
+      /** Purchased */
+      purchased: number;
+      /** Points */
+      points: number;
+      /** Streak */
+      streak: number;
+      /**
+       * Refill At
+       * Format: date-time
+       */
+      refill_at: string;
+      /** Placeholder */
+      placeholder: boolean;
+    };
+    /** WorldIn */
+    WorldIn: {
+      /** Name */
+      name: string;
+    };
+    /** WorldOut */
+    WorldOut: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Name */
+      name: string;
+      /** Join Code */
+      join_code: string;
+      /** Is Creator */
+      is_creator: boolean;
+      /** Members */
+      members: number;
+      /** Courses */
+      courses: components["schemas"]["CourseOut"][];
+    };
+    /** WorldSummary */
+    WorldSummary: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Name */
+      name: string;
+      /** Join Code */
+      join_code: string;
+    };
+  };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    health_api_health_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Health"];
-                };
-            };
-        };
+  health_api_health_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    status_api_system_status_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SystemStatus"];
-                };
-            };
+        content: {
+          "application/json": components["schemas"]["Health"];
         };
+      };
     };
-    get_job_api_jobs__job_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                job_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["JobView"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  status_api_system_status_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    cancel_job_api_jobs__job_id__cancel_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                job_id: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["JobView"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+        content: {
+          "application/json": components["schemas"]["SystemStatus"];
         };
+      };
     };
-    stats_api_admin_stats_get: {
-        parameters: {
-            query?: {
-                provider?: "cloud" | "local" | "mock" | "all";
-            };
-            header?: {
-                "x-admin-token"?: string | null;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Stats"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  get_job_api_jobs__job_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        job_id: string;
+      };
+      cookie?: never;
     };
-    signup_api_auth_signup_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SignupIn"];
-            };
+        content: {
+          "application/json": components["schemas"]["JobView"];
         };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Me"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
         };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
     };
-    login_api_auth_login_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LoginIn"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Me"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  cancel_job_api_jobs__job_id__cancel_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        job_id: string;
+      };
+      cookie?: never;
     };
-    logout_api_auth_logout_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+        content: {
+          "application/json": components["schemas"]["JobView"];
         };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
     };
-    me_api_auth_me_get: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path?: never;
-            cookie?: {
-                lw_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Me"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  stats_api_admin_stats_get: {
+    parameters: {
+      query?: {
+        provider?: "cloud" | "local" | "mock" | "all";
+      };
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: never;
     };
-    update_me_api_auth_me_patch: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path?: never;
-            cookie?: {
-                lw_session?: string | null;
-            };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MeIn"];
-            };
+        content: {
+          "application/json": components["schemas"]["Stats"];
         };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Me"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
         };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
     };
-    get_economy_api_economy_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EconomyOut"];
-                };
-            };
-        };
+  };
+  signup_api_auth_signup_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    get_wallet_api_wallet_get: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path?: never;
-            cookie?: {
-                lw_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Wallet"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SignupIn"];
+      };
     };
-    score_style_api_onboarding_style_post: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path?: never;
-            cookie?: {
-                lw_session?: string | null;
-            };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["StyleIn"];
-            };
+        content: {
+          "application/json": components["schemas"]["Me"];
         };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StyleOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
         };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
     };
-    get_profile_api_profile_get: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path?: never;
-            cookie?: {
-                lw_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProfileOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  login_api_auth_login_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    put_profile_api_profile_put: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path?: never;
-            cookie?: {
-                lw_session?: string | null;
-            };
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProfileIn"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProfileOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LoginIn"];
+      };
     };
-    start_api_placement_start_post: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path?: never;
-            cookie?: {
-                lw_session?: string | null;
-            };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["StartIn"];
-            };
+        content: {
+          "application/json": components["schemas"]["Me"];
         };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StartOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
         };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
     };
-    questions_api_placement__course_id__get: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path: {
-                course_id: string;
-            };
-            cookie?: {
-                lw_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["QuestionsOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  logout_api_auth_logout_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    finish_api_placement_finish_post: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path?: never;
-            cookie?: {
-                lw_session?: string | null;
-            };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["FinishIn"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Graded"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+        content?: never;
+      };
     };
-    my_worlds_api_worlds_get: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path?: never;
-            cookie?: {
-                lw_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorldSummary"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  me_api_auth_me_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
     };
-    create_world_api_worlds_post: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path?: never;
-            cookie?: {
-                lw_session?: string | null;
-            };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["WorldIn"];
-            };
+        content: {
+          "application/json": components["schemas"]["Me"];
         };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorldOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
         };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
     };
-    join_world_api_worlds_join_post: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path?: never;
-            cookie?: {
-                lw_session?: string | null;
-            };
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["JoinIn"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorldOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  update_me_api_auth_me_patch: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
     };
-    get_world_api_worlds__world_id__get: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path: {
-                world_id: string;
-            };
-            cookie?: {
-                lw_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorldOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MeIn"];
+      };
     };
-    add_course_api_worlds__world_id__courses_post: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path: {
-                world_id: string;
-            };
-            cookie?: {
-                lw_session?: string | null;
-            };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CourseIn"];
-            };
+        content: {
+          "application/json": components["schemas"]["Me"];
         };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CourseOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
         };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
     };
-    island_api_courses__course_id__get: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path: {
-                course_id: string;
-            };
-            cookie?: {
-                lw_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["IslandOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  get_economy_api_economy_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    delete_course_api_courses__course_id__delete: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path: {
-                course_id: string;
-            };
-            cookie?: {
-                lw_session?: string | null;
-            };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+        content: {
+          "application/json": components["schemas"]["EconomyOut"];
         };
+      };
     };
-    add_chapter_api_courses__course_id__chapters_post: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path: {
-                course_id: string;
-            };
-            cookie?: {
-                lw_session?: string | null;
-            };
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ChapterIn"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChapterOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  get_wallet_api_wallet_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
     };
-    upload_document_api_chapters__chapter_id__documents_post: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path: {
-                chapter_id: string;
-            };
-            cookie?: {
-                lw_session?: string | null;
-            };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "multipart/form-data": components["schemas"]["Body_upload_document_api_chapters__chapter_id__documents_post"];
-            };
+        content: {
+          "application/json": components["schemas"]["Wallet"];
         };
-        responses: {
-            /** @description Successful Response */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UploadOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
         };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
     };
-    delete_document_api_documents__document_id__delete: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path: {
-                document_id: string;
-            };
-            cookie?: {
-                lw_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  score_style_api_onboarding_style_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
     };
-    indexing_api_worlds__world_id__indexing_get: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path: {
-                world_id: string;
-            };
-            cookie?: {
-                lw_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["IndexingOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StyleIn"];
+      };
     };
-    world_map_api_worlds__world_id__map_get: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path: {
-                world_id: string;
-            };
-            cookie?: {
-                lw_session?: string | null;
-            };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MapOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+        content: {
+          "application/json": components["schemas"]["StyleOut"];
         };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
     };
-    presence_api_courses__course_id__presence_post: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path: {
-                course_id: string;
-            };
-            cookie?: {
-                lw_session?: string | null;
-            };
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PresenceIn"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  get_profile_api_profile_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
     };
-    create_demo_job_api_dev_demo_jobs_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DemoJobIn"];
-            };
+        content: {
+          "application/json": components["schemas"]["ProfileOut"];
         };
-        responses: {
-            /** @description Successful Response */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["JobCreated"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
         };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
     };
-    create_search_job_api_dev_search_jobs_post: {
-        parameters: {
-            query?: never;
-            header?: {
-                "x-dev-user"?: string | null;
-                "x-ui-language"?: string | null;
-            };
-            path?: never;
-            cookie?: {
-                lw_session?: string | null;
-            };
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SearchIn"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["JobCreated"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  put_profile_api_profile_put: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
     };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ProfileIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProfileOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  start_api_placement_start_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StartIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["StartOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  questions_api_placement__course_id__get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        course_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuestionsOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  finish_api_placement_finish_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FinishIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Graded"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  my_worlds_api_worlds_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WorldSummary"][];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  create_world_api_worlds_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WorldIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WorldOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  join_world_api_worlds_join_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["JoinIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WorldOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_world_api_worlds__world_id__get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        world_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WorldOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  add_course_api_worlds__world_id__courses_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        world_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CourseIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CourseOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  island_api_courses__course_id__get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        course_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["IslandOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  delete_course_api_courses__course_id__delete: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        course_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  add_chapter_api_courses__course_id__chapters_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        course_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChapterIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ChapterOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  upload_document_api_chapters__chapter_id__documents_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        chapter_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": components["schemas"]["Body_upload_document_api_chapters__chapter_id__documents_post"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["UploadOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  delete_document_api_documents__document_id__delete: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        document_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  indexing_api_worlds__world_id__indexing_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        world_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["IndexingOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  world_map_api_worlds__world_id__map_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        world_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MapOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  presence_api_courses__course_id__presence_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        course_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PresenceIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  create_demo_job_api_dev_demo_jobs_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DemoJobIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobCreated"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  create_search_job_api_dev_search_jobs_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SearchIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobCreated"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
 }
