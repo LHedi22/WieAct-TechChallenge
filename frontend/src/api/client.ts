@@ -23,11 +23,20 @@ export type ProfileOut = S["ProfileOut"];
 export type MapOut = S["MapOut"];
 export type MapCourse = S["MapCourse"];
 export type IslandOut = S["IslandOut"];
-export type PlacementStart = S["StartOut"];
+export type PlacementStart = S["PlacementStartOut"];
 export type PlacementResult = S["Graded"];
 export type Language = S["SignupIn"]["ui_language"];
 
 export type PlacementQuestion = S["AskedQuestion"];
+export type QuizPrice = S["Price"];
+export type QuizStart = S["QuizStartOut"];
+export type QuizAttempt = S["AttemptView"];
+export type QuizQuestion = S["QuestionView"];
+export type QuizResults = S["Results"];
+export type TutorSession = S["SessionOut"];
+export type TutorTurn = S["Turn"];
+export type TutorJob = S["JobRef"];
+export type TutorAction = S["TurnIn"]["action"];
 export type PlacementQuestions = S["QuestionsOut"];
 
 const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
@@ -130,4 +139,24 @@ export const api = {
     request<PlacementQuestions>(`/api/placement/${courseId}`),
   placementFinish: (courseId: string, answers: (number | null)[]) =>
     post<PlacementResult>("/api/placement/finish", { course_id: courseId, answers }),
+
+  quizPrice: (chapterId: string, level: string) =>
+    request<QuizPrice>(
+      `/api/quiz/price?chapter_id=${encodeURIComponent(chapterId)}&level=${encodeURIComponent(level)}`,
+    ),
+  quizStart: (chapterId: string, level: string) =>
+    post<QuizStart>("/api/quiz/start", { chapter_id: chapterId, level }),
+  quizFromJob: (jobId: string) => post<QuizAttempt>(`/api/quiz/attempts/from-job/${jobId}`, {}),
+  quizAttempt: (id: string) => request<QuizAttempt>(`/api/quiz/attempts/${id}`),
+  quizAnswer: (id: string, q: number, choice: number) =>
+    post<QuizQuestion>(`/api/quiz/attempts/${id}/answer`, { q, choice }),
+  quizSkip: (id: string, q: number) => post<QuizQuestion>(`/api/quiz/attempts/${id}/skip`, { q }),
+  quizFinish: (id: string) => post<QuizResults>(`/api/quiz/attempts/${id}/finish`, {}),
+
+  tutorStart: (chapterId: string, level: string) =>
+    post<TutorJob>("/api/tutor/start", { chapter_id: chapterId, level }),
+  tutorSession: (id: string) => request<TutorSession>(`/api/tutor/${id}`),
+  tutorTurn: (id: string, text: string, action: TutorAction) =>
+    post<TutorJob>(`/api/tutor/${id}/turn`, { text, action }),
+  tutorEnd: (id: string) => post<TutorJob>(`/api/tutor/${id}/end`, {}),
 };

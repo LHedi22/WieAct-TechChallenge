@@ -59,7 +59,9 @@
         "reading_pages": "Reading the pages",
         "finding_key_ideas": "Finding key ideas",
         "saving_search_index": "Saving the search index",
-        "searching": "Searching"
+        "searching": "Searching",
+        "thinking": "Thinking",
+        "checking_reply": "Checking the reply"
       }
     },
     "wisdom": {
@@ -94,7 +96,19 @@
       "cosmetic_locked": "Earn more points to unlock this.",
       "placement_no_material": "This island has no course material yet. Upload some first.",
       "placement_not_ready": "The placement quiz isn't ready yet.",
-      "placement_incomplete": "Answer every question first."
+      "placement_incomplete": "Answer every question first.",
+      "level_invalid": "Pick a level: beginner, intermediate or advanced.",
+      "quiz_not_ready": "The quiz isn't ready yet.",
+      "quiz_finished": "This quiz is finished.",
+      "quiz_question_invalid": "That question doesn't exist.",
+      "quiz_choice_invalid": "Pick one of the four answers.",
+      "quiz_question_done": "You already answered this question.",
+      "quiz_not_found": "This quiz no longer exists.",
+      "tutor_ended": "This session has ended.",
+      "tutor_busy": "The tutor is still answering. One moment.",
+      "tutor_empty": "Write something first, even a guess.",
+      "tutor_no_hints": "You've used all 3 hints in this session.",
+      "tutor_not_found": "This session no longer exists."
     },
     "mascot": {
       "waving": "The Sidi Bou Said cat, waving",
@@ -695,7 +709,9 @@
       "balanceAfter": "Balance after",
       "short": "Not enough coins today. Coins refill at midnight.",
       "cancel": "Cancel",
-      "confirm": "Enter"
+      "confirm": "Enter",
+      "fromPlacement": "From your placement",
+      "classMade": "Your class already made one"
     },
     "soon": {
       "body": "This building opens in the next update. Your coins were not spent.",
@@ -718,6 +734,75 @@
       "score": "{correct} of {total} right",
       "chapter": "{correct} / {asked}",
       "toIsland": "Go to the island"
+    }
+  },
+  "quiz": {
+    "building": "Building your quiz…",
+    "saveExit": "Save and exit",
+    "check": "Check",
+    "tryAgain": "Try again · 2nd try",
+    "skip": "Skip this question",
+    "next": "Next question",
+    "seeResults": "See my results",
+    "notQuite": "Not quite. Here's a hint for your second try.",
+    "hint": "Hint",
+    "hintsFree": "Hints are free. A correct second try still earns half the points.",
+    "yourAnswer": "Your answer",
+    "rightAnswer": "Right answer",
+    "result": {
+      "correct": "Correct, first try!",
+      "second": "Right on your second try: half the points.",
+      "wrong": "Not this time. Here's why:",
+      "skipped": "Skipped. Here's the answer and why:"
+    },
+    "results": {
+      "score": "Your score",
+      "mastery": "Mastery of {title}",
+      "nextStep": "Your next step",
+      "nextTutor": "{title} is still tricky → try the Socratic Tutor. It asks you questions until it clicks.",
+      "nextQuiz": "Nice work → next: {title} at {level} level.",
+      "goTutor": "Go to the Socratic Tutor",
+      "goQuiz": "Start that quiz",
+      "backIsland": "Back to the island",
+      "lookAgain": "{count, plural, =0 {Nothing to look at again: all correct!} one {# thing to look at again} other {# things to look at again}}",
+      "q": "Q{n}",
+      "yours": "You said:",
+      "skipped": "Skipped",
+      "correct": "Right answer:",
+      "half": "half points",
+      "rightConcepts": "{count} correct: {list}. Nice work."
+    }
+  },
+  "tutor": {
+    "quickMode": "Quick mode · faster model while it's busy",
+    "end": "End session",
+    "backIsland": "Back to the island",
+    "deeper": "Deeper explanation",
+    "askTeacher": "The course may not cover this: ask your teacher too.",
+    "thinking": "The tutor is thinking",
+    "hint": "Give me a hint ({used}/{max})",
+    "anotherWay": "Explain it another way",
+    "stuck": "I'm stuck",
+    "send": "Send",
+    "placeholder": "Type your thinking, even if you're not sure…",
+    "goal": "Session goal",
+    "hintsUsed": "Hints used",
+    "hintsCount": "{used} of {max}",
+    "ideas": "Ideas you've found",
+    "found": "Found",
+    "notYet": "Not yet",
+    "note": "The tutor asks questions instead of giving answers. Tap \"I'm stuck\" any time for a smaller step.",
+    "actions": {
+      "message": "…",
+      "hint": "Can I have a hint?",
+      "another_way": "Can you explain it another way?",
+      "stuck": "I'm stuck."
+    },
+    "summary": {
+      "title": "Session summary",
+      "found": "{count, plural, one {You found # key idea yourself.} other {You found # key ideas yourself.}}",
+      "next": "Next:",
+      "quiz": "Take a quiz on this chapter"
     }
   }
 }

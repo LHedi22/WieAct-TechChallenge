@@ -20,7 +20,7 @@ from app.models import Chapter, Chunk, Job
 router = APIRouter(prefix="/api/placement", tags=["placement"])
 
 
-class StartIn(BaseModel):
+class PlacementStartIn(BaseModel):
     course_id: uuid.UUID
 
 
@@ -37,7 +37,7 @@ class QuestionsOut(BaseModel):
     questions: list[AskedQuestion]
 
 
-class StartOut(BaseModel):
+class PlacementStartOut(BaseModel):
     course_id: uuid.UUID
     cached: bool
     cost: int
@@ -57,14 +57,14 @@ async def _course(s, user, course_id):
         raise HTTPException(404, e.key) from e
 
 
-@router.post("/start", response_model=StartOut)
-async def start(body: StartIn, s: Session, user: CurrentUser) -> StartOut:
+@router.post("/start", response_model=PlacementStartOut)
+async def start(body: PlacementStartIn, s: Session, user: CurrentUser) -> PlacementStartOut:
     course = await _course(s, user, body.course_id)
     language = user.ui_language
     cost = economy.COST["placement_quiz"]
     existing = await service.find_set(course.id, language)
     if existing:
-        return StartOut(
+        return PlacementStartOut(
             course_id=course.id,
             cached=True,
             cost=0,
@@ -99,7 +99,9 @@ async def start(body: StartIn, s: Session, user: CurrentUser) -> StartOut:
             cost=cost,
         )
         pending = created.id
-    return StartOut(course_id=course.id, cached=False, cost=cost, job_id=pending, questions=None)
+    return PlacementStartOut(
+        course_id=course.id, cached=False, cost=cost, job_id=pending, questions=None
+    )
 
 
 @router.get("/{course_id}", response_model=QuestionsOut)

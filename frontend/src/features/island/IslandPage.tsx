@@ -149,11 +149,15 @@ export function IslandPage() {
           island={island}
           building={picked}
           onClose={() => setPicked(null)}
-          onConfirm={(chapter, level) =>
-            void navigate(
-              `/worlds/${worldId}/courses/${courseId}/buildings/${picked.key}?chapter=${chapter}&level=${level}`,
-            )
-          }
+          onConfirm={(chapter, level) => {
+            const base = `/worlds/${worldId}/courses/${courseId}`;
+            const q = `?chapter=${chapter}&level=${level}`;
+            const open: Record<string, string> = {
+              quiz_hall: `${base}/quiz/new${q}`,
+              socratic_tutor: `${base}/tutor/new${q}`,
+            };
+            void navigate(open[picked.key] ?? `${base}/buildings/${picked.key}${q}`);
+          }}
         />
       )}
     </div>

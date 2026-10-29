@@ -15,6 +15,7 @@ export { CoinCounter, PointsCounter, RefillTimer, StreakCounter } from "./Counte
 export { Input } from "./Input";
 export { LanguageSwitcher } from "./LanguageSwitcher";
 export { LoadingStages, type Stage, type StageState } from "./LoadingStages";
+export { MathText } from "./MathText";
 export { Mascot, type MascotPose } from "./Mascot";
 export { PixelButton, type PixelButtonVariant } from "./PixelButton";
 export {

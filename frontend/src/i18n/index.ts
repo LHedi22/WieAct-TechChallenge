@@ -18,6 +18,8 @@ export const NAMESPACES = [
   "map",
   "island",
   "placement",
+  "quiz",
+  "tutor",
 ] as const;
 
 /** Locale files hold one object per namespace; `_review` (Darija review notes) is metadata. */

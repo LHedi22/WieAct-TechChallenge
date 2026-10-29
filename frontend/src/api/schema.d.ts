@@ -304,6 +304,193 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/quiz/price": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Price */
+    get: operations["price_api_quiz_price_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/quiz/start": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Start */
+    post: operations["start_api_quiz_start_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/quiz/attempts/from-job/{job_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** From Job */
+    post: operations["from_job_api_quiz_attempts_from_job__job_id__post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/quiz/attempts/{attempt_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Attempt */
+    get: operations["get_attempt_api_quiz_attempts__attempt_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/quiz/attempts/{attempt_id}/answer": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Answer */
+    post: operations["answer_api_quiz_attempts__attempt_id__answer_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/quiz/attempts/{attempt_id}/skip": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Skip */
+    post: operations["skip_api_quiz_attempts__attempt_id__skip_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/quiz/attempts/{attempt_id}/finish": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Finish */
+    post: operations["finish_api_quiz_attempts__attempt_id__finish_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/tutor/start": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Start */
+    post: operations["start_api_tutor_start_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/tutor/{session_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Session */
+    get: operations["get_session_api_tutor__session_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/tutor/{session_id}/turn": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Turn */
+    post: operations["turn_api_tutor__session_id__turn_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/tutor/{session_id}/end": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** End */
+    post: operations["end_api_tutor__session_id__end_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/worlds": {
     parameters: {
       query?: never;
@@ -544,6 +731,13 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** AnswerIn */
+    AnswerIn: {
+      /** Q */
+      q: number;
+      /** Choice */
+      choice: number;
+    };
     /**
      * AskedQuestion
      * @description A placement question as the student sees it: no answer, no difficulty.
@@ -555,6 +749,45 @@ export interface components {
       question: string;
       /** Options */
       options: string[];
+    };
+    /** AttemptView */
+    AttemptView: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /**
+       * World Id
+       * Format: uuid
+       */
+      world_id: string;
+      /**
+       * Course Id
+       * Format: uuid
+       */
+      course_id: string;
+      /** Course Name */
+      course_name: string;
+      /**
+       * Chapter Id
+       * Format: uuid
+       */
+      chapter_id: string;
+      /** Chapter Title */
+      chapter_title: string;
+      /** Chapter Idx */
+      chapter_idx: number;
+      /** Level */
+      level: string;
+      /** Status */
+      status: string;
+      /** Current */
+      current: number;
+      /** Points */
+      points: number;
+      /** Questions */
+      questions: components["schemas"]["QuestionView"][];
     };
     /** Avatar */
     Avatar: {
@@ -791,6 +1024,13 @@ export interface components {
       /** App Env */
       app_env: string;
     };
+    /** Idea */
+    Idea: {
+      /** Text */
+      text: string;
+      /** Found */
+      found: boolean;
+    };
     /** IndexingChapter */
     IndexingChapter: {
       /**
@@ -901,6 +1141,19 @@ export interface components {
       cost: number;
       /** Cached */
       cached: boolean;
+    };
+    /** JobRef */
+    JobRef: {
+      /**
+       * Session Id
+       * Format: uuid
+       */
+      session_id: string;
+      /**
+       * Job Id
+       * Format: uuid
+       */
+      job_id: string;
     };
     /** JobView */
     JobView: {
@@ -1037,10 +1290,77 @@ export interface components {
       /** Is Me */
       is_me: boolean;
     };
+    /** Missed */
+    Missed: {
+      /** I */
+      i: number;
+      /** Question */
+      question: string;
+      /** Status */
+      status: string;
+      /** Yours */
+      yours: string | null;
+      /** Correct */
+      correct: string;
+      /** Explanation */
+      explanation: string | null;
+      /** Concept */
+      concept: string | null;
+    };
+    /** NextStep */
+    NextStep: {
+      /**
+       * Kind
+       * @enum {string}
+       */
+      kind: "tutor" | "quiz";
+      /**
+       * Chapter Id
+       * Format: uuid
+       */
+      chapter_id: string;
+      /** Chapter Title */
+      chapter_title: string;
+      /** Level */
+      level: string;
+      /** Cost */
+      cost: number;
+    };
+    /** PlacementStartIn */
+    PlacementStartIn: {
+      /**
+       * Course Id
+       * Format: uuid
+       */
+      course_id: string;
+    };
+    /** PlacementStartOut */
+    PlacementStartOut: {
+      /**
+       * Course Id
+       * Format: uuid
+       */
+      course_id: string;
+      /** Cached */
+      cached: boolean;
+      /** Cost */
+      cost: number;
+      /** Job Id */
+      job_id: string | null;
+      /** Questions */
+      questions: components["schemas"]["AskedQuestion"][] | null;
+    };
     /** PresenceIn */
     PresenceIn: {
       /** Chapter Id */
       chapter_id?: string | null;
+    };
+    /** Price */
+    Price: {
+      /** Cost */
+      cost: number;
+      /** Cached */
+      cached: boolean;
     };
     /** ProfileIn */
     ProfileIn: {
@@ -1096,6 +1416,30 @@ export interface components {
       /** Onboarded */
       onboarded: boolean;
     };
+    /** QuestionView */
+    QuestionView: {
+      /** I */
+      i: number;
+      /** Question */
+      question: string;
+      /** Options */
+      options: string[];
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: "pending" | "hint" | "correct" | "second" | "wrong" | "skipped";
+      /** First */
+      first?: number | null;
+      /** Second */
+      second?: number | null;
+      /** Hint */
+      hint?: string | null;
+      /** Answer Index */
+      answer_index?: number | null;
+      /** Explanation */
+      explanation?: string | null;
+    };
     /** QuestionsOut */
     QuestionsOut: {
       /**
@@ -1105,6 +1449,54 @@ export interface components {
       course_id: string;
       /** Questions */
       questions: components["schemas"]["AskedQuestion"][];
+    };
+    /** QuizStartIn */
+    QuizStartIn: {
+      /**
+       * Chapter Id
+       * Format: uuid
+       */
+      chapter_id: string;
+      /** Level */
+      level: string;
+    };
+    /** QuizStartOut */
+    QuizStartOut: {
+      /** Attempt Id */
+      attempt_id: string | null;
+      /** Job Id */
+      job_id: string | null;
+      /** Cost */
+      cost: number;
+      /** Cached */
+      cached: boolean;
+    };
+    /** Results */
+    Results: {
+      /**
+       * Attempt Id
+       * Format: uuid
+       */
+      attempt_id: string;
+      /** Score */
+      score: number;
+      /** Total */
+      total: number;
+      /** Points */
+      points: number;
+      /** Second Tries */
+      second_tries: number;
+      /** Mastery */
+      mastery: number;
+      /** Weak */
+      weak: boolean;
+      /** Missed */
+      missed: components["schemas"]["Missed"][];
+      /** Right Concepts */
+      right_concepts: string[];
+      next_step: components["schemas"]["NextStep"];
+      /** Tag Job Id */
+      tag_job_id: string | null;
     };
     /** SearchIn */
     SearchIn: {
@@ -1121,6 +1513,56 @@ export interface components {
        */
       k: number;
     };
+    /** SessionOut */
+    SessionOut: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /**
+       * World Id
+       * Format: uuid
+       */
+      world_id: string;
+      /**
+       * Course Id
+       * Format: uuid
+       */
+      course_id: string;
+      /** Course Name */
+      course_name: string;
+      /**
+       * Chapter Id
+       * Format: uuid
+       */
+      chapter_id: string;
+      /** Chapter Title */
+      chapter_title: string;
+      /** Level */
+      level: string;
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: "active" | "ended";
+      /** Goal */
+      goal: string | null;
+      /** Ideas */
+      ideas: components["schemas"]["Idea"][];
+      /** Hints Used */
+      hints_used: number;
+      /** Max Hints */
+      max_hints: number;
+      /** Turns */
+      turns: components["schemas"]["Turn"][];
+      /** Pending Job Id */
+      pending_job_id: string | null;
+      /** Summary */
+      summary: {
+        [key: string]: unknown;
+      } | null;
+    };
     /** SignupIn */
     SignupIn: {
       /** Nickname */
@@ -1134,29 +1576,10 @@ export interface components {
        */
       ui_language: "en" | "fr" | "ar" | "ar-TN";
     };
-    /** StartIn */
-    StartIn: {
-      /**
-       * Course Id
-       * Format: uuid
-       */
-      course_id: string;
-    };
-    /** StartOut */
-    StartOut: {
-      /**
-       * Course Id
-       * Format: uuid
-       */
-      course_id: string;
-      /** Cached */
-      cached: boolean;
-      /** Cost */
-      cost: number;
-      /** Job Id */
-      job_id: string | null;
-      /** Questions */
-      questions: components["schemas"]["AskedQuestion"][] | null;
+    /** SkipIn */
+    SkipIn: {
+      /** Q */
+      q: number;
     };
     /** Stats */
     Stats: {
@@ -1234,6 +1657,56 @@ export interface components {
       tokens_out: number;
       /** Avg Latency Ms */
       avg_latency_ms: number;
+    };
+    /** Turn */
+    Turn: {
+      /**
+       * Role
+       * @enum {string}
+       */
+      role: "student" | "tutor";
+      /** Text */
+      text: string;
+      /** Action */
+      action?: string | null;
+      /** Tier */
+      tier?: string | null;
+      /**
+       * Quick Mode
+       * @default false
+       */
+      quick_mode: boolean;
+      /** Confidence */
+      confidence?: string | null;
+      /** At */
+      at?: string | null;
+    };
+    /** TurnIn */
+    TurnIn: {
+      /**
+       * Text
+       * @default
+       */
+      text: string;
+      /**
+       * Action
+       * @default message
+       * @enum {string}
+       */
+      action: "message" | "hint" | "another_way" | "stuck";
+    };
+    /** TutorStartIn */
+    TutorStartIn: {
+      /**
+       * Chapter Id
+       * Format: uuid
+       */
+      chapter_id: string;
+      /**
+       * Level
+       * @enum {string}
+       */
+      level: "beginner" | "intermediate" | "advanced";
     };
     /** UploadOut */
     UploadOut: {
@@ -1836,7 +2309,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["StartIn"];
+        "application/json": components["schemas"]["PlacementStartIn"];
       };
     };
     responses: {
@@ -1846,7 +2319,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["StartOut"];
+          "application/json": components["schemas"]["PlacementStartOut"];
         };
       };
       /** @description Validation Error */
@@ -1921,6 +2394,419 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Graded"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  price_api_quiz_price_get: {
+    parameters: {
+      query: {
+        chapter_id: string;
+        level: string;
+      };
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Price"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  start_api_quiz_start_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QuizStartIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuizStartOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  from_job_api_quiz_attempts_from_job__job_id__post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        job_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AttemptView"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_attempt_api_quiz_attempts__attempt_id__get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        attempt_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AttemptView"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  answer_api_quiz_attempts__attempt_id__answer_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        attempt_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AnswerIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuestionView"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  skip_api_quiz_attempts__attempt_id__skip_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        attempt_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SkipIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuestionView"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  finish_api_quiz_attempts__attempt_id__finish_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        attempt_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Results"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  start_api_tutor_start_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TutorStartIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobRef"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_session_api_tutor__session_id__get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        session_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SessionOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  turn_api_tutor__session_id__turn_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        session_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TurnIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobRef"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  end_api_tutor__session_id__end_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        session_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobRef"];
         };
       };
       /** @description Validation Error */

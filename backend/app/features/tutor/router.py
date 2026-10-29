@@ -18,7 +18,7 @@ from app.models import Chapter, Course, TutorSession
 router = APIRouter(prefix="/api/tutor", tags=["tutor"])
 
 
-class StartIn(BaseModel):
+class TutorStartIn(BaseModel):
     chapter_id: uuid.UUID
     level: Literal["beginner", "intermediate", "advanced"]
 
@@ -100,7 +100,7 @@ def _http(e: Rejected) -> HTTPException:
 
 
 @router.post("/start", response_model=JobRef)
-async def start(body: StartIn, s: Session, user: CurrentUser) -> JobRef:
+async def start(body: TutorStartIn, s: Session, user: CurrentUser) -> JobRef:
     try:
         chapter = await member_chapter(s, user, body.chapter_id)
     except NotFound as e:

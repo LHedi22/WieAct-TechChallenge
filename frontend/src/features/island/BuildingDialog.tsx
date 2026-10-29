@@ -1,6 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { IslandOut } from "@/api/client";
+import { api, type IslandOut } from "@/api/client";
 import { Bidi, Chip, PixelButton, PixelPanel } from "@/components";
 import { cx } from "@/components/cx";
 import { useNumberFormat } from "@/components/useNumberFormat";
@@ -41,9 +42,16 @@ export function BuildingDialog({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  // Shared buildings are free when the class already made this chapter + level; that check
-  // arrives with the Study/Audio studios (M7) — until then the generate price is shown.
-  const cost = building.cost;
+  // The Quiz Hall asks the server before Confirm: free when a class set this student hasn't
+  // done is ready (ECONOMY.md). Study/Audio "free if cached" checks arrive with M7.
+  const quizPrice = useQuery({
+    queryKey: ["quiz-price", chapterId, level],
+    queryFn: () => api.quizPrice(chapterId, level),
+    enabled: building.key === "quiz_hall" && !!chapterId,
+  });
+  const cost =
+    building.key === "quiz_hall" ? (quizPrice.data?.cost ?? building.cost) : building.cost;
+  const cachedQuiz = building.key === "quiz_hall" && quizPrice.data?.cached;
   const balance = wallet?.coins ?? 0;
   const after = balance - cost;
   const short = after < 0;
@@ -104,7 +112,14 @@ export function BuildingDialog({
                     onChange={() => setLevel(l)}
                     className="sr-only"
                   />
-                  {tc(`chip.${l}`)}
+                  <span className="flex flex-col">
+                    {tc(`chip.${l}`)}
+                    {island.level === l && (
+                      <span className="text-small font-normal opacity-80">
+                        {t("dialog.fromPlacement")}
+                      </span>
+                    )}
+                  </span>
                 </label>
               ))}
             </div>
@@ -115,7 +130,12 @@ export function BuildingDialog({
               {building.answer_cost === 0 ? (
                 <span className="font-semibold">{t("costs.teachback", { ask: cost })}</span>
               ) : cost === 0 ? (
-                <Chip kind="cost">{tc("chip.free")}</Chip>
+                <span className="flex flex-col items-end gap-1">
+                  <Chip kind="cost">{tc("chip.free")}</Chip>
+                  {cachedQuiz && (
+                    <span className="text-small text-ink/70">{t("dialog.classMade")}</span>
+                  )}
+                </span>
               ) : (
                 <Chip kind="cost">{tc("chip.cost", { count: cost })}</Chip>
               )}

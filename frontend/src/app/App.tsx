@@ -9,7 +9,10 @@ import { LandingPage } from "@/features/landing/LandingPage";
 import { MapPage } from "@/features/map/MapPage";
 import { OnboardingPage } from "@/features/onboarding/OnboardingPage";
 import { PlacementPage } from "@/features/placement/PlacementPage";
+import { QuizAttemptPage } from "@/features/quiz/QuizAttemptPage";
+import { QuizStartPage } from "@/features/quiz/QuizStartPage";
 import { StyleguidePage } from "@/features/styleguide/StyleguidePage";
+import { TutorPage, TutorStartPage } from "@/features/tutor/TutorPage";
 import { AddMaterialPage } from "@/features/worlds/AddMaterialPage";
 import { CreateOrJoinPage } from "@/features/worlds/CreateOrJoinPage";
 import { IndexingPage } from "@/features/worlds/IndexingPage";
@@ -33,6 +36,10 @@ const router = createBrowserRouter([
   { path: `${W}/upload`, element: signedIn(<AddMaterialPage />) },
   { path: C, element: signedIn(<IslandPage />) },
   { path: `${C}/placement`, element: signedIn(<PlacementPage />) },
+  { path: `${C}/quiz/new`, element: signedIn(<QuizStartPage />) },
+  { path: `${C}/quiz/:attemptId`, element: signedIn(<QuizAttemptPage />) },
+  { path: `${C}/tutor/new`, element: signedIn(<TutorStartPage />) },
+  { path: `${C}/tutor/:sessionId`, element: signedIn(<TutorPage />) },
   { path: `${C}/buildings/:building`, element: signedIn(<BuildingSoonPage />) },
   { path: "/styleguide", element: <StyleguidePage /> },
   // Dev-only: the M1 demo job through useJob + LoadingStages + queue/quick-mode banners.

@@ -59,7 +59,9 @@
         "reading_pages": "Lecture des pages",
         "finding_key_ideas": "Recherche des idées clés",
         "saving_search_index": "Enregistrement de l'index de recherche",
-        "searching": "Recherche"
+        "searching": "Recherche",
+        "thinking": "Réflexion",
+        "checking_reply": "Vérification de la réponse"
       }
     },
     "wisdom": {
@@ -94,7 +96,19 @@
       "cosmetic_locked": "Gagne plus de points pour débloquer ceci.",
       "placement_no_material": "Cette île n'a pas encore de contenu. Ajoute-en d'abord.",
       "placement_not_ready": "Le quiz de placement n'est pas encore prêt.",
-      "placement_incomplete": "Réponds d'abord à toutes les questions."
+      "placement_incomplete": "Réponds d'abord à toutes les questions.",
+      "level_invalid": "Choisis un niveau : débutant, intermédiaire ou avancé.",
+      "quiz_not_ready": "Le quiz n'est pas encore prêt.",
+      "quiz_finished": "Ce quiz est terminé.",
+      "quiz_question_invalid": "Cette question n'existe pas.",
+      "quiz_choice_invalid": "Choisis l'une des quatre réponses.",
+      "quiz_question_done": "Tu as déjà répondu à cette question.",
+      "quiz_not_found": "Ce quiz n'existe plus.",
+      "tutor_ended": "Cette séance est terminée.",
+      "tutor_busy": "Le tuteur répond encore. Un instant.",
+      "tutor_empty": "Écris quelque chose d'abord, même une hypothèse.",
+      "tutor_no_hints": "Tu as utilisé les 3 indices de cette séance.",
+      "tutor_not_found": "Cette séance n'existe plus."
     },
     "mascot": {
       "waving": "Le chat de Sidi Bou Saïd fait coucou",
@@ -695,7 +709,9 @@
       "balanceAfter": "Solde après",
       "short": "Pas assez de pièces aujourd'hui. Elles se rechargent à minuit.",
       "cancel": "Annuler",
-      "confirm": "Entrer"
+      "confirm": "Entrer",
+      "fromPlacement": "D'après ton placement",
+      "classMade": "Ta classe en a déjà fait un"
     },
     "soon": {
       "body": "Ce bâtiment ouvre à la prochaine mise à jour. Tes pièces n'ont pas été dépensées.",
@@ -718,6 +734,75 @@
       "score": "{correct} sur {total} justes",
       "chapter": "{correct} / {asked}",
       "toIsland": "Aller à l'île"
+    }
+  },
+  "quiz": {
+    "building": "Préparation de ton quiz…",
+    "saveExit": "Enregistrer et quitter",
+    "check": "Vérifier",
+    "tryAgain": "Réessayer · 2e essai",
+    "skip": "Passer cette question",
+    "next": "Question suivante",
+    "seeResults": "Voir mes résultats",
+    "notQuite": "Pas tout à fait. Voici un indice pour ton deuxième essai.",
+    "hint": "Indice",
+    "hintsFree": "Les indices sont gratuits. Un deuxième essai réussi rapporte encore la moitié des points.",
+    "yourAnswer": "Ta réponse",
+    "rightAnswer": "Bonne réponse",
+    "result": {
+      "correct": "Juste, du premier coup !",
+      "second": "Juste au deuxième essai : la moitié des points.",
+      "wrong": "Pas cette fois. Voici pourquoi :",
+      "skipped": "Passée. Voici la réponse et pourquoi :"
+    },
+    "results": {
+      "score": "Ton score",
+      "mastery": "Maîtrise de {title}",
+      "nextStep": "Ta prochaine étape",
+      "nextTutor": "{title} reste difficile → essaie le tuteur socratique. Il te pose des questions jusqu'au déclic.",
+      "nextQuiz": "Bien joué → ensuite : {title} au niveau {level}.",
+      "goTutor": "Aller au tuteur socratique",
+      "goQuiz": "Lancer ce quiz",
+      "backIsland": "Retour à l'île",
+      "lookAgain": "{count, plural, =0 {Rien à revoir : tout est juste !} one {# point à revoir} other {# points à revoir}}",
+      "q": "Q{n}",
+      "yours": "Tu as répondu :",
+      "skipped": "Passée",
+      "correct": "Bonne réponse :",
+      "half": "moitié des points",
+      "rightConcepts": "{count} justes : {list}. Bien joué."
+    }
+  },
+  "tutor": {
+    "quickMode": "Mode rapide · modèle plus rapide pendant l'affluence",
+    "end": "Terminer la séance",
+    "backIsland": "Retour à l'île",
+    "deeper": "Explication approfondie",
+    "askTeacher": "Le cours ne couvre peut-être pas ceci : demande aussi à ton enseignant.",
+    "thinking": "Le tuteur réfléchit",
+    "hint": "Un indice ({used}/{max})",
+    "anotherWay": "Explique autrement",
+    "stuck": "Je bloque",
+    "send": "Envoyer",
+    "placeholder": "Écris ta réflexion, même si tu n'es pas sûr…",
+    "goal": "Objectif de la séance",
+    "hintsUsed": "Indices utilisés",
+    "hintsCount": "{used} sur {max}",
+    "ideas": "Idées trouvées",
+    "found": "Trouvée",
+    "notYet": "Pas encore",
+    "note": "Le tuteur pose des questions au lieu de donner les réponses. Appuie sur « Je bloque » pour une étape plus petite.",
+    "actions": {
+      "message": "…",
+      "hint": "Je peux avoir un indice ?",
+      "another_way": "Tu peux l'expliquer autrement ?",
+      "stuck": "Je bloque."
+    },
+    "summary": {
+      "title": "Bilan de la séance",
+      "found": "{count, plural, one {Tu as trouvé # idée clé toi-même.} other {Tu as trouvé # idées clés toi-même.}}",
+      "next": "Ensuite :",
+      "quiz": "Faire un quiz sur ce chapitre"
     }
   }
 }

@@ -21,12 +21,12 @@ class Price(BaseModel):
     cached: bool
 
 
-class StartIn(BaseModel):
+class QuizStartIn(BaseModel):
     chapter_id: uuid.UUID
     level: str
 
 
-class StartOut(BaseModel):
+class QuizStartOut(BaseModel):
     attempt_id: uuid.UUID | None  # a shared set was ready: no AI call, free
     job_id: uuid.UUID | None  # a new set is being written: poll the job, then from-job
     cost: int
@@ -70,11 +70,11 @@ async def price(chapter_id: uuid.UUID, level: str, s: Session, user: CurrentUser
     return Price(**await service.price(s, user, chapter.id, level, user.ui_language))
 
 
-@router.post("/start", response_model=StartOut)
-async def start(body: StartIn, s: Session, user: CurrentUser) -> StartOut:
+@router.post("/start", response_model=QuizStartOut)
+async def start(body: QuizStartIn, s: Session, user: CurrentUser) -> QuizStartOut:
     chapter = await _chapter(s, user, body.chapter_id)
     try:
-        return StartOut(**await service.start(s, user, chapter, body.level))
+        return QuizStartOut(**await service.start(s, user, chapter, body.level))
     except Rejected as e:
         raise _http(e) from e
 
