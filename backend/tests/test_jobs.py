@@ -206,3 +206,17 @@ async def test_jobs_store_payload(sm):
         "reading_chapter",
         "writing_summary",
     ]
+
+
+def test_every_handler_is_known_even_after_one_feature_registered_itself():
+    """Regression: the API imports app.rag.indexing first; spec_for must still find the rest."""
+    import subprocess
+    import sys
+
+    code = (
+        "import app.rag.indexing\n"
+        "from app.jobs.registry import spec_for\n"
+        "for k in ('DEV_SEARCH', 'QUIZ_POOL', 'DEMO_SUMMARY', 'INDEX_DOCUMENT'): spec_for(k)\n"
+    )
+    proc = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=False)
+    assert proc.returncode == 0, proc.stderr[-500:]

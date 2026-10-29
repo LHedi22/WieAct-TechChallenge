@@ -191,3 +191,17 @@ async def test_production_refuses_dev_users(monkeypatch):
     with pytest.raises(deps.HTTPException) as e:
         await deps.current_user(s=None, x_dev_user="SeaTurtle42")
     assert e.value.status_code == 401 and e.value.detail == "errors.sign_in_required"
+
+
+async def test_compact_share_ignores_embedding_calls(api, sm, pptx):
+    world = await make_world(api)
+    chapter = world["course"]["chapters"][0]["id"]
+    await api.post(
+        f"/api/chapters/{chapter}/documents",
+        files={"file": (pptx.name, pptx.read_bytes())},
+        headers=SEA,
+    )
+    await Worker(sm).drain(timeout_s=60)
+    stats = (await api.get("/api/admin/stats", params={"provider": "mock"})).json()
+    assert stats["by_tier"]["embed"]["calls"] >= 1 and "mid" not in stats["by_tier"]
+    assert stats["compact_share"] == 1.0  # only compact chat calls: embeddings don't dilute it

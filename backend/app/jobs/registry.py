@@ -45,6 +45,7 @@ def job(kind: str, stages: tuple[str, ...]) -> Callable[[Handler], Handler]:
 
 
 def spec_for(kind: str) -> JobSpec:
-    if not HANDLERS:
-        import app.jobs.handlers  # noqa: F401  (registers every handler)
+    # Always load the full list: importing one feature module registers only its own handlers.
+    import app.jobs.handlers  # noqa: F401, PLC0415  (registers every handler)
+
     return HANDLERS[kind]

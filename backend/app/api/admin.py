@@ -101,14 +101,16 @@ async def stats(
     )
     repeated = await s.scalar(select(func.coalesce(func.sum(dup.c.extra), 0)))
     total_calls = totals[0]
-    compact = by_tier.get("compact").calls if "compact" in by_tier else 0
+    compact = by_tier["compact"].calls if "compact" in by_tier else 0
+    mid = by_tier["mid"].calls if "mid" in by_tier else 0
+    chat_calls = compact + mid  # the compact/mid split ignores embeddings (own endpoint + quota)
     return Stats(
         provider=provider,
         calls=total_calls,
         ok=totals[1],
         cache_hits=cache_hits or 0,
         repeated_identical=int(repeated or 0),
-        compact_share=round(compact / total_calls, 3) if total_calls else 0.0,
+        compact_share=round(compact / chat_calls, 3) if chat_calls else 0.0,
         by_tier=by_tier,
         by_task=dict(task_rows),
         refusals=dict(refusal_rows),
