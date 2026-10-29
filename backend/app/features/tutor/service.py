@@ -14,10 +14,11 @@ from __future__ import annotations
 
 import re
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field, ValidationError
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import gateway, prompts
@@ -33,6 +34,7 @@ MAX_HINTS = 3
 STUCK_TO_ESCALATE = 2
 HISTORY_TURNS = 6
 CONTEXT_K = 4
+REUSE_WINDOW = timedelta(minutes=2)
 Action = Literal["message", "hint", "another_way", "stuck"]
 
 # Phrases that state an answer instead of asking (en / fr / ar / Darija). Conservative on purpose:
@@ -114,6 +116,22 @@ async def _pending(s: AsyncSession, session: TutorSession) -> bool:
 
 
 async def start(s: AsyncSession, user: User, chapter: Chapter, level: str) -> TutorSession:
+    # A session opened moments ago and not used yet is returned again (double click, reload):
+    # a second plan call would be a repeated identical request.
+    recent = await s.scalar(
+        select(TutorSession)
+        .where(
+            TutorSession.user_id == user.id,
+            TutorSession.chapter_id == chapter.id,
+            TutorSession.level == level,
+            TutorSession.status == "active",
+            TutorSession.created_at >= datetime.now(UTC) - REUSE_WINDOW,
+        )
+        .order_by(TutorSession.created_at.desc())
+        .limit(1)
+    )
+    if recent is not None and not any(t["role"] == "student" for t in recent.turns):
+        return recent
     course = await s.get(Course, chapter.course_id)
     session = TutorSession(
         user_id=user.id,
@@ -304,7 +322,8 @@ async def tutor_step(ctx: JobContext) -> dict[str, Any]:
                     lane="interactive",
                     messages=messages,
                     language=lang,
-                    cache_key=None,  # personal conversation: never shared
+                    # the plan holds nothing personal: shared by chapter + level + language + style
+                    cache_key=f"tutor-plan:{chapter.id}:{session.level}:{lang}:{style}",
                     prompt_version=version,
                 )
             )

@@ -66,7 +66,10 @@ async def test_unseen_shared_set_is_free_and_needs_no_ai_call(api, sm, pptx):  #
 async def test_all_seen_generates_a_new_set_as_a_job(api, sm, pptx):  # noqa: F811
     _, chapter = await indexed(api, sm, pptx)
     body = {"chapter_id": chapter, "level": "intermediate"}
-    await api.post("/api/quiz/start", json=body, headers=OWL_FR)  # uses seed 1
+    first = (await api.post("/api/quiz/start", json=body, headers=OWL_FR)).json()  # seed 1
+    again = (await api.post("/api/quiz/start", json=body, headers=OWL_FR)).json()
+    assert again["attempt_id"] == first["attempt_id"]  # unfinished: resumed, no new set used
+    await api.post(f"/api/quiz/attempts/{first['attempt_id']}/finish", headers=OWL_FR)
     price = (await api.get("/api/quiz/price", params=body, headers=OWL_FR)).json()
     assert price == {"cost": economy.COST["quiz"], "cached": False}
     start = (await api.post("/api/quiz/start", json=body, headers=OWL_FR)).json()

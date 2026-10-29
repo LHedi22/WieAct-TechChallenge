@@ -1,9 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { api } from "@/api/client";
 import { Mascot } from "@/components";
+import { useOnce } from "@/hooks/useOnce";
 import { ErrorBanner, JoinCard } from "./parts";
 
 /** /join/:code — the invite link: joins, then opens the world (its indexing screen until M3). */
@@ -16,7 +16,7 @@ export function JoinPage() {
     onSuccess: (world) => void navigate(`/worlds/${world.id}`, { replace: true }),
   });
   const { mutate } = join;
-  useEffect(() => mutate(), [mutate]);
+  useOnce(mutate);
 
   return (
     <main className="mx-auto flex max-w-md flex-col items-center gap-5 px-4 py-12 text-center">

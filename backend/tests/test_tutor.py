@@ -144,3 +144,25 @@ async def test_sessions_are_personal(api, sm, pptx):  # noqa: F811
         headers={"X-Dev-User": "Stranger9"},
     )
     assert other.status_code == 404
+
+
+async def test_double_start_reuses_the_new_session(api, sm, pptx):  # noqa: F811
+    _, chapter = await indexed(api, sm, pptx)
+    body = {"chapter_id": chapter, "level": "intermediate"}
+    a = (await api.post("/api/tutor/start", json=body, headers=OWL_FR)).json()
+    b = (await api.post("/api/tutor/start", json=body, headers=OWL_FR)).json()
+    assert a == b
+    await Worker(sm).drain(timeout_s=30)
+    assert await tutor_calls(sm) == 1
+
+
+async def test_plan_is_shared_by_classmates_with_the_same_language_and_style(api, sm, pptx):  # noqa: F811
+    _, chapter = await indexed(api, sm, pptx)
+    await start(api, sm, chapter)
+    r = await api.post(
+        "/api/tutor/start", json={"chapter_id": chapter, "level": "intermediate"}, headers=SEA
+    )
+    await Worker(sm).drain(timeout_s=30)
+    s = (await api.get(f"/api/tutor/{r.json()['session_id']}", headers=SEA)).json()
+    assert s["goal"] and len(s["ideas"]) == 3
+    assert await tutor_calls(sm) == 1  # the second plan came from the cache

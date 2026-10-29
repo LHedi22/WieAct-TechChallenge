@@ -3,6 +3,7 @@ attempt with (concept, mistake_type) → `mistakes` (weak spots, daily challenge
 
 from __future__ import annotations
 
+import hashlib
 import uuid
 from typing import Any, Literal
 
@@ -69,7 +70,8 @@ async def tag_mistakes(ctx: JobContext) -> dict[str, Any]:
                 lane="background",
                 messages=messages,
                 language=attempt.language,
-                cache_key=f"attempt:{attempt_id}",
+                cache_key=f"tags:{attempt.language}:"
+                + hashlib.sha256(items.encode("utf-8")).hexdigest()[:32],
                 max_tokens=TOKENS_PER_ITEM * len(idx) + 40,
                 prompt_version=version,
             )

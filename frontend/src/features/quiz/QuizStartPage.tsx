@@ -5,6 +5,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api } from "@/api/client";
 import { Sprite } from "@/components";
 import { JobProgress } from "@/features/jobs/JobProgress";
+import { useOnce } from "@/hooks/useOnce";
 import { ErrorBanner } from "@/features/worlds/parts";
 
 /** …/quiz/new?chapter&level — a shared set opens at once; a new one is written as a job first. */
@@ -26,7 +27,7 @@ export function QuizStartPage() {
     onSuccess: (a) => void navigate(`${base}/${a.id}`, { replace: true }),
   });
   const { mutate } = start;
-  useEffect(() => mutate(), [mutate]);
+  useOnce(mutate);
   const jobId = start.data?.job_id;
 
   return (

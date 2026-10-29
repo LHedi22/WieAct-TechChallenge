@@ -6,6 +6,7 @@ import { api, type TutorAction, type TutorSession } from "@/api/client";
 import { Banner, Bidi, Chip, MathText, PixelButton, SoftCard, Sprite } from "@/components";
 import { cx } from "@/components/cx";
 import { JOB_POLL_MS, isTerminal, useJob } from "@/hooks/useJob";
+import { useOnce } from "@/hooks/useOnce";
 import { ErrorBanner } from "@/features/worlds/parts";
 
 /** …/tutor/new?chapter&level — opens a session (the first question is a job), then the chat. */
@@ -22,7 +23,7 @@ export function TutorStartPage() {
       }),
   });
   const { mutate } = start;
-  useEffect(() => mutate(), [mutate]);
+  useOnce(mutate);
   return (
     <main className="p-8">
       <ErrorBanner error={start.error} />
@@ -56,14 +57,22 @@ export function TutorPage() {
   const send = useMutation({
     mutationFn: ({ msg, action }: { msg: string; action: TutorAction }) =>
       api.tutorTurn(sessionId, msg, action),
-    onSuccess: () => {
+    onSuccess: (r) => {
       setText("");
+      qc.setQueryData<TutorSession>(["tutor", sessionId], (s) =>
+        s ? { ...s, pending_job_id: r.job_id } : s,
+      );
       void qc.invalidateQueries({ queryKey: ["tutor", sessionId] });
     },
   });
   const end = useMutation({
     mutationFn: () => api.tutorEnd(sessionId),
-    onSuccess: () => void qc.invalidateQueries({ queryKey: ["tutor", sessionId] }),
+    onSuccess: (r) => {
+      qc.setQueryData<TutorSession>(["tutor", sessionId], (s) =>
+        s ? { ...s, pending_job_id: r.job_id } : s,
+      );
+      void qc.invalidateQueries({ queryKey: ["tutor", sessionId] });
+    },
   });
 
   if (!session)
@@ -73,7 +82,8 @@ export function TutorPage() {
       </main>
     );
   const island = `/worlds/${worldId}/courses/${courseId}`;
-  const busy = !!session.pending_job_id || send.isPending;
+  // a failed or cancelled turn must not lock the chat: only a job still running counts
+  const busy = (!!session.pending_job_id && !jobDone) || send.isPending;
   const quick = session.turns.some((x) => x.quick_mode);
   const act = (action: TutorAction, msg = "") => send.mutate({ msg, action });
 

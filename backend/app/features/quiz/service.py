@@ -69,6 +69,19 @@ async def start(s: AsyncSession, user: User, chapter: Chapter, level: str) -> di
         raise Rejected("errors.level_invalid")
     course = await s.get(Course, chapter.course_id)
     language = user.ui_language
+    # An unfinished attempt here is resumed (Save and exit, a double click, a reload) instead of
+    # using up another shared set.
+    unfinished = await s.scalar(
+        select(QuizAttempt).where(
+            QuizAttempt.user_id == user.id,
+            QuizAttempt.chapter_id == chapter.id,
+            QuizAttempt.level == level,
+            QuizAttempt.language == language,
+            QuizAttempt.status == "in_progress",
+        )
+    )
+    if unfinished:
+        return {"attempt_id": unfinished.id, "job_id": None, "cost": 0, "cached": True}
     found = await unseen_set(s, user, chapter.id, level, language)
     if found:
         attempt = await create_attempt(s, user, found, course)

@@ -6,6 +6,7 @@ import { api, type PlacementQuestion, type PlacementResult } from "@/api/client"
 import { Bidi, Chip, Mascot, PixelButton, PixelPanel, ProgressBar, SoftCard } from "@/components";
 import { cx } from "@/components/cx";
 import { JobProgress } from "@/features/jobs/JobProgress";
+import { useOnce } from "@/hooks/useOnce";
 import { ErrorBanner } from "@/features/worlds/parts";
 
 type Level = "beginner" | "intermediate" | "advanced";
@@ -30,7 +31,7 @@ export function PlacementPage() {
     onSuccess: (s) => s.questions && receive(s.questions),
   });
   const { mutate } = start;
-  useEffect(() => mutate(), [mutate]);
+  useOnce(mutate);
 
   const finish = useMutation({
     mutationFn: () => api.placementFinish(courseId, answers),
