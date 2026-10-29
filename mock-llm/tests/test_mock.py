@@ -189,3 +189,14 @@ async def test_quiz_fixture_ten_questions_in_language():
     qs = out["questions"]
     assert len(qs) == 10 and "صحيحة" in qs[0]["question"]
     assert all(q["options"][q["answer_index"]] for q in qs)
+
+
+async def test_placement_fixture_spans_chapters_and_difficulties():
+    user = "[chapter 1 · Limits · page:2] limits 0/0\n\n[chapter 2 · Derivatives · page:20] slope"
+    body = chat_body(system="Place. <!-- task: PLACEMENT_QUIZ --> <!-- lang: fr -->", user=user)
+    async with client() as c:
+        r = await c.post("/v1/chat/completions", json=body)
+    qs = json.loads(r.json()["choices"][0]["message"]["content"])["questions"]
+    assert len(qs) == 8 and {q["chapter"] for q in qs} == {1, 2}
+    assert {q["difficulty"] for q in qs} == {"beginner", "intermediate", "advanced"}
+    assert "correcte" in qs[0]["question"]

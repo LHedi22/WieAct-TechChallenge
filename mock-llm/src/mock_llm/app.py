@@ -207,7 +207,26 @@ def _quiz(user: str, lang: str) -> dict[str, Any]:
     return {"questions": questions}
 
 
-GENERATORS = {"CHUNK_TAG": _chunk_tags, "QUIZ_GENERATE": _quiz}
+CHAPTER_MARK = re.compile(r"\[chapter (\d+) [^\]]*\]")
+DIFFICULTY = ("beginner", "beginner", "intermediate", "intermediate", "intermediate", "advanced")
+
+
+def _placement(user: str, lang: str) -> dict[str, Any]:
+    """8 questions across the chapters named in the excerpt labels, mixed difficulty."""
+    chapters = [int(n) for n in dict.fromkeys(CHAPTER_MARK.findall(user))] or [1]
+    base = _quiz(user, lang)["questions"]
+    questions = []
+    for i in range(8):
+        q = dict(base[i % len(base)])
+        q.pop("hint", None)
+        q.pop("explanation", None)
+        q["difficulty"] = DIFFICULTY[i % len(DIFFICULTY)]
+        q["chapter"] = chapters[i % len(chapters)]
+        questions.append(q)
+    return {"questions": questions}
+
+
+GENERATORS = {"CHUNK_TAG": _chunk_tags, "QUIZ_GENERATE": _quiz, "PLACEMENT_QUIZ": _placement}
 
 
 def _break_json(text: str) -> str:
