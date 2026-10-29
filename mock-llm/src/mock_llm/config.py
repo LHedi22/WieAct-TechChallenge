@@ -42,6 +42,8 @@ class MockConfig(BaseModel):
     model_embedding: str = "mock-embed"
     embedding_dim: int = 384
     embedding_rpm: float = 60  # embeddings have their own quota
+    embedding_max_inputs: int = 64  # more inputs per call → 400 naming the limit
+    p_503_embed: float = 0.0
 
     @classmethod
     def from_env(cls) -> MockConfig:
@@ -66,4 +68,6 @@ class MockConfig(BaseModel):
             model_embedding=os.environ.get("MOCK_EMBEDDING_MODEL", "mock-embed"),
             embedding_dim=int(_f("MOCK_EMBEDDING_DIM", 384)),
             embedding_rpm=_f("MOCK_EMBEDDING_RPM", 60),
+            embedding_max_inputs=int(_f("MOCK_EMBEDDING_MAX_INPUTS", 64)),
+            p_503_embed=_f("MOCK_P_503_EMBED", 0.0),
         )

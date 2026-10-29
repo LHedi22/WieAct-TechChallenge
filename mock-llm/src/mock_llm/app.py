@@ -101,6 +101,9 @@ def _content(messages: list[dict[str, Any]], json_wanted: bool) -> str:
     lang_mark = LANG_MARK.search(system)
     lang = lang_mark.group(1) if lang_mark else "en"
     topic = _topic(messages)
+    if task and task.group(1) in GENERATORS:
+        user = "\n".join(str(m.get("content", "")) for m in messages if m.get("role") == "user")
+        return json.dumps(GENERATORS[task.group(1)](user, lang), ensure_ascii=False)
     if task:
         for name in (
             f"{task.group(1)}.{lang}.json",
@@ -115,15 +118,122 @@ def _content(messages: list[dict[str, Any]], json_wanted: bool) -> str:
     return f"Mock reply about {topic}."
 
 
+# --- generated fixtures: replies that depend on the request ----------------------------------
+CHUNK_MARK = re.compile(r"\[\[chunk:([\w-]+)\]\]")
+_STOP_WORDS = (
+    "about after also because before being between could does each from have into just more "
+    "most must only other over same should some such than that their them then there these "
+    "they this those through under very what when where which while will with would your "
+    "page chapter first gives means value values example "
+)
+STOP = set(_STOP_WORDS.split())
+
+
+def _concepts(text: str, n: int = 3) -> list[str]:
+    counts: dict[str, int] = {}
+    for w in re.findall(r"[^\W\d_]{5,}", text.lower()):
+        if w not in STOP:
+            counts[w] = counts.get(w, 0) + 1
+    return [w for w, _ in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))[:n]]
+
+
+def _lang_of(text: str) -> str:
+    if re.search(r"[\u0600-\u06FF]", text):
+        return "ar"
+    if re.search(r"\b(le|la|les|est|une|des)\b", text.lower()):
+        return "fr"
+    return "en"
+
+
+def _chunk_tags(user: str, lang: str) -> dict[str, Any]:
+    parts = CHUNK_MARK.split(user)  # ["", id1, text1, id2, text2, ...]
+    chunks = []
+    for cid, text in zip(parts[1::2], parts[2::2], strict=True):
+        chunks.append(
+            {
+                "id": cid,
+                "concepts": _concepts(text),
+                "level": "intermediate",
+                "lang": _lang_of(text),
+            }
+        )
+    return {"chunks": chunks}
+
+
+QUIZ_TEXT = {
+    "en": (
+        "Which statement about {c} is correct?",
+        "Re-read the part about {c}.",
+        "The material defines {c} this way.",
+        "The correct statement about {c}",
+        "A common misconception about {c}",
+    ),
+    "fr": (
+        "Quelle affirmation sur {c} est correcte ?",
+        "Relis la partie sur {c}.",
+        "Le cours définit {c} ainsi.",
+        "L'affirmation correcte sur {c}",
+        "Une idée reçue sur {c}",
+    ),
+    "ar": (
+        "أي عبارة عن {c} صحيحة؟",
+        "أعد قراءة الجزء الخاص بـ {c}.",
+        "يعرّف الدرس {c} بهذه الطريقة.",
+        "العبارة الصحيحة عن {c}",
+        "خطأ شائع عن {c}",
+    ),
+}
+
+
+def _quiz(user: str, lang: str) -> dict[str, Any]:
+    q, hint, expl, right, wrong = QUIZ_TEXT.get(lang[:2], QUIZ_TEXT["en"])
+    concepts = _concepts(user, 10) or ["the topic"]
+    questions = []
+    for i in range(10):
+        c = concepts[i % len(concepts)]
+        answer = i % 4
+        options = [f"{wrong.format(c=c)} ({k + 1})" for k in range(4)]
+        options[answer] = right.format(c=c)
+        questions.append(
+            {
+                "question": q.format(c=c),
+                "options": options,
+                "answer_index": answer,
+                "hint": hint.format(c=c),
+                "explanation": expl.format(c=c),
+                "concept": c,
+            }
+        )
+    return {"questions": questions}
+
+
+GENERATORS = {"CHUNK_TAG": _chunk_tags, "QUIZ_GENERATE": _quiz}
+
+
 def _break_json(text: str) -> str:
     """Almost-JSON, the way small models break it: fenced, trailing comma, missing brace."""
     return "```json\n" + text.rstrip().rstrip("}") + ",\n```"
 
 
+WORD = re.compile(r"[^\W_]+(?:[/^.][^\W_]+)*", re.UNICODE)  # keeps "0/0", "x^2", "f(x)" parts
+
+
 def _embedding(text: str, dim: int) -> list[float]:
-    rng = random.Random(hashlib.sha256(text.encode("utf-8")).digest())
-    v = [rng.gauss(0, 1) for _ in range(dim)]
-    n = math.sqrt(sum(x * x for x in v)) or 1.0
+    """Hashed bag of words (signed feature hashing, log tf, L2-normalised): deterministic, and
+    texts sharing words get a higher cosine, so search on the mock behaves like search."""
+    counts: dict[str, int] = {}
+    for w in WORD.findall(text.lower()):
+        counts[w] = counts.get(w, 0) + 1
+    v = [0.0] * dim
+    for w, c in counts.items():
+        h = hashlib.blake2b(w.encode("utf-8"), digest_size=8).digest()
+        sign = 1.0 if h[0] & 1 else -1.0
+        v[int.from_bytes(h[1:], "big") % dim] += sign * (1 + math.log(c))
+    n = math.sqrt(sum(x * x for x in v))
+    if not n:  # no words: a fixed pseudo-random vector
+        rng = random.Random(hashlib.sha256(text.encode("utf-8")).digest())
+        v = [rng.gauss(0, 1) for _ in range(dim)]
+        n = math.sqrt(sum(x * x for x in v)) or 1.0
     return [x / n for x in v]
 
 
@@ -261,10 +371,25 @@ def create_app(config: MockConfig | None = None, *, seed: int | None = None) -> 
             return _error(401, "Key is blocked", "auth_error")
         body = await request.json()
         wait = app.state.embed_bucket.take()
-        if wait:
-            return quota_exhausted(wait)
+        if wait or _fault(request) == "quota":
+            return quota_exhausted(wait or c.quota_delay_s)
         inputs = body.get("input")
         texts = [inputs] if isinstance(inputs, str) else list(inputs or [])
+        fault = _fault(request)
+        if fault == "503" or app.state.rng.random() < c.p_503_embed:
+            return _error(
+                503,
+                "Embedding model saturated",
+                "overloaded",
+                {"Retry-After": str(c.retry_after_503_s)},
+            )
+        if fault == "400" or len(texts) > c.embedding_max_inputs:
+            return _error(
+                400,
+                f"{len(texts)} inputs exceeds the maximum of {c.embedding_max_inputs} inputs "
+                "per request",
+                "invalid_request_error",
+            )
         data = [
             {"object": "embedding", "index": i, "embedding": _embedding(t, c.embedding_dim)}
             for i, t in enumerate(texts)

@@ -143,3 +143,49 @@ async def test_embeddings_deterministic_and_sized():
     assert len(a["data"]) == 2 and len(a["data"][0]["embedding"]) == 8
     assert a["data"][0]["embedding"] == b["data"][0]["embedding"]
     assert a["data"][0]["embedding"] != a["data"][1]["embedding"]
+
+
+def _cos(a, b):
+    return sum(x * y for x, y in zip(a, b, strict=True))
+
+
+async def test_embeddings_reflect_shared_words():
+    texts = [
+        "limit 0/0 indeterminate form: factor and cancel before substitution",
+        "the derivative is the slope of the tangent line, power rule",
+        "limit 0/0",
+    ]
+    async with client() as c:
+        r = await c.post("/v1/embeddings", json={"model": "mock-embed", "input": texts})
+    a, b, q = (d["embedding"] for d in r.json()["data"])
+    assert _cos(q, a) > _cos(q, b) + 0.2
+
+
+async def test_chunk_tag_fixture_answers_every_chunk():
+    user = (
+        "[[chunk:c1]] Limits and the indeterminate form, limits again\n[[chunk:c2]] Pile de plates"
+    )
+    body = chat_body(system="Tag. <!-- task: CHUNK_TAG --> <!-- lang: en -->", user=user)
+    async with client() as c:
+        out = json.loads(
+            (await c.post("/v1/chat/completions", json=body)).json()["choices"][0]["message"][
+                "content"
+            ]
+        )
+    assert [ch["id"] for ch in out["chunks"]] == ["c1", "c2"]
+    assert out["chunks"][0]["concepts"][0] == "limits"
+
+
+async def test_quiz_fixture_ten_questions_in_language():
+    body = chat_body(
+        system="Quiz. <!-- task: QUIZ_GENERATE --> <!-- lang: ar -->", user="limits derivative"
+    )
+    async with client() as c:
+        out = json.loads(
+            (await c.post("/v1/chat/completions", json=body)).json()["choices"][0]["message"][
+                "content"
+            ]
+        )
+    qs = out["questions"]
+    assert len(qs) == 10 and "صحيحة" in qs[0]["question"]
+    assert all(q["options"][q["answer_index"]] for q in qs)
