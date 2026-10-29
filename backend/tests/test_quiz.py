@@ -172,3 +172,17 @@ async def test_attempts_are_personal_and_members_only(api, sm, pptx):  # noqa: F
         "/api/quiz/start", json={"chapter_id": chapter, "level": "expert"}, headers=OWL_FR
     )
     assert bad.status_code == 400 and bad.json()["detail"] == "errors.level_invalid"
+
+
+async def test_eval_script_writes_outputs_with_checks(api, sm, pptx, tmp_path):  # noqa: F811
+    from app.evals.__main__ import quiz_eval
+    from app.seed.__main__ import seed
+
+    assert await seed(run=True) == 0
+    assert await quiz_eval(["en", "fr", "ar"], 20, "OLIVE-7Q2", False, tmp_path) == 0
+    for lang in ("en", "fr", "ar"):
+        report = json.loads((tmp_path / f"mock-{lang}.json").read_text(encoding="utf-8"))
+        assert report["count"] == 20 and report["calls"] == 2
+        assert report["checks_passed"]["valid"] == 20
+        assert report["checks_passed"]["language_script"] == 20
+        assert report["questions"][0]["review"] == {"correct": None, "notes": ""}
