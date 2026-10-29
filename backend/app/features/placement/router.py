@@ -24,12 +24,25 @@ class StartIn(BaseModel):
     course_id: uuid.UUID
 
 
+class AskedQuestion(BaseModel):
+    """A placement question as the student sees it: no answer, no difficulty."""
+
+    i: int
+    question: str
+    options: list[str]
+
+
+class QuestionsOut(BaseModel):
+    course_id: uuid.UUID
+    questions: list[AskedQuestion]
+
+
 class StartOut(BaseModel):
     course_id: uuid.UUID
     cached: bool
     cost: int
     job_id: uuid.UUID | None  # set when the questions still have to be written
-    questions: list[dict[str, Any]] | None  # set when they are ready (no answers inside)
+    questions: list[AskedQuestion] | None  # set when they are ready (no answers inside)
 
 
 class FinishIn(BaseModel):
@@ -89,7 +102,7 @@ async def start(body: StartIn, s: Session, user: CurrentUser) -> StartOut:
     return StartOut(course_id=course.id, cached=False, cost=cost, job_id=pending, questions=None)
 
 
-@router.get("/{course_id}")
+@router.get("/{course_id}", response_model=QuestionsOut)
 async def questions(course_id: uuid.UUID, s: Session, user: CurrentUser) -> dict[str, Any]:
     course = await _course(s, user, course_id)
     placement = await service.find_set(course.id, user.ui_language)

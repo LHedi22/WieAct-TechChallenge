@@ -14,6 +14,21 @@ export type DocumentOut = S["DocumentOut"];
 export type UploadOut = S["UploadOut"];
 export type IndexingOut = S["IndexingOut"];
 export type IndexingChapter = S["IndexingChapter"];
+export type Me = S["Me"];
+export type Economy = S["EconomyOut"];
+export type Wallet = S["Wallet"];
+export type StyleOut = S["StyleOut"];
+export type ProfileIn = S["ProfileIn"];
+export type ProfileOut = S["ProfileOut"];
+export type MapOut = S["MapOut"];
+export type MapCourse = S["MapCourse"];
+export type IslandOut = S["IslandOut"];
+export type PlacementStart = S["StartOut"];
+export type PlacementResult = S["Graded"];
+export type Language = S["SignupIn"]["ui_language"];
+
+export type PlacementQuestion = S["AskedQuestion"];
+export type PlacementQuestions = S["QuestionsOut"];
 
 const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
@@ -27,10 +42,9 @@ export class ApiError extends Error {
   }
 }
 
-/** Until sign-in exists (M3) the dev backend identifies the user by nickname (X-Dev-User). */
+/** The session is an HttpOnly cookie; the UI language rides along so the server's copy follows. */
 function identity(): Record<string, string> {
-  const { devUser, language } = useUiStore.getState();
-  return { "X-Dev-User": devUser, "X-UI-Language": language };
+  return { "X-UI-Language": useUiStore.getState().language };
 }
 
 async function request<T>(path: string, init?: RequestInit, json = true): Promise<T> {
@@ -92,4 +106,27 @@ export const api = {
   },
   deleteDocument: (id: string) => request<void>(`/api/documents/${id}`, { method: "DELETE" }),
   indexing: (worldId: string) => request<IndexingOut>(`/api/worlds/${worldId}/indexing`),
+
+  me: () => request<Me>("/api/auth/me"),
+  signup: (nickname: string, password: string, ui_language: Language) =>
+    post<Me>("/api/auth/signup", { nickname, password, ui_language }),
+  login: (nickname: string, password: string) =>
+    post<Me>("/api/auth/login", { nickname, password }),
+  logout: () => request<void>("/api/auth/logout", { method: "POST" }),
+  scoreStyle: (answers: string[]) => post<StyleOut>("/api/onboarding/style", { answers }),
+  profile: () => request<ProfileOut>("/api/profile"),
+  saveProfile: (body: Partial<ProfileIn>) =>
+    request<ProfileOut>("/api/profile", { method: "PUT", body: JSON.stringify(body) }),
+  economy: () => request<Economy>("/api/economy"),
+  wallet: () => request<Wallet>("/api/wallet"),
+  worldMap: (worldId: string) => request<MapOut>(`/api/worlds/${worldId}/map`),
+  island: (courseId: string) => request<IslandOut>(`/api/courses/${courseId}`),
+  presence: (courseId: string, chapterId?: string) =>
+    post<void>(`/api/courses/${courseId}/presence`, { chapter_id: chapterId ?? null }),
+  placementStart: (courseId: string) =>
+    post<PlacementStart>("/api/placement/start", { course_id: courseId }),
+  placementQuestions: (courseId: string) =>
+    request<PlacementQuestions>(`/api/placement/${courseId}`),
+  placementFinish: (courseId: string, answers: (number | null)[]) =>
+    post<PlacementResult>("/api/placement/finish", { course_id: courseId, answers }),
 };

@@ -524,6 +524,18 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * AskedQuestion
+         * @description A placement question as the student sees it: no answer, no difficulty.
+         */
+        AskedQuestion: {
+            /** I */
+            i: number;
+            /** Question */
+            question: string;
+            /** Options */
+            options: string[];
+        };
         /** Avatar */
         Avatar: {
             /** Skin */
@@ -1055,6 +1067,16 @@ export interface components {
             /** Onboarded */
             onboarded: boolean;
         };
+        /** QuestionsOut */
+        QuestionsOut: {
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /** Questions */
+            questions: components["schemas"]["AskedQuestion"][];
+        };
         /** SearchIn */
         SearchIn: {
             /**
@@ -1105,9 +1127,7 @@ export interface components {
             /** Job Id */
             job_id: string | null;
             /** Questions */
-            questions: {
-                [key: string]: unknown;
-            }[] | null;
+            questions: components["schemas"]["AskedQuestion"][] | null;
         };
         /** Stats */
         Stats: {
@@ -1799,9 +1819,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": components["schemas"]["QuestionsOut"];
                 };
             };
             /** @description Validation Error */
