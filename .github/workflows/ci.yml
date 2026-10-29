@@ -20,7 +20,6 @@ jobs:
 
   backend:
     runs-on: ubuntu-latest
-    if: hashFiles('backend/pyproject.toml') != ''
     services:
       db:
         image: postgres:16
@@ -29,7 +28,7 @@ jobs:
         options: --health-cmd "pg_isready -U lw" --health-interval 5s --health-retries 10
     defaults: { run: { working-directory: backend } }
     env:
-      DATABASE_URL: postgresql+asyncpg://lw:lw@localhost:5432/learningworld
+      DATABASE_URL: postgresql+asyncpg://lw:lw@127.0.0.1:5432/learningworld
       APP_ENV: development
       LLM_PROVIDER: mock
       MOCK_BASE_URL: http://mock
@@ -37,6 +36,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
+      - run: sudo apt-get update -q && sudo apt-get install -yq tesseract-ocr tesseract-ocr-ara tesseract-ocr-fra
       - run: uv sync
       - run: uv run ruff check . && uv run ruff format --check .
       - run: uv run pytest -q
@@ -53,7 +53,6 @@ jobs:
 
   frontend:
     runs-on: ubuntu-latest
-    if: hashFiles('frontend/package.json') != ''
     defaults: { run: { working-directory: frontend } }
     steps:
       - uses: actions/checkout@v4
