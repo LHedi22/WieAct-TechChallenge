@@ -42,15 +42,21 @@ export function BuildingDialog({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  // Quiz Hall and Study Studio ask the server before Confirm: free when the class already made
-  // it (an unseen quiz set, the chapter's study pack) — DESIGN.md fix 2, ECONOMY.md.
-  const priced = building.key === "quiz_hall" || building.key === "study_studio";
+  // Quiz Hall, Study Studio and Audio Studio ask the server before Confirm: free when the class
+  // already made it (an unseen quiz set, the study pack, the episode) — DESIGN.md fix 2, ECONOMY.md.
+  const PRICES: Record<
+    string,
+    (chapter: string, level: string) => Promise<{ cost: number; cached: boolean }>
+  > = {
+    quiz_hall: api.quizPrice,
+    study_studio: api.studioPrice,
+    audio_studio: api.audioPrice,
+  };
+  const priceOf = PRICES[building.key];
+  const priced = !!priceOf;
   const livePrice = useQuery({
     queryKey: [building.key, "price", chapterId, level],
-    queryFn: () =>
-      building.key === "quiz_hall"
-        ? api.quizPrice(chapterId, level)
-        : api.studioPrice(chapterId, level),
+    queryFn: () => priceOf!(chapterId, level),
     enabled: priced && !!chapterId,
   });
   const cost = priced ? (livePrice.data?.cost ?? building.cost) : building.cost;

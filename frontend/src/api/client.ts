@@ -59,6 +59,7 @@ export type StudyCard = S["CardOut"];
 export type CardGrade = S["ReviewIn"]["grade"];
 export type StudioPay = S["GenerateIn"]["pay"];
 export type ClassPool = S["PoolOut"];
+export type AudioEpisode = S["Episode"];
 
 const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
@@ -199,6 +200,12 @@ export const api = {
     request<CardQueue>(`/api/studio/${chapterId}/cards?level=${encodeURIComponent(level)}`),
   reviewCard: (cardId: string, grade: CardGrade) =>
     post<S["ReviewOut"]>(`/api/studio/cards/${cardId}/review`, { grade }),
+  audio: (chapterId: string, level: string) =>
+    request<AudioEpisode>(`/api/audio/${chapterId}?level=${encodeURIComponent(level)}`),
+  audioPrice: (chapterId: string, level: string) =>
+    request<QuizPrice>(`/api/audio/${chapterId}/price?level=${encodeURIComponent(level)}`),
+  audioGenerate: (chapterId: string, level: string, pay: StudioPay) =>
+    post<S["GenerateOut"]>(`/api/audio/${chapterId}/generate`, { level, pay }),
   pool: (worldId: string) => request<ClassPool>(`/api/worlds/${worldId}/pool`),
   givePool: (worldId: string, amount: number) =>
     post<ClassPool>(`/api/worlds/${worldId}/pool`, { amount }),

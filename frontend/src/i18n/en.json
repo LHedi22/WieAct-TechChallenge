@@ -70,7 +70,8 @@
         "writing_the_tip": "Writing the tip",
         "writing_notes": "Writing the notes",
         "making_flashcards": "Making flashcards",
-        "drawing_map": "Drawing the mind map"
+        "drawing_map": "Drawing the mind map",
+        "writing_script": "Writing the episode"
       }
     },
     "wisdom": {
@@ -738,10 +739,6 @@
       "confirm": "Enter",
       "fromPlacement": "From your placement",
       "classMade": "Your class already made one"
-    },
-    "soon": {
-      "body": "This building opens in the next update. Your coins were not spent.",
-      "back": "Back to the island"
     }
   },
   "placement": {
@@ -1031,5 +1028,19 @@
     "amount": "Coins to give",
     "give": "Add coins",
     "note": "Up to {max} at a time. Given coins stay in the pool."
+  },
+  "audio": {
+    "title": "Revision episode",
+    "play": "Play",
+    "pause": "Pause",
+    "speed": "Speed",
+    "segment": "Part {n} of {total}",
+    "transcript": "Transcript",
+    "darija": "Darija audio comes later: for now, read the transcript below.",
+    "noVoice": "Your browser has no voice for this language, so here is the transcript to read.",
+    "make": {
+      "title": "Make the audio episode for your class",
+      "body": "A 2–3 minute spoken revision of this chapter at this level, written once from your course material and read aloud by your browser. Everyone in your class then listens for free."
+    }
   }
 }

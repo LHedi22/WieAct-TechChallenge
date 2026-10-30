@@ -107,7 +107,7 @@ and on failure do ONE compact "fix this JSON" repair call. Small models break JS
 | TUTOR_SUMMARY | compact | summary | interactive | session id |
 | NOTES_WRITE (STUDY_PACK job, step 1) | mid | plan-once + narrow-before-generating (quiz-pool narrowing, no filter call) | interactive | chapter+level+lang (+job; `study_assets` is the class cache) |
 | FLASHCARDS / MAP_WRITE (STUDY_PACK steps 2–3, from the notes only) | compact | execute-compact | interactive | chapter+level+lang (+job) |
-| AUDIO_SCRIPT | mid | narrow-before-generating, once then cached | interactive | chapter+level+lang |
+| AUDIO_SCRIPT (AUDIO_EPISODE job) | mid | narrow-before-generating, once then cached | interactive | chapter+level+lang (+job; `study_assets` is the class cache) |
 | DAILY_PLAN (first `GET /api/daily` of a Tunis day; an instant rule plan shows meanwhile and stays if the job fails; applied only while nothing is done) | mid, once / student / day | plan-once | background | user+date |
 | CHALLENGE_ITEMS (unused: flashcard challenges review existing cards) | compact | execute-compact | background | user+date |
 | WISDOM_TIP (at `WISDOM_THRESHOLD` distinct students per world+concept+mistake type; ONE call writes the tip in every language of the world's members; later students only raise the count) | mid, once per pattern | generate-once | background | world+concept+type+langs+count |
@@ -179,7 +179,7 @@ a ledger row — never mutate a balance without one.
 `/api/worlds` (create) · `/api/worlds/join` · `/api/worlds/{id}` (map data) · `/api/worlds/{id}/courses|chapters|documents`
 `/api/jobs/{id}` · `/api/economy` · `/api/wallet` (+ `/demo-purchase`) · `/api/daily` (+ `/seen`: the daily return screen, shown to returning students on their first open of the day) — any paid start without enough coins → `402 errors.insufficient_coins`
 `/api/quiz/price` · `/api/quiz/start` · `/api/quiz/attempts/{id}` (+ `/answer`, `/skip`, `/finish`; `/api/quiz/attempts/from-job/{job}`) · `/api/placement/{start,finish}` · `/api/tutor/start` · `/api/tutor/{id}` (+ `/turn` with action message|hint|another_way|stuck, `/end`)
-`/api/studio/{chapter}?level` (notes, map, card counts, missing parts, pending job, price, pool balance) · `/api/studio/{chapter}/price` · `/api/studio/{chapter}/generate {level, pay: me|pool}` · `/api/studio/{chapter}/cards?level` (due queue) · `/api/studio/cards/{id}/review {grade}` · `/api/quiz/attempts/{id}/flashcards` · `/api/worlds/{id}/pool` (GET/POST) · `/api/audio/{chapter}`
+`/api/studio/{chapter}?level` (notes, map, card counts, missing parts, pending job, price, pool balance) · `/api/studio/{chapter}/price` · `/api/studio/{chapter}/generate {level, pay: me|pool}` · `/api/studio/{chapter}/cards?level` (due queue) · `/api/studio/cards/{id}/review {grade}` · `/api/quiz/attempts/{id}/flashcards` · `/api/worlds/{id}/pool` (GET/POST) · `/api/audio/{chapter}?level` (script, pending job, price, pool) · `/api/audio/{chapter}/price` · `/api/audio/{chapter}/generate {level, pay}`
 `/api/arena/questions?chapter_id` (feed, polled) · `/api/arena/questions/{id}` (+ `/answers`) · `/api/arena/answers/{id}/pin` · `/api/arena/answers/{id}/helpful` (POST/DELETE) · `/api/arena/solo`
 `/api/leaderboard?scope=world|global&period=week|all&world_id` · `/api/wisdom?world_id&course_id` (tips in the user's language, English fallback)
 `/api/admin/stats` (call log aggregates; dev/demo only) · `/api/system/status` (slot live? offline demo mode?)

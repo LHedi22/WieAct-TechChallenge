@@ -179,7 +179,7 @@ new Darija strings need native review (M8); real-model tips/plans not yet genera
 
 ## M7 · Study Studio → Audio Studio (7–8 Nov; cut Audio first)
 - [x] Notes, flashcards with SRS, mind map; shared cache; Class Pool payment
-- [ ] Audio script + Web Speech player with transcript and speed
+- [x] Audio script + Web Speech player with transcript and speed
 
 _Status 30/10 (Phase A):_ **Study Studio + Class Pool pass** through the real UI (Playwright/Chromium
 against the compose stack on mock, demo world `OLIVE-7Q2`): student A (EN) opens the studio → 15
@@ -196,6 +196,15 @@ frontend; ruff, eslint, tsc, i18n (769 keys × 4), constraint greps pass; load s
 component tests, not yet clicked in a browser; mock notes reuse English concept words inside
 Arabic text (real models write in the language); new Darija strings need native review (M8); no
 real-model pack yet (in-slot); Audio is Phase B.
+
+_Status 30/10 (Phase B):_ **Audio Studio passes**: through the real UI (EN 1440×900, AR 390×844) a
+student pays 15 coins → loading stages → the episode transcript (headless Chromium has no voices, so
+the "no voice" transcript-only state shows, RTL, no horizontal scroll). Tests: 254 backend (1 mid call
+per episode then free, shared job, pool refund on an unusable script and a fresh retry call), 29
+mock-llm, 59 frontend (segment-by-segment speech with highlight, speed, jump, Darija and no-voice
+transcript-only). All five buildings now open. **Open:** playback with real voices checked only with a
+faked `speechSynthesis` (needs a desktop browser); Darija TTS stays OPEN (silma-tts); no real-model
+episode yet (in-slot).
 
 ## M8 · Ship (8–9 Nov)
 - [ ] Offline demo mode (`/api/system/status` + banner, disables new AI actions)

@@ -4,7 +4,6 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ApiError } from "@/api/client";
 import { ArenaPage } from "@/features/arena/ArenaPage";
 import { AuthPage } from "@/features/auth/AuthPage";
-import { BuildingSoonPage } from "@/features/island/BuildingSoonPage";
 import { IslandPage } from "@/features/island/IslandPage";
 import { DevJobsPage } from "@/features/jobs/DevJobsPage";
 import { LandingPage } from "@/features/landing/LandingPage";
@@ -16,6 +15,7 @@ import { QuizAttemptPage } from "@/features/quiz/QuizAttemptPage";
 import { QuizStartPage } from "@/features/quiz/QuizStartPage";
 import { StyleguidePage } from "@/features/styleguide/StyleguidePage";
 import { StudioPage } from "@/features/studio/StudioPage";
+import { AudioPage } from "@/features/audio/AudioPage";
 import { OutOfCoinsDialog } from "@/features/wallet/OutOfCoinsDialog";
 import { TutorPage, TutorStartPage } from "@/features/tutor/TutorPage";
 import { AddMaterialPage } from "@/features/worlds/AddMaterialPage";
@@ -51,7 +51,7 @@ const router = createBrowserRouter([
   { path: `${C}/tutor/:sessionId`, element: signedIn(<TutorPage />) },
   { path: `${C}/arena`, element: signedIn(<ArenaPage />) },
   { path: `${C}/studio`, element: signedIn(<StudioPage />) },
-  { path: `${C}/buildings/:building`, element: signedIn(<BuildingSoonPage />) },
+  { path: `${C}/audio`, element: signedIn(<AudioPage />) },
   { path: "/styleguide", element: <StyleguidePage /> },
   // Dev-only: the M1 demo job through useJob + LoadingStages + queue/quick-mode banners.
   ...(import.meta.env.DEV ? [{ path: "/dev/jobs", element: <DevJobsPage /> }] : []),

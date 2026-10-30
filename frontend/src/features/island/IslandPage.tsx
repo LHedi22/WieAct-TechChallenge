@@ -157,8 +157,10 @@ export function IslandPage() {
               socratic_tutor: `${base}/tutor/new${q}`,
               teachback_arena: `${base}/arena${q}`,
               study_studio: `${base}/studio${q}`,
+              audio_studio: `${base}/audio${q}`,
             };
-            void navigate(open[picked.key] ?? `${base}/buildings/${picked.key}${q}`);
+            const to = open[picked.key];
+            if (to) void navigate(to);
           }}
         />
       )}

@@ -70,7 +70,8 @@
         "writing_the_tip": "On écrit l’astuce",
         "writing_notes": "Rédaction des fiches",
         "making_flashcards": "Création des cartes",
-        "drawing_map": "Dessin de la carte mentale"
+        "drawing_map": "Dessin de la carte mentale",
+        "writing_script": "Écriture de l'épisode"
       }
     },
     "wisdom": {
@@ -738,10 +739,6 @@
       "confirm": "Entrer",
       "fromPlacement": "D'après ton placement",
       "classMade": "Ta classe en a déjà fait un"
-    },
-    "soon": {
-      "body": "Ce bâtiment ouvre à la prochaine mise à jour. Tes pièces n'ont pas été dépensées.",
-      "back": "Retour à l'île"
     }
   },
   "placement": {
@@ -1031,5 +1028,19 @@
     "amount": "Pièces à donner",
     "give": "Ajouter des pièces",
     "note": "Jusqu'à {max} à la fois. Les pièces données restent dans la cagnotte."
+  },
+  "audio": {
+    "title": "Épisode de révision",
+    "play": "Écouter",
+    "pause": "Pause",
+    "speed": "Vitesse",
+    "segment": "Partie {n} sur {total}",
+    "transcript": "Transcription",
+    "darija": "L'audio en darija arrive plus tard : pour l'instant, lis la transcription ci-dessous.",
+    "noVoice": "Ton navigateur n'a pas de voix pour cette langue : voici la transcription à lire.",
+    "make": {
+      "title": "Créer l'épisode audio pour ta classe",
+      "body": "Une révision parlée de 2 à 3 minutes sur ce chapitre et ce niveau, écrite une seule fois à partir de vos supports et lue par ton navigateur. Ensuite, toute la classe l'écoute gratuitement."
+    }
   }
 }
