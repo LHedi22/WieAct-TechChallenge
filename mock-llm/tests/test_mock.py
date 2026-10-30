@@ -248,3 +248,10 @@ async def test_wisdom_tip_answers_every_requested_language():
     )
     assert set(out["tips"]) == {"en", "ar"}
     assert "limits" in out["tips"]["en"]["trap"] and out["tips"]["ar"]["why"]
+
+
+async def test_daily_plan_picks_three_challenges_in_the_student_language():
+    system = "Plan. <!-- task: DAILY_PLAN --> <!-- lang: fr -->"
+    out = await _reply(system, "Chapters:\n1. Calculus · Limits (mastery 40%)\n\nRecent mistakes:")
+    assert [c["type"] for c in out["challenges"]] == ["quiz_score", "quiz_questions", "teachback"]
+    assert out["challenges"][0]["chapter"] == 1 and "chapitre" in out["challenges"][0]["why"]

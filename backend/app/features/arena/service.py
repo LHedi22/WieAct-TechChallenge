@@ -27,6 +27,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import gateway, prompts
 from app.core import db, economy
+from app.features.daily import service as daily
 from app.features.wallet import service as wallet
 from app.gateway import Task, TaskKind
 from app.jobs.registry import JobContext, job
@@ -373,6 +374,7 @@ async def grade_answer(ctx: JobContext) -> dict[str, Any]:
             a.ai_feedback = {"flag": g.flag}
         else:
             a.status = "graded"
+            await daily.record(s, a.author_id, "teachback", chapter_id=q.chapter_id)
             a.ai_score, a.ai_confidence = g.score, g.confidence
             a.ai_feedback = {
                 "errors": [e.model_dump() for e in g.errors],
@@ -415,6 +417,7 @@ async def grade_solo(ctx: JobContext) -> dict[str, Any]:
         points = economy.POINTS["teachback_solo_per_10_score"] * (g.score // 10)
         async with db.get_sessionmaker()() as s:
             await wallet.add_points(s, user_id, course.world_id, points, "solo", str(ctx.job_id))
+            await daily.record(s, user_id, "teachback", chapter_id=chapter.id)
             await s.commit()
     return {
         "flag": g.flag,

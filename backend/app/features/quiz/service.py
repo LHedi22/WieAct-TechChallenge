@@ -14,6 +14,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import economy
+from app.features.daily import service as daily
 from app.features.quiz import pool
 from app.features.wallet import service as wallet
 from app.jobs.service import create_job
@@ -258,6 +259,8 @@ async def answer(s: AsyncSession, attempt: QuizAttempt, i: int, choice: int) -> 
             a["status"] = "wrong"
     answers[i] = a
     _advance(attempt, answers)
+    if a["status"] in DONE:  # a question answered for good counts for today's challenges
+        await daily.record(s, attempt.user_id, "quiz_questions", chapter_id=attempt.chapter_id)
     await s.commit()
     return question_view(i, q, a)
 
@@ -353,6 +356,7 @@ async def finish(s: AsyncSession, user: User, attempt: QuizAttempt) -> Results:
                 world_id=attempt.world_id,
             )
             tag_job_id = job.id
+        await daily.record(s, user.id, "quiz_score", chapter_id=chapter.id, score_pct=pct)
     else:
         mastery = mastery_row.mastery if mastery_row else pct
     await s.commit()

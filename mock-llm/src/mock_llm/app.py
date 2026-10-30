@@ -407,6 +407,30 @@ def _wisdom(user: str, lang: str, system: str = "") -> dict[str, Any]:
     return {"tips": tips}
 
 
+# --- Daily plan --------------------------------------------------------------------------------
+CHAPTER_LINE = re.compile(r"^(\d+)\. ", re.MULTILINE)
+PLAN_TEXT = {
+    "en": ("Start with your weakest chapter.", "Warm up with a few questions.",
+           "Explaining it is the best test.", "One step at a time today."),
+    "fr": ("Commence par ton chapitre le plus fragile.", "Échauffe-toi avec quelques questions.",
+           "L'expliquer est le meilleur test.", "Un pas à la fois aujourd'hui."),
+    "ar": ("ابدأ بالفصل الأضعف لديك.", "تمرّن ببعض الأسئلة.",
+           "شرح الفكرة هو أفضل اختبار.", "خطوة بخطوة اليوم."),
+    "ar-TN": ("ابدا بالفصل اللي تحس روحك فيه ضعيف.", "سخّن بشوية أسئلة.",
+              "كي تفسّرها تعرف روحك فهمتها.", "خطوة بخطوة اليوم."),
+}  # fmt: skip
+
+
+def _daily_plan(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    first = 1 if CHAPTER_LINE.search(user) else None
+    weak, warm, explain, msg = PLAN_TEXT.get(lang, PLAN_TEXT["en"])
+    challenges = [{"type": "quiz_questions", "chapter": None, "target": 5, "why": warm}]
+    if first:
+        challenges.insert(0, {"type": "quiz_score", "chapter": first, "target": 70, "why": weak})
+    challenges.append({"type": "teachback", "chapter": first, "target": 1, "why": explain})
+    return {"challenges": challenges, "message": msg}
+
+
 GENERATORS = {
     "MODERATE_POST": _moderate,
     "TEACHBACK_GRADE": _teachback,
@@ -418,6 +442,7 @@ GENERATORS = {
     "PLACEMENT_QUIZ": _placement,
     "QUIZ_GRADE_TAG": _grade_tag,
     "WISDOM_TIP": _wisdom,
+    "DAILY_PLAN": _daily_plan,
 }
 
 

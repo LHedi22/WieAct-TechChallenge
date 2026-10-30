@@ -23,6 +23,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import gateway, prompts
 from app.core import db, economy
+from app.features.daily import service as daily
 from app.features.wallet import service as wallet
 from app.gateway import Task, TaskKind
 from app.jobs.registry import JobContext, job
@@ -216,6 +217,7 @@ async def end(s: AsyncSession, session: TutorSession) -> uuid.UUID:
             "activity",
             str(session.id),
         )
+        await daily.record(s, session.user_id, "tutor_session", chapter_id=session.chapter_id)
     j = await create_job(
         s,
         kind=KIND,
