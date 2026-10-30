@@ -255,3 +255,22 @@ async def test_daily_plan_picks_three_challenges_in_the_student_language():
     out = await _reply(system, "Chapters:\n1. Calculus · Limits (mastery 40%)\n\nRecent mistakes:")
     assert [c["type"] for c in out["challenges"]] == ["quiz_score", "quiz_questions", "teachback"]
     assert out["challenges"][0]["chapter"] == 1 and "chapitre" in out["challenges"][0]["why"]
+
+
+async def test_study_pack_notes_cards_and_map_follow_the_request():
+    ctx = (
+        "[page:3] Limits describe values near a point. Limits limits continuity.\n\n"
+        "[slide:2] Derivative slope"
+    )
+    notes = await _reply("Notes. <!-- task: NOTES_WRITE --> <!-- lang: fr -->", ctx)
+    assert notes["sections"] and notes["key_terms"] and notes["title"] == "Fiche de révision"
+    assert {r for s in notes["sections"] for r in s["refs"]} <= {"page:3", "slide:2"}
+    cards = await _reply(
+        "Turn revision notes into 3 flashcards. <!-- task: FLASHCARDS --> <!-- lang: ar -->",
+        "limits continuity derivative slope points values",
+    )
+    assert len(cards["cards"]) == 3 and "؟" in cards["cards"][0]["front"]
+    tree = await _reply(
+        "Map. <!-- task: MAP_WRITE --> <!-- lang: en -->", "limits continuity slope"
+    )
+    assert tree["root"] and tree["branches"][0]["label"] and tree["branches"][0]["children"]

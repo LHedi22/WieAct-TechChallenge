@@ -431,6 +431,69 @@ def _daily_plan(user: str, lang: str, system: str = "") -> dict[str, Any]:
     return {"challenges": challenges, "message": msg}
 
 
+# --- Study Studio: notes (mid), then flashcards and mind map (compact) from the notes ----------
+REF_MARK = re.compile(r"\[((?:page|slide|section|part|image):[\w-]+)\]")
+NOTES_TEXT = {
+    "en": ("Revision notes", "What {c} means", "The material explains {c} step by step.",
+           "Check the conditions before using {c}.", "the idea of {c} in this chapter",
+           "What is {c}?", "{c} is explained in the notes with its conditions."),
+    "fr": ("Fiche de révision", "Ce que signifie {c}", "Le cours explique {c} étape par étape.",
+           "Vérifie les conditions avant d'utiliser {c}.", "l'idée de {c} dans ce chapitre",
+           "Qu'est-ce que {c} ?", "{c} est expliqué dans la fiche avec ses conditions."),
+    "ar": ("ملخّص للمراجعة", "معنى {c}", "يشرح الدرس {c} خطوة بخطوة.",
+           "تحقّق من الشروط قبل استعمال {c}.", "فكرة {c} في هذا الفصل",
+           "ما هو {c}؟", "يُشرح {c} في الملخّص مع شروطه."),
+    "ar-TN": ("ملخّص للمراجعة", "شنوّة معناها {c}", "الدرس يفسّر {c} خطوة بخطوة.",
+              "ثبّت في الشروط قبل ما تستعمل {c}.", "فكرة {c} في الفصل هذا",
+              "شنوّة {c}؟", "{c} مفسّر في الملخّص مع الشروط متاعو."),
+}  # fmt: skip
+
+
+def _notes_text(lang: str) -> tuple[str, ...]:
+    return NOTES_TEXT.get(lang, NOTES_TEXT.get(lang[:2], NOTES_TEXT["en"]))
+
+
+def _notes(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    title, heading, point, check, meaning, _, _ = _notes_text(lang)
+    refs = list(dict.fromkeys(REF_MARK.findall(user))) or ["page:1"]
+    concepts = _concepts(user, 4) or ["the topic"]
+    sections = [
+        {
+            "heading": heading.format(c=c),
+            "points": [point.format(c=c), check.format(c=c)],
+            "refs": [refs[i % len(refs)]],
+        }
+        for i, c in enumerate(concepts)
+    ]
+    terms = [{"term": c, "meaning": meaning.format(c=c)} for c in concepts]
+    return {"title": title, "sections": sections, "key_terms": terms}
+
+
+COUNT_MARK = re.compile(r"into (\d+) flashcards")
+
+
+def _flashcards(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    *_, front, back = _notes_text(lang)
+    m = COUNT_MARK.search(system)
+    count = int(m.group(1)) if m else 8
+    concepts = _concepts(user, count) or ["the topic"]
+    return {
+        "cards": [
+            {"front": front.format(c=c), "back": back.format(c=c), "concept": c}
+            for c in concepts[:count]
+        ]
+    }
+
+
+def _mind_map(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    title = _notes_text(lang)[0]
+    concepts = _concepts(user, 8) or ["topic"]
+    branches = [
+        {"label": c, "children": concepts[i + 1 : i + 3] or [c]} for i, c in enumerate(concepts[:4])
+    ]
+    return {"root": title, "branches": branches}
+
+
 GENERATORS = {
     "MODERATE_POST": _moderate,
     "TEACHBACK_GRADE": _teachback,
@@ -443,6 +506,9 @@ GENERATORS = {
     "QUIZ_GRADE_TAG": _grade_tag,
     "WISDOM_TIP": _wisdom,
     "DAILY_PLAN": _daily_plan,
+    "NOTES_WRITE": _notes,
+    "FLASHCARDS": _flashcards,
+    "MAP_WRITE": _mind_map,
 }
 
 

@@ -23,8 +23,8 @@ ROUTES: dict[TaskKind, Route] = {
     K.TUTOR_TURN: Route("compact", "escalation", 220),
     K.TUTOR_SUMMARY: Route("compact", "summary", 200),
     K.TUTOR_GUARD: Route("compact", "guard", 160),
-    K.NOTES_WRITE: Route("mid", "narrow-before-generating", 700),
-    K.MAP_WRITE: Route("mid", "narrow-before-generating", 600),
+    K.NOTES_WRITE: Route("mid", "plan-once", 700),
+    K.MAP_WRITE: Route("compact", "execute-compact", 400),  # from the mid notes (DECISIONS)
     K.AUDIO_SCRIPT: Route("mid", "narrow-before-generating", 700),
     K.FLASHCARDS: Route("compact", "execute-compact", 600),
     K.DAILY_PLAN: Route("mid", "plan-once", 400),
