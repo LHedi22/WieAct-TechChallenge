@@ -61,7 +61,8 @@ vitest, i18n) all green.
 - [x] `useJob` hook + `LoadingStages` + queue/quick-mode banners wired to a demo job
 - [x] `/api/admin/stats`: calls per tier, split %, tokens, cache hits, refusals, fallbacks
 - [x] Tests for every row of the error contract in PLATFORM.md
-- [ ] **In-slot model probe:** `python3 scripts/probe_models.py` → fills docs/MODELS.md results, prints recommended `.env` lines (models, embedding dim, ceilings, quota header names); record in DECISIONS.md
+- [x] **In-slot model probe:** `python3 scripts/probe_models.py` → fills docs/MODELS.md results, prints recommended `.env` lines (models, embedding dim, ceilings, quota header names); record in DECISIONS.md
+      _30/10:_ compact `llama3.2-3b`, mid `llama3.1-8b` (DECISIONS.md); **no embeddings model on our key** (OPEN: to ask the organisers)
 **Done when:** a load script firing 30 jobs at mock (with 503 and quota faults on) completes all jobs, never exceeds 2 concurrent, shows fallbacks in stats, and the UI shows queue position, and `python scripts/llm.py use auto` switches between local and cloud at slot boundaries without restarting (verified against mock with `MOCK_BLOCKED`).
 
 _Status 28/10:_ load test PASS — `load.py --jobs 30 --faults 503,quota` against the compose stack:
