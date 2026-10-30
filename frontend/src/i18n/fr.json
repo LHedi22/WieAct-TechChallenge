@@ -61,7 +61,10 @@
         "saving_search_index": "Enregistrement de l'index de recherche",
         "searching": "Recherche",
         "thinking": "Réflexion",
-        "checking_reply": "Vérification de la réponse"
+        "checking_reply": "Vérification de la réponse",
+        "checking_message": "Vérification du message",
+        "scoring_answer": "Notation de l'explication",
+        "double_checking": "Deuxième vérification de la note"
       }
     },
     "wisdom": {
@@ -108,7 +111,17 @@
       "tutor_busy": "Le tuteur répond encore. Un instant.",
       "tutor_empty": "Écris quelque chose d'abord, même une hypothèse.",
       "tutor_no_hints": "Tu as utilisé les 3 indices de cette séance.",
-      "tutor_not_found": "Cette séance n'existe plus."
+      "tutor_not_found": "Cette séance n'existe plus.",
+      "insufficient_coins": "Pas assez de pièces pour ça. Tes pièces gratuites reviennent à minuit.",
+      "unknown_product": "Ce produit n'existe pas.",
+      "world_required": "Choisis d'abord un monde.",
+      "arena_not_found": "Cette question n'existe plus.",
+      "arena_question_closed": "Cette question n'accepte plus de réponses.",
+      "arena_own_question": "Tu ne peux pas répondre à ta propre question. Tes camarades le feront !",
+      "arena_still_grading": "Ta réponse est encore en cours de notation.",
+      "arena_not_asker": "Seule la personne qui a posé la question peut épingler la meilleure réponse.",
+      "arena_already_pinned": "Une meilleure réponse est déjà épinglée.",
+      "arena_own_answer": "Tu ne peux pas voter pour ta propre réponse."
     },
     "mascot": {
       "waving": "Le chat de Sidi Bou Saïd fait coucou",
@@ -770,7 +783,8 @@
       "skipped": "Passée",
       "correct": "Bonne réponse :",
       "half": "moitié des points",
-      "rightConcepts": "{count} justes : {list}. Bien joué."
+      "rightConcepts": "{count} justes : {list}. Bien joué.",
+      "pointsSplit": "{answers} pour tes réponses + {bonus} pour avoir terminé"
     }
   },
   "tutor": {
@@ -804,5 +818,114 @@
       "next": "Ensuite :",
       "quiz": "Faire un quiz sur ce chapitre"
     }
+  },
+  "wallet": {
+    "close": "Fermer",
+    "title": "Plus de pièces pour aujourd'hui",
+    "body": "Tes pièces se rechargent toutes seules. En attendant, tout ce que ta classe a déjà enregistré reste gratuit.",
+    "refill": "{count} pièces gratuites de retour dans",
+    "bought": "Achat de démo effectué. Tu as maintenant {coins} pièces.",
+    "earnTitle": "Gagner des pièces gratuitement",
+    "earnAnswer": "Réponds à un camarade dans l'Arène Teach-Back (note de {score} ou plus)",
+    "perAnswer": "+{count} chacune",
+    "earnCap": "Jusqu'à {count} pièces gagnées par jour.",
+    "topUpTitle": "Ou recharge",
+    "pack": {
+      "name": "Pack de pièces",
+      "gives": "{coins} pièces, environ {quizzes} quiz. Elles n'expirent jamais."
+    },
+    "pass": {
+      "name": "Pass Examen",
+      "gives": "{days} jours · jusqu'à {count} activités IA par jour à 0 pièce"
+    },
+    "demoBuy": "Achat de démo · {price} TND",
+    "demoNote": "Démo uniquement : aucun vrai paiement dans ce prototype.",
+    "savedFree": "Le contenu enregistré par la classe reste gratuit : anciens quiz et tout ce que ta classe a déjà créé."
+  },
+  "leaderboard": {
+    "cardTitle": "Cette semaine dans ta classe",
+    "empty": "Pas encore de points. Termine une activité pour apparaître au classement.",
+    "seeAll": "Voir tout le classement",
+    "hidden": "Explorateur caché",
+    "you": "(toi)",
+    "back": "Retour à la carte",
+    "title": "Classement",
+    "scopeLabel": "Quel classement",
+    "periodLabel": "Quelle période",
+    "scope": {
+      "world": "Ma classe",
+      "global": "Tout le monde"
+    },
+    "period": {
+      "week": "Cette semaine",
+      "all": "Depuis le début"
+    },
+    "visible": "Ton pseudo apparaît dans les classements.",
+    "hiddenSelf": "Tu es caché·e : ta classe voit « Explorateur caché » et tu n'es pas dans le classement général.",
+    "hideMe": "Me cacher",
+    "showMe": "Afficher mon pseudo"
+  },
+  "arena": {
+    "title": "Arène Teach-Back",
+    "modes": "Mode",
+    "tab": {
+      "peer": "Salle entre pairs",
+      "solo": "Mode solo"
+    },
+    "leave": "Quitter l'arène",
+    "feedTitle": "Questions de ta classe",
+    "rewardHint": "+{count} pièces par bonne réponse (note {score}+)",
+    "noQuestions": "Pas encore de questions. Sois le premier ou la première à demander !",
+    "checking": "vérification…",
+    "rejected": {
+      "abusive": "Non publiée : reste bienveillant·e, s'il te plaît.",
+      "off_topic": "Non publiée : ça ne ressemble pas à une question de cours.",
+      "personal_data": "Non publiée : retire les infos personnelles (e-mail, téléphone).",
+      "other": "Non publiée."
+    },
+    "noAnswers": "Pas encore de réponse",
+    "answers": "{count, plural, one {# réponse} other {# réponses}}",
+    "ask": "Poser une question à la classe",
+    "askLabel": "Ta question",
+    "askHelp": "Seul ton pseudo est affiché. Aucune question n'est trop simple.",
+    "cancel": "Annuler",
+    "askSend": "Demander",
+    "asked": "Publiée ! Tes camarades peuvent répondre.",
+    "refunded": "Tes pièces ont été remboursées.",
+    "ok": "OK",
+    "pickQuestion": "Choisis une question, ou poses-en une.",
+    "waitingForClass": "En attente de la réponse d'un camarade…",
+    "seeOthers": "{count, plural, one {Voir l'autre réponse} other {Voir les # autres réponses}}",
+    "helpful": "{count, plural, =0 {Pas encore de vote utile} one {Jugée utile par # camarade} other {Jugée utile par # camarades}}",
+    "markHelpful": "Utile",
+    "unhelpful": "Retirer « utile »",
+    "pin": "Épingler comme meilleure réponse",
+    "yourAnswer": "(ta réponse)",
+    "pinnedYours": "Épinglée comme meilleure",
+    "answerRejected": {
+      "abusive": "Non notée : reste bienveillant·e, s'il te plaît.",
+      "off_topic": "Non notée : ça n'explique pas le sujet.",
+      "other": "Non notée."
+    },
+    "belowThreshold": "Il faut {score} ou plus pour gagner des pièces. Améliore ta réponse pour réessayer.",
+    "improve": "Améliorer ma réponse",
+    "improveLabel": "Améliore ton explication",
+    "answerLabel": "Explique-le à ton camarade",
+    "answerHelp": "Explique avec tes mots, dans la langue que tu veux. L'IA la note par rapport au cours.",
+    "answerSend": "Envoyer mon explication",
+    "outOf": "/100 note IA",
+    "scoreLabel": "Note IA",
+    "toFix": "{count, plural, one {# point à corriger} other {# points à corriger}}",
+    "good": "Bien : {text}",
+    "missing": "À mentionner aussi : {ideas}",
+    "solo": {
+      "title": "Enseigner une notion",
+      "intro": "Explique une idée de ce chapitre comme à un camarade. L'IA la note et montre ce qui manquait.",
+      "concept": "Notion",
+      "explain": "Ton explication",
+      "send": "Obtenir ma note",
+      "again": "En expliquer une autre"
+    },
+    "retry": "Réessayer"
   }
 }

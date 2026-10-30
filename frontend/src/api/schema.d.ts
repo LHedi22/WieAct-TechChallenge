@@ -218,6 +218,40 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/wallet/demo-purchase": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Demo Purchase */
+    post: operations["demo_purchase_api_wallet_demo_purchase_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/leaderboard": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Leaderboard */
+    get: operations["get_leaderboard_api_leaderboard_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/onboarding/style": {
     parameters: {
       query?: never;
@@ -491,6 +525,110 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/arena/questions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Feed */
+    get: operations["feed_api_arena_questions_get"];
+    put?: never;
+    /** Ask */
+    post: operations["ask_api_arena_questions_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/arena/questions/{question_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Detail */
+    get: operations["detail_api_arena_questions__question_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/arena/questions/{question_id}/answers": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Answer */
+    post: operations["answer_api_arena_questions__question_id__answers_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/arena/answers/{answer_id}/pin": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Pin */
+    post: operations["pin_api_arena_answers__answer_id__pin_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/arena/answers/{answer_id}/helpful": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Mark Helpful */
+    post: operations["mark_helpful_api_arena_answers__answer_id__helpful_post"];
+    /** Unmark Helpful */
+    delete: operations["unmark_helpful_api_arena_answers__answer_id__helpful_delete"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/arena/solo": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Solo */
+    post: operations["solo_api_arena_solo_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/worlds": {
     parameters: {
       query?: never;
@@ -731,12 +869,50 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    /** AnswerIn */
-    AnswerIn: {
-      /** Q */
-      q: number;
-      /** Choice */
-      choice: number;
+    /** AnswerOut */
+    AnswerOut: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      author: components["schemas"]["Author"];
+      /** Is Mine */
+      is_mine: boolean;
+      /** Text */
+      text: string;
+      /** Status */
+      status: string;
+      /** Score */
+      score: number | null;
+      /** Confidence */
+      confidence: string | null;
+      /** Helpful */
+      helpful: number;
+      /** Voted */
+      voted: boolean;
+      /** Pinned */
+      pinned: boolean;
+      feedback: components["schemas"]["Feedback"] | null;
+      /** Reject Flag */
+      reject_flag: string | null;
+      /** Grading Job Id */
+      grading_job_id: string | null;
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string;
+    };
+    /** AskIn */
+    AskIn: {
+      /**
+       * Chapter Id
+       * Format: uuid
+       */
+      chapter_id: string;
+      /** Text */
+      text: string;
     };
     /**
      * AskedQuestion
@@ -789,6 +965,15 @@ export interface components {
       /** Questions */
       questions: components["schemas"]["QuestionView"][];
     };
+    /** Author */
+    Author: {
+      /** Nickname */
+      nickname: string;
+      /** Avatar */
+      avatar: {
+        [key: string]: unknown;
+      } | null;
+    };
     /** Avatar */
     Avatar: {
       /** Skin */
@@ -797,6 +982,26 @@ export interface components {
       outfit: string;
       /** Extra */
       extra?: string | null;
+    };
+    /** Board */
+    Board: {
+      /**
+       * Scope
+       * @enum {string}
+       */
+      scope: "world" | "global";
+      /**
+       * Period
+       * @enum {string}
+       */
+      period: "week" | "all";
+      /** Since */
+      since: string | null;
+      /** Entries */
+      entries: components["schemas"]["Entry"][];
+      me: components["schemas"]["Entry"] | null;
+      /** Opted In */
+      opted_in: boolean;
     };
     /** Body_upload_document_api_chapters__chapter_id__documents_post */
     Body_upload_document_api_chapters__chapter_id__documents_post: {
@@ -858,6 +1063,13 @@ export interface components {
       correct: number;
       /** Asked */
       asked: number;
+    };
+    /** CoinPack */
+    CoinPack: {
+      /** Coins */
+      coins: number;
+      /** Price Tnd */
+      price_tnd: number;
     };
     /** CourseIn */
     CourseIn: {
@@ -965,6 +1177,7 @@ export interface components {
       };
       /** Peer Answer Threshold */
       peer_answer_threshold: number;
+      products: components["schemas"]["Products"];
       /** Cosmetics */
       cosmetics: {
         [key: string]: number;
@@ -973,6 +1186,62 @@ export interface components {
       buildings: {
         [key: string]: components["schemas"]["BuildingCost"];
       };
+    };
+    /** Entry */
+    Entry: {
+      /** Rank */
+      rank: number;
+      /** Nickname */
+      nickname: string | null;
+      /** Avatar */
+      avatar: {
+        [key: string]: unknown;
+      } | null;
+      /** Points */
+      points: number;
+      /** Is Me */
+      is_me: boolean;
+    };
+    /** ExamPass */
+    ExamPass: {
+      /** Days */
+      days: number;
+      /** Price Tnd */
+      price_tnd: number;
+    };
+    /** Feed */
+    Feed: {
+      /**
+       * Chapter Id
+       * Format: uuid
+       */
+      chapter_id: string;
+      /** Chapter Title */
+      chapter_title: string;
+      /** Course Name */
+      course_name: string;
+      /** Ask Cost */
+      ask_cost: number;
+      /** Solo Cost */
+      solo_cost: number;
+      /** Questions */
+      questions: components["schemas"]["QuestionItem"][];
+    };
+    /** Feedback */
+    Feedback: {
+      /** Errors */
+      errors: {
+        [key: string]: string;
+      }[];
+      /** Good */
+      good: string;
+      /** Missing */
+      missing: string[];
+      /**
+       * Quick Mode
+       * @default false
+       */
+      quick_mode: boolean;
     };
     /** FinishIn */
     FinishIn: {
@@ -1362,6 +1631,11 @@ export interface components {
       /** Cached */
       cached: boolean;
     };
+    /** Products */
+    Products: {
+      coin_pack: components["schemas"]["CoinPack"];
+      exam_pass: components["schemas"]["ExamPass"];
+    };
     /** ProfileIn */
     ProfileIn: {
       /** University */
@@ -1415,6 +1689,61 @@ export interface components {
       } | null;
       /** Onboarded */
       onboarded: boolean;
+    };
+    /** PurchaseIn */
+    PurchaseIn: {
+      /**
+       * Product
+       * @enum {string}
+       */
+      product: "coin_pack" | "exam_pass";
+    };
+    /** PurchaseOut */
+    PurchaseOut: {
+      /** Demo */
+      demo: boolean;
+      wallet: components["schemas"]["Wallet"];
+    };
+    /** QuestionDetail */
+    QuestionDetail: {
+      question: components["schemas"]["QuestionItem"];
+      /** Answers */
+      answers: components["schemas"]["AnswerOut"][];
+      my_answer: components["schemas"]["AnswerOut"] | null;
+      /** Can Answer */
+      can_answer: boolean;
+      /** Can Pin */
+      can_pin: boolean;
+      /** Threshold */
+      threshold: number;
+    };
+    /** QuestionItem */
+    QuestionItem: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Text */
+      text: string;
+      author: components["schemas"]["Author"];
+      /** Is Mine */
+      is_mine: boolean;
+      /** Status */
+      status: string;
+      /** Reject Reason */
+      reject_reason: string | null;
+      /** Answers */
+      answers: number;
+      /** Pinned */
+      pinned: boolean;
+      /** Answered By Me */
+      answered_by_me: boolean;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
     };
     /** QuestionView */
     QuestionView: {
@@ -1484,6 +1813,8 @@ export interface components {
       total: number;
       /** Points */
       points: number;
+      /** Activity Points */
+      activity_points: number;
       /** Second Tries */
       second_tries: number;
       /** Mastery */
@@ -1580,6 +1911,32 @@ export interface components {
     SkipIn: {
       /** Q */
       q: number;
+    };
+    /** SoloIn */
+    SoloIn: {
+      /**
+       * Chapter Id
+       * Format: uuid
+       */
+      chapter_id: string;
+      /** Concept */
+      concept: string;
+      /** Text */
+      text: string;
+    };
+    /** Started */
+    Started: {
+      /**
+       * Job Id
+       * Format: uuid
+       */
+      job_id: string;
+      /** Cost */
+      cost: number;
+      /** Question Id */
+      question_id?: string | null;
+      /** Answer Id */
+      answer_id?: string | null;
     };
     /** Stats */
     Stats: {
@@ -1740,6 +2097,13 @@ export interface components {
       /** Chapter */
       chapter: string | null;
     };
+    /** Votes */
+    Votes: {
+      /** Helpful */
+      helpful: number;
+      /** Voted */
+      voted: boolean;
+    };
     /** Wallet */
     Wallet: {
       /** Coins */
@@ -1750,6 +2114,8 @@ export interface components {
       earned: number;
       /** Purchased */
       purchased: number;
+      /** Earned Today */
+      earned_today: number;
       /** Points */
       points: number;
       /** Streak */
@@ -1759,8 +2125,10 @@ export interface components {
        * Format: date-time
        */
       refill_at: string;
-      /** Placeholder */
-      placeholder: boolean;
+      /** Exam Pass Until */
+      exam_pass_until: string | null;
+      /** Exam Pass Left Today */
+      exam_pass_left_today: number | null;
     };
     /** WorldIn */
     WorldIn: {
@@ -1796,6 +2164,18 @@ export interface components {
       name: string;
       /** Join Code */
       join_code: string;
+    };
+    /** AnswerIn */
+    app__features__arena__router__AnswerIn: {
+      /** Text */
+      text: string;
+    };
+    /** AnswerIn */
+    app__features__quiz__router__AnswerIn: {
+      /** Q */
+      q: number;
+      /** Choice */
+      choice: number;
     };
   };
   responses: never;
@@ -2172,6 +2552,82 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Wallet"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  demo_purchase_api_wallet_demo_purchase_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PurchaseIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PurchaseOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_leaderboard_api_leaderboard_get: {
+    parameters: {
+      query?: {
+        scope?: "world" | "global";
+        period?: "week" | "all";
+        world_id?: string | null;
+      };
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Board"];
         };
       };
       /** @description Validation Error */
@@ -2570,7 +3026,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["AnswerIn"];
+        "application/json": components["schemas"]["app__features__quiz__router__AnswerIn"];
       };
     };
     responses: {
@@ -2807,6 +3263,300 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["JobRef"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  feed_api_arena_questions_get: {
+    parameters: {
+      query: {
+        chapter_id: string;
+      };
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Feed"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ask_api_arena_questions_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AskIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Started"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  detail_api_arena_questions__question_id__get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        question_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuestionDetail"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  answer_api_arena_questions__question_id__answers_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        question_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["app__features__arena__router__AnswerIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Started"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  pin_api_arena_answers__answer_id__pin_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        answer_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  mark_helpful_api_arena_answers__answer_id__helpful_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        answer_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Votes"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  unmark_helpful_api_arena_answers__answer_id__helpful_delete: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        answer_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Votes"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  solo_api_arena_solo_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SoloIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Started"];
         };
       };
       /** @description Validation Error */

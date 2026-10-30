@@ -155,6 +155,7 @@ export function IslandPage() {
             const open: Record<string, string> = {
               quiz_hall: `${base}/quiz/new${q}`,
               socratic_tutor: `${base}/tutor/new${q}`,
+              teachback_arena: `${base}/arena${q}`,
             };
             void navigate(open[picked.key] ?? `${base}/buildings/${picked.key}${q}`);
           }}

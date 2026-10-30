@@ -109,6 +109,7 @@ describe("Quiz attempt", () => {
       score: 1,
       total: 2,
       points: 5,
+      activity_points: 20,
       second_tries: 1,
       mastery: 40,
       weak: true,
@@ -189,7 +190,8 @@ describe("Quiz attempt", () => {
     await user.click(await screen.findByRole("button", { name: "See my results" }));
 
     expect(await screen.findByText("1 thing to look at again")).toBeInTheDocument();
-    expect(screen.getByText("+5")).toBeInTheDocument();
+    expect(screen.getByText("+25")).toBeInTheDocument(); // 5 for the answers + 20 for finishing
+    expect(screen.getByText("5 for your answers + 20 for finishing")).toBeInTheDocument();
     expect(screen.getByText("Weak spot")).toBeInTheDocument();
     const next = screen.getByRole("link", { name: /Go to the Socratic Tutor/ });
     expect(within(next).getByText("8 coins")).toBeInTheDocument();
@@ -311,8 +313,10 @@ describe("Entry dialog", () => {
         purchased: 0,
         points: 0,
         streak: 0,
+        earned_today: 0,
         refill_at: "2026-10-30T23:00:00Z",
-        placeholder: true,
+        exam_pass_until: null,
+        exam_pass_left_today: null,
       },
     });
     show(

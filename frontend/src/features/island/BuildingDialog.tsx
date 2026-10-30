@@ -54,7 +54,8 @@ export function BuildingDialog({
   const cachedQuiz = building.key === "quiz_hall" && quizPrice.data?.cached;
   const balance = wallet?.coins ?? 0;
   const after = balance - cost;
-  const short = after < 0;
+  // Answering in the Teach-Back Arena is free: only asking costs, and that is checked on ask.
+  const short = after < 0 && building.answer_cost !== 0;
 
   return (
     <div className="fixed inset-0 z-30 flex items-center justify-center p-4">

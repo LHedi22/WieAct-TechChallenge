@@ -325,8 +325,16 @@ function Results({
           <SoftCard className="flex items-center gap-3">
             <Sprite name="star" scale={2} alt={tc("icons.star")} />
             <p>
-              <span className="font-heading text-h2 text-primary">+{results.points}</span>{" "}
-              {tc("counters.points", { count: results.points })}
+              <span className="font-heading text-h2 text-primary">
+                +{results.points + results.activity_points}
+              </span>{" "}
+              {tc("counters.points", { count: results.points + results.activity_points })}
+              <span className="block text-small text-ink/70">
+                {t("results.pointsSplit", {
+                  answers: results.points,
+                  bonus: results.activity_points,
+                })}
+              </span>
             </p>
           </SoftCard>
           <SoftCard className="flex items-center justify-between">

@@ -38,6 +38,16 @@ export type TutorTurn = S["Turn"];
 export type TutorJob = S["JobRef"];
 export type TutorAction = S["TurnIn"]["action"];
 export type PlacementQuestions = S["QuestionsOut"];
+export type Purchase = S["PurchaseOut"];
+export type Product = S["PurchaseIn"]["product"];
+export type Leaderboard = S["Board"];
+export type LeaderboardEntry = S["Entry"];
+export type ArenaFeed = S["Feed"];
+export type ArenaQuestion = S["QuestionItem"];
+export type ArenaDetail = S["QuestionDetail"];
+export type ArenaAnswer = S["AnswerOut"];
+export type ArenaStarted = S["Started"];
+export type ArenaVotes = S["Votes"];
 
 const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
@@ -129,6 +139,12 @@ export const api = {
     request<ProfileOut>("/api/profile", { method: "PUT", body: JSON.stringify(body) }),
   economy: () => request<Economy>("/api/economy"),
   wallet: () => request<Wallet>("/api/wallet"),
+  demoPurchase: (product: Product) => post<Purchase>("/api/wallet/demo-purchase", { product }),
+  leaderboard: (scope: "world" | "global", period: "week" | "all", worldId?: string) =>
+    request<Leaderboard>(
+      `/api/leaderboard?scope=${scope}&period=${period}` +
+        (worldId ? `&world_id=${encodeURIComponent(worldId)}` : ""),
+    ),
   worldMap: (worldId: string) => request<MapOut>(`/api/worlds/${worldId}/map`),
   island: (courseId: string) => request<IslandOut>(`/api/courses/${courseId}`),
   presence: (courseId: string, chapterId?: string) =>
@@ -159,4 +175,20 @@ export const api = {
   tutorTurn: (id: string, text: string, action: TutorAction) =>
     post<TutorJob>(`/api/tutor/${id}/turn`, { text, action }),
   tutorEnd: (id: string) => post<TutorJob>(`/api/tutor/${id}/end`, {}),
+
+  arenaFeed: (chapterId: string) =>
+    request<ArenaFeed>(`/api/arena/questions?chapter_id=${encodeURIComponent(chapterId)}`),
+  arenaAsk: (chapterId: string, text: string) =>
+    post<ArenaStarted>("/api/arena/questions", { chapter_id: chapterId, text }),
+  arenaQuestion: (id: string) => request<ArenaDetail>(`/api/arena/questions/${id}`),
+  arenaAnswer: (questionId: string, text: string) =>
+    post<ArenaStarted>(`/api/arena/questions/${questionId}/answers`, { text }),
+  arenaPin: (answerId: string) =>
+    request<void>(`/api/arena/answers/${answerId}/pin`, { method: "POST" }),
+  arenaHelpful: (answerId: string, helpful: boolean) =>
+    request<ArenaVotes>(`/api/arena/answers/${answerId}/helpful`, {
+      method: helpful ? "POST" : "DELETE",
+    }),
+  arenaSolo: (chapterId: string, concept: string, text: string) =>
+    post<ArenaStarted>("/api/arena/solo", { chapter_id: chapterId, concept, text }),
 };

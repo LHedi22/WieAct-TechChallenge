@@ -21,6 +21,7 @@ import { cx } from "@/components/cx";
 import { ErrorBanner } from "@/features/worlds/parts";
 import { accentOf } from "./layout";
 import { MapScene, type Zoom } from "./MapScene";
+import { LeaderboardCard } from "@/features/leaderboard/Leaderboard";
 
 type View = "map" | "list";
 
@@ -231,6 +232,7 @@ function ClassPanel({ data }: { data: MapOut }) {
       <Link to={`/worlds/${data.world_id}/upload`} className="font-semibold text-primary underline">
         {t("class.addMaterial")}
       </Link>
+      <LeaderboardCard worldId={data.world_id} />
     </aside>
   );
 }

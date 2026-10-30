@@ -33,6 +33,7 @@ const economy: Economy = {
   earn: {},
   points: {},
   peer_answer_threshold: 70,
+  products: { coin_pack: { coins: 50, price_tnd: 2 }, exam_pass: { days: 14, price_tnd: 10 } },
   cosmetics: { cap: 0, glasses: 0, scarf: 0, chechia: 300, headphones: 500 },
   buildings: {},
 };
@@ -43,8 +44,10 @@ const wallet: Wallet = {
   purchased: 0,
   points: 0,
   streak: 0,
+  earned_today: 0,
   refill_at: "2026-10-30T23:00:00Z",
-  placeholder: true,
+  exam_pass_until: null,
+  exam_pass_left_today: null,
 };
 const map: MapOut = {
   world_id: W,
