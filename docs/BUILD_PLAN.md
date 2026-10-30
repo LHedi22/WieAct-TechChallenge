@@ -156,9 +156,26 @@ deferred (DECISIONS); Darija strings drafted, need native review (M8); the visua
 was done in EN at 1440×900, AR checked by layout metrics only.
 
 ## M6 · Daily challenges + Class Wisdom (6–7 Nov)
-- [ ] Daily plan (plan-once mid) + daily return screen + challenge progress tracking
-- [ ] Wisdom: tag counting, threshold → mid tip, tips on loading screens and Quiz Hall
+- [x] Daily plan (plan-once mid) + daily return screen + challenge progress tracking
+- [x] Wisdom: tag counting, threshold → mid tip, tips on loading screens and Quiz Hall
 **Done when:** 3 seeded students making the same mistake produce a tip shown on the next loading screen.
+
+_Status 30/10:_ **Done-when passes**, in pytest (`test_done_when_seeded_tip_reaches_a_newcomer`: seed
+→ ONE mid WISDOM_TIP call → a newcomer gets the tip, student_count 3; re-seeding makes no second call)
+and through the real UI (MCP Playwright, compose stack on mock): `python -m app.seed` → seed-ana,
+seed-bilel and seed-cyrine share one Calculus mistake → one tip in en + ar (the world's languages, one
+call) → a brand-new Arabic student joins `OLIVE-7Q2` and the next loading screen (placement, then
+Teach-Back solo) shows the Arabic tip, RTL. Daily: first `GET /api/daily` writes a rule plan at once,
+the background DAILY_PLAN job (1 mid call) replaced it ("Planned for you") with the "why" lines;
+side panel and daily return screen checked in AR at 1440×900 and 390×844 (no horizontal scroll);
+Continue → map, no second redirect. Tests: 238 backend (daily: catalogue validation, rewards once, earn
+cap, all-3 bonus, AI plan never overrides progress; wisdom: threshold, distinct students, one call for
+N languages, no nicknames in the prompt, unusable reply → retried by the next student), 27 mock-llm,
+50 frontend; ruff, eslint, tsc, i18n (710 keys × 4), constraint greps pass; load smoke (10 jobs, 503 +
+quota) PASS with 2 fallbacks. **Open:** flashcard challenges + CHALLENGE_ITEMS wait for M7; the Quiz
+Hall results wisdom card is covered by typecheck and the tip component test, not yet seen in a browser;
+mock tips reuse the English concept word inside Arabic text (real models write it in the language);
+new Darija strings need native review (M8); real-model tips/plans not yet generated (next slot).
 
 ## M7 · Study Studio → Audio Studio (7–8 Nov; cut Audio first)
 - [ ] Notes, flashcards with SRS, mind map; shared cache; Class Pool payment
