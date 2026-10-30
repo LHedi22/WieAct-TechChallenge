@@ -178,8 +178,24 @@ mock tips reuse the English concept word inside Arabic text (real models write i
 new Darija strings need native review (M8); real-model tips/plans not yet generated (next slot).
 
 ## M7 · Study Studio → Audio Studio (7–8 Nov; cut Audio first)
-- [ ] Notes, flashcards with SRS, mind map; shared cache; Class Pool payment
+- [x] Notes, flashcards with SRS, mind map; shared cache; Class Pool payment
 - [ ] Audio script + Web Speech player with transcript and speed
+
+_Status 30/10 (Phase A):_ **Study Studio + Class Pool pass** through the real UI (Playwright/Chromium
+against the compose stack on mock, demo world `OLIVE-7Q2`): student A (EN) opens the studio → 15
+coins, generate panel → loading stages → notes with page refs, mind map, 12 cards; Space flips, 1/2/3
+grade with the server's intervals (Again 1 min · Good 10 min · Easy 3 days). Student B (EN) opens it
+free with no new call; B gives 15 coins to the pool; student C (AR, 390×844) pays an Arabic pack
+from the pool (15 → 0), RTL, mirrored mind map, no horizontal scroll, no console errors. The log
+shows exactly 1 NOTES_WRITE (mid) + 1 FLASHCARDS + 1 MAP_WRITE (compact) per pack and nothing
+for later students. Tests: 251 backend (pack = 1 mid + 2 compact then free, shared pending job,
+pool pay + refund on failure, failed map keeps notes and cards and a free run fills it, SRS, daily
+`flashcards` challenge, quiz cards personal with no AI call, members only), 28 mock-llm, 55
+frontend; ruff, eslint, tsc, i18n (769 keys × 4), constraint greps pass; load smoke (10 jobs,
+503 + quota) PASS with 1 fallback. **Open:** "Turn these into flashcards" is covered by API and
+component tests, not yet clicked in a browser; mock notes reuse English concept words inside
+Arabic text (real models write in the language); new Darija strings need native review (M8); no
+real-model pack yet (in-slot); Audio is Phase B.
 
 ## M8 · Ship (8–9 Nov)
 - [ ] Offline demo mode (`/api/system/status` + banner, disables new AI actions)
