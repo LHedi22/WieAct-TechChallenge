@@ -21,6 +21,7 @@ from app.features.wallet.service import InsufficientCoins
 from app.features.wisdom import router as wisdom
 from app.features.worlds import map as world_map
 from app.features.worlds import router as worlds
+from app.jobs.service import AIPaused
 
 
 def create_app() -> FastAPI:
@@ -42,6 +43,11 @@ def create_app() -> FastAPI:
     @app.exception_handler(InsufficientPool)
     async def _pool_short(_: Request, e: InsufficientPool) -> JSONResponse:
         return JSONResponse(status_code=402, content={"detail": e.key})
+
+    @app.exception_handler(AIPaused)
+    async def _ai_paused(_: Request, e: AIPaused) -> JSONResponse:
+        # Offline demo mode: the banner explains it; nothing was reserved.
+        return JSONResponse(status_code=503, content={"detail": e.key})
 
     @app.exception_handler(InsufficientCoins)
     async def _no_coins(_: Request, e: InsufficientCoins) -> JSONResponse:

@@ -16,7 +16,9 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import and_, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from app.gateway import Defer, GatewayError
+from app.core import slot
+from app.core.config import get_settings
+from app.gateway import Defer, GatewayError, OfflineMode
 from app.jobs.coins import coins
 from app.jobs.registry import JobContext, spec_for
 from app.models import Job
@@ -106,6 +108,16 @@ class Worker:
                 log.info("job %s deferred %.0fs (%s)", job.id, d.delay_s, d.reason)
             else:
                 values = {"error": d.user_key}
+        except OfflineMode as e:
+            # Offline demo mode began after the job was queued. A student waiting on a loading
+            # screen gets the offline message and a refund; background work waits for the slot.
+            nxt = slot.next_slot(datetime.now(UTC), get_settings().LLM_SLOT_GROUP)
+            if job.lane == "background" and nxt is not None:
+                status = "queued"
+                values = {"not_before": nxt.start, "error": "deferred:offline"}
+                log.info("job %s waits for the next slot (%s)", job.id, nxt.label())
+            else:
+                values = {"error": e.user_key}
         except GatewayError as e:
             values = {"error": e.user_key}
             log.warning("job %s failed: %s", job.id, type(e).__name__)

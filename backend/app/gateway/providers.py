@@ -54,6 +54,8 @@ async def resolve(
     settings: Settings, sm: async_sessionmaker[AsyncSession], now: datetime | None = None
 ) -> Resolution:
     configured = settings.LLM_PROVIDER
+    if settings.OFFLINE_DEMO_MODE == "on":  # forced (demo rehearsal, or a pause by the team)
+        return Resolution(settings.llm, offline=True, reason="forced")
     if configured in ("local", "mock"):
         return Resolution(settings.profile_for(configured))
 
@@ -71,3 +73,16 @@ async def resolve(
         return Resolution(cloud)
     reason = "blocked" if blocked else ("outside_slot" if not live else "cloud_not_configured")
     return Resolution(settings.profile_for("local"), reason=reason)
+
+
+async def paused_until(
+    settings: Settings, sm: async_sessionmaker[AsyncSession], now: datetime | None = None
+) -> tuple[bool, datetime | None]:
+    """(offline, when new AI calls can start again: the next slot, or None if there is none).
+    Offline = new AI actions are paused; cached results are still served."""
+    now = now or datetime.now(UTC)
+    res = await resolve(settings, sm, now)
+    if not res.offline:
+        return False, None
+    nxt = slot.next_slot(now, settings.LLM_SLOT_GROUP)
+    return True, (nxt.start if nxt else None)
