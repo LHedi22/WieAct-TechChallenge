@@ -208,7 +208,21 @@ faked `speechSynthesis` (needs a desktop browser); Darija TTS stays OPEN (silma-
 episode yet (in-slot).
 
 ## M8 · Ship (8–9 Nov)
-- [ ] Offline demo mode (`/api/system/status` + banner, disables new AI actions)
+- [x] Offline demo mode (`/api/system/status` + banner, disables new AI actions)
 - [ ] Deploy (Vercel + Render/Railway), seed demo world, Darija review by native speakers
 - [ ] User test with ~10 students simultaneously (in-slot); export stats for report
 - [ ] README (setup, architecture, GenAI module explanation, screenshots), demo video ≤ 1:30 (show shared world, fallback, queue + Wisdom tip), 6-page report
+
+_Status 30/10 (in progress):_ **Offline demo mode passes**: interactive starts answer 503
+`errors.offline` before any coin is reserved; background work waits for the next slot; a running
+job caught by the switch fails with a refund (interactive) or requeues (background); the banner
+shows on every screen with the next live time (Tunis, 24 h) and AI start buttons are disabled,
+while saved results and the arena feed stay open. Checked with `OFFLINE_DEMO_MODE=on` in EN and AR
+at 1440×900 and 390×844 (RTL, no horizontal scroll, no app console errors). Tests: 260 backend
+(6 offline), 64 frontend; load smoke PASS with the new deterministic forced-503 fallback check.
+**Deploy:** config in place (`backend/start-prod.sh` + `railway.toml`, `frontend/vercel.json`,
+`docs/DEPLOY.md`; the start script smoke-tested in a container); accounts, secrets, seed and
+warm-up are human steps. **Blocked:** no embeddings model on our cloud key (DECISIONS.md OPEN),
+so cloud indexing can't run yet. **README** rewritten (GenAI module, setup, privacy, services);
+screenshots still to capture. Report draft and video shot list in `docs/report/`; stats export
+via `scripts/export_stats.py`. Human: Darija review, ~10-student user test, video.
