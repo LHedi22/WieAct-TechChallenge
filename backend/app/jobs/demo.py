@@ -27,7 +27,10 @@ async def demo_summary(ctx: JobContext) -> dict[str, Any]:
     await asyncio.sleep(0.3)  # stands in for retrieval (M2: vector search + compact filter)
     await ctx.set_stage("writing_summary")
     version, messages = prompts.render(
-        "demo_summary", language=language, topic="Calculus I", text=PASSAGE
+        "demo_summary",
+        language=language,
+        topic=ctx.payload.get("topic") or "Calculus I",
+        text=PASSAGE,
     )
     result = ctx.note(
         await gateway.run(

@@ -6,7 +6,10 @@
 Turns on mock faults through /_mock/config, fires the jobs (a third interactive, the rest
 background), polls each like the UI (every 1.5 s), then reports wait times, the highest queue
 position seen, max concurrency at the mock, fallbacks and refusals from /api/admin/stats.
-Exits non-zero if any job did not finish, or more than 2 calls were ever in flight.
+With 503 faults on, one last interactive job runs while every mid call answers 503, so the
+compact fallback (Quick mode) is checked every time, not only when two 503s happen to line up.
+Exits non-zero if any job did not finish, more than 2 calls were ever in flight, or that forced
+job did not fall back.
 """
 
 from __future__ import annotations
@@ -15,6 +18,7 @@ import argparse
 import asyncio
 import sys
 import time
+import uuid
 
 import httpx
 
@@ -22,9 +26,13 @@ TERMINAL = {"done", "failed", "cancelled"}
 FAULTS = {"503": {"p_503_mid": 0.35}, "quota": {"p_quota": 0.15, "quota_delay_s": 3}}
 
 
+RUN = uuid.uuid4().hex[:6]  # every job's prompt differs: no repeated identical requests on our key
+
+
 async def run_job(client: httpx.AsyncClient, lane: str, poll_s: float, timeout_s: float) -> dict:
     t0 = time.monotonic()
-    created = await client.post("/api/dev/demo-jobs", json={"lane": lane})
+    topic = f"Calculus I (load {RUN}-{uuid.uuid4().hex[:6]})"
+    created = await client.post("/api/dev/demo-jobs", json={"lane": lane, "topic": topic})
     created.raise_for_status()
     job_id = created.json()["job_id"]
     max_pos = 0
@@ -90,6 +98,10 @@ async def main() -> int:
                     *[run_job(api, lane, a.poll, a.timeout) for lane in lanes]
                 )
                 total = time.monotonic() - t0
+                forced = None
+                if "503" in a.faults:  # mid saturated → interactive: one retry, then compact
+                    await mock.patch("/_mock/config", json={"p_503_mid": 1.0, "p_quota": 0.0})
+                    forced = await run_job(api, "interactive", a.poll, a.timeout)
                 after = (await api.get("/api/admin/stats", params={"provider": "mock"})).json()
             mock_stats = (await mock.get("/_mock/stats")).json()
         finally:
@@ -119,9 +131,11 @@ async def main() -> int:
         print(f"  ! {r['lane']} job ended {r['status']} ({r['error']})")
 
     ok = not failed and mock_stats["max_concurrency_seen"] <= 2
-    if "503" in a.faults and fallbacks == 0:
-        print("  ! no fallback observed despite 503 faults")
-        ok = False
+    if forced is not None:
+        print(f"forced 503 job        {forced['status']} · quick mode {forced['quick_mode']}")
+        if forced["status"] != "done" or not forced["quick_mode"]:
+            print("  ! the interactive job did not fall back to compact under mid 503s")
+            ok = False
     print("\nRESULT", "PASS" if ok else "FAIL")
     return 0 if ok else 1
 
