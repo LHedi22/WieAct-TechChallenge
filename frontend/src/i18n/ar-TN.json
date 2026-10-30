@@ -952,7 +952,7 @@
     "type": {
       "quiz_questions": "{count, plural, zero {جاوب على # سؤال} one {جاوب على سؤال واحد} two {جاوب على زوز أسئلة} few {جاوب على # أسئلة} many {جاوب على # سؤال} other {جاوب على # سؤال}}",
       "quiz_score": "اعمل {percent}% في الكويز متاع {chapter}",
-      "teachback": "فسّر فكرة وحدة في Teach-Back",
+      "teachback": "فسّر فكرة وحدة في Teach‑Back",
       "tutor_session": "كمّل جلسة مع المعلّم السقراطي"
     }
   }

@@ -208,6 +208,7 @@ function ClassPanel({ data }: { data: MapOut }) {
   };
   return (
     <aside className="flex flex-col gap-4 border-sand bg-whitewash p-4 lg:border-s-2">
+      <ChallengesCard />
       <h2 className="text-h2">{t("class.title")}</h2>
       <ul
         className="flex flex-col gap-2"
@@ -239,7 +240,6 @@ function ClassPanel({ data }: { data: MapOut }) {
       <Link to={`/worlds/${data.world_id}/upload`} className="font-semibold text-primary underline">
         {t("class.addMaterial")}
       </Link>
-      <ChallengesCard />
       <LeaderboardCard worldId={data.world_id} />
     </aside>
   );

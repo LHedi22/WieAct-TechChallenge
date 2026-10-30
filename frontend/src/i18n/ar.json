@@ -951,7 +951,7 @@
     "type": {
       "quiz_questions": "{count, plural, zero {أجب عن # سؤال} one {أجب عن سؤال واحد} two {أجب عن سؤالين} few {أجب عن # أسئلة} many {أجب عن # سؤالًا} other {أجب عن # سؤال}}",
       "quiz_score": "احصل على {percent}% في اختبار {chapter}",
-      "teachback": "اشرح فكرة واحدة في Teach-Back",
+      "teachback": "اشرح فكرة واحدة في Teach‑Back",
       "tutor_session": "أنهِ جلسة مع المعلّم السقراطي"
     }
   }
