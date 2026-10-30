@@ -113,6 +113,7 @@ async def test_first_read_gives_a_rule_plan_now_and_one_mid_plan_job(api, sm, pp
     first = (await api.get("/api/daily", headers=OWL_FR)).json()
     assert len(first["challenges"]) == 3 and first["planned_by"] == "rule"
     assert first["first_open_today"] and first["plan_job_id"] and not first["all_done"]
+    assert not first["returning"]  # signed up today: no "welcome back" screen
     assert first["coins"] == economy.DAILY_FREE_COINS
     again = (await api.get("/api/daily", headers=OWL_FR)).json()
     assert again["plan_job_id"] == first["plan_job_id"]

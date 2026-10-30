@@ -933,5 +933,26 @@
       "again": "Explain another one"
     },
     "retry": "Try again"
+  },
+  "daily": {
+    "title": "Daily challenges",
+    "plannedForYou": "Planned for you",
+    "planning": "Planning your day…",
+    "reminder": "Study reminder: today's challenges are waiting for you.",
+    "reward": "+{coins} coins · +{points} pts",
+    "done": "Done",
+    "go": "Go",
+    "allDone": "All 3 done! +{points} bonus points",
+    "welcome": "Welcome back!",
+    "refilled": "{count} free coins are back for today",
+    "today": "Today's 3 challenges",
+    "bonusHint": "Finish all 3 for +{points} bonus points and keep your streak.",
+    "continue": "To the map",
+    "type": {
+      "quiz_questions": "{count, plural, one {Answer # quiz question} other {Answer # quiz questions}}",
+      "quiz_score": "Score {percent}% on the {chapter} quiz",
+      "teachback": "Explain one idea in Teach-Back",
+      "tutor_session": "Finish a Socratic Tutor session"
+    }
   }
 }

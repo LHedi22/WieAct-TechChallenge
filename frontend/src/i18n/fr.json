@@ -933,5 +933,26 @@
       "again": "En expliquer une autre"
     },
     "retry": "Réessayer"
+  },
+  "daily": {
+    "title": "Défis du jour",
+    "plannedForYou": "Préparés pour toi",
+    "planning": "On prépare ta journée…",
+    "reminder": "Rappel d'étude : tes défis du jour t'attendent.",
+    "reward": "+{coins} pièces · +{points} pts",
+    "done": "Fait",
+    "go": "Y aller",
+    "allDone": "Les 3 sont faits ! +{points} points bonus",
+    "welcome": "Bon retour !",
+    "refilled": "{count} pièces gratuites sont de retour pour aujourd'hui",
+    "today": "Tes 3 défis du jour",
+    "bonusHint": "Termine les 3 pour +{points} points bonus et garde ta série.",
+    "continue": "Vers la carte",
+    "type": {
+      "quiz_questions": "{count, plural, one {Réponds à # question de quiz} other {Réponds à # questions de quiz}}",
+      "quiz_score": "Obtiens {percent} % au quiz {chapter}",
+      "teachback": "Explique une idée dans le Teach-Back",
+      "tutor_session": "Termine une séance avec le tuteur socratique"
+    }
   }
 }

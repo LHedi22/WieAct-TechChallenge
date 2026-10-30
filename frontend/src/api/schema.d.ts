@@ -1189,6 +1189,8 @@ export interface components {
       message: string | null;
       /** First Open Today */
       first_open_today: boolean;
+      /** Returning */
+      returning: boolean;
       /** Reminder Due */
       reminder_due: boolean;
       /** Coins */

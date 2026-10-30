@@ -10,6 +10,7 @@ from pydantic import BaseModel
 
 from app.api.deps import CurrentUser, Session
 from app.core import economy
+from app.core.wallet_rules import tunis_day
 from app.features.daily import service
 from app.features.wallet import service as wallet
 from app.models import DailyState, Profile
@@ -38,6 +39,7 @@ class Daily(BaseModel):
     plan_job_id: uuid.UUID | None
     message: str | None
     first_open_today: bool
+    returning: bool  # signed up before today: the daily return screen is for them
     reminder_due: bool
     coins: int
     free_today: int
@@ -56,6 +58,7 @@ async def _view(s: Session, user, state: DailyState, now: datetime) -> Daily:
         plan_job_id=state.plan_job_id,
         message=(state.plan or {}).get("message"),
         first_open_today=state.seen_at is None,
+        returning=tunis_day(user.created_at) < state.date,
         reminder_due=service.reminder_due(profile, state, now),
         coins=b.coins,
         free_today=b.free,

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api, type MapCourse, type MapOut } from "@/api/client";
@@ -22,6 +22,8 @@ import { ErrorBanner } from "@/features/worlds/parts";
 import { accentOf } from "./layout";
 import { MapScene, type Zoom } from "./MapScene";
 import { LeaderboardCard } from "@/features/leaderboard/Leaderboard";
+import { ChallengesCard } from "@/features/daily/Challenges";
+import { useDaily } from "@/features/daily/useDaily";
 
 type View = "map" | "list";
 
@@ -36,6 +38,11 @@ export function MapPage() {
   const [zoom, setZoom] = useState<Zoom>(1);
   const query = useQuery({ queryKey: ["map", worldId], queryFn: () => api.worldMap(worldId) });
   const data = query.data;
+  const daily = useDaily().data;
+  const welcomeBack = Boolean(daily?.first_open_today && daily.returning);
+  useEffect(() => {
+    if (welcomeBack) void navigate(`/worlds/${worldId}/today`, { replace: true });
+  }, [welcomeBack, navigate, worldId]);
 
   const open = (c: MapCourse) => void navigate(`/worlds/${worldId}/courses/${c.id}`);
   const place = (c: MapCourse) => void navigate(`/worlds/${worldId}/courses/${c.id}/placement`);
@@ -232,6 +239,7 @@ function ClassPanel({ data }: { data: MapOut }) {
       <Link to={`/worlds/${data.world_id}/upload`} className="font-semibold text-primary underline">
         {t("class.addMaterial")}
       </Link>
+      <ChallengesCard />
       <LeaderboardCard worldId={data.world_id} />
     </aside>
   );

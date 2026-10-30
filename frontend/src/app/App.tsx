@@ -21,6 +21,7 @@ import { AddMaterialPage } from "@/features/worlds/AddMaterialPage";
 import { CreateOrJoinPage } from "@/features/worlds/CreateOrJoinPage";
 import { IndexingPage } from "@/features/worlds/IndexingPage";
 import { JoinPage } from "@/features/worlds/JoinPage";
+import { DailyReturnPage } from "@/features/daily/DailyReturnPage";
 import { RequireAuth } from "./RequireAuth";
 import { useUiStore } from "./uiStore";
 import { useDocumentLanguage } from "./useDocumentLanguage";
@@ -40,6 +41,7 @@ const router = createBrowserRouter([
   { path: `${W}/indexing`, element: signedIn(<IndexingPage />) },
   { path: `${W}/upload`, element: signedIn(<AddMaterialPage />) },
   { path: `${W}/leaderboard`, element: signedIn(<LeaderboardPage />) },
+  { path: `${W}/today`, element: signedIn(<DailyReturnPage />) },
   { path: C, element: signedIn(<IslandPage />) },
   { path: `${C}/placement`, element: signedIn(<PlacementPage />) },
   { path: `${C}/quiz/new`, element: signedIn(<QuizStartPage />) },
