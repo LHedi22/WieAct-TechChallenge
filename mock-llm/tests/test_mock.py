@@ -235,3 +235,16 @@ async def test_teachback_grade_rewards_explanations_grounded_in_the_excerpts():
     assert good["score"] > 70 > weak["score"] and weak["errors"][0]["quote"] == "Undo works like a"
     assert weak["good"].startswith("Tu as")  # feedback in the requested language
     assert (await _reply(system, user("idiot")))["flag"] == "abusive"
+
+
+async def test_wisdom_tip_answers_every_requested_language():
+    system = (
+        'Tips. {"tips": {"en": {"trap": "...", "why": "...", "right": "..."}, '
+        '"ar": {"trap": "...", "why": "...", "right": "..."}}} '
+        "<!-- task: WISDOM_TIP --> <!-- lang: en -->"
+    )
+    out = await _reply(
+        system, "Course: Calc · Chapter: Limits\nConcept: limits · Kind of mistake: x"
+    )
+    assert set(out["tips"]) == {"en", "ar"}
+    assert "limits" in out["tips"]["en"]["trap"] and out["tips"]["ar"]["why"]

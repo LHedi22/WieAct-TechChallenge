@@ -13,6 +13,7 @@ from app.features.quiz import router as quiz
 from app.features.tutor import router as tutor
 from app.features.wallet import router as wallet
 from app.features.wallet.service import InsufficientCoins
+from app.features.wisdom import router as wisdom
 from app.features.worlds import map as world_map
 from app.features.worlds import router as worlds
 
@@ -51,6 +52,7 @@ def create_app() -> FastAPI:
     app.include_router(quiz.router)
     app.include_router(tutor.router)
     app.include_router(arena.router)
+    app.include_router(wisdom.router)
     app.include_router(worlds.router)
     app.include_router(world_map.router)
     if settings.APP_ENV != "production":

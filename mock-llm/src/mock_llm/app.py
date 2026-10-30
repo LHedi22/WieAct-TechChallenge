@@ -377,6 +377,36 @@ def _teachback(user: str, lang: str, system: str = "") -> dict[str, Any]:
     }
 
 
+# --- Class Wisdom ---------------------------------------------------------------------------------
+TIP_LANG = re.compile(r'"(en|fr|ar|ar-TN)": \{"trap"')
+CONCEPT_LINE = re.compile(r"^Concept: (.+?) · ", re.MULTILINE)
+TIP_TEXT = {
+    "en": ("It is tempting to apply the usual rule to {c} straight away.",
+           "That skips the condition the rule depends on.",
+           "Check the condition first, then choose the method for {c}."),
+    "fr": ("On est tenté d'appliquer directement la règle habituelle à {c}.",
+           "Cela oublie la condition dont dépend la règle.",
+           "Vérifie d'abord la condition, puis choisis la méthode pour {c}."),
+    "ar": ("من المغري تطبيق القاعدة المعتادة على {c} مباشرة.",
+           "هذا يتجاهل الشرط الذي تعتمد عليه القاعدة.",
+           "تحقّق من الشرط أولًا ثم اختر الطريقة المناسبة لـ {c}."),
+    "ar-TN": ("ساهل باش تطبّق القاعدة العادية على {c} طول.",
+              "هكا تنسى الشرط اللي تعتمد عليه القاعدة.",
+              "ثبّت في الشرط الأول وبعد اختار الطريقة متاع {c}."),
+}  # fmt: skip
+
+
+def _wisdom(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    m = CONCEPT_LINE.search(user)
+    concept = m.group(1).strip() if m else "this idea"
+    langs = TIP_LANG.findall(system) or [lang]
+    tips = {}
+    for code in langs:
+        trap, why, right = TIP_TEXT.get(code, TIP_TEXT["en"])
+        tips[code] = {"trap": trap.format(c=concept), "why": why, "right": right.format(c=concept)}
+    return {"tips": tips}
+
+
 GENERATORS = {
     "MODERATE_POST": _moderate,
     "TEACHBACK_GRADE": _teachback,
@@ -387,6 +417,7 @@ GENERATORS = {
     "QUIZ_GENERATE": _quiz,
     "PLACEMENT_QUIZ": _placement,
     "QUIZ_GRADE_TAG": _grade_tag,
+    "WISDOM_TIP": _wisdom,
 }
 
 
