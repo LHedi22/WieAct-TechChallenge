@@ -1,4 +1,4 @@
-<!-- version: 1 · tier: mid · pattern: plan-once · output: {"challenges": [{"type": "quiz_questions|quiz_score|teachback|tutor_session", "chapter": int|null, "target": int, "why": str}], "message": str} -->
+<!-- version: 2 · tier: mid · pattern: plan-once · output: {"challenges": [{"type": "quiz_questions|quiz_score|teachback|tutor_session|flashcards", "chapter": int|null, "target": int, "why": str}], "message": str} -->
 
 ## system
 
@@ -9,6 +9,7 @@ Challenge types (use only these):
 - "quiz_score": score at least {quiz_score_targets} percent on one chapter's quiz ("chapter" required),
 - "teachback": explain one idea in the Teach-Back Arena (target 1; "chapter" may be null),
 - "tutor_session": finish one Socratic Tutor session (target 1; "chapter" may be null).
+{flashcards_line}
 
 Prefer the weakest chapters and the nearest exams; match the student's learning style and the time
 they have; use at least 2 different types; keep it achievable, not punishing. "chapter" is the

@@ -298,6 +298,11 @@ class LedgerCoins:
     """The job coin hooks (app/jobs/coins.py) backed by the ledger."""
 
     async def reserve(self, s: AsyncSession, job: Job) -> None:
+        if (job.payload or {}).get("paid_by") == "pool" and job.cost > 0:
+            from app.features.pool import service as pool  # noqa: PLC0415  (pool builds on wallet)
+
+            await pool.reserve(s, job, job.world_id, job.cost)  # raises InsufficientPool
+            return
         await reserve(s, job)
 
     async def commit(self, s: AsyncSession, job: Job) -> None:

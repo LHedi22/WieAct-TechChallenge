@@ -10,13 +10,20 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ValidationError
 
-ChallengeType = Literal["quiz_questions", "quiz_score", "teachback", "tutor_session"]
-TYPES: tuple[str, ...] = ("quiz_questions", "quiz_score", "teachback", "tutor_session")
+ChallengeType = Literal["quiz_questions", "quiz_score", "teachback", "tutor_session", "flashcards"]
+TYPES: tuple[str, ...] = (
+    "quiz_questions",
+    "quiz_score",
+    "teachback",
+    "tutor_session",
+    "flashcards",
+)
 TARGETS: dict[str, tuple[int, ...]] = {
     "quiz_questions": (5, 10, 15, 20),
     "quiz_score": (60, 70, 80, 90),  # percent on one chapter quiz
     "teachback": (1,),
     "tutor_session": (1,),
+    "flashcards": (10, 20),  # cards reviewed in the Study Studio
 }
 NEEDS_CHAPTER = {"quiz_score"}
 COUNT = 3
@@ -87,10 +94,11 @@ class AIChallenge(BaseModel):
 
 
 def from_ai(
-    content: Any, cands: list[Candidate], fallback: list[dict]
+    content: Any, cands: list[Candidate], fallback: list[dict], has_cards: bool = False
 ) -> tuple[list[dict], str | None]:
     """Keep the valid AI challenges (known type, chapter in the list when needed, no duplicate
-    type+chapter), snap targets to the catalogue, and fill up to 3 from the rule plan."""
+    type+chapter, flashcards only for a student who has cards), snap targets to the catalogue,
+    and fill up to 3 from the rule plan."""
     raw = content.get("challenges") if isinstance(content, dict) else None
     message = content.get("message") if isinstance(content, dict) else None
     out: list[dict] = []
@@ -102,6 +110,8 @@ def from_ai(
             continue
         c = cands[ch.chapter - 1] if ch.chapter and 1 <= ch.chapter <= len(cands) else None
         if ch.type in NEEDS_CHAPTER and c is None:
+            continue
+        if ch.type == "flashcards" and not has_cards:
             continue
         key = (ch.type, str(c.chapter_id) if c else None)
         if key in seen:

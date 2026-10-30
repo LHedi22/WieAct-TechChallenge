@@ -4,6 +4,7 @@ from app.features.arena import service as arena  # noqa: F401
 from app.features.daily import service as daily  # noqa: F401
 from app.features.placement import service as placement  # noqa: F401
 from app.features.quiz import pool, tagging  # noqa: F401
+from app.features.studio import pack  # noqa: F401
 from app.features.tutor import service as tutor  # noqa: F401
 from app.features.wisdom import service as wisdom  # noqa: F401
 from app.jobs import demo  # noqa: F401

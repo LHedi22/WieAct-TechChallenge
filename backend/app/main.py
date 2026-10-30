@@ -13,6 +13,7 @@ from app.features.placement import router as placement
 from app.features.pool import router as pool
 from app.features.pool.service import InsufficientPool
 from app.features.quiz import router as quiz
+from app.features.studio import router as studio
 from app.features.tutor import router as tutor
 from app.features.wallet import router as wallet
 from app.features.wallet.service import InsufficientCoins
@@ -62,6 +63,8 @@ def create_app() -> FastAPI:
     app.include_router(wisdom.router)
     app.include_router(daily.router)
     app.include_router(pool.router)
+    app.include_router(studio.router)
+    app.include_router(studio.quiz_router)
     app.include_router(worlds.router)
     app.include_router(world_map.router)
     if settings.APP_ENV != "production":

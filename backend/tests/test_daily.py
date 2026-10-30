@@ -57,7 +57,7 @@ def test_ai_output_is_validated_snapped_and_filled_from_the_rule_plan():
     content = {
         "challenges": [
             {"type": "quiz_score", "chapter": 2, "target": 73, "why": "Derivatives next."},
-            {"type": "flashcards", "chapter": 1, "target": 5},  # not in the catalogue
+            {"type": "podcast", "chapter": 1, "target": 5},  # not in the catalogue
             {"type": "quiz_score", "chapter": None, "target": 70},  # needs a chapter
             {"type": "quiz_score", "chapter": 2, "target": 90},  # duplicate
             {"type": "quiz_questions", "chapter": 9, "target": 300},  # unknown chapter → any

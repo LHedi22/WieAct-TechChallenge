@@ -9,7 +9,7 @@ import uuid
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -26,6 +26,7 @@ from app.models import (
     ChapterMastery,
     Course,
     DailyState,
+    Flashcard,
     Job,
     Mistake,
     Profile,
@@ -127,6 +128,26 @@ def _chapters_text(cands: list[plan.Candidate], today: date) -> str:
     return "\n".join(lines)
 
 
+FLASHCARDS_LINE = (
+    '- "flashcards": review {} flashcards in the Study Studio ("chapter" may be null).'
+)
+
+
+async def _has_cards(s: AsyncSession, user_id: uuid.UUID, chapter_ids: list[uuid.UUID]) -> bool:
+    """Flashcards can be planned only for a student with cards: their own, or a class deck."""
+    found = await s.scalar(
+        select(Flashcard.id)
+        .where(
+            or_(
+                Flashcard.user_id == user_id,
+                Flashcard.chapter_id.in_(chapter_ids) & Flashcard.asset_id.is_not(None),
+            )
+        )
+        .limit(1)
+    )
+    return found is not None
+
+
 @job(KIND, stages=("planning_your_day",))
 async def plan_day(ctx: JobContext) -> dict[str, Any]:
     day = date.fromisoformat(ctx.payload["date"])
@@ -144,6 +165,7 @@ async def plan_day(ctx: JobContext) -> dict[str, Any]:
                 .limit(5)
             )
         ).all()
+        has_cards = await _has_cards(s, user.id, [c.chapter_id for c in cands])
     await ctx.set_stage("planning_your_day")
     p = profile
     version, messages = prompts.render(
@@ -151,6 +173,9 @@ async def plan_day(ctx: JobContext) -> dict[str, Any]:
         language=user.ui_language,
         quiz_questions_targets="/".join(map(str, plan.TARGETS["quiz_questions"])),
         quiz_score_targets="/".join(map(str, plan.TARGETS["quiz_score"])),
+        flashcards_line=FLASHCARDS_LINE.format("/".join(map(str, plan.TARGETS["flashcards"])))
+        if has_cards
+        else "",
         visual=p.style_visual if p else 25,
         practice=p.style_practice if p else 25,
         listening=p.style_listening if p else 25,
@@ -177,7 +202,7 @@ async def plan_day(ctx: JobContext) -> dict[str, Any]:
         if state is None or any(c["progress"] for c in state.challenges):
             await s.commit()
             return {"applied": False}
-        challenges, message = plan.from_ai(result.content, cands, state.challenges)
+        challenges, message = plan.from_ai(result.content, cands, state.challenges, has_cards)
         state.challenges = challenges
         state.plan = {"message": message, "quick_mode": result.quick_mode}
         state.planned_by = "ai"
