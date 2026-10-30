@@ -118,9 +118,9 @@ class Worker:
             await s.execute(update(Job).where(Job.id == job.id).values(status=status, **values))
             fresh = await s.get(Job, job.id)
             if status == "done":
-                await coins.commit(fresh)
+                await coins.commit(s, fresh)
             elif status == "failed":
-                await coins.refund(fresh)
+                await coins.refund(s, fresh)
             await s.commit()
 
     async def tick(self) -> int:

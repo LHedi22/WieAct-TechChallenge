@@ -1,4 +1,4 @@
-"""The economy constants (ECONOMY.md) and the M3 wallet placeholder."""
+"""The economy constants (ECONOMY.md) and the public economy endpoint."""
 
 from datetime import UTC, datetime
 
@@ -34,4 +34,3 @@ async def test_economy_endpoint_is_public_and_wallet_needs_sign_in(api):  # noqa
     await api.post("/api/auth/signup", json=SIGNUP)
     wallet = (await api.get("/api/wallet")).json()
     assert wallet["coins"] == economy.DAILY_FREE_COINS and wallet["points"] == 0
-    assert wallet["placeholder"] is True

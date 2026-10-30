@@ -60,7 +60,7 @@ async def create_job(
     )
     s.add(job)
     await s.flush()
-    await coins.reserve(job)
+    await coins.reserve(s, job)
     await s.commit()
     return job
 
@@ -134,6 +134,6 @@ async def cancel(s: AsyncSession, job: Job) -> Job:
         raise NotCancellable(job.status)
     job.status = "cancelled"
     job.finished_at = datetime.now(UTC)
-    await coins.refund(job)
+    await coins.refund(s, job)
     await s.commit()
     return job

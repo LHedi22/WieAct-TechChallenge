@@ -88,8 +88,9 @@ async def start(s: AsyncSession, user: User, chapter: Chapter, level: str) -> di
         return {"attempt_id": attempt.id, "job_id": None, "cost": 0, "cached": True}
     # A classmate is already generating this chapter + level + language: share that job.
     job_id = await pool.pending_generation(s, chapter.id, level, language)
-    cost = economy.COST["quiz"]
+    cost = 0  # sharing that job reserves nothing: this student gets the class's set for free
     if job_id is None:
+        cost = economy.COST["quiz"]
         seed = await pool.next_seed(s, chapter.id, level, language)
         job = await create_job(
             s,
