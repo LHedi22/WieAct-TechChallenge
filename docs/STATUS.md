@@ -37,9 +37,12 @@ Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
 - [ ] Record the demo video (`docs/report/VIDEO.md` shot list).
 
 ## 3. Deploy (config is in the repo; the rest is a human with accounts)
+- [x] Qdrant Cloud cluster created (31/10). Check it with `scripts/check_qdrant.py` (URL + key
+      from your own terminal). Its URL and key go **only** into Railway's variables, not `.env`:
+      dev keeps the compose Qdrant so mock/local collections never land in the cloud cluster.
 - [ ] Railway project (service root `backend`, `railway.toml`, Postgres, volume at `/data`),
-      Vercel (root `frontend`; replace `REPLACE-WITH-RAILWAY-DOMAIN` in `frontend/vercel.json`),
-      Qdrant Cloud cluster. Steps and variable names: `docs/DEPLOY.md`.
+      Vercel (root `frontend`; replace `REPLACE-WITH-RAILWAY-DOMAIN` in `frontend/vercel.json`).
+      Steps and variable names: `docs/DEPLOY.md`.
 - [ ] Seed the demo world in-slot, check `/api/health` and the offline banner after the slot.
 - [ ] Check that a multi-MB upload works through the Vercel rewrite (fallback in DEPLOY.md).
 

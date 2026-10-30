@@ -20,7 +20,9 @@ organisers before step 4.
 
 ## 1. Qdrant Cloud
 Create a free cluster → copy its URL and an API key → keep them for step 2
-(`QDRANT_URL`, `QDRANT_API_KEY`). The app creates the collection
+(`QDRANT_URL`, `QDRANT_API_KEY`). Check them from your own terminal with
+`python3 scripts/check_qdrant.py` (it reads the two variables from the environment and never prints
+the key). The app creates the collection
 `{QDRANT_COLLECTION_PREFIX}-cloud-{embedding slug}` on first use.
 
 ## 2. Railway
