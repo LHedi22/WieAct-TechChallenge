@@ -18,6 +18,21 @@ class BuildingCost(BaseModel):
     answer_cost: int | None = None
 
 
+class CoinPack(BaseModel):
+    coins: int
+    price_tnd: int
+
+
+class ExamPass(BaseModel):
+    days: int
+    price_tnd: int
+
+
+class Products(BaseModel):
+    coin_pack: CoinPack
+    exam_pass: ExamPass
+
+
 class EconomyOut(BaseModel):
     daily_free_coins: int
     daily_earn_cap: int
@@ -26,7 +41,7 @@ class EconomyOut(BaseModel):
     earn: dict[str, int]
     points: dict[str, int]
     peer_answer_threshold: int
-    products: dict[str, dict[str, int]]
+    products: Products
     cosmetics: dict[str, int]
     buildings: dict[str, BuildingCost]
 
