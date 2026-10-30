@@ -64,12 +64,18 @@
         "checking_reply": "Vérification de la réponse",
         "checking_message": "Vérification du message",
         "scoring_answer": "Notation de l'explication",
-        "double_checking": "Deuxième vérification de la note"
+        "double_checking": "Deuxième vérification de la note",
+        "planning_your_day": "On prépare ta journée",
+        "spotting_the_pattern": "On repère l’erreur commune",
+        "writing_the_tip": "On écrit l’astuce"
       }
     },
     "wisdom": {
       "title": "Sagesse de la classe",
-      "sample": "3 camarades ont confondu 0/0 et 0 ici. Essaie d'abord de factoriser."
+      "sample": "3 camarades ont confondu 0/0 et 0 ici. Essaie d'abord de factoriser.",
+      "classmates": "{count, plural, one {# camarade est tombé dans ce piège :} other {# camarades sont tombés dans ce piège :}}",
+      "anonymous": "Les noms sont cachés. Seule l’erreur est partagée.",
+      "another": "Montre-moi une autre astuce"
     },
     "errors": {
       "code_not_found": "Ce code ne correspond à aucun monde.",

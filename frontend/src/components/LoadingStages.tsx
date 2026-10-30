@@ -55,7 +55,7 @@ export function LoadingStages({
         {tip && (
           <SoftCard className="bg-sand/20">
             <p className="text-small font-semibold text-olive-ink">{t("wisdom.title")}</p>
-            <p>{tip}</p>
+            <div>{tip}</div>
           </SoftCard>
         )}
       </div>

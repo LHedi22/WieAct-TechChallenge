@@ -6,6 +6,7 @@ import { api } from "@/api/client";
 import { Sprite } from "@/components";
 import { JobProgress } from "@/features/jobs/JobProgress";
 import { useOnce } from "@/hooks/useOnce";
+import { useWisdomTip } from "@/features/wisdom/useWisdomTip";
 import { ErrorBanner } from "@/features/worlds/parts";
 
 /** …/quiz/new?chapter&level — a shared set opens at once; a new one is written as a job first. */
@@ -29,6 +30,7 @@ export function QuizStartPage() {
   const { mutate } = start;
   useOnce(mutate);
   const jobId = start.data?.job_id;
+  const tip = useWisdomTip(worldId, courseId);
 
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-6 bg-whitewash px-4 py-8">
@@ -42,7 +44,7 @@ export function QuizStartPage() {
       <h2 className="text-h1">{t("building")}</h2>
       <ErrorBanner error={start.error ?? fromJob.error} />
       {jobId && (
-        <JobProgress jobId={jobId}>
+        <JobProgress jobId={jobId} tip={tip}>
           {() => <OpenWhenDone jobId={jobId} open={fromJob.mutate} started={fromJob.isPending} />}
         </JobProgress>
       )}

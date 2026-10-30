@@ -6,6 +6,7 @@ import { api, type ArenaAnswer, type ArenaDetail, type ArenaQuestion } from "@/a
 import { Avatar, type AvatarLook, Bidi, Chip, PixelButton, SoftCard, Sprite } from "@/components";
 import { cx } from "@/components/cx";
 import { JobProgress } from "@/features/jobs/JobProgress";
+import { useWisdomTip } from "@/features/wisdom/useWisdomTip";
 import { useJob } from "@/hooks/useJob";
 import { useOnce } from "@/hooks/useOnce";
 import { ErrorBanner } from "@/features/worlds/parts";
@@ -161,6 +162,12 @@ function PeerRoom({
   );
 }
 
+/** The Class Wisdom tip for this island's loading screens. */
+function useCourseTip() {
+  const { worldId = "", courseId = "" } = useParams();
+  return useWisdomTip(worldId, courseId);
+}
+
 function EmptyRoom() {
   const { t } = useTranslation("arena");
   return <p className="text-ink/70">{t("pickQuestion")}</p>;
@@ -180,6 +187,7 @@ function AskForm({
   const qc = useQueryClient();
   const id = useId();
   const [text, setText] = useState("");
+  const tip = useCourseTip();
   const ask = useMutation({
     mutationFn: () => api.arenaAsk(chapterId, text.trim()),
     onSuccess: () => void qc.invalidateQueries({ queryKey: ["arena", chapterId] }),
@@ -187,7 +195,7 @@ function AskForm({
   if (ask.data) {
     return (
       <SoftCard className="flex flex-col gap-2">
-        <JobProgress jobId={ask.data.job_id}>
+        <JobProgress jobId={ask.data.job_id} tip={tip}>
           {(result) => (
             <QuestionChecked
               ok={result.status === "open"}
@@ -358,11 +366,12 @@ function MyAnswer({ detail }: { detail: ArenaDetail }) {
   const qid = detail.question.id;
   const grading = (mine?.status === "grading" ? mine.grading_job_id : null) ?? jobId;
   const job = useJob(grading);
+  const tip = useCourseTip();
 
   if (grading) {
     return (
       <SoftCard className="flex flex-col gap-3">
-        <JobProgress jobId={grading}>
+        <JobProgress jobId={grading} tip={tip}>
           {() => (
             <GradedRefresh
               onShown={() => {
@@ -516,6 +525,7 @@ function SoloMode({ chapterId, cost }: { chapterId: string; cost: number }) {
   const textId = useId();
   const [concept, setConcept] = useState("");
   const [text, setText] = useState("");
+  const tip = useCourseTip();
   const start = useMutation({
     mutationFn: () => api.arenaSolo(chapterId, concept.trim(), text.trim()),
   });
@@ -526,7 +536,7 @@ function SoloMode({ chapterId, cost }: { chapterId: string; cost: number }) {
       <p className="text-ink/70">{t("solo.intro")}</p>
       {start.data ? (
         <SoftCard>
-          <JobProgress jobId={start.data.job_id}>
+          <JobProgress jobId={start.data.job_id} tip={tip}>
             {(r) => (
               <div className="flex flex-col gap-3">
                 <GradedRefresh

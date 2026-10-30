@@ -64,12 +64,18 @@
         "checking_reply": "Checking the reply",
         "checking_message": "Checking the message",
         "scoring_answer": "Scoring the explanation",
-        "double_checking": "Double-checking the score"
+        "double_checking": "Double-checking the score",
+        "planning_your_day": "Planning your day",
+        "spotting_the_pattern": "Spotting the pattern",
+        "writing_the_tip": "Writing the tip"
       }
     },
     "wisdom": {
       "title": "Class wisdom",
-      "sample": "3 classmates mixed up 0/0 with 0 here. Try factoring first."
+      "sample": "3 classmates mixed up 0/0 with 0 here. Try factoring first.",
+      "classmates": "{count, plural, one {# classmate fell for this:} other {# classmates fell for this:}}",
+      "anonymous": "Names are hidden. Only the pattern is shared.",
+      "another": "Show me another tip"
     },
     "errors": {
       "code_not_found": "That code doesn't match any world.",

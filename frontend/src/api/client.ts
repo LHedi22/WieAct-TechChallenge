@@ -48,6 +48,9 @@ export type ArenaDetail = S["QuestionDetail"];
 export type ArenaAnswer = S["AnswerOut"];
 export type ArenaStarted = S["Started"];
 export type ArenaVotes = S["Votes"];
+export type WisdomTip = S["Tip"];
+export type Daily = S["Daily"];
+export type DailyChallenge = S["Challenge"];
 
 const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
@@ -145,6 +148,12 @@ export const api = {
       `/api/leaderboard?scope=${scope}&period=${period}` +
         (worldId ? `&world_id=${encodeURIComponent(worldId)}` : ""),
     ),
+  wisdom: (worldId: string, courseId?: string) =>
+    request<S["Tips"]>(
+      `/api/wisdom?world_id=${worldId}` + (courseId ? `&course_id=${courseId}` : ""),
+    ),
+  daily: () => request<Daily>("/api/daily"),
+  dailySeen: () => post<Daily>("/api/daily/seen", {}),
   worldMap: (worldId: string) => request<MapOut>(`/api/worlds/${worldId}/map`),
   island: (courseId: string) => request<IslandOut>(`/api/courses/${courseId}`),
   presence: (courseId: string, chapterId?: string) =>

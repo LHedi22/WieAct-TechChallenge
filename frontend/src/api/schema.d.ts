@@ -629,6 +629,57 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/wisdom": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Tips */
+    get: operations["tips_api_wisdom_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/daily": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Daily */
+    get: operations["get_daily_api_daily_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/daily/seen": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Seen */
+    post: operations["seen_api_daily_seen_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/worlds": {
     parameters: {
       query?: never;
@@ -1034,6 +1085,29 @@ export interface components {
       /** Answer Cost */
       answer_cost?: number | null;
     };
+    /** Challenge */
+    Challenge: {
+      /** Type */
+      type: string;
+      /** Target */
+      target: number;
+      /** Progress */
+      progress: number;
+      /** Done */
+      done: boolean;
+      /** Why */
+      why: string | null;
+      /** World Id */
+      world_id: string | null;
+      /** Course Id */
+      course_id: string | null;
+      /** Chapter Id */
+      chapter_id: string | null;
+      /** Course */
+      course: string | null;
+      /** Chapter */
+      chapter: string | null;
+    };
     /** ChapterIn */
     ChapterIn: {
       /** Title */
@@ -1095,6 +1169,39 @@ export interface components {
       exam_date: string | null;
       /** Chapters */
       chapters?: components["schemas"]["ChapterOut"][];
+    };
+    /** Daily */
+    Daily: {
+      /**
+       * Date
+       * Format: date
+       */
+      date: string;
+      /** Challenges */
+      challenges: components["schemas"]["Challenge"][];
+      /** All Done */
+      all_done: boolean;
+      /** Planned By */
+      planned_by: string;
+      /** Plan Job Id */
+      plan_job_id: string | null;
+      /** Message */
+      message: string | null;
+      /** First Open Today */
+      first_open_today: boolean;
+      /** Reminder Due */
+      reminder_due: boolean;
+      /** Coins */
+      coins: number;
+      /** Free Today */
+      free_today: number;
+      /** Streak */
+      streak: number;
+      /**
+       * Refill At
+       * Format: date-time
+       */
+      refill_at: string;
     };
     /** DemoJobIn */
     DemoJobIn: {
@@ -2014,6 +2121,38 @@ export interface components {
       tokens_out: number;
       /** Avg Latency Ms */
       avg_latency_ms: number;
+    };
+    /** Tip */
+    Tip: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /**
+       * Course Id
+       * Format: uuid
+       */
+      course_id: string;
+      /** Concept */
+      concept: string;
+      /** Mistake Type */
+      mistake_type: string;
+      /** Language */
+      language: string;
+      /** Trap */
+      trap: string;
+      /** Why */
+      why: string;
+      /** Right */
+      right: string;
+      /** Student Count */
+      student_count: number;
+    };
+    /** Tips */
+    Tips: {
+      /** Tips */
+      tips: components["schemas"]["Tip"][];
     };
     /** Turn */
     Turn: {
@@ -3557,6 +3696,111 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Started"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  tips_api_wisdom_get: {
+    parameters: {
+      query: {
+        world_id: string;
+        course_id?: string | null;
+      };
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Tips"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_daily_api_daily_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Daily"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  seen_api_daily_seen_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Daily"];
         };
       };
       /** @description Validation Error */

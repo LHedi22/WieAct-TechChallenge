@@ -6,6 +6,7 @@ import { api, type PlacementQuestion, type PlacementResult } from "@/api/client"
 import { Bidi, Chip, Mascot, PixelButton, PixelPanel, ProgressBar, SoftCard } from "@/components";
 import { cx } from "@/components/cx";
 import { JobProgress } from "@/features/jobs/JobProgress";
+import { useWisdomTip } from "@/features/wisdom/useWisdomTip";
 import { useOnce } from "@/hooks/useOnce";
 import { ErrorBanner } from "@/features/worlds/parts";
 
@@ -15,6 +16,7 @@ type Level = "beginner" | "intermediate" | "advanced";
  * A calm study screen: no water, no mascot until the result. */
 export function PlacementPage() {
   const { worldId = "", courseId = "" } = useParams();
+  const tip = useWisdomTip(worldId, courseId);
   const { t } = useTranslation("placement");
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -58,7 +60,7 @@ export function PlacementPage() {
       <ErrorBanner error={start.error ?? finish.error} />
 
       {!questions && start.data?.job_id && (
-        <JobProgress jobId={start.data.job_id}>
+        <JobProgress jobId={start.data.job_id} tip={tip}>
           {() => <QuestionsLoader courseId={courseId} onReady={receive} />}
         </JobProgress>
       )}

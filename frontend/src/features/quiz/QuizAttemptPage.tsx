@@ -15,6 +15,7 @@ import {
   Sprite,
 } from "@/components";
 import { cx } from "@/components/cx";
+import { WisdomCard } from "@/features/wisdom/WisdomTip";
 import { ErrorBanner } from "@/features/worlds/parts";
 
 const LETTERS = ["A", "B", "C", "D"];
@@ -301,6 +302,7 @@ function Results({
 }) {
   const { t } = useTranslation("quiz");
   const { t: tc } = useTranslation();
+  const { worldId = "", courseId = "" } = useParams();
   const ns = results.next_step;
   const base = island;
   const next =
@@ -395,6 +397,7 @@ function Results({
               </li>
             ))}
           </ul>
+          <WisdomCard worldId={worldId} courseId={courseId} />
           {results.right_concepts.length > 0 && (
             <SoftCard className="border-olive-light bg-olive-light/10 text-small">
               {t("results.rightConcepts", {
