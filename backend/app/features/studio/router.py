@@ -5,13 +5,12 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Any
-
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from app.api.deps import CurrentUser, Session
 from app.features.studio import service, srs
+from app.features.quiz.router import Price
 from app.features.studio.service import Pay, Rejected
 from app.features.worlds.service import NotFound, member_chapter
 from app.models import QuizAttempt
@@ -20,9 +19,31 @@ router = APIRouter(prefix="/api/studio", tags=["studio"])
 quiz_router = APIRouter(prefix="/api/quiz", tags=["studio"])
 
 
-class Price(BaseModel):
-    cost: int
-    cached: bool
+class NoteSection(BaseModel):
+    heading: str
+    points: list[str]
+    refs: list[str]  # page:12, slide:3 …
+
+
+class KeyTerm(BaseModel):
+    term: str
+    meaning: str
+
+
+class Notes(BaseModel):
+    title: str
+    sections: list[NoteSection]
+    key_terms: list[KeyTerm]
+
+
+class MapBranch(BaseModel):
+    label: str
+    children: list[str]
+
+
+class MindMap(BaseModel):
+    root: str
+    branches: list[MapBranch]
 
 
 class CardCounts(BaseModel):
@@ -37,8 +58,8 @@ class Studio(BaseModel):
     chapter_title: str
     level: str
     language: str
-    notes: dict[str, Any] | None  # {title, sections[{heading, points, refs}], key_terms}
-    map: dict[str, Any] | None  # {root, branches[{label, children}]}
+    notes: Notes | None
+    map: MindMap | None
     missing: list[str]  # parts not generated yet: notes | flashcards | map
     pending_job_id: uuid.UUID | None
     cards: CardCounts

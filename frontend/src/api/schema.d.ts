@@ -680,6 +680,126 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/worlds/{world_id}/pool": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Pool */
+    get: operations["get_pool_api_worlds__world_id__pool_get"];
+    put?: never;
+    /** Give */
+    post: operations["give_api_worlds__world_id__pool_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/studio/{chapter_id}/price": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Price */
+    get: operations["price_api_studio__chapter_id__price_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/studio/{chapter_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Studio */
+    get: operations["get_studio_api_studio__chapter_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/studio/{chapter_id}/generate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Generate */
+    post: operations["generate_api_studio__chapter_id__generate_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/studio/{chapter_id}/cards": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Cards */
+    get: operations["cards_api_studio__chapter_id__cards_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/studio/cards/{card_id}/review": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Review */
+    post: operations["review_api_studio_cards__card_id__review_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/quiz/attempts/{attempt_id}/flashcards": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** From Quiz */
+    post: operations["from_quiz_api_quiz_attempts__attempt_id__flashcards_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/worlds": {
     parameters: {
       query?: never;
@@ -1085,6 +1205,39 @@ export interface components {
       /** Answer Cost */
       answer_cost?: number | null;
     };
+    /** CardCounts */
+    CardCounts: {
+      /** New */
+      new: number;
+      /** Learning */
+      learning: number;
+      /** Review */
+      review: number;
+      /** Total */
+      total: number;
+    };
+    /** CardOut */
+    CardOut: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Front */
+      front: string;
+      /** Back */
+      back: string;
+      /** Concept */
+      concept: string | null;
+      /** Source */
+      source: string;
+      /** Stage */
+      stage: string;
+      /** Intervals */
+      intervals: {
+        [key: string]: number;
+      };
+    };
     /** Challenge */
     Challenge: {
       /** Type */
@@ -1362,6 +1515,50 @@ export interface components {
       /** Answers */
       answers: (number | null)[];
     };
+    /** FromQuizOut */
+    FromQuizOut: {
+      /** Added */
+      added: number;
+      /**
+       * Chapter Id
+       * Format: uuid
+       */
+      chapter_id: string;
+      /** Level */
+      level: string;
+    };
+    /** GenerateIn */
+    GenerateIn: {
+      /** Level */
+      level: string;
+      /**
+       * Pay
+       * @default me
+       * @enum {string}
+       */
+      pay: "me" | "pool";
+    };
+    /** GenerateOut */
+    GenerateOut: {
+      /** Job Id */
+      job_id: string | null;
+      /** Cost */
+      cost: number;
+      /** Cached */
+      cached: boolean;
+    };
+    /** Gift */
+    Gift: {
+      /** Nickname */
+      nickname: string;
+      /** Coins */
+      coins: number;
+    };
+    /** GiveIn */
+    GiveIn: {
+      /** Amount */
+      amount: number;
+    };
     /** Graded */
     Graded: {
       /** Level */
@@ -1582,12 +1779,26 @@ export interface components {
       /** Code */
       code: string;
     };
+    /** KeyTerm */
+    KeyTerm: {
+      /** Term */
+      term: string;
+      /** Meaning */
+      meaning: string;
+    };
     /** LoginIn */
     LoginIn: {
       /** Nickname */
       nickname: string;
       /** Password */
       password: string;
+    };
+    /** MapBranch */
+    MapBranch: {
+      /** Label */
+      label: string;
+      /** Children */
+      children: string[];
     };
     /** MapCourse */
     MapCourse: {
@@ -1668,6 +1879,13 @@ export interface components {
       /** Is Me */
       is_me: boolean;
     };
+    /** MindMap */
+    MindMap: {
+      /** Root */
+      root: string;
+      /** Branches */
+      branches: components["schemas"]["MapBranch"][];
+    };
     /** Missed */
     Missed: {
       /** I */
@@ -1704,6 +1922,24 @@ export interface components {
       /** Cost */
       cost: number;
     };
+    /** NoteSection */
+    NoteSection: {
+      /** Heading */
+      heading: string;
+      /** Points */
+      points: string[];
+      /** Refs */
+      refs: string[];
+    };
+    /** Notes */
+    Notes: {
+      /** Title */
+      title: string;
+      /** Sections */
+      sections: components["schemas"]["NoteSection"][];
+      /** Key Terms */
+      key_terms: components["schemas"]["KeyTerm"][];
+    };
     /** PlacementStartIn */
     PlacementStartIn: {
       /**
@@ -1727,6 +1963,15 @@ export interface components {
       job_id: string | null;
       /** Questions */
       questions: components["schemas"]["AskedQuestion"][] | null;
+    };
+    /** PoolOut */
+    PoolOut: {
+      /** Balance */
+      balance: number;
+      /** Max Contribution */
+      max_contribution: number;
+      /** Recent */
+      recent: components["schemas"]["Gift"][];
     };
     /** PresenceIn */
     PresenceIn: {
@@ -1888,6 +2133,14 @@ export interface components {
       /** Questions */
       questions: components["schemas"]["AskedQuestion"][];
     };
+    /** Queue */
+    Queue: {
+      /** Cards */
+      cards: components["schemas"]["CardOut"][];
+      counts: components["schemas"]["CardCounts"];
+      /** Next Due At */
+      next_due_at: string | null;
+    };
     /** QuizStartIn */
     QuizStartIn: {
       /**
@@ -1937,6 +2190,29 @@ export interface components {
       next_step: components["schemas"]["NextStep"];
       /** Tag Job Id */
       tag_job_id: string | null;
+    };
+    /** ReviewIn */
+    ReviewIn: {
+      /**
+       * Grade
+       * @enum {string}
+       */
+      grade: "again" | "good" | "easy";
+    };
+    /** ReviewOut */
+    ReviewOut: {
+      /**
+       * Card Id
+       * Format: uuid
+       */
+      card_id: string;
+      /**
+       * Due At
+       * Format: date-time
+       */
+      due_at: string;
+      /** Interval S */
+      interval_s: number;
     };
     /** SearchIn */
     SearchIn: {
@@ -2077,6 +2353,33 @@ export interface components {
       fallbacks: number;
       /** Quota Headers Seen */
       quota_headers_seen: string[];
+    };
+    /** Studio */
+    Studio: {
+      /**
+       * Chapter Id
+       * Format: uuid
+       */
+      chapter_id: string;
+      /** Chapter Title */
+      chapter_title: string;
+      /** Level */
+      level: string;
+      /** Language */
+      language: string;
+      notes: components["schemas"]["Notes"] | null;
+      map: components["schemas"]["MindMap"] | null;
+      /** Missing */
+      missing: string[];
+      /** Pending Job Id */
+      pending_job_id: string | null;
+      cards: components["schemas"]["CardCounts"];
+      /** Pool Balance */
+      pool_balance: number;
+      /** Cost */
+      cost: number;
+      /** Cached */
+      cached: boolean;
     };
     /** StyleIn */
     StyleIn: {
@@ -3803,6 +4106,312 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Daily"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_pool_api_worlds__world_id__pool_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        world_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PoolOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  give_api_worlds__world_id__pool_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        world_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GiveIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PoolOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  price_api_studio__chapter_id__price_get: {
+    parameters: {
+      query: {
+        level: string;
+      };
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        chapter_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Price"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_studio_api_studio__chapter_id__get: {
+    parameters: {
+      query: {
+        level: string;
+      };
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        chapter_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Studio"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  generate_api_studio__chapter_id__generate_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        chapter_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GenerateIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GenerateOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  cards_api_studio__chapter_id__cards_get: {
+    parameters: {
+      query: {
+        level: string;
+      };
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        chapter_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Queue"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  review_api_studio_cards__card_id__review_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        card_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReviewIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReviewOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  from_quiz_api_quiz_attempts__attempt_id__flashcards_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        attempt_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FromQuizOut"];
         };
       };
       /** @description Validation Error */

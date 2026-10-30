@@ -51,6 +51,14 @@ export type ArenaVotes = S["Votes"];
 export type WisdomTip = S["Tip"];
 export type Daily = S["Daily"];
 export type DailyChallenge = S["Challenge"];
+export type Studio = S["Studio"];
+export type StudyNotes = S["Notes"];
+export type MindMap = S["MindMap"];
+export type CardQueue = S["Queue"];
+export type StudyCard = S["CardOut"];
+export type CardGrade = S["ReviewIn"]["grade"];
+export type StudioPay = S["GenerateIn"]["pay"];
+export type ClassPool = S["PoolOut"];
 
 const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
@@ -177,6 +185,23 @@ export const api = {
     post<QuizQuestion>(`/api/quiz/attempts/${id}/answer`, { q, choice }),
   quizSkip: (id: string, q: number) => post<QuizQuestion>(`/api/quiz/attempts/${id}/skip`, { q }),
   quizFinish: (id: string) => post<QuizResults>(`/api/quiz/attempts/${id}/finish`, {}),
+
+  quizFlashcards: (attemptId: string) =>
+    post<S["FromQuizOut"]>(`/api/quiz/attempts/${attemptId}/flashcards`, {}),
+
+  studio: (chapterId: string, level: string) =>
+    request<Studio>(`/api/studio/${chapterId}?level=${encodeURIComponent(level)}`),
+  studioPrice: (chapterId: string, level: string) =>
+    request<QuizPrice>(`/api/studio/${chapterId}/price?level=${encodeURIComponent(level)}`),
+  studioGenerate: (chapterId: string, level: string, pay: StudioPay) =>
+    post<S["GenerateOut"]>(`/api/studio/${chapterId}/generate`, { level, pay }),
+  studioCards: (chapterId: string, level: string) =>
+    request<CardQueue>(`/api/studio/${chapterId}/cards?level=${encodeURIComponent(level)}`),
+  reviewCard: (cardId: string, grade: CardGrade) =>
+    post<S["ReviewOut"]>(`/api/studio/cards/${cardId}/review`, { grade }),
+  pool: (worldId: string) => request<ClassPool>(`/api/worlds/${worldId}/pool`),
+  givePool: (worldId: string, amount: number) =>
+    post<ClassPool>(`/api/worlds/${worldId}/pool`, { amount }),
 
   tutorStart: (chapterId: string, level: string) =>
     post<TutorJob>("/api/tutor/start", { chapter_id: chapterId, level }),

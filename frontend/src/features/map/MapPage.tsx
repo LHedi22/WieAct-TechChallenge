@@ -23,6 +23,7 @@ import { accentOf } from "./layout";
 import { MapScene, type Zoom } from "./MapScene";
 import { LeaderboardCard } from "@/features/leaderboard/Leaderboard";
 import { ChallengesCard } from "@/features/daily/Challenges";
+import { PoolCard } from "@/features/pool/PoolCard";
 import { useDaily } from "@/features/daily/useDaily";
 
 type View = "map" | "list";
@@ -240,6 +241,7 @@ function ClassPanel({ data }: { data: MapOut }) {
       <Link to={`/worlds/${data.world_id}/upload`} className="font-semibold text-primary underline">
         {t("class.addMaterial")}
       </Link>
+      <PoolCard worldId={data.world_id} />
       <LeaderboardCard worldId={data.world_id} />
     </aside>
   );

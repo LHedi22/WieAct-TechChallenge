@@ -309,6 +309,13 @@ function Results({
     ns.kind === "tutor"
       ? `${base}/tutor/new?chapter=${ns.chapter_id}&level=${ns.level}`
       : `${base}/quiz/new?chapter=${ns.chapter_id}&level=${ns.level}`;
+  const navigate = useNavigate();
+  // Missed questions → personal flashcards (no AI call), then straight to the Study Studio deck.
+  const toCards = useMutation({
+    mutationFn: () => api.quizFlashcards(attempt.id),
+    onSuccess: (r) =>
+      void navigate(`${base}/studio?chapter=${r.chapter_id}&level=${r.level}&tab=flashcards`),
+  });
   return (
     <div className="flex min-h-screen flex-col bg-whitewash">
       <QuizHeader attempt={attempt} />
@@ -397,6 +404,17 @@ function Results({
               </li>
             ))}
           </ul>
+          {results.missed.length > 0 && (
+            <PixelButton
+              variant="secondary"
+              className="self-start"
+              disabled={toCards.isPending}
+              onClick={() => toCards.mutate()}
+            >
+              {t("results.toCards")}
+            </PixelButton>
+          )}
+          <ErrorBanner error={toCards.error} />
           <WisdomCard worldId={worldId} courseId={courseId} />
           {results.right_concepts.length > 0 && (
             <SoftCard className="border-olive-light bg-olive-light/10 text-small">

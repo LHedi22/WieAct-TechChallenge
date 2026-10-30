@@ -42,16 +42,19 @@ export function BuildingDialog({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  // The Quiz Hall asks the server before Confirm: free when a class set this student hasn't
-  // done is ready (ECONOMY.md). Study/Audio "free if cached" checks arrive with M7.
-  const quizPrice = useQuery({
-    queryKey: ["quiz-price", chapterId, level],
-    queryFn: () => api.quizPrice(chapterId, level),
-    enabled: building.key === "quiz_hall" && !!chapterId,
+  // Quiz Hall and Study Studio ask the server before Confirm: free when the class already made
+  // it (an unseen quiz set, the chapter's study pack) — DESIGN.md fix 2, ECONOMY.md.
+  const priced = building.key === "quiz_hall" || building.key === "study_studio";
+  const livePrice = useQuery({
+    queryKey: [building.key, "price", chapterId, level],
+    queryFn: () =>
+      building.key === "quiz_hall"
+        ? api.quizPrice(chapterId, level)
+        : api.studioPrice(chapterId, level),
+    enabled: priced && !!chapterId,
   });
-  const cost =
-    building.key === "quiz_hall" ? (quizPrice.data?.cost ?? building.cost) : building.cost;
-  const cachedQuiz = building.key === "quiz_hall" && quizPrice.data?.cached;
+  const cost = priced ? (livePrice.data?.cost ?? building.cost) : building.cost;
+  const cachedQuiz = priced && livePrice.data?.cached;
   const balance = wallet?.coins ?? 0;
   const after = balance - cost;
   // Answering in the Teach-Back Arena is free: only asking costs, and that is checked on ask.

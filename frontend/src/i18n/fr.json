@@ -67,7 +67,10 @@
         "double_checking": "Deuxième vérification de la note",
         "planning_your_day": "On prépare ta journée",
         "spotting_the_pattern": "On repère l’erreur commune",
-        "writing_the_tip": "On écrit l’astuce"
+        "writing_the_tip": "On écrit l’astuce",
+        "writing_notes": "Rédaction des fiches",
+        "making_flashcards": "Création des cartes",
+        "drawing_map": "Dessin de la carte mentale"
       }
     },
     "wisdom": {
@@ -127,7 +130,11 @@
       "arena_still_grading": "Ta réponse est encore en cours de notation.",
       "arena_not_asker": "Seule la personne qui a posé la question peut épingler la meilleure réponse.",
       "arena_already_pinned": "Une meilleure réponse est déjà épinglée.",
-      "arena_own_answer": "Tu ne peux pas voter pour ta propre réponse."
+      "arena_own_answer": "Tu ne peux pas voter pour ta propre réponse.",
+      "pool_insufficient": "La cagnotte de classe n'a pas encore assez de pièces pour ça.",
+      "pool_amount_invalid": "Donne entre 1 et 50 pièces.",
+      "card_not_found": "Cette carte n'existe plus.",
+      "quiz_not_finished": "Termine d'abord le quiz."
     },
     "mascot": {
       "waving": "Le chat de Sidi Bou Saïd fait coucou",
@@ -790,7 +797,8 @@
       "correct": "Bonne réponse :",
       "half": "moitié des points",
       "rightConcepts": "{count} justes : {list}. Bien joué.",
-      "pointsSplit": "{answers} pour tes réponses + {bonus} pour avoir terminé"
+      "pointsSplit": "{answers} pour tes réponses + {bonus} pour avoir terminé",
+      "toCards": "En faire des cartes mémoire"
     }
   },
   "tutor": {
@@ -952,7 +960,76 @@
       "quiz_questions": "{count, plural, one {Réponds à # question de quiz} other {Réponds à # questions de quiz}}",
       "quiz_score": "Obtiens {percent} % au quiz {chapter}",
       "teachback": "Explique une idée dans le Teach-Back",
-      "tutor_session": "Termine une séance avec le tuteur socratique"
+      "tutor_session": "Termine une séance avec le tuteur socratique",
+      "flashcards": "{count, plural, one {Révise # carte mémoire} other {Révise # cartes mémoire}}"
     }
+  },
+  "studio": {
+    "back": "Retour à l'île",
+    "chapter": "Chapitre {n}",
+    "tabs": {
+      "notes": "Fiches de révision",
+      "flashcards": "Cartes mémoire",
+      "map": "Carte mentale"
+    },
+    "cardOf": "Carte {n} sur {total}",
+    "counts": {
+      "new": "{count, plural, one {# nouvelle} other {# nouvelles}}",
+      "learning": "{count} en cours",
+      "review": "{count} à revoir"
+    },
+    "answer": "Réponse",
+    "show": "Voir la réponse",
+    "howWell": "Tu la connaissais bien ?",
+    "grade": {
+      "again": "À revoir",
+      "good": "Bien",
+      "easy": "Facile"
+    },
+    "in": {
+      "lessMinute": "dans <1 min",
+      "minutes": "dans {count} min",
+      "hours": "{count, plural, one {dans # heure} other {dans # heures}}",
+      "days": "{count, plural, one {dans # jour} other {dans # jours}}"
+    },
+    "keys": "Clavier : 1 À revoir · 2 Bien · 3 Facile · Espace pour retourner",
+    "done": {
+      "title": "Aucune carte à revoir pour l'instant.",
+      "round": "{count, plural, one {Tu as revu # carte. Bravo !} other {Tu as revu # cartes. Bravo !}}",
+      "next": "La prochaine carte revient {when}.",
+      "more": "Chercher d'autres cartes"
+    },
+    "source": "Source",
+    "ref": {
+      "page": "Page",
+      "slide": "Diapo",
+      "section": "Section",
+      "part": "Partie",
+      "image": "Image"
+    },
+    "keyTerms": "Mots clés",
+    "partMissing": "Cette partie n'a pas abouti la dernière fois. Ta classe a déjà payé le pack : réessayer est gratuit.",
+    "retryFree": "Réessayer · Gratuit",
+    "make": {
+      "title": "Créer le pack de révision pour ta classe",
+      "body": "Des fiches, des cartes mémoire et une carte mentale pour ce chapitre et ce niveau, créées une seule fois à partir de vos supports de cours. Ensuite, toute la classe les ouvre gratuitement.",
+      "who": "Qui paie ?",
+      "me": "Moi ({count} pièces)",
+      "pool": "La cagnotte de classe ({count} pièces)",
+      "cost": "Coût",
+      "after": "Ton solde après",
+      "poolAfter": "Cagnotte après",
+      "short": "Pas assez de pièces aujourd'hui. Utilise la cagnotte de classe ou reviens après minuit.",
+      "go": "Créer"
+    }
+  },
+  "pool": {
+    "title": "Cagnotte de classe",
+    "body": "Des pièces que ta classe met en commun pour créer des packs de révision ouverts à tous.",
+    "recent": "Derniers dons",
+    "gave": "{count, plural, one {a donné # pièce} other {a donné # pièces}}",
+    "amount": "Pièces à donner",
+    "give": "Ajouter des pièces",
+    "note": "Jusqu'à {max} à la fois. Les pièces données restent dans la cagnotte."
   }
 }

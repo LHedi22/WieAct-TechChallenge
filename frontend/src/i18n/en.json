@@ -67,7 +67,10 @@
         "double_checking": "Double-checking the score",
         "planning_your_day": "Planning your day",
         "spotting_the_pattern": "Spotting the pattern",
-        "writing_the_tip": "Writing the tip"
+        "writing_the_tip": "Writing the tip",
+        "writing_notes": "Writing the notes",
+        "making_flashcards": "Making flashcards",
+        "drawing_map": "Drawing the mind map"
       }
     },
     "wisdom": {
@@ -127,7 +130,11 @@
       "arena_still_grading": "Your answer is still being scored.",
       "arena_not_asker": "Only the person who asked can pin the best answer.",
       "arena_already_pinned": "A best answer is already pinned.",
-      "arena_own_answer": "You can't vote for your own answer."
+      "arena_own_answer": "You can't vote for your own answer.",
+      "pool_insufficient": "The Class Pool doesn't have enough coins for this yet.",
+      "pool_amount_invalid": "Give between 1 and 50 coins.",
+      "card_not_found": "This flashcard no longer exists.",
+      "quiz_not_finished": "Finish the quiz first."
     },
     "mascot": {
       "waving": "The Sidi Bou Said cat, waving",
@@ -790,7 +797,8 @@
       "correct": "Right answer:",
       "half": "half points",
       "rightConcepts": "{count} correct: {list}. Nice work.",
-      "pointsSplit": "{answers} for your answers + {bonus} for finishing"
+      "pointsSplit": "{answers} for your answers + {bonus} for finishing",
+      "toCards": "Turn these into flashcards"
     }
   },
   "tutor": {
@@ -952,7 +960,76 @@
       "quiz_questions": "{count, plural, one {Answer # quiz question} other {Answer # quiz questions}}",
       "quiz_score": "Score {percent}% on the {chapter} quiz",
       "teachback": "Explain one idea in Teach-Back",
-      "tutor_session": "Finish a Socratic Tutor session"
+      "tutor_session": "Finish a Socratic Tutor session",
+      "flashcards": "{count, plural, one {Review # flashcard} other {Review # flashcards}}"
     }
+  },
+  "studio": {
+    "back": "Back to island",
+    "chapter": "Chapter {n}",
+    "tabs": {
+      "notes": "Revision notes",
+      "flashcards": "Flashcards",
+      "map": "Mind map"
+    },
+    "cardOf": "Card {n} of {total}",
+    "counts": {
+      "new": "{count} new",
+      "learning": "{count} learning",
+      "review": "{count} review"
+    },
+    "answer": "Answer",
+    "show": "Show the answer",
+    "howWell": "How well did you know it?",
+    "grade": {
+      "again": "Again",
+      "good": "Good",
+      "easy": "Easy"
+    },
+    "in": {
+      "lessMinute": "in <1 min",
+      "minutes": "in {count} min",
+      "hours": "{count, plural, one {in # hour} other {in # hours}}",
+      "days": "{count, plural, one {in # day} other {in # days}}"
+    },
+    "keys": "Keyboard: 1 Again · 2 Good · 3 Easy · Space to flip",
+    "done": {
+      "title": "No cards to review right now.",
+      "round": "{count, plural, one {You reviewed # card. Nice!} other {You reviewed # cards. Nice!}}",
+      "next": "The next card comes back {when}.",
+      "more": "Check for more cards"
+    },
+    "source": "From",
+    "ref": {
+      "page": "Page",
+      "slide": "Slide",
+      "section": "Section",
+      "part": "Part",
+      "image": "Image"
+    },
+    "keyTerms": "Key terms",
+    "partMissing": "This part didn't finish last time. Your class already paid for the pack, so trying again is free.",
+    "retryFree": "Try again · Free",
+    "make": {
+      "title": "Make the study pack for your class",
+      "body": "Revision notes, flashcards and a mind map for this chapter and level, made once from your course material. Everyone in your class then opens them for free.",
+      "who": "Who pays?",
+      "me": "Me ({count} coins)",
+      "pool": "The Class Pool ({count} coins)",
+      "cost": "Cost",
+      "after": "Your balance after",
+      "poolAfter": "Class Pool after",
+      "short": "Not enough coins today. Ask the Class Pool, or come back after midnight.",
+      "go": "Make it"
+    }
+  },
+  "pool": {
+    "title": "Class Pool",
+    "body": "Coins your class shares to make study packs everyone can open.",
+    "recent": "Recent gifts",
+    "gave": "{count, plural, one {gave # coin} other {gave # coins}}",
+    "amount": "Coins to give",
+    "give": "Add coins",
+    "note": "Up to {max} at a time. Given coins stay in the pool."
   }
 }
