@@ -16,6 +16,7 @@ that isn't in the docs. Humans resolve OPEN items.
 - OPEN: Darija TTS — pregenerate with silma-tts-derja or transcript-only? (M7 ships transcript-only for Darija as the default; adding silma-tts later only changes the player)
 
 ## Decided
+- 2026-10-30 · M8 deploy (user picked Railway): ONE Railway service runs migrations, then the job worker and the API (`backend/start-prod.sh`): the docs don't say a volume can be shared by two services, and one worker process is required anyway (limiter). If either process exits, the container exits and Railway restarts both. Uploads on a Railway volume at `/data`. Vercel serves the frontend and rewrites `/api/*` to Railway, so the session cookie is first-party (`SameSite=lax`, no CORS). Fallback if large uploads fail through the rewrite: `VITE_API_URL` = the Railway URL with `SESSION_COOKIE_SAMESITE=none` + `SECURE=true` + `CORS_ORIGINS`
 - 2026-10-30 · M8 offline demo mode: `create_job` checks the provider first. A student-started AI action → 503 `errors.offline` before any coin is reserved or row committed; background work (tagging, tips, daily plan, quiz pool, indexing) is queued with `not_before` = the next slot start, so finishing a quiz or uploading still works. A job already running when the switch happens: interactive → fails with a refund (no one waits 12 h on a loading screen), background → waits for the next slot. `OFFLINE_DEMO_MODE=on` forces it inside `resolve()`, so the gateway and the banner agree. Known limit: ending a Tutor session needs its summary call, so it also answers 503 while offline
 - 2026-10-30 · Cloud models (in-slot probe, docs/MODELS.md): compact **`llama3.2-3b`** (7/7 checks, 2.5 s median), mid **`llama3.1-8b`** (7/7, 3.6 s); no thinking models, so `LLM_DISABLE_THINKING=false`; `response_format: json_object` accepted by all listed models (`LLM_JSON_MODE=auto` keeps working); `max_tokens=100000` was accepted (HTTP 200), so no ceiling is visible at the request level and the gateway's 400-shrink path stays for an unseen one. Raw outputs `scripts/out/probe-cloud-20261030-1806.json` go to the prompt-evaluator; Darija is checked by hand
 - 2026-10-30 · Class Wisdom retries (user-approved): a WISDOM_TIP job has no payer (cost 0), so a failed tip refunds nothing because nothing was charged. A pattern whose tip failed at N distinct students is re-asked only when the count goes above N (`payload.students`), so neither a cached empty tip nor JSON still broken after the repair call can be re-requested on every quiz attempt
@@ -103,5 +104,6 @@ that isn't in the docs. Humans resolve OPEN items.
 - silma-tts-derja (Apache-2.0, local) — Darija audio, if used
 - Browser Web Speech API — TTS for ar/fr/en (client side, no data sent by us)
 - Ollama (local, open source) — dev only, never used in production or the demo
-- Hosting: Vercel (frontend), Render or Railway (backend + Postgres)
+- Hosting: Vercel (frontend, static build + `/api` rewrite), Railway (API + job worker in one service, Postgres, uploads volume)
+- Qdrant Cloud (free tier) — hosted Qdrant for the demo, unless the platform's Qdrant is reachable
 - No other LLM or AI API is used.
