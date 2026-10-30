@@ -82,11 +82,29 @@ async def check_patterns(
         )
         if pending:
             continue
+        # A tip that failed at n students is retried only once more students hit the trap, so
+        # unusable replies can't be re-asked on every attempt (each retry is a new request).
+        failed_at = await s.scalar(
+            select(func.max(Job.payload["students"].as_integer())).where(
+                Job.kind == KIND,
+                Job.world_id == world_id,
+                Job.status == "failed",
+                Job.payload["concept"].astext == concept,
+                Job.payload["mistake_type"].astext == kind,
+            )
+        )
+        if failed_at is not None and n <= failed_at:
+            continue
         j = await create_job(
             s,
             kind=KIND,
             lane="background",
-            payload={"world_id": str(world_id), "concept": concept, "mistake_type": kind},
+            payload={
+                "world_id": str(world_id),
+                "concept": concept,
+                "mistake_type": kind,
+                "students": n,
+            },
             world_id=world_id,
         )
         jobs.append(j.id)

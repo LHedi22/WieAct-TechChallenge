@@ -7,6 +7,7 @@ from sqlalchemy import func, select
 
 from app import gateway
 from app.core import economy
+from app.features.wisdom import service as wisdom
 from app.jobs.worker import Worker
 from app.models import AICallLog, Job, Mistake, WisdomTip
 from tests.test_map import join
@@ -140,6 +141,12 @@ async def test_unusable_reply_fails_and_the_next_student_retries(api, sm, pptx, 
         job = await s.scalar(select(Job).where(Job.kind == "WISDOM_TIP"))
         assert job.status == "failed" and job.error == "errors.ai_failed"
         assert await s.scalar(select(func.count()).select_from(WisdomTip)) == 0
+        # The same 3 students hitting the trap again never re-ask (whatever made the reply
+        # unusable: a cached empty tip or JSON still broken after the repair call).
+        again = await wisdom.check_patterns(
+            s, job.world_id, {(job.payload["concept"], job.payload["mistake_type"])}
+        )
+        assert again == [] and await tip_jobs(sm) == 1
 
     monkeypatch.setitem(mock_app.GENERATORS, "WISDOM_TIP", real)
     await join(api, world, STUDENTS[3])
