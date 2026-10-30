@@ -42,6 +42,7 @@ class EconomyOut(BaseModel):
     earn: dict[str, int]
     points: dict[str, int]
     peer_answer_threshold: int
+    products: dict[str, dict[str, int]]
     cosmetics: dict[str, int]
     buildings: dict[str, BuildingCost]
 
