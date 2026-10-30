@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 from app.api import admin, dev, economy, health, jobs, system
 from app.core.config import get_settings
 from app.features.auth import router as auth
+from app.features.leaderboard import router as leaderboard
 from app.features.onboarding import router as onboarding
 from app.features.placement import router as placement
 from app.features.quiz import router as quiz
@@ -43,6 +44,7 @@ def create_app() -> FastAPI:
     app.include_router(auth.router)
     app.include_router(economy.router)
     app.include_router(wallet.router)
+    app.include_router(leaderboard.router)
     app.include_router(onboarding.router)
     app.include_router(placement.router)
     app.include_router(quiz.router)

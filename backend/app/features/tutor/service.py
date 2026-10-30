@@ -23,6 +23,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import gateway, prompts
 from app.core import db, economy
+from app.features.wallet import service as wallet
 from app.gateway import Task, TaskKind
 from app.jobs.registry import JobContext, job
 from app.jobs.service import create_job
@@ -206,6 +207,15 @@ async def end(s: AsyncSession, session: TutorSession) -> uuid.UUID:
         raise Rejected("errors.tutor_ended", 409)
     if await _pending(s, session):
         raise Rejected("errors.tutor_busy", 409)
+    if any(t["role"] == "student" for t in session.turns):  # a real session, not open-and-close
+        await wallet.add_points(
+            s,
+            session.user_id,
+            session.world_id,
+            economy.POINTS["activity_completed"],
+            "activity",
+            str(session.id),
+        )
     j = await create_job(
         s,
         kind=KIND,

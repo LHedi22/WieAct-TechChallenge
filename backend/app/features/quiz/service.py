@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import economy
 from app.features.quiz import pool
+from app.features.wallet import service as wallet
 from app.jobs.service import create_job
 from app.models import (
     Chapter,
@@ -295,7 +296,8 @@ class Results(BaseModel):
     attempt_id: uuid.UUID
     score: int
     total: int
-    points: int
+    points: int  # from the answers
+    activity_points: int  # bonus for finishing (POINTS["activity_completed"])
     second_tries: int
     mastery: int
     weak: bool
@@ -325,6 +327,11 @@ async def finish(s: AsyncSession, user: User, attempt: QuizAttempt) -> Results:
     if first_finish:
         attempt.status = "finished"
         attempt.finished_at = datetime.now(UTC)
+        ref = str(attempt.id)
+        await wallet.add_points(s, user.id, attempt.world_id, attempt.points, "quiz_answers", ref)
+        await wallet.add_points(
+            s, user.id, attempt.world_id, economy.POINTS["activity_completed"], "activity", ref
+        )
         stmt = insert(ChapterMastery).values(
             user_id=user.id, chapter_id=chapter.id, mastery=mastery, weak=mastery < WEAK_BELOW
         )
@@ -374,6 +381,7 @@ async def finish(s: AsyncSession, user: User, attempt: QuizAttempt) -> Results:
         score=score,
         total=total,
         points=attempt.points,
+        activity_points=economy.POINTS["activity_completed"],
         second_tries=attempt.second_tries,
         mastery=mastery,
         weak=mastery < WEAK_BELOW,

@@ -128,6 +128,11 @@ async def test_hint_second_try_reveal_skip_points_and_results(api, sm, pptx):  #
     res = (await api.post(f"/api/quiz/attempts/{aid}/finish", headers=OWL_FR)).json()
     assert res["score"] == 8 and res["total"] == 10 and res["second_tries"] == 2
     assert res["points"] == 7 * 10 + 5
+    assert res["activity_points"] == economy.POINTS["activity_completed"]
+    wallet = (await api.get("/api/wallet", headers=OWL_FR)).json()  # points reach the ledger once
+    assert wallet["points"] == 75 + economy.POINTS["activity_completed"] and wallet["streak"] == 1
+    await api.post(f"/api/quiz/attempts/{aid}/finish", headers=OWL_FR)
+    assert (await api.get("/api/wallet", headers=OWL_FR)).json()["points"] == wallet["points"]
     assert [m["i"] for m in res["missed"]] == [1, 2, 3]
     assert res["missed"][1]["status"] == "wrong" and res["missed"][1]["explanation"]
     assert res["mastery"] == 80 and not res["weak"]
