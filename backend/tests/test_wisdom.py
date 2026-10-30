@@ -102,3 +102,26 @@ async def test_wisdom_is_members_only(api, sm, pptx):  # noqa: F811
     world, _ = await indexed(api, sm, pptx)
     r = await api.get("/api/wisdom", params={"world_id": world["id"]}, headers=as_user("Stranger9"))
     assert r.status_code == 404
+
+
+async def test_done_when_seeded_tip_reaches_a_newcomer(api, sm, gw, mock_llm):  # noqa: F811
+    """M6 Done-when: 3 seeded students making the same mistake → a tip a new student sees."""
+    # The whole seed (indexing + quiz pools + the tip) in one drain: no quota deferral here.
+    from mock_llm.app import Bucket
+
+    from app.seed.__main__ import DEMO_CODE, seed
+
+    mock_llm.state.bucket = Bucket(6000, 200)
+
+    assert await seed(run=True) == 0
+    assert await calls(sm, "WISDOM_TIP") == 1
+    assert await seed(run=True) == 0  # idempotent: no second tip call
+    assert await calls(sm, "WISDOM_TIP") == 1 and await tip_jobs(sm) == 1
+
+    newcomer = as_user("Newcomer8")
+    joined = await api.post("/api/worlds/join", json={"code": DEMO_CODE}, headers=newcomer)
+    world_id = joined.json()["id"]
+    tips = (await api.get("/api/wisdom", params={"world_id": world_id}, headers=newcomer)).json()
+    assert len(tips["tips"]) == 1
+    tip = tips["tips"][0]
+    assert tip["language"] == "en" and tip["student_count"] == 3 and tip["trap"]

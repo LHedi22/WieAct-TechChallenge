@@ -3,6 +3,9 @@
     uv run python -m app.seed          # queue the uploads; the worker indexes them
     uv run python -m app.seed --run    # also index them here (no worker running)
 
+Then 3 synthetic classmates share one quiz mistake, so a Class Wisdom tip is ready (once the
+class quiz set exists: re-run after indexing if the worker was still busy).
+
 Idempotent: re-running reuses the world (code OLIVE-7Q2) and skips files already uploaded."""
 
 from __future__ import annotations
@@ -81,11 +84,17 @@ async def seed(run: bool) -> int:
             _, job_id, _ = await service.store_upload(s, user, chapter, path.name, _stream(path))
             queued += job_id is not None
     print(f"World {DEMO_CODE} ({world.id}): {queued} files queued for indexing")
+    from app.seed.wisdom import STUDENTS, seed_wisdom
+
     if run:
         from app.jobs.worker import Worker
 
         await Worker(sm).drain(timeout_s=900)
         print("Indexing finished")
+    tips = await seed_wisdom(sm, DEMO_CODE)
+    if run and tips:
+        await Worker(sm).drain(timeout_s=300)
+    print(f"Class Wisdom: {', '.join(STUDENTS)} share one mistake; {len(tips)} tip job(s) queued")
     return 0
 
 
