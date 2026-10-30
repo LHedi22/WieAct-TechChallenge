@@ -125,3 +125,25 @@ async def test_done_when_seeded_tip_reaches_a_newcomer(api, sm, gw, mock_llm):  
     assert len(tips["tips"]) == 1
     tip = tips["tips"][0]
     assert tip["language"] == "en" and tip["student_count"] == 3 and tip["trap"]
+
+
+async def test_unusable_reply_fails_and_the_next_student_retries(api, sm, pptx, monkeypatch):  # noqa: F811
+    from mock_llm import app as mock_app
+
+    real = mock_app.GENERATORS["WISDOM_TIP"]
+    monkeypatch.setitem(mock_app.GENERATORS, "WISDOM_TIP", lambda *a, **k: {"text": "?"})
+    world, chapter = await indexed(api, sm, pptx)
+    for h in STUDENTS[:3]:
+        await join(api, world, h)
+        await miss_first_question(api, sm, h, chapter)
+    async with sm() as s:
+        job = await s.scalar(select(Job).where(Job.kind == "WISDOM_TIP"))
+        assert job.status == "failed" and job.error == "errors.ai_failed"
+        assert await s.scalar(select(func.count()).select_from(WisdomTip)) == 0
+
+    monkeypatch.setitem(mock_app.GENERATORS, "WISDOM_TIP", real)
+    await join(api, world, STUDENTS[3])
+    await miss_first_question(api, sm, STUDENTS[3], chapter)
+    assert await tip_jobs(sm) == 2  # a new job, a new (not identical) request
+    tips = await api.get("/api/wisdom", params={"world_id": world["id"]}, headers=STUDENTS[0])
+    assert tips.json()["tips"][0]["student_count"] == 4

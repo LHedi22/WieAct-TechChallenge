@@ -150,8 +150,13 @@ async def _samples(
     return items, chapter_id
 
 
-def cache_key(world_id: uuid.UUID, concept: str, kind: str, langs: list[str], version: str) -> str:
-    return f"wisdom:{world_id}:{concept}:{kind}:{','.join(langs)}:v{version}"
+def cache_key(
+    world_id: uuid.UUID, concept: str, kind: str, langs: list[str], count: int, version: str
+) -> str:
+    """One tip per pattern and set of languages. The student count is part of the key so that a
+    reply with no usable tip (failed job) is retried only when one more student hits the trap,
+    never re-read from the cache."""
+    return f"wisdom:{world_id}:{concept}:{kind}:{','.join(langs)}:n{count}:v{version}"
 
 
 def parse_tips(content: Any, langs: list[str]) -> dict[str, TipText]:
@@ -201,13 +206,15 @@ async def write_tip(ctx: JobContext) -> dict[str, Any]:
                 lane="background",
                 messages=messages,
                 language=langs[0],
-                cache_key=cache_key(world_id, concept, kind, langs, version),
+                cache_key=cache_key(world_id, concept, kind, langs, count, version),
                 max_tokens=TOKENS_PER_LANGUAGE * len(langs) + 40,
                 prompt_version=version,
             )
         )
     )
     tips = parse_tips(result.content, langs)
+    if not tips:  # nothing usable: fail the job; the next student with this mistake retries
+        raise gateway.GatewayError("WISDOM_TIP reply had no valid tip")
     async with db.get_sessionmaker()() as s:
         for lang, tip in tips.items():
             stmt = insert(WisdomTip).values(
