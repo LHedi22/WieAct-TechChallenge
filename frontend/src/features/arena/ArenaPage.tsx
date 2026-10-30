@@ -310,7 +310,7 @@ function PeerAnswer({ a, detail }: { a: ArenaAnswer; detail: ArenaDetail }) {
   });
   const pin = useMutation({ mutationFn: () => api.arenaPin(a.id), onSuccess: refresh });
   return (
-    <SoftCard className={cx("flex flex-col gap-2", a.pinned && "border-olive bg-olive-light/10")}>
+    <SoftCard className={cx("flex flex-col gap-2", a.pinned && "!border-olive !bg-olive-light/10")}>
       <div className="flex flex-wrap items-center gap-2">
         {a.pinned && <Chip kind="pinned">{tc("chip.pinned")}</Chip>}
         <Avatar look={a.author.avatar as AvatarLook | null} size={28} />
@@ -406,7 +406,7 @@ function MyAnswer({ detail }: { detail: ArenaDetail }) {
   }
   const fb = mine.feedback;
   return (
-    <SoftCard className="flex flex-col gap-3 border-ink">
+    <SoftCard className="flex flex-col gap-3 !border-ink">
       <div className="flex flex-wrap items-center gap-2">
         <Avatar look={mine.author.avatar as AvatarLook | null} size={28} />
         <Bidi className="font-semibold">{mine.author.nickname}</Bidi>

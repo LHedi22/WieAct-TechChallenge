@@ -110,8 +110,8 @@ and on failure do ONE compact "fix this JSON" repair call. Small models break JS
 | DAILY_PLAN | mid, once / student / day | plan-once | background (first login) | user+date |
 | CHALLENGE_ITEMS | compact | execute-compact | background | user+date |
 | WISDOM_TIP | mid, once per recurring tag | generate once, reuse | background | world+tag+lang |
-| TEACHBACK_GRADE | compact score; mid reviews low-confidence or top answers | draft-then-revise | interactive | answer id |
-| MODERATE_POST | compact | classification | interactive | text hash |
+| TEACHBACK_GRADE (ARENA_GRADE / ARENA_SOLO jobs; the same call moderates the answer via `flag`) | compact draft; mid reviews only when confidence is low or the score is within `TEACHBACK_REVIEW_BAND` of `PEER_ANSWER_THRESHOLD` (solo: low confidence only); mid busy → the draft stands (Quick mode) | draft-then-revise | interactive | none (personal) |
+| MODERATE_POST (ARENA_ASK job: peer questions; rejected → coins refunded) | compact | classification | interactive | text hash |
 | TRANSLATE_SHORT | compact | rewriting | background | text+lang |
 | PLACEMENT_QUIZ (8 Q per course, 2 chunks per chapter, one call; graded server-side) | compact | narrow-before-generating | interactive | course+lang (shared by the class) |
 | any mid task when saturated | compact | fallback (`quick_mode`) | — | — |
@@ -163,9 +163,9 @@ others read the cache when it lands.
 `study_assets(id, world_id, chapter_id, level, language, kind[notes|flashcards|map|audio_script], content jsonb)`
 `flashcard_reviews(user_id, card_id, due_at, interval, ease)`
 `tutor_sessions(id, user_id, world_id, course_id, chapter_id, level, language, goal, ideas jsonb, hints_used, stuck_count, escalate_next, turns jsonb, pending_job_id, status, summary jsonb, ended_at)`
-`peer_questions(id, world_id, chapter_id, author_id, text, status, pinned_answer_id)` · `peer_answers(id, question_id, author_id, text, ai_score, ai_confidence, ai_feedback jsonb, helpful_count)`
-`coin_ledger(id, user_id, delta, kind[daily|earned|purchased|spend|refund|pool], ref, created_at)` · `points_ledger(id, user_id, world_id, delta, reason, created_at)`
-`daily_state(user_id, date, free_coins_left, earned_today, plan jsonb, challenges jsonb, streak)`
+`peer_questions(id, world_id, chapter_id, author_id, text, language, status[pending|open|rejected], reject_reason, pinned_answer_id)` · `peer_answers(id, question_id, author_id, text, status[grading|graded|rejected|failed], ai_score, ai_confidence, ai_feedback jsonb, reviewed_by_mid, rewarded)` — one per student per question · `peer_votes(answer_id, user_id)`
+`coin_ledger(id, user_id, day, bucket[free|earned|purchased|pass], kind[daily|earned|purchased|spend|refund|pass], delta, ref, created_at)` — `day` = Tunis day; one `daily` row per user-day, one refund per (ref, bucket) · `points_ledger(id, user_id, world_id, delta, reason, ref, created_at)` — unique (user, reason, ref)
+`daily_state(user_id, date, plan jsonb, challenges jsonb)` (M6; free coins, earned-today and streak are derived from the ledgers)
 `class_pool(world_id, balance)` · `cosmetics_owned(user_id, item_key)`
 
 Balances are derived from ledgers (with a cached balance column if needed). Every coin change is
@@ -175,11 +175,11 @@ a ledger row — never mutate a balance without one.
 `/api/auth/{signup,login,logout,me,session}` (signed HttpOnly cookie) · `/api/profile` · `/api/onboarding/style`
 `/api/worlds/{id}/map` · `/api/courses/{id}` (island) · `/api/courses/{id}/presence` · `/api/placement/{course_id}`
 `/api/worlds` (create) · `/api/worlds/join` · `/api/worlds/{id}` (map data) · `/api/worlds/{id}/courses|chapters|documents`
-`/api/jobs/{id}` · `/api/economy` · `/api/wallet` · `/api/daily`
+`/api/jobs/{id}` · `/api/economy` · `/api/wallet` (+ `/demo-purchase`) · `/api/daily` — any paid start without enough coins → `402 errors.insufficient_coins`
 `/api/quiz/price` · `/api/quiz/start` · `/api/quiz/attempts/{id}` (+ `/answer`, `/skip`, `/finish`; `/api/quiz/attempts/from-job/{job}`) · `/api/placement/{start,finish}` · `/api/tutor/start` · `/api/tutor/{id}` (+ `/turn` with action message|hint|another_way|stuck, `/end`)
 `/api/studio/{chapter}/{notes|flashcards|map}` · `/api/audio/{chapter}`
-`/api/arena/questions` · `/api/arena/questions/{id}/answers` · `/api/arena/solo`
-`/api/leaderboard?scope=world|global&period=week|all` · `/api/wisdom?world&course`
+`/api/arena/questions?chapter_id` (feed, polled) · `/api/arena/questions/{id}` (+ `/answers`) · `/api/arena/answers/{id}/pin` · `/api/arena/answers/{id}/helpful` (POST/DELETE) · `/api/arena/solo`
+`/api/leaderboard?scope=world|global&period=week|all&world_id` · `/api/wisdom?world&course`
 `/api/admin/stats` (call log aggregates; dev/demo only) · `/api/system/status` (slot live? offline demo mode?)
 
 ## Config (.env)

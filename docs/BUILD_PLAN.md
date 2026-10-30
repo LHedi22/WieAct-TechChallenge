@@ -135,10 +135,25 @@ outputs from our slot (prompt-evaluator agent or a human); KaTeX replaced by the
 (npm registry blocked); coins for Quiz/Tutor are recorded on jobs, charged from M5.
 
 ## M5 · Economy, leaderboards, Teach-Back (4–6 Nov)
-- [ ] Wallet ledgers, daily refill (Africa/Tunis), earn cap, refunds, demo purchase, out-of-coins screen
-- [ ] Points, streaks, class + global leaderboards (opt-out)
-- [ ] Teach-Back peer room (ask with moderation, answer, AI grade draft-then-revise, pin best, helpful votes, polling) + solo mode
+- [x] Wallet ledgers, daily refill (Africa/Tunis), earn cap, refunds, demo purchase, out-of-coins screen
+- [x] Points, streaks, class + global leaderboards (opt-out)
+- [x] Teach-Back peer room (ask with moderation, answer, AI grade draft-then-revise, pin best, helpful votes, polling) + solo mode
 **Done when:** two browsers in the same world can ask/answer and see scores and leaderboard change.
+
+_Status 30/10:_ **Done-when passes** through the real UI (MCP Playwright, two browser contexts, compose
+stack with mock-llm `p_503_mid` 0.15, seeded `OLIVE-7Q2`): Yasmine asks in the Data Structures arena
+(20 → 18 coins, moderation job) → Karim sees it in the polled feed, answers → scored 84 by ONE compact
+call (outside the review band, no mid) → +3 coins, +30 points → Yasmine sees the score and pins it →
++50 points → both leaderboards show Karim at 80. Also via the API with two dev users (a 45 answer: no
+coins; improved to 84: +3 coins once). AR at 390×844: `dir=rtl`, no horizontal scroll. Tests: 223
+backend (wallet, leaderboard, arena incl. review band, mid-busy keeps the draft, refunds, permissions),
+25 mock-llm, 46 frontend; ruff, eslint, tsc, i18n (687 keys × 4), constraint greps pass. **Open:** load
+smoke (10 jobs, 503 + quota) completes 10/10 with ≤ 2 in flight and all faults handled, but reports
+FAIL on "no fallback observed": with ~4 interactive jobs a double 503 is rare, so that check is
+chance-driven (same result before M5 today; M1's 30-job run saw 1) — make the check deterministic
+(e.g. one forced-503 interactive job) before the demo; "ask the AI after 10 min without a peer answer"
+deferred (DECISIONS); Darija strings drafted, need native review (M8); the visual compare with mockup 15
+was done in EN at 1440×900, AR checked by layout metrics only.
 
 ## M6 · Daily challenges + Class Wisdom (6–7 Nov)
 - [ ] Daily plan (plan-once mid) + daily return screen + challenge progress tracking

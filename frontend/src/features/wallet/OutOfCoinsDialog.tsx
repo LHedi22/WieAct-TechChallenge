@@ -139,7 +139,7 @@ function Dialog({ onClose }: { onClose: () => void }) {
                     {t("demoBuy", { price: pack.price_tnd })}
                   </PixelButton>
                 </SoftCard>
-                <SoftCard className="flex flex-col gap-2 border-terracotta">
+                <SoftCard className="flex flex-col gap-2 !border-terracotta">
                   <span className="flex items-center gap-2 font-semibold">
                     <Sprite name="star" scale={1} /> {t("pass.name")}
                   </span>
