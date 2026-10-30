@@ -10,6 +10,8 @@ from app.features.daily import router as daily
 from app.features.leaderboard import router as leaderboard
 from app.features.onboarding import router as onboarding
 from app.features.placement import router as placement
+from app.features.pool import router as pool
+from app.features.pool.service import InsufficientPool
 from app.features.quiz import router as quiz
 from app.features.tutor import router as tutor
 from app.features.wallet import router as wallet
@@ -35,6 +37,10 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    @app.exception_handler(InsufficientPool)
+    async def _pool_short(_: Request, e: InsufficientPool) -> JSONResponse:
+        return JSONResponse(status_code=402, content={"detail": e.key})
+
     @app.exception_handler(InsufficientCoins)
     async def _no_coins(_: Request, e: InsufficientCoins) -> JSONResponse:
         # Any paid start without enough coins: the UI opens the out-of-coins screen.
@@ -55,6 +61,7 @@ def create_app() -> FastAPI:
     app.include_router(arena.router)
     app.include_router(wisdom.router)
     app.include_router(daily.router)
+    app.include_router(pool.router)
     app.include_router(worlds.router)
     app.include_router(world_map.router)
     if settings.APP_ENV != "production":

@@ -151,11 +151,27 @@ async def reserve(s: AsyncSession, job: Job, now: datetime | None = None) -> Non
     if b.pass_active(now) and b.pass_left_today > 0:
         s.add(_row(job.user_id, today, "pass", "spend", 0, ref))
         return
-    split = split_spend(job.cost, free=b.free, earned=b.earned, purchased=b.purchased)
+    _debit(job.user_id, b, job.cost, today, ref, s)
+    await s.flush()
+
+
+def _debit(user_id: uuid.UUID, b: Balances, amount: int, today: date, ref: str, s) -> None:
+    split = split_spend(amount, free=b.free, earned=b.earned, purchased=b.purchased)
     if split is None:
         raise InsufficientCoins()
     for bucket, n in split.items():
-        s.add(_row(job.user_id, today, bucket, "spend", -n, ref))
+        s.add(_row(user_id, today, bucket, "spend", -n, ref))
+
+
+async def spend(
+    s: AsyncSession, user_id: uuid.UUID, amount: int, ref: str, now: datetime | None = None
+) -> None:
+    """Spend coins outside a job (a Class Pool contribution): never paid by an Exam Pass.
+    Raises InsufficientCoins."""
+    now = _now(now)
+    await _lock(s, user_id)
+    b = await balances(s, user_id, now)
+    _debit(user_id, b, amount, tunis_day(now), ref, s)
     await s.flush()
 
 
@@ -288,4 +304,7 @@ class LedgerCoins:
         return None  # coins were debited at reserve time
 
     async def refund(self, s: AsyncSession, job: Job) -> None:
+        from app.features.pool import service as pool  # noqa: PLC0415  (pool builds on wallet)
+
         await refund(s, job)
+        await pool.refund(s, job)
