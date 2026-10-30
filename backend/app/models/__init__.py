@@ -7,11 +7,16 @@ from app.models.economy import CoinLedger, PointsLedger
 from app.models.job import Job
 from app.models.learner import ChapterMastery, CourseLevel, PlacementSet, Presence, Profile
 from app.models.rag import Chunk, Document, QuizSet
+from app.models.studio import ClassPoolLedger, Flashcard, FlashcardReview, StudyAsset
 from app.models.study import Mistake, QuizAttempt, TutorSession
 from app.models.user import User
 from app.models.world import World, WorldMember
 
 __all__ = [
+    "ClassPoolLedger",
+    "Flashcard",
+    "FlashcardReview",
+    "StudyAsset",
     "DailyState",
     "WisdomTip",
     "CoinLedger",
