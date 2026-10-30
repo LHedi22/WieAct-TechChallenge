@@ -6,6 +6,7 @@ import { ArenaPage } from "@/features/arena/ArenaPage";
 import { AuthPage } from "@/features/auth/AuthPage";
 import { IslandPage } from "@/features/island/IslandPage";
 import { DevJobsPage } from "@/features/jobs/DevJobsPage";
+import { OfflineBanner } from "@/features/jobs/ProviderBadge";
 import { LandingPage } from "@/features/landing/LandingPage";
 import { LeaderboardPage } from "@/features/leaderboard/Leaderboard";
 import { MapPage } from "@/features/map/MapPage";
@@ -78,6 +79,7 @@ export function App() {
   useDocumentLanguage();
   return (
     <QueryClientProvider client={queryClient}>
+      <OfflineBanner />
       <RouterProvider router={router} />
       <OutOfCoinsDialog />
     </QueryClientProvider>

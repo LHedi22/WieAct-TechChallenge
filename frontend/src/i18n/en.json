@@ -20,6 +20,8 @@
     "banner": {
       "queue": "High demand, your quiz is in line (about {seconds} s).",
       "offline": "Offline demo mode – showing saved results.",
+      "offlineUntil": "New AI actions resume {when} (Tunis time).",
+      "aiPaused": "Paused in offline demo mode: what your class already made still opens.",
       "quickMode": "Quick mode: a faster model answered this time.",
       "placement": "Take the 8-question placement quiz to set your level."
     },

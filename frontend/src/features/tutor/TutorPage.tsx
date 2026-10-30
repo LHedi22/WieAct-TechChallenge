@@ -7,6 +7,7 @@ import { Banner, Bidi, Chip, MathText, PixelButton, SoftCard, Sprite } from "@/c
 import { cx } from "@/components/cx";
 import { JOB_POLL_MS, isTerminal, useJob } from "@/hooks/useJob";
 import { useOnce } from "@/hooks/useOnce";
+import { useAiPaused } from "@/hooks/useAiPaused";
 import { ErrorBanner } from "@/features/worlds/parts";
 
 /** …/tutor/new?chapter&level — opens a session (the first question is a job), then the chat. */
@@ -65,6 +66,7 @@ export function TutorPage() {
       void qc.invalidateQueries({ queryKey: ["tutor", sessionId] });
     },
   });
+  const paused = useAiPaused(); // offline demo mode: the transcript stays readable
   const end = useMutation({
     mutationFn: () => api.tutorEnd(sessionId),
     onSuccess: (r) => {
@@ -83,7 +85,7 @@ export function TutorPage() {
     );
   const island = `/worlds/${worldId}/courses/${courseId}`;
   // a failed or cancelled turn must not lock the chat: only a job still running counts
-  const busy = (!!session.pending_job_id && !jobDone) || send.isPending;
+  const busy = (!!session.pending_job_id && !jobDone) || send.isPending || paused;
   const quick = session.turns.some((x) => x.quick_mode);
   const act = (action: TutorAction, msg = "") => send.mutate({ msg, action });
 

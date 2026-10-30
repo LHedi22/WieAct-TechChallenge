@@ -20,6 +20,8 @@
     "banner": {
       "queue": "Forte affluence : ton quiz est dans la file (environ {seconds} s).",
       "offline": "Mode démo hors ligne – résultats enregistrés affichés.",
+      "offlineUntil": "Les nouvelles actions IA reprennent {when} (heure de Tunis).",
+      "aiPaused": "En pause en mode démo hors ligne : ce que ta classe a déjà créé reste accessible.",
       "quickMode": "Mode rapide : un modèle plus rapide a répondu cette fois.",
       "placement": "Fais le quiz de positionnement (8 questions) pour fixer ton niveau."
     },

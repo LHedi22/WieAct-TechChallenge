@@ -5,6 +5,7 @@ import { Banner, Bidi, Chip, PixelButton, PixelPanel } from "@/components";
 import { cx } from "@/components/cx";
 import { useNumberFormat } from "@/components/useNumberFormat";
 import { PoolCard } from "@/features/pool/PoolCard";
+import { useAiPaused } from "@/hooks/useAiPaused";
 import { useWallet } from "@/hooks/useSession";
 
 /** Shared material not made yet (study pack, audio episode): what it costs, who pays (me or the
@@ -30,6 +31,7 @@ export function GeneratePanel({
   const { t: tc } = useTranslation();
   const nf = useNumberFormat();
   const coins = useWallet().data?.coins ?? 0;
+  const paused = useAiPaused();
   const poolOk = poolBalance >= cost;
   const [pay, setPay] = useState<StudioPay>(poolOk && coins < cost ? "pool" : "me");
   const name = useId();
@@ -78,10 +80,11 @@ export function GeneratePanel({
           </dd>
         </dl>
         {pay === "me" && after < 0 && <Banner kind="error">{t("make.short")}</Banner>}
+        {paused && <p className="text-small text-ink/70">{tc("banner.aiPaused")}</p>}
         <PixelButton
           variant="spend"
           className="self-end"
-          disabled={busy || after < 0}
+          disabled={busy || paused || after < 0}
           onClick={() => onGenerate(pay)}
         >
           {t("make.go")}

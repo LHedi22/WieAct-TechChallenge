@@ -9,6 +9,7 @@ import { JobProgress } from "@/features/jobs/JobProgress";
 import { useWisdomTip } from "@/features/wisdom/useWisdomTip";
 import { useJob } from "@/hooks/useJob";
 import { useOnce } from "@/hooks/useOnce";
+import { useAiPaused } from "@/hooks/useAiPaused";
 import { ErrorBanner } from "@/features/worlds/parts";
 import { useEconomy } from "@/hooks/useSession";
 import { type Fix, ScoreCard } from "./ScoreCard";
@@ -183,6 +184,7 @@ function AskForm({
   onDone: () => void;
 }) {
   const { t } = useTranslation("arena");
+  const paused = useAiPaused();
   const { t: tc } = useTranslation();
   const qc = useQueryClient();
   const id = useId();
@@ -232,7 +234,7 @@ function AskForm({
         </PixelButton>
         <PixelButton
           variant="spend"
-          disabled={text.trim().length < 8 || ask.isPending}
+          disabled={paused || text.trim().length < 8 || ask.isPending}
           onClick={() => ask.mutate()}
         >
           {t("askSend")} <Chip kind="cost">{tc("chip.cost", { count: cost })}</Chip>
@@ -477,6 +479,7 @@ function AnswerForm({
   onCancel?: () => void;
 }) {
   const { t } = useTranslation("arena");
+  const paused = useAiPaused();
   const id = useId();
   const [text, setText] = useState(initial);
   const send = useMutation({
@@ -506,7 +509,7 @@ function AnswerForm({
         )}
         <PixelButton
           variant="primary"
-          disabled={text.trim().length < 20 || send.isPending}
+          disabled={paused || text.trim().length < 20 || send.isPending}
           onClick={() => send.mutate()}
         >
           {t("answerSend")}
@@ -519,6 +522,7 @@ function AnswerForm({
 // --- solo ----------------------------------------------------------------------------------------
 function SoloMode({ chapterId, cost }: { chapterId: string; cost: number }) {
   const { t } = useTranslation("arena");
+  const paused = useAiPaused();
   const { t: tc } = useTranslation();
   const qc = useQueryClient();
   const conceptId = useId();
@@ -604,7 +608,9 @@ function SoloMode({ chapterId, cost }: { chapterId: string; cost: number }) {
           <PixelButton
             variant="spend"
             className="self-end"
-            disabled={concept.trim().length < 2 || text.trim().length < 20 || start.isPending}
+            disabled={
+              paused || concept.trim().length < 2 || text.trim().length < 20 || start.isPending
+            }
             onClick={() => start.mutate()}
           >
             {t("solo.send")} <Chip kind="cost">{tc("chip.cost", { count: cost })}</Chip>

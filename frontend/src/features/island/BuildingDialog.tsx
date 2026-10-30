@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useAiPaused } from "@/hooks/useAiPaused";
 import { api, type IslandOut } from "@/api/client";
 import { Bidi, Chip, PixelButton, PixelPanel } from "@/components";
 import { cx } from "@/components/cx";
@@ -65,6 +66,10 @@ export function BuildingDialog({
   const after = balance - cost;
   // Answering in the Teach-Back Arena is free: only asking costs, and that is checked on ask.
   const short = after < 0 && building.answer_cost !== 0;
+  // Offline demo mode: what the class already made still opens; new AI work doesn't. The arena
+  // room opens too (reading questions and answers needs no AI).
+  const paused =
+    useAiPaused() && building.answer_cost !== 0 && !(priced && livePrice.data?.cached);
 
   return (
     <div className="fixed inset-0 z-30 flex items-center justify-center p-4">
@@ -157,13 +162,14 @@ export function BuildingDialog({
             </dd>
           </dl>
           {short && <p className="text-small text-danger">{t("dialog.short")}</p>}
+          {paused && <p className="text-small text-ink/70">{tc("banner.aiPaused")}</p>}
           <div className="flex justify-end gap-3">
             <PixelButton variant="secondary" onClick={onClose}>
               {t("dialog.cancel")}
             </PixelButton>
             <PixelButton
               variant="spend"
-              disabled={short || !chapterId}
+              disabled={short || paused || !chapterId}
               onClick={() => onConfirm(chapterId, level)}
             >
               {t("dialog.confirm")}

@@ -2488,6 +2488,8 @@ export interface components {
       slot_live: boolean;
       /** Next Slot */
       next_slot: string | null;
+      /** Next Slot Start */
+      next_slot_start: string | null;
       /** Offline Demo Mode */
       offline_demo_mode: boolean;
       /** Reason */
