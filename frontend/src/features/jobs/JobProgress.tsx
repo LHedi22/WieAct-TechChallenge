@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { JobView } from "@/api/client";
-import { Banner, Bidi, Chip, LoadingStages, PixelButton } from "@/components";
+import { Banner, Bidi, Chip, LoadingStages, type LoadingTip, PixelButton } from "@/components";
 import { useJob } from "@/hooks/useJob";
 
 interface JobProgressProps {
   jobId: string;
-  /** Class Wisdom tip for the loading screen (M6). */
-  tip?: ReactNode;
+  /** Class Wisdom tip for the loading screen (M6), or a general study tip. */
+  tip?: LoadingTip;
   children: (result: NonNullable<JobView["result"]>, job: JobView) => ReactNode;
 }
 

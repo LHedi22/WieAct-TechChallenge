@@ -79,7 +79,18 @@
       "sample": "3 classmates mixed up 0/0 with 0 here. Try factoring first.",
       "classmates": "{count, plural, one {# classmate fell for this:} other {# classmates fell for this:}}",
       "anonymous": "Names are hidden. Only the pattern is shared.",
-      "another": "Show me another tip"
+      "another": "Show me another tip",
+      "general": {
+        "title": "Study tip",
+        "tips": {
+          "1": "Test yourself before re-reading: trying to recall an idea fixes it better than reading it again.",
+          "2": "Space it out: three short sessions on different days beat one long session the night before.",
+          "3": "Explain it in your own words, as if to a classmate. The parts you can't explain are the ones to review.",
+          "4": "Mix chapters when you practise: switching between kinds of problems teaches you to spot which method fits.",
+          "5": "After a mistake, write down why it was tempting. Next time you'll see the trap coming.",
+          "6": "Work in 25-minute blocks with a short break: a rested brain remembers more."
+        }
+      }
     },
     "errors": {
       "code_not_found": "That code doesn't match any world.",

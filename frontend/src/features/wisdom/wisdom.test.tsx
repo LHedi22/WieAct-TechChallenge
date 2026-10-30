@@ -1,6 +1,6 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { WisdomTip } from "@/api/client";
 import { renderWith } from "@/test/render";
 import { WisdomTipBody } from "./WisdomTip";
@@ -32,5 +32,32 @@ describe("WisdomTipBody", () => {
     expect(screen.queryByRole("button")).toBeNull();
     expect(screen.getByText(/زملاء وقعوا في هذا الفخ/)).toBeInTheDocument();
     expect(screen.getByText("الأسماء مخفية. نشارك النمط فقط.")).toBeInTheDocument();
+  });
+});
+
+describe("Loading-screen tips", () => {
+  it("shows only this course's tips, else a general study tip", async () => {
+    const { useWisdomTip } = await import("./useWisdomTip");
+    const { QueryClient, QueryClientProvider } = await import("@tanstack/react-query");
+    const { LoadingStages } = await import("@/components");
+    const other = { ...tip(1, "Other course trap."), course_id: "c2" };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response(JSON.stringify({ tips: [other] }), { status: 200 })),
+    );
+    function Screen({ course }: { course: string }) {
+      return <LoadingStages stages={[]} tip={useWisdomTip("w1", course)} />;
+    }
+    const qc = new QueryClient();
+    renderWith(
+      <QueryClientProvider client={qc}>
+        <Screen course="c1" />
+      </QueryClientProvider>,
+    );
+    expect(await screen.findByTestId("general-tip")).toBeInTheDocument();
+    expect(screen.getByText("Study tip")).toBeInTheDocument();
+    await new Promise((r) => setTimeout(r, 50));
+    expect(screen.queryByText("Other course trap.")).toBeNull();
+    vi.unstubAllGlobals();
   });
 });
