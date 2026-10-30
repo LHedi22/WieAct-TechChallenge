@@ -112,7 +112,7 @@ class FromQuizOut(BaseModel):
     level: str
 
 
-def _http(e: Exception) -> HTTPException:
+def http_error(e: Exception) -> HTTPException:
     if isinstance(e, NotFound):
         return HTTPException(404, e.key)
     if isinstance(e, Rejected):
@@ -120,42 +120,42 @@ def _http(e: Exception) -> HTTPException:
     raise e
 
 
-async def _chapter(s, user, chapter_id):
+async def chapter_or_404(s, user, chapter_id):
     try:
         return await member_chapter(s, user, chapter_id)
     except NotFound as e:
-        raise _http(e) from e
+        raise http_error(e) from e
 
 
 @router.get("/{chapter_id}/price", response_model=Price)
 async def price(chapter_id: uuid.UUID, level: str, s: Session, user: CurrentUser) -> Price:
-    chapter = await _chapter(s, user, chapter_id)
+    chapter = await chapter_or_404(s, user, chapter_id)
     return Price(**await service.price(s, chapter.id, level, user.ui_language))
 
 
 @router.get("/{chapter_id}", response_model=Studio)
 async def get_studio(chapter_id: uuid.UUID, level: str, s: Session, user: CurrentUser) -> Studio:
-    chapter = await _chapter(s, user, chapter_id)
+    chapter = await chapter_or_404(s, user, chapter_id)
     try:
         return Studio(**await service.status(s, user, chapter, level))
     except Rejected as e:
-        raise _http(e) from e
+        raise http_error(e) from e
 
 
 @router.post("/{chapter_id}/generate", response_model=GenerateOut)
 async def generate(
     chapter_id: uuid.UUID, body: GenerateIn, s: Session, user: CurrentUser
 ) -> GenerateOut:
-    chapter = await _chapter(s, user, chapter_id)
+    chapter = await chapter_or_404(s, user, chapter_id)
     try:
         return GenerateOut(**await service.generate(s, user, chapter, body.level, body.pay))
     except Rejected as e:
-        raise _http(e) from e
+        raise http_error(e) from e
 
 
 @router.get("/{chapter_id}/cards", response_model=Queue)
 async def cards(chapter_id: uuid.UUID, level: str, s: Session, user: CurrentUser) -> Queue:
-    chapter = await _chapter(s, user, chapter_id)
+    chapter = await chapter_or_404(s, user, chapter_id)
     return Queue(**await service.queue(s, user, chapter, level))
 
 
@@ -164,7 +164,7 @@ async def review(card_id: uuid.UUID, body: ReviewIn, s: Session, user: CurrentUs
     try:
         out = ReviewOut(**await service.review(s, user, card_id, body.grade))
     except Rejected as e:
-        raise _http(e) from e
+        raise http_error(e) from e
     await s.commit()
     return out
 
@@ -177,6 +177,6 @@ async def from_quiz(attempt_id: uuid.UUID, s: Session, user: CurrentUser) -> Fro
     try:
         out = FromQuizOut(**await service.from_quiz(s, user, attempt))
     except Rejected as e:
-        raise _http(e) from e
+        raise http_error(e) from e
     await s.commit()
     return out

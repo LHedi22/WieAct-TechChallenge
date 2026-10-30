@@ -2,17 +2,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { api, type Studio, type StudioPay } from "@/api/client";
-import { Banner, Bidi, Chip, PixelButton, PixelPanel, Sprite } from "@/components";
+import { api, type StudioPay } from "@/api/client";
+import { Bidi, PixelButton, PixelPanel, Sprite } from "@/components";
 import { cx } from "@/components/cx";
-import { useNumberFormat } from "@/components/useNumberFormat";
 import { JobProgress } from "@/features/jobs/JobProgress";
-import { PoolCard } from "@/features/pool/PoolCard";
 import { useWisdomTip } from "@/features/wisdom/useWisdomTip";
 import { ErrorBanner } from "@/features/worlds/parts";
 import { useOnce } from "@/hooks/useOnce";
-import { useWallet } from "@/hooks/useSession";
 import { cardsKey } from "./cards";
+import { GeneratePanel } from "./GeneratePanel";
 import { Flashcards } from "./Flashcards";
 import { MindMapView, NotesView } from "./StudyViews";
 
@@ -81,7 +79,10 @@ export function StudioPage() {
     } else if (missing.includes("notes")) {
       body = (
         <GeneratePanel
-          studio={s}
+          cost={s.cost}
+          poolBalance={s.pool_balance}
+          title={t("make.title")}
+          body={t("make.body")}
           worldId={worldId}
           busy={generate.isPending}
           onGenerate={(pay) => generate.mutate(pay)}
@@ -172,82 +173,4 @@ export function StudioPage() {
 function Finish({ onDone }: { onDone: () => void }) {
   useOnce(onDone);
   return null;
-}
-
-/** No pack yet for this chapter + level + language: what it costs, who pays, and the pool. */
-function GeneratePanel({
-  studio,
-  worldId,
-  busy,
-  onGenerate,
-}: {
-  studio: Studio;
-  worldId: string;
-  busy: boolean;
-  onGenerate: (pay: StudioPay) => void;
-}) {
-  const { t } = useTranslation("studio");
-  const { t: tc } = useTranslation();
-  const nf = useNumberFormat();
-  const coins = useWallet().data?.coins ?? 0;
-  const poolOk = studio.pool_balance >= studio.cost;
-  const [pay, setPay] = useState<StudioPay>(poolOk && coins < studio.cost ? "pool" : "me");
-  const name = useId();
-  const after = pay === "me" ? coins - studio.cost : studio.pool_balance - studio.cost;
-
-  return (
-    <div className="flex flex-col gap-4">
-      <PixelPanel className="flex flex-col gap-4" data-testid="generate-panel">
-        <h2 className="text-h2">{t("make.title")}</h2>
-        <p>{t("make.body")}</p>
-        <fieldset className="flex flex-col gap-2">
-          <legend className="mb-1 font-semibold">{t("make.who")}</legend>
-          {(["me", "pool"] as const).map((p) => (
-            <label
-              key={p}
-              className={cx(
-                "flex min-h-11 items-center gap-3 rounded-pixel-step border-2 px-3",
-                pay === p ? "border-ink bg-sand/30" : "border-sand bg-white",
-                p === "pool" && !poolOk && "opacity-60",
-              )}
-            >
-              <input
-                type="radio"
-                name={name}
-                value={p}
-                checked={pay === p}
-                disabled={p === "pool" && !poolOk}
-                onChange={() => setPay(p)}
-              />
-              <span className="flex-1">
-                {p === "me"
-                  ? t("make.me", { count: coins })
-                  : t("make.pool", { count: studio.pool_balance })}
-              </span>
-            </label>
-          ))}
-        </fieldset>
-        <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1">
-          <dt>{t("make.cost")}</dt>
-          <dd className="text-end">
-            <Chip kind="cost">{tc("chip.cost", { count: studio.cost })}</Chip>
-          </dd>
-          <dt>{pay === "me" ? t("make.after") : t("make.poolAfter")}</dt>
-          <dd className={cx("text-end font-semibold", after < 0 && "text-danger")}>
-            <Bidi>{nf.format(Math.max(after, 0))}</Bidi>
-          </dd>
-        </dl>
-        {pay === "me" && after < 0 && <Banner kind="error">{t("make.short")}</Banner>}
-        <PixelButton
-          variant="spend"
-          className="self-end"
-          disabled={busy || after < 0}
-          onClick={() => onGenerate(pay)}
-        >
-          {t("make.go")}
-        </PixelButton>
-      </PixelPanel>
-      <PoolCard worldId={worldId} />
-    </div>
-  );
 }

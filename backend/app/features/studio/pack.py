@@ -152,11 +152,12 @@ async def missing(s, chapter_id: uuid.UUID, level: str, language: str) -> list[s
     return out
 
 
-async def pending_generation(s, chapter_id: uuid.UUID, level: str, language: str):
-    """A pack already queued or running for this chapter + level + language (shared)."""
+async def pending_generation(s, chapter_id: uuid.UUID, level: str, language: str, kind: str = KIND):
+    """A pack (or audio episode) already queued or running for this chapter + level + language
+    (shared)."""
     return await s.scalar(
         select(Job.id).where(
-            Job.kind == KIND,
+            Job.kind == kind,
             Job.status.in_(("queued", "running")),
             Job.payload["chapter_id"].astext == str(chapter_id),
             Job.payload["level"].astext == level,
@@ -166,7 +167,7 @@ async def pending_generation(s, chapter_id: uuid.UUID, level: str, language: str
 
 
 # --- the job -----------------------------------------------------------------------------------
-async def _save_asset(world_id, chapter_id, level, language, kind, content) -> uuid.UUID:
+async def save_asset(world_id, chapter_id, level, language, kind, content) -> uuid.UUID:
     async with db.get_sessionmaker()() as s:
         await s.execute(
             insert(StudyAsset)
@@ -275,7 +276,7 @@ async def study_pack(ctx: JobContext) -> dict[str, Any]:
         notes, notes_id = found["notes"].content, found["notes"].id
     else:
         notes = await _notes(ctx, chapter, course, level, language)  # failure fails the job
-        notes_id = await _save_asset(world_id, chapter_id, level, language, "notes", notes)
+        notes_id = await save_asset(world_id, chapter_id, level, language, "notes", notes)
     text = notes_text(notes)
 
     failed: list[str] = []
@@ -312,6 +313,6 @@ async def study_pack(ctx: JobContext) -> dict[str, Any]:
         except gateway.GatewayError:
             failed.append("map")
         else:
-            await _save_asset(world_id, chapter_id, level, language, "map", tree)
+            await save_asset(world_id, chapter_id, level, language, "map", tree)
     # Public job result: what is ready; the content itself comes from GET /api/studio.
     return {"chapter_id": str(chapter_id), "level": level, "missing": failed}

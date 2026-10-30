@@ -800,6 +800,57 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/audio/{chapter_id}/price": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Price */
+    get: operations["price_api_audio__chapter_id__price_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/audio/{chapter_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Episode */
+    get: operations["get_episode_api_audio__chapter_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/audio/{chapter_id}/generate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Generate */
+    post: operations["generate_api_audio__chapter_id__generate_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/worlds": {
     parameters: {
       query?: never;
@@ -1463,6 +1514,27 @@ export interface components {
       points: number;
       /** Is Me */
       is_me: boolean;
+    };
+    /** Episode */
+    Episode: {
+      /**
+       * Chapter Id
+       * Format: uuid
+       */
+      chapter_id: string;
+      /** Level */
+      level: string;
+      /** Language */
+      language: string;
+      script: components["schemas"]["Script"] | null;
+      /** Pending Job Id */
+      pending_job_id: string | null;
+      /** Pool Balance */
+      pool_balance: number;
+      /** Cost */
+      cost: number;
+      /** Cached */
+      cached: boolean;
     };
     /** ExamPass */
     ExamPass: {
@@ -2213,6 +2285,13 @@ export interface components {
       due_at: string;
       /** Interval S */
       interval_s: number;
+    };
+    /** Script */
+    Script: {
+      /** Title */
+      title: string;
+      /** Segments */
+      segments: string[];
     };
     /** SearchIn */
     SearchIn: {
@@ -4412,6 +4491,122 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["FromQuizOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  price_api_audio__chapter_id__price_get: {
+    parameters: {
+      query: {
+        level: string;
+      };
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        chapter_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Price"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_episode_api_audio__chapter_id__get: {
+    parameters: {
+      query: {
+        level: string;
+      };
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        chapter_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Episode"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  generate_api_audio__chapter_id__generate_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        chapter_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GenerateIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GenerateOut"];
         };
       };
       /** @description Validation Error */

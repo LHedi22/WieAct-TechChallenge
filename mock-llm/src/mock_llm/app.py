@@ -494,6 +494,27 @@ def _mind_map(user: str, lang: str, system: str = "") -> dict[str, Any]:
     return {"root": title, "branches": branches}
 
 
+AUDIO_TEXT = {
+    "en": ("Revision episode", "In this episode we review {c}.", "Let's look at {c} step by step.",
+           "To recap: remember how {c} works and when to use it."),
+    "fr": ("Épisode de révision", "Dans cet épisode, on révise {c}.",
+           "Regardons {c} étape par étape.", "En résumé : retiens comment marche {c}."),
+    "ar": ("حلقة مراجعة", "في هذه الحلقة نراجع {c}.", "لننظر إلى {c} خطوة بخطوة.",
+           "للتلخيص: تذكّر كيف يعمل {c} ومتى نستعمله."),
+    "ar-TN": ("حلقة مراجعة", "في الحلقة هذي باش نراجعو {c}.", "خلّي نشوفو {c} خطوة بخطوة.",
+              "باختصار: تفكّر كيفاش يخدم {c} ووقتاش نستعملوه."),
+}  # fmt: skip
+
+
+def _audio(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    title, intro, step, recap = AUDIO_TEXT.get(lang, AUDIO_TEXT.get(lang[:2], AUDIO_TEXT["en"]))
+    concepts = _concepts(user, 4) or ["the topic"]
+    segments = [intro.format(c=", ".join(concepts))]
+    segments += [step.format(c=c) for c in concepts]
+    segments.append(recap.format(c=concepts[0]))
+    return {"title": title, "segments": segments}
+
+
 GENERATORS = {
     "MODERATE_POST": _moderate,
     "TEACHBACK_GRADE": _teachback,
@@ -509,6 +530,7 @@ GENERATORS = {
     "NOTES_WRITE": _notes,
     "FLASHCARDS": _flashcards,
     "MAP_WRITE": _mind_map,
+    "AUDIO_SCRIPT": _audio,
 }
 
 

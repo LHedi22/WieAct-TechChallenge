@@ -274,3 +274,8 @@ async def test_study_pack_notes_cards_and_map_follow_the_request():
         "Map. <!-- task: MAP_WRITE --> <!-- lang: en -->", "limits continuity slope"
     )
     assert tree["root"] and tree["branches"][0]["label"] and tree["branches"][0]["children"]
+
+
+async def test_audio_script_is_segments_in_the_language():
+    out = await _reply("Audio. <!-- task: AUDIO_SCRIPT --> <!-- lang: fr -->", "limits continuity")
+    assert out["title"] == "Épisode de révision" and len(out["segments"]) >= 3
