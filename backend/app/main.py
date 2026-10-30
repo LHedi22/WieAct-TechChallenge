@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 
 from app.api import admin, dev, economy, health, jobs, system
 from app.core.config import get_settings
+from app.features.arena import router as arena
 from app.features.auth import router as auth
 from app.features.leaderboard import router as leaderboard
 from app.features.onboarding import router as onboarding
@@ -49,6 +50,7 @@ def create_app() -> FastAPI:
     app.include_router(placement.router)
     app.include_router(quiz.router)
     app.include_router(tutor.router)
+    app.include_router(arena.router)
     app.include_router(worlds.router)
     app.include_router(world_map.router)
     if settings.APP_ENV != "production":

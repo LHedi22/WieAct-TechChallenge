@@ -324,7 +324,62 @@ def _summary(user: str, lang: str, system: str = "") -> dict[str, Any]:
     return {"summary": tx["summary"].format(c=concept), "next_step": tx["next"]}
 
 
+# --- Teach-Back: moderation and grading -----------------------------------------------------------
+ABUSE = re.compile(r"\b(idiot|stupid|moron|débile|connard)\b|حمار|غبي", re.I)
+PERSONAL = re.compile(r"[\w.+-]+@[\w-]+\.\w+|\+?\d[\d \-]{7,}\d|@\w{3,}")
+SECTION = re.compile(r"^([A-Z][A-Z ]+):\s*$", re.MULTILINE)
+GRADE_TEXT = {
+    "en": ("Check this against the material.", "You explained the main idea in your own words."),
+    "fr": ("Vérifie ce point dans le cours.", "Tu as expliqué l'idée principale avec tes mots."),
+    "ar": ("راجع هذه النقطة في الدرس.", "شرحت الفكرة الأساسية بكلماتك."),
+    "ar-TN": ("ثبّت في النقطة هاذي في الكور.", "فسّرت الفكرة الأساسية بكلامك."),
+}
+
+
+def _moderate(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    text = user.split("Question:", 1)[-1]
+    if ABUSE.search(text):
+        return {"verdict": "abusive"}
+    if PERSONAL.search(text):
+        return {"verdict": "personal_data"}
+    if "http" in text.lower() or not re.search(r"[^\W\d_]{3,}", text):
+        return {"verdict": "off_topic"}
+    return {"verdict": "ok"}
+
+
+def _sections(user: str) -> dict[str, str]:
+    parts = SECTION.split(user)  # ["head", NAME, body, NAME, body, ...]
+    return {name: body.strip() for name, body in zip(parts[1::2], parts[2::2], strict=True)}
+
+
+def _teachback(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    """Score = how much of the explanation's vocabulary appears in the excerpts (40-95)."""
+    sec = _sections(user)
+    answer = sec.get("STUDENT EXPLANATION", "")
+    excerpts = sec.get("COURSE EXCERPTS", "")
+    if ABUSE.search(answer):
+        return {"flag": "abusive", "score": 0, "confidence": "high", "errors": [], "good": "",
+                "missing": []}  # fmt: skip
+    words = set(_concepts(answer, 40))
+    known = set(_concepts(excerpts, 400))
+    ratio = len(words & known) / len(words) if words else 0.0
+    score = 40 + round(55 * ratio)
+    short = len(answer.split()) < 8
+    fix, good = GRADE_TEXT.get(lang, GRADE_TEXT["en"])
+    first = " ".join(answer.split()[:4])
+    return {
+        "flag": "ok",
+        "score": score,
+        "confidence": "low" if short else "high" if ratio > 0.5 else "medium",
+        "errors": [{"quote": first, "fix": fix}] if score < 85 and first else [],
+        "good": good,
+        "missing": [c for c in _concepts(excerpts, 6) if c not in words][:2],
+    }
+
+
 GENERATORS = {
+    "MODERATE_POST": _moderate,
+    "TEACHBACK_GRADE": _teachback,
     "TUTOR_TURN": _tutor,
     "TUTOR_GUARD": _guard,
     "TUTOR_SUMMARY": _summary,
