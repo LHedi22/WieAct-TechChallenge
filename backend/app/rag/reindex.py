@@ -66,7 +66,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--provider", choices=["cloud", "local", "mock"], required=True)
     p.add_argument("--world", type=uuid.UUID, default=None)
     args = p.parse_args(argv)
-    os.environ["LLM_PROVIDER"] = args.provider  # resolve exactly this provider's profile
+    # Embed with exactly this provider; chat stays as configured (production keeps cloud chat
+    # and may embed with our own Ollama: `--provider local`).
+    os.environ["EMBED_PROVIDER"] = args.provider
+    if args.provider == "cloud":
+        os.environ["LLM_PROVIDER"] = "cloud"
     get_settings.cache_clear()
     return asyncio.run(reindex(args.provider, args.world))
 

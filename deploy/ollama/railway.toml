@@ -1,0 +1,7 @@
+# Railway service "ollama" (root directory: deploy/ollama). See docs/DEPLOY.md.
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+restartPolicyType = "ALWAYS"

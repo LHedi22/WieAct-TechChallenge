@@ -6,17 +6,14 @@ are in `docs/BUILD_PLAN.md` (status lines) and `docs/DECISIONS.md` (OPEN items).
 whenever an item closes.
 
 ## 1. Blockers
-- [ ] **Cloud embeddings model.** Our key (hack-04) lists no embeddings model. `/v1/embeddings`
-      rejects every name we tried with 400 "Invalid model name". Without one, nothing can be
-      indexed on the cloud (uploads, the seeded demo world, then quiz pools, notes and audio).
-      → A human emails wie.act@ieee.tn: "hack-04: `/v1/models` lists only chat models and
-      `/v1/embeddings` answers 400 'Invalid model name' for every name; which embeddings model
-      should our key use?" Fallback, a human decision:
-      an embedder inside our backend, declared as an external service. When the answer comes, run
-      `python3 scripts/probe_embeddings.py <name>`, put `CLOUD_EMBEDDING_MODEL/DIM` in `.env`, and
-      run `uv run python -m app.rag.reindex --provider cloud` in our slot.
-- [ ] **`.env` cloud lines** (a human pastes them; Claude never opens `.env`):
-      `CLOUD_MODEL_COMPACT=llama3.2-3b`, `CLOUD_MODEL_MID=llama3.1-8b`, `LLM_DISABLE_THINKING=false`.
+- [x] ~~Cloud embeddings model~~ → **decided 31/10: our own Ollama with `bge-m3`**
+      (`EMBED_PROVIDER=local`; DECISIONS.md). Dev: `ollama pull bge-m3` on the Mac (done) and
+      `EMBED_PROVIDER=local` in `.env`. Production: the Railway `ollama` service (DEPLOY.md).
+      Still worth telling the organisers we self-host embeddings (declared service).
+- [ ] **`.env` lines** (a human pastes them; Claude never opens `.env`):
+      `CLOUD_MODEL_COMPACT=llama3.2-3b`, `CLOUD_MODEL_MID=llama3.1-8b`, `LLM_DISABLE_THINKING=false`,
+      `EMBED_PROVIDER=local`. Then re-index the dev data once:
+      `cd backend && uv run python -m app.rag.reindex --provider local` (or in the container).
 
 ## 2. In-slot work (needs the live key; Group A: Mon 02/11 00–12, Tue 03/11 12–24, …)
 Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with

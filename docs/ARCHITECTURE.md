@@ -131,7 +131,9 @@ others read the cache when it lands.
 - `INDEX_DOCUMENT` job (background): parse → CHUNK_TAG (8 chunks per compact call, cached by file
   hash) → EMBED (32 per call) → Qdrant; ~5 calls for a 30-page PDF. Resumable after a Defer; the
   same file twice in a chapter is indexed once. `documents.progress/detail` drive the indexing screen.
-- Embeddings via the platform endpoint (own quota) through the gateway, batched.
+- Embeddings through the gateway, batched. `EMBED_PROVIDER=local`: our own Ollama with `bge-m3`
+  (the platform key has no embeddings model; DECISIONS.md 2026-10-31), otherwise the chat provider's
+  endpoint. Indexing and search pick the collection from the provider that made the vectors.
 - `VectorStore` interface: `upsert(chunks)`, `search(query_vec, filters={world_id, course_id, chapter_id}, k)`,
   `delete(document_id)`. Implementation: **`QdrantVectorStore`** with `qdrant-client` (async).
   One collection per provider (`{QDRANT_COLLECTION_PREFIX}-{provider}-{embedding model slug}`, see

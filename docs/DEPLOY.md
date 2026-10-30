@@ -10,13 +10,13 @@ browser ──▶ Vercel (static React build)
                                            ├─ Railway Postgres
                                            ├─ Railway volume /data (uploads)
                                            ├─ Qdrant Cloud (vectors)
-                                           └─ EdNova platform (LLM, our slot only)
+                                           ├─ Railway "ollama" (bge-m3 embeddings, private network)
+                                           └─ EdNova platform (chat, our slot only)
 ```
 
-## Blocker first
-Uploads can't be indexed on the cloud until we know the **embeddings model** for our key
-(DECISIONS.md, OPEN). The seeded demo world needs indexing too. Get the answer from the
-organisers before step 4.
+## Embeddings
+Our key has no embeddings model, so a second Railway service runs **Ollama with `bge-m3`** for
+embeddings only (DECISIONS.md 2026-10-31). Chat stays on the platform.
 
 ## 1. Qdrant Cloud
 Create a free cluster → copy its URL and an API key → keep them for step 2
@@ -31,6 +31,10 @@ the key). The app creates the collection
    to `/backend/railway.toml`. It builds `backend/Dockerfile` (Tesseract included) and starts
    `sh start-prod.sh`.
 2. **+ New → Database → PostgreSQL.**
+   **+ New → GitHub repo** (same repo) → name the service **`ollama`** → Root directory
+   `deploy/ollama` (it builds `deploy/ollama/Dockerfile`). Add a volume mounted at
+   `/root/.ollama` so the model (~1.2 GB) is downloaded once. Don't generate a public domain for
+   it. Its log shows `ollama ready with bge-m3` when it's up. It needs about 2 GB of RAM.
 3. Service → **Volumes** → add one mounted at `/data`. If the container can't write to it, set
    `RAILWAY_RUN_UID=0`.
 4. Service → **Variables** (names from `.env.example`):
@@ -41,7 +45,9 @@ the key). The app creates the collection
    | `LLM_PROVIDER` | `cloud` |
    | `CLOUD_BASE_URL`, `CLOUD_API_KEY` | platform URL · the hack-04 key |
    | `CLOUD_MODEL_COMPACT`, `CLOUD_MODEL_MID` | `llama3.2-3b`, `llama3.1-8b` (DECISIONS.md) |
-   | `CLOUD_EMBEDDING_MODEL`, `CLOUD_EMBEDDING_DIM` | from the organisers (blocker above) |
+   | `EMBED_PROVIDER` | `local` |
+   | `LOCAL_BASE_URL` | `http://ollama.railway.internal:11434/v1` (if it can't connect, check the private domain on the ollama service) |
+   | `LOCAL_EMBEDDING_MODEL`, `LOCAL_EMBEDDING_DIM` | `bge-m3`, `1024` |
    | `LLM_DISABLE_THINKING` | `false` |
    | `LLM_SLOT_GROUP` | `A` |
    | `DATABASE_URL` | `postgresql+asyncpg://${{Postgres.PGUSER}}:${{Postgres.PGPASSWORD}}@${{Postgres.PGHOST}}:${{Postgres.PGPORT}}/${{Postgres.PGDATABASE}}` |

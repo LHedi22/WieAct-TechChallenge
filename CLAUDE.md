@@ -8,8 +8,8 @@ A working end-to-end app is required — no mockups, no notebooks.
 ## Where we are (30 Oct)
 M0–M7 built and green on the mock; M8 (ship) in progress. **@docs/STATUS.md lists everything still
 missing** (blockers, in-slot work, deploy, deliverables). Read it first and tick items there as
-they close. Top blocker: our cloud key has **no embeddings model** (DECISIONS.md OPEN), so
-nothing can be indexed on the cloud yet. Cloud models: compact `llama3.2-3b`, mid `llama3.1-8b`
+they close. Our cloud key has **no embeddings model**, so embeddings come from our own Ollama with
+`bge-m3` (`EMBED_PROVIDER=local`; Mac in dev, a Railway service in production). Cloud models: compact `llama3.2-3b`, mid `llama3.1-8b`
 (no thinking models → `LLM_DISABLE_THINKING=false`). We are slot **Group A**.
 
 ## Read before working

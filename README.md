@@ -76,7 +76,8 @@ against background 126 s on the slow mock. The final forced-503 job always falls
 
 **RAG.** PDF, PPTX, DOCX, TXT and images (Tesseract OCR, `ara+fra+eng`, for scanned pages) →
 ~2,000-character chunks that never cross a page or slide, so every chunk keeps a reference
-(`page:12`) → compact concept tags → embeddings → Qdrant (one collection per provider, payload
+(`page:12`) → compact concept tags → embeddings (our own Ollama with `bge-m3`, multilingual:
+our platform key has no embeddings model) → Qdrant (one collection per provider, payload
 filters on world, course and chapter). Text stays in Postgres.
 
 **Prompts** live in `backend/app/prompts/*.md` (versioned, multilingual). The tutor's
@@ -145,8 +146,8 @@ lives only in `.env` (gitignored) and the deploy's secret settings.
 ## Declared external services
 
 Tesseract OCR (local) · Qdrant (self-hosted in dev; Qdrant Cloud for the demo unless the platform's
-Qdrant is reachable) · PostgreSQL · browser Web Speech API (client-side voices) · Ollama (dev only,
-never in production or the demo) · hosting on Vercel and Railway. No other LLM or AI API is used.
+Qdrant is reachable) · PostgreSQL · browser Web Speech API (client-side voices) · Ollama (chat models dev only;
+`bge-m3` embeddings in production, since our key has none) · hosting on Vercel and Railway. No other LLM or AI API is used.
 The full list is in `docs/DECISIONS.md`.
 
 ## Docs
