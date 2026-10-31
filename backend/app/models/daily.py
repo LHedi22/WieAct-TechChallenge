@@ -22,7 +22,7 @@ class DailyState(Base):
     )
     date: Mapped[date] = mapped_column(Date, primary_key=True)
     challenges: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, default=list)
-    plan: Mapped[dict[str, Any] | None] = mapped_column(JSONB)  # {message} from the AI plan
+    plan: Mapped[dict[str, Any] | None] = mapped_column(JSONB)  # {message, quick_mode, language}
     planned_by: Mapped[str] = mapped_column(String(8), default="rule")  # rule | ai
     plan_job_id: Mapped[uuid.UUID | None] = mapped_column()
     seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

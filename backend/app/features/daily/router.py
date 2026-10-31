@@ -50,13 +50,20 @@ class Daily(BaseModel):
 async def _view(s: Session, user, state: DailyState, now: datetime) -> Daily:
     b = await wallet.balances(s, user.id, now)
     profile = await s.get(Profile, user.id)
+    plan = state.plan or {}
+    # The AI plan is written once a day; after a language switch its why lines and message would
+    # show in the old language, so they are left out (no second AI call).
+    same_language = plan.get("language") in (None, user.ui_language)
     return Daily(
         date=state.date,
-        challenges=[Challenge(**c) for c in state.challenges],
+        challenges=[
+            Challenge(**{**c, "why": c.get("why") if same_language else None})
+            for c in state.challenges
+        ],
         all_done=all(c["done"] for c in state.challenges),
         planned_by=state.planned_by,
         plan_job_id=state.plan_job_id,
-        message=(state.plan or {}).get("message"),
+        message=plan.get("message") if same_language else None,
         first_open_today=state.seen_at is None,
         returning=tunis_day(user.created_at) < state.date,
         reminder_due=service.reminder_due(profile, state, now),

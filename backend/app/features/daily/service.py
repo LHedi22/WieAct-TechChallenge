@@ -192,7 +192,7 @@ async def plan_day(ctx: JobContext) -> dict[str, Any]:
                 lane="background",
                 messages=messages,
                 language=user.ui_language,
-                cache_key=f"daily:{user.id}:{day.isoformat()}:v{version}",
+                cache_key=f"daily:{user.id}:{day.isoformat()}:{user.ui_language}:v{version}",
                 prompt_version=version,
             )
         )
@@ -204,7 +204,12 @@ async def plan_day(ctx: JobContext) -> dict[str, Any]:
             return {"applied": False}
         challenges, message = plan.from_ai(result.content, cands, state.challenges, has_cards)
         state.challenges = challenges
-        state.plan = {"message": message, "quick_mode": result.quick_mode}
+        # the language it was written in: other languages don't get its free-text lines
+        state.plan = {
+            "message": message,
+            "quick_mode": result.quick_mode,
+            "language": user.ui_language,
+        }
         state.planned_by = "ai"
         await s.commit()
     return {"applied": True, "types": [c["type"] for c in challenges]}

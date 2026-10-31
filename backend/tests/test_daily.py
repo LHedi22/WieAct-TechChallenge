@@ -138,6 +138,42 @@ async def test_first_read_gives_a_rule_plan_now_and_one_mid_plan_job(api, sm, pp
     assert not (await api.get("/api/daily", headers=OWL_FR)).json()["first_open_today"]
 
 
+async def test_ai_lines_hide_after_a_language_switch(api, sm, pptx):  # noqa: F811
+    """The AI plan is written once, in the language of that moment. After a switch, its free-text
+    lines (why, message) are left out rather than shown in the wrong language; no new AI call."""
+    await indexed(api, sm, pptx)
+    await api.get("/api/daily", headers=OWL_FR)
+    await Worker(sm).drain(timeout_s=30)
+    fr = (await api.get("/api/daily", headers=OWL_FR)).json()
+    assert fr["message"] and any(c["why"] for c in fr["challenges"])
+    en = (await api.get("/api/daily", headers={**OWL_FR, "X-UI-Language": "en"})).json()
+    assert en["message"] is None and not any(c["why"] for c in en["challenges"])
+    assert [c["type"] for c in en["challenges"]] == [c["type"] for c in fr["challenges"]]
+    back = (await api.get("/api/daily", headers=OWL_FR)).json()
+    assert back["message"] == fr["message"]
+    assert await count(sm, Job.kind == "DAILY_PLAN") == 1
+
+
+async def test_plan_cache_is_per_language(api, sm, pptx):  # noqa: F811
+    """A plan rebuilt the same day in another language must not reuse the cached reply."""
+    await indexed(api, sm, pptx)
+    await api.get("/api/daily", headers=OWL_FR)
+    await Worker(sm).drain(timeout_s=30)
+    async with sm() as s:
+        user = await s.scalar(select(User).where(User.nickname == "NightOwl7"))
+        await s.delete(await s.get(DailyState, (user.id, tunis_day())))
+        await s.commit()
+    await api.get("/api/daily", headers={**OWL_FR, "X-UI-Language": "en"})
+    await Worker(sm).drain(timeout_s=30)
+    async with sm() as s:
+        calls = await s.scalar(
+            select(func.count())
+            .select_from(AICallLog)
+            .where(AICallLog.task_kind == "DAILY_PLAN", AICallLog.cache_hit.is_(False))
+        )
+    assert calls == 2  # one per language, no cache hit across languages
+
+
 async def set_challenges(sm, nickname: str, challenges: list[dict]) -> None:
     async with sm() as s:
         user = await s.scalar(select(User).where(User.nickname == nickname))
