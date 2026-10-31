@@ -15,7 +15,7 @@ Each island has five buildings:
 | **Socratic Tutor** | Guiding questions, never the final answer; hint counter, "ideas found", session summary | compact turns; mid only after 2 × "I'm stuck" (escalation) |
 | **Study Studio** | Notes with page refs, flashcards (spaced repetition), mind map | 1 mid + 2 compact per pack, then free for the class |
 | **Audio Studio** | A spoken episode of the chapter (browser voices), transcript and speed | 1 mid call per episode, then free |
-| **Teach-Back Arena** | Explain to classmates; answers are AI-scored, the asker pins the best | compact grades; mid reviews only uncertain or borderline scores |
+| **Teach-Back Arena** | Explain to classmates; answers are AI-scored, the asker pins the best | compact grades; mid reviews only uncertain or borderline scores (Arabic and Darija: mid grades directly) |
 
 Mistakes that several classmates share become anonymous **Class Wisdom** tips, written once by
 the mid model in every language of the class. A **daily plan** (3 challenges) is written once per
@@ -47,7 +47,7 @@ queue position and ETA. Coins are committed on success and refunded on failure.
 | Pattern | Used for |
 | --- | --- |
 | escalation | Tutor turns: compact by default, mid only when the student is stuck |
-| draft-then-revise | Teach-Back grading: compact drafts; mid reviews low-confidence or borderline scores |
+| draft-then-revise | Teach-Back grading: compact drafts; mid reviews low-confidence or borderline scores. Arabic and Darija go straight to mid (the compact model is unreliable there); a grade still unsure pays nothing until it's reviewed |
 | plan-once / execute-compact | Study pack: mid writes the notes once, compact turns them into cards and a map; daily plan |
 | narrow-before-generating | Quiz sets, notes, audio scripts: vector search on the chapter, then only the relevant chunks reach the model |
 | fallback | Any mid task when mid is saturated → compact, shown as a "Quick mode" badge |
@@ -126,9 +126,10 @@ cd frontend && pnpm install && pnpm dev
 ## Tests
 
 ```bash
-cd backend && uv run ruff check . && uv run pytest -q          # 260 tests, mock platform in-process
+cd backend && uv run ruff check . && uv run pytest -q          # 304 tests, mock platform in-process
 cd frontend && pnpm lint && pnpm typecheck && pnpm test --run && pnpm i18n:check
 cd backend && uv run python ../scripts/load.py --jobs 30       # against the running stack
+cd backend && uv run python -m app.evals slot                  # every AI feature × 4 languages, saved for review
 ```
 
 No `uv` or `node_modules` on the host? Run the same checks inside the compose containers

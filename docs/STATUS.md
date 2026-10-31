@@ -1,4 +1,4 @@
-# What's still missing — as of 30 Oct 2026, 21:30 Tunis
+# What's still missing — as of 31 Oct 2026, 01:00 Tunis
 
 Deadline **Tue 10 Nov** (report + repo + 90 s video); record the demo by **Mon 9 Nov**. M0–M7 are
 built and pass their Done-when checks on the mock. Remaining work, most urgent first. Details
@@ -17,10 +17,18 @@ whenever an item closes.
 ## 2. In-slot work (needs the live key; Group A: Mon 02/11 00–12, Tue 03/11 12–24, …)
 Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
 `SSL_CERT_FILE=/etc/ssl/cert.pem`.
-- [ ] Real-model end-to-end run in EN, FR, AR (and Darija): placement, quiz, tutor, study pack,
-      audio, Teach-Back, wisdom tip, daily plan. Nothing has run on the cloud yet except the probe.
-- [ ] **Prompt eval (M4 box):** 20 generated questions per language from real outputs → the
-      `prompt-evaluator` agent over `backend/tests/evals/*/outputs/`, results stored for the report.
+- [ ] **First thing in the slot:** `docker compose exec backend uv run python -m app.evals slot --cloud`
+      (with `LLM_PROVIDER=cloud` in `.env`, then `docker compose restart backend worker`). It runs
+      study pack, audio, daily plan, Teach-Back (solid + partial answer) in EN, FR, AR and Darija
+      plus one Class Wisdom tip: about 30 calls, 17 mid, ~10–20 min. Outputs go to
+      `backend/tests/evals/slot/outputs/cloud-*.json`; then `python3 scripts/export_stats.py`
+      on the host. Tested on the mock only (31/10). Afterwards switch back with
+      `python3 scripts/llm.py use mock` (or `auto`).
+- [ ] Placement, quiz and Tutor on the real models by hand in the browser (the slot run doesn't
+      cover them; the quiz eval below does the questions).
+- [ ] **Prompt eval (M4 box):** `uv run python -m app.evals quiz --langs en,fr,ar,ar-TN` in-slot
+      (20 questions per language), then the `prompt-evaluator` agent over
+      `backend/tests/evals/*/outputs/cloud-*` (quiz + the slot run), results stored for the report.
       Also review `scripts/out/probe-cloud-20261030-1806.json`; check Darija by hand.
 - [ ] Watch for prompts that small models break (JSON validity on `llama3.2-3b`; the probe said
       `qwen2.5-3b` failed quiz JSON, ours passed).
@@ -53,11 +61,16 @@ Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
       (drafted by Claude, flagged `_review`), plus real-model Darija outputs.
 
 ## 5. Code still to do (small)
-- [ ] Dev-only Local/Cloud/Mock badge in the top bar (it's only on `/dev/jobs`). The rest of
-      M1 "Providers kept apart" is built: per-provider collections, provider in cache keys and
-      the call log, stats default to cloud, offline serves cloud cache only.
-- [ ] Ending a Tutor session while offline answers 503 (the summary needs AI). Option: end
-      without a summary when paused.
+- [x] Dev-only Local/Cloud/Mock badge in the top bar (31/10). M1 "Providers kept apart" is
+      complete: per-provider collections, provider in cache keys and the call log, stats default
+      to cloud, offline serves cloud cache only.
+- [x] Ending a Tutor session while offline saves it without the summary (31/10).
+- [x] Teach-Back: Arabic and Darija graded by mid; unsure grades wait (`pending_review`); shared
+      prompt voice rules (31/10, DECISIONS.md).
+- [x] `ai_cache` race fixed (31/10): two packs in different languages embedding the same query at
+      once crashed one job. Found by the mock slot run.
+- [ ] **Avatar step redesign** (onboarding step 4, user feedback 31/10: "make it smoother and more
+      fun to build").
 - [ ] Optional: the KaTeX swap for `MathText` if the npm registry allows it.
 - [ ] Optional: "ask the AI after 10 min without a peer answer" (deferred, DECISIONS.md).
 

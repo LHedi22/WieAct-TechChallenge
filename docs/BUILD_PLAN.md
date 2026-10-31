@@ -48,7 +48,7 @@ vitest, i18n) all green.
   - [x] Qwen3 thinking off: append `" /no_think"` to the system message for qwen3 models; for cloud
         also send `chat_template_kwargs` `enable_thinking=false` and drop it on a 400; always strip
         `<think>…</think>`. Tested.
-  - [ ] Providers kept apart: Qdrant collection = `{prefix}-{provider}-{embedding model slug}` with
+  - [x] Providers kept apart: Qdrant collection = `{prefix}-{provider}-{embedding model slug}` with
         that provider's dim; `python -m app.rag.reindex --provider cloud` rebuilds the cloud
         collection; `ai_cache` keys and `ai_call_log` rows include provider and model;
         `/api/admin/stats` defaults to `provider=cloud`; Offline demo mode serves cloud-generated
