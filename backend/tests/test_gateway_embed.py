@@ -1,5 +1,7 @@
 """gateway.embed: the error contract applied to the (separately metered) embeddings endpoint."""
 
+import asyncio
+
 import pytest
 
 from app.gateway import Defer, KeyBlocked
@@ -147,3 +149,42 @@ def test_production_accepts_self_hosted_embeddings_but_not_mock(monkeypatch):
     assert make_settings(monkeypatch, **PROD | SELF).EMBED_PROVIDER == "local"
     with pytest.raises(ValueError, match="EMBED_PROVIDER"):
         make_settings(monkeypatch, **PROD | {"EMBED_PROVIDER": "mock"})
+
+
+async def test_parallel_identical_cache_writes_do_not_collide(sm):
+    """Two jobs embedding the same search query at once both store it: the second write must not
+    crash on the primary key (found by the slot run: two languages' study packs, one chapter).
+    The race made deterministic: another transaction holds the key, uncommitted, when put() runs."""
+    from app.gateway import cache
+    from app.models import AICache
+
+    key = "k" * 64
+    async with sm() as other:
+        other.add(
+            AICache(
+                key=key,
+                task_kind="EMBED",
+                content={"value": [0.1, 0.2]},
+                model_tier="embed",
+                provider="mock",
+                model="m",
+                hits=0,
+            )
+        )
+        await other.flush()  # row inserted, not committed: put() can't see it yet
+        write = asyncio.create_task(
+            cache.put(
+                sm,
+                key=key,
+                kind="EMBED",
+                content=[0.1, 0.2],
+                tier="embed",
+                provider="mock",
+                model="m",
+            )
+        )
+        await asyncio.sleep(0.3)  # put() is now waiting on the uncommitted key
+        await other.commit()
+    await write
+    row = await cache.get(sm, key)
+    assert row is not None and row.content == {"value": [0.1, 0.2]}

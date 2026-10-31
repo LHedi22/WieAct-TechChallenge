@@ -8,6 +8,7 @@ import json
 from typing import Any
 
 from sqlalchemy import update
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.models import AICache
@@ -42,16 +43,19 @@ async def put(
     provider: str,
     model: str,
 ) -> None:
+    # Upsert, not merge (select-then-insert): two jobs storing the same key at once, e.g. one
+    # search-query embedding, must not crash the second on the primary key.
+    values = {
+        "task_kind": kind,
+        "content": {"value": content},
+        "model_tier": tier,
+        "provider": provider,
+        "model": model,
+    }
     async with sm() as s:
-        await s.merge(
-            AICache(
-                key=key,
-                task_kind=kind,
-                content={"value": content},
-                model_tier=tier,
-                provider=provider,
-                model=model,
-                hits=0,
-            )
+        await s.execute(
+            insert(AICache)
+            .values(key=key, hits=0, **values)
+            .on_conflict_do_update(index_elements=[AICache.key], set_=values)
         )
         await s.commit()
