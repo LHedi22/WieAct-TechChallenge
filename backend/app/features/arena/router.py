@@ -60,7 +60,8 @@ class AnswerOut(BaseModel):
     author: Author
     is_mine: bool
     text: str
-    status: str  # grading | graded | rejected | failed
+    # grading | graded | pending_review (unsure: no rewards, author only) | rejected | failed
+    status: str
     score: int | None
     confidence: str | None
     helpful: int
@@ -244,13 +245,13 @@ async def detail(question_id: uuid.UUID, s: Session, user: CurrentUser) -> Quest
             is_mine=own,
             text=a.text,
             status=a.status,
-            score=a.ai_score,
+            score=a.ai_score if a.status != "pending_review" else None,  # unconfirmed
             confidence=a.ai_confidence,
             helpful=helpful.get(a.id, 0),
             voted=a.id in voted,
             pinned=a.id == q.pinned_answer_id,
             feedback=Feedback(**{k: fb[k] for k in Feedback.model_fields if k in fb})
-            if own and a.status == "graded"
+            if own and a.status in ("graded", "pending_review")
             else None,
             reject_flag=fb.get("flag") if own and a.status == "rejected" else None,
             grading_job_id=await service.grading_job(s, a.id)

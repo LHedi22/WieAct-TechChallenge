@@ -216,4 +216,29 @@ describe("Teach-Back peer room", () => {
     await userEvent.click(screen.getByRole("button", { name: "Pin as best answer" }));
     await waitFor(() => expect(calls).toContain("POST /api/arena/answers/a1/pin"));
   });
+  it("shows my unsure answer as waiting for a check, with feedback and no score", async () => {
+    const mine: ArenaDetail["answers"][number] = {
+      ...detail.answers[0]!,
+      id: "a2",
+      is_mine: true,
+      status: "pending_review",
+      score: null,
+      confidence: "low",
+      feedback: {
+        errors: [],
+        good: "You linked undo to the order.",
+        missing: ["LIFO"],
+        quick_mode: false,
+      },
+    };
+    serve({
+      "GET /api/economy": economy,
+      "GET /api/arena/questions": feed,
+      "GET /api/arena/questions/q1": { ...detail, answers: [], my_answer: mine, can_pin: false },
+    });
+    show(<ArenaPage />, "/w/:worldId/c/:courseId/arena", "/w/w1/c/c1/arena?chapter=ch1", "ar");
+    expect(await screen.findByText("في انتظار التحقق")).toBeInTheDocument();
+    expect(screen.queryByText("92")).not.toBeInTheDocument();
+    expect(screen.getByText(/You linked undo/)).toBeInTheDocument();
+  });
 });

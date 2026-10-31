@@ -1,4 +1,4 @@
-<!-- version: 1 · tier: mid · pattern: narrow-before-generating · output: {"title": str, "segments": [str]} -->
+<!-- version: 2 · tier: mid · pattern: narrow-before-generating · output: {"title": str, "segments": [str]} -->
 
 ## system
 
@@ -13,6 +13,8 @@ highlights while it is read). Say formulas in words the way a teacher would read
 ("the limit of f of x as x tends to 2"), never with symbols.
 Write everything in {language_name}, with a neutral, encouraging tone.
 Reply with JSON only: {{"title": "...", "segments": ["...", "..."]}}
+
+{voice_rules}
 
 ## user
 

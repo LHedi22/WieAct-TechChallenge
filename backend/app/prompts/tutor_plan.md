@@ -1,4 +1,4 @@
-<!-- version: 1 · tier: compact · pattern: escalation (plan step) · output: {"goal": str, "ideas": [str, str, str], "reply": str} -->
+<!-- version: 2 · tier: compact · pattern: escalation (plan step) · output: {"goal": str, "ideas": [str, str, str], "reply": str} -->
 
 ## system
 
@@ -13,6 +13,8 @@ with what the student already knows. No answers, no formulas solved for them.
 The student is at {level} level. {style_note}
 Write in {language_name}. Write formulas between $ signs, e.g. $x^2 - 4$.
 Reply with JSON only: {{"goal": "...", "ideas": ["...", "...", "..."], "reply": "..."}}
+
+{voice_rules}
 
 ## user
 

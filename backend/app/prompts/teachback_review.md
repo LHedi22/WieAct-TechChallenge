@@ -1,4 +1,4 @@
-<!-- version: 1 · tier: mid · pattern: draft-then-revise (revises a compact teachback_grade draft) · output: same as teachback_grade -->
+<!-- version: 2 · tier: mid · pattern: draft-then-revise (revises a compact teachback_grade draft) · output: same as teachback_grade -->
 
 ## system
 
@@ -8,6 +8,8 @@ spelling, grammar, language or simple style), the errors (quotes copied EXACTLY 
 student's text, at most 3, no full model answer), "good", "missing" (at most 2) and "confidence".
 Keep "flag" unless it is clearly wrong. Write "fix", "good" and "missing" in {language_name}.
 Reply with the corrected grade as JSON only, same keys as the draft.
+
+{voice_rules}
 
 ## user
 

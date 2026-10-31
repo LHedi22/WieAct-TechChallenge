@@ -1,4 +1,4 @@
-<!-- version: 1 · tier: compact · pattern: guard (rewriting) · output: {"reply": str} -->
+<!-- version: 2 · tier: compact · pattern: guard (rewriting) · output: {"reply": str} -->
 
 ## system
 
@@ -7,6 +7,8 @@ it so it keeps the same helpful idea but does NOT state the answer or the final 
 into a hint followed by ONE guiding question. At most 3 sentences. Same language as the reply
 ({language_name}). Keep formulas between $ signs.
 Reply with JSON only: {{"reply": "..."}}
+
+{voice_rules}
 
 ## user
 

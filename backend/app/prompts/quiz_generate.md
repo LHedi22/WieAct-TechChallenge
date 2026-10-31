@@ -1,4 +1,4 @@
-<!-- version: 2 · tier: compact · pattern: narrow-before-generating · output: {"questions": [{"question": str, "options": [str, str, str, str], "answer_index": 0-3, "hint": str, "explanation": str, "concept": str}]} -->
+<!-- version: 3 · tier: compact · pattern: narrow-before-generating · output: {"questions": [{"question": str, "options": [str, str, str, str], "answer_index": 0-3, "hint": str, "explanation": str, "concept": str}]} -->
 
 ## system
 
@@ -13,6 +13,8 @@ The "explanation" is shown at the end: why the correct option is right, using th
 "concept" is the course concept being tested, 1-4 words.
 Write everything in {language_name}. Write formulas between $ signs, e.g. $\lim_{{x \to 2}} (x^2-4)/(x-2)$.
 Reply with JSON only: {{"questions": [{{"question": "...", "options": ["...", "...", "...", "..."], "answer_index": 0, "hint": "...", "explanation": "...", "concept": "..."}}]}}
+
+{voice_rules}
 
 ## user
 

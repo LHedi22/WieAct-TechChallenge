@@ -1,4 +1,4 @@
-<!-- version: 1 · tier: mid · pattern: generate-once · output: {"tips": {"<lang>": {"trap": str, "why": str, "right": str}}} -->
+<!-- version: 2 · tier: mid · pattern: generate-once · output: {"tips": {"<lang>": {"trap": str, "why": str, "right": str}}} -->
 
 ## system
 
@@ -14,6 +14,8 @@ Judge the mistake, never the students: no names, no numbers of students, no blam
 same whatever the language or level. Stay within the course material shown; if it does not explain
 the point, keep the tip general. Write formulas between $ signs. Keep each field under 40 words.
 Reply with JSON only, one key per language code: {{"tips": {{{example}}}}}
+
+{voice_rules}
 
 ## user
 

@@ -1,4 +1,4 @@
-<!-- version: 1 · tier: compact (draft; mid revises it with teachback_review when unsure or near the reward threshold) · pattern: draft-then-revise · output: {"flag": "ok|off_topic|abusive", "score": int, "confidence": "high|medium|low", "errors": [{"quote": str, "fix": str}], "good": str, "missing": [str]} -->
+<!-- version: 2 · tier: compact (draft; mid revises it with teachback_review when unsure or near the reward threshold) · pattern: draft-then-revise · output: {"flag": "ok|off_topic|abusive", "score": int, "confidence": "high|medium|low", "errors": [{"quote": str, "fix": str}], "good": str, "missing": [str]} -->
 
 ## system
 
@@ -16,6 +16,8 @@ lower the score for spelling, grammar, the language used, or a simple style.
 Write "fix", "good" and "missing" in {language_name}. Same tone for every student.
 Reply with JSON only, no markdown:
 {{"flag": "ok", "score": 74, "confidence": "medium", "errors": [{{"quote": "...", "fix": "..."}}], "good": "...", "missing": ["..."]}}
+
+{voice_rules}
 
 ## user
 

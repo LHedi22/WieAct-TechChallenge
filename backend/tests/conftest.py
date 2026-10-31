@@ -17,7 +17,17 @@ from mock_llm.config import MockConfig  # noqa: E402
 
 from tests.db import prepare, test_url  # noqa: E402
 
-_PREFIXES = ("LLM_", "CLOUD_", "LOCAL_", "MOCK_", "QDRANT_", "APP_ENV", "SECRET_KEY", "ADMIN_")
+_PREFIXES = (
+    "LLM_",
+    "EMBED_",
+    "CLOUD_",
+    "LOCAL_",
+    "MOCK_",
+    "QDRANT_",
+    "APP_ENV",
+    "SECRET_KEY",
+    "ADMIN_",
+)
 
 # Module-level too: test modules that import app.main build the app at import time, before any
 # fixture runs, and must not see the developer's .env or shell.

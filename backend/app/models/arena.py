@@ -34,7 +34,7 @@ class PeerQuestion(Base):
 class PeerAnswer(Base):
     """A classmate's explanation, AI-scored (draft-then-revise). One per student per question;
     "Improve my answer" rewrites it in place and grades it again. status: grading | graded |
-    rejected."""
+    pending_review (still unsure after grading: no rewards, author only) | rejected | failed."""
 
     __tablename__ = "peer_answers"
     __table_args__ = (UniqueConstraint("question_id", "author_id"),)
@@ -45,7 +45,7 @@ class PeerAnswer(Base):
     )
     author_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     text: Mapped[str] = mapped_column(Text)
-    status: Mapped[str] = mapped_column(String(10), default="grading")
+    status: Mapped[str] = mapped_column(String(16), default="grading")
     ai_score: Mapped[int | None] = mapped_column(Integer)
     ai_confidence: Mapped[str | None] = mapped_column(String(8))
     # {errors: [{quote, fix}], good, missing: [str], quick_mode}

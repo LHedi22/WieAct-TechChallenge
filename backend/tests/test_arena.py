@@ -11,6 +11,7 @@ from app.features.arena.service import Grade, needs_review, parse_grade
 from app.gateway import Defer, Result, TaskKind
 from app.jobs.worker import Worker
 from app.models import AICallLog
+from tests.test_map import join
 from tests.test_quiz import OWL_FR, indexed
 from tests.test_rag_indexing import gw, rag_env  # noqa: F401  (fixtures)
 from tests.test_worlds_api import SEA, api, make_world, pptx  # noqa: F401  (fixtures)
@@ -234,3 +235,74 @@ async def test_full_path_on_the_mock_one_compact_call(api, sm, pptx):  # noqa: F
             select(func.count()).where(AICallLog.task_kind == "MODERATE_POST")
         )
     assert tiers.get("compact") == 1 and tiers.get("mid", 0) <= 1 and moderation == 1
+
+
+# --- Arabic / Darija grading safety --------------------------------------------------------------
+# The compact model mis-grades Arabic and Darija explanations, so they go straight to mid. A grade
+# that is still low-confidence pays nothing automatically: the answer waits as "pending_review".
+SAND_AR = {"X-Dev-User": "SandFox", "X-UI-Language": "ar"}
+DUNE_TN = {"X-Dev-User": "DuneCat", "X-UI-Language": "ar-TN"}
+AR_TEXT = "المكدس يحتفظ بآخر عملية في الأعلى، لذلك التراجع يحذفها أولاً: آخر من يدخل أول من يخرج."
+
+
+async def arabic_room(api, sm, pptx, who):  # noqa: F811
+    world, chapter = await indexed(api, sm, pptx)
+    await join(api, world, who)
+    r = await api.post(
+        "/api/arena/questions",
+        json={"chapter_id": chapter, "text": "Why does a stack make undo easy?"},
+        headers=OWL_FR,
+    )
+    await Worker(sm).drain(timeout_s=30)
+    return chapter, r.json()["question_id"]
+
+
+@pytest.mark.parametrize("who", [SAND_AR, DUNE_TN], ids=["ar", "ar-TN"])
+async def test_arabic_and_darija_are_graded_by_mid_directly(api, sm, pptx, grades, who):  # noqa: F811
+    _, qid = await arabic_room(api, sm, pptx, who)
+    grades["mid"].append(g(88))
+    d = await send(api, sm, qid, AR_TEXT, who=who)
+    assert grades["calls"] == ["mid"]  # no compact draft first
+    assert d["my_answer"]["status"] == "graded" and d["my_answer"]["score"] == 88
+    assert (await wallet(api, who))["earned"] == economy.EARN["peer_answer_good"]
+
+
+async def test_low_confidence_answer_waits_for_review_without_rewards(api, sm, pptx, grades):  # noqa: F811
+    _, qid = await arabic_room(api, sm, pptx, SAND_AR)
+    grades["mid"].append(g(90, "low"))
+    d = await send(api, sm, qid, AR_TEXT, who=SAND_AR)
+    mine = d["my_answer"]
+    assert mine["status"] == "pending_review" and mine["score"] is None
+    assert mine["feedback"]["good"]  # the author still gets the feedback
+    w = await wallet(api, SAND_AR)
+    assert w["earned"] == 0 and w["points"] == 0
+    seen = (await api.get(f"/api/arena/questions/{qid}", headers=OWL_FR)).json()
+    assert seen["answers"] == [] and seen["question"]["answers"] == 0  # not shown to classmates
+    pin = await api.post(f"/api/arena/answers/{mine['id']}/pin", headers=OWL_FR)
+    assert pin.status_code in (404, 409)
+
+
+async def test_english_low_confidence_after_review_also_waits(api, sm, pptx, grades):  # noqa: F811
+    _, qid = await room(api, sm, pptx)
+    grades["compact"].append(g(80, "low"))
+    grades["mid"].append(g(80, "low"))  # the review is still unsure
+    d = await send(api, sm, qid)
+    assert grades["calls"] == ["compact", "mid"]
+    assert d["my_answer"]["status"] == "pending_review"
+    assert (await wallet(api, SEA))["earned"] == 0
+
+
+async def test_solo_low_confidence_pays_no_points(api, sm, pptx, grades):  # noqa: F811
+    world, chapter = await indexed(api, sm, pptx)
+    await join(api, world, SAND_AR)
+    grades["mid"].append(g(90, "low"))
+    r = await api.post(
+        "/api/arena/solo",
+        json={"chapter_id": chapter, "concept": "stacks", "text": AR_TEXT},
+        headers=SAND_AR,
+    )
+    await Worker(sm).drain(timeout_s=30)
+    job = (await api.get(f"/api/jobs/{r.json()['job_id']}", headers=SAND_AR)).json()
+    assert job["result"]["pending_review"] is True and job["result"]["points"] == 0
+    assert grades["calls"] == ["mid"]
+    assert (await wallet(api, SAND_AR))["points"] == 0

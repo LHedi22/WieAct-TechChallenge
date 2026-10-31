@@ -3,7 +3,16 @@ import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { api, type ArenaAnswer, type ArenaDetail, type ArenaQuestion } from "@/api/client";
-import { Avatar, type AvatarLook, Bidi, Chip, PixelButton, SoftCard, Sprite } from "@/components";
+import {
+  Avatar,
+  type AvatarLook,
+  Banner,
+  Bidi,
+  Chip,
+  PixelButton,
+  SoftCard,
+  Sprite,
+} from "@/components";
 import { cx } from "@/components/cx";
 import { JobProgress } from "@/features/jobs/JobProgress";
 import { useWisdomTip } from "@/features/wisdom/useWisdomTip";
@@ -435,6 +444,22 @@ function MyAnswer({ detail }: { detail: ArenaDetail }) {
             defaultValue: t("answerRejected.other"),
           })}
         </p>
+      ) : mine.status === "pending_review" ? (
+        <>
+          <Banner kind="queue">
+            <span className="block">{t("pending.title")}</span>
+            <span className="block font-normal">{t("pending.body")}</span>
+          </Banner>
+          <ScoreCard
+            score={null}
+            confidence={mine.confidence}
+            text={mine.text}
+            errors={fb?.errors ?? []}
+            good={fb?.good ?? ""}
+            missing={fb?.missing ?? []}
+            quickMode={fb?.quick_mode}
+          />
+        </>
       ) : (
         mine.score !== null && (
           <ScoreCard
@@ -555,6 +580,21 @@ function SoloMode({ chapterId, cost }: { chapterId: string; cost: number }) {
                       defaultValue: t("answerRejected.other"),
                     })}
                   </p>
+                ) : r.pending_review ? (
+                  <>
+                    <Banner kind="queue">
+                      <span className="block">{t("pending.title")}</span>
+                      <span className="block font-normal">{t("pending.solo")}</span>
+                    </Banner>
+                    <ScoreCard
+                      score={null}
+                      confidence={r.confidence as string}
+                      text={text}
+                      errors={r.errors as Fix[]}
+                      good={r.good as string}
+                      missing={r.missing as string[]}
+                    />
+                  </>
                 ) : (
                   <>
                     <ScoreCard

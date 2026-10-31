@@ -951,7 +951,12 @@
       "send": "Obtenir ma note",
       "again": "En expliquer une autre"
     },
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "pending": {
+      "title": "En attente de vérification",
+      "body": "L'IA n'était pas sûre de la note de cette réponse : aucune pièce ni aucun point n'est attribué automatiquement, et la classe ne la voit pas encore. Tu peux l'améliorer pour qu'elle soit notée à nouveau.",
+      "solo": "L'IA n'était pas sûre de la note de cette explication : aucun point n'est attribué automatiquement. Réessaie avec un peu plus de détails."
+    }
   },
   "daily": {
     "title": "Défis du jour",

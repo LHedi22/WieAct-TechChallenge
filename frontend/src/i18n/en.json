@@ -951,7 +951,12 @@
       "send": "Get my score",
       "again": "Explain another one"
     },
-    "retry": "Try again"
+    "retry": "Try again",
+    "pending": {
+      "title": "Waiting for a check",
+      "body": "The AI wasn't sure how to grade this answer, so no coins or points are given automatically and classmates don't see it yet. You can improve it and it will be graded again.",
+      "solo": "The AI wasn't sure how to grade this explanation, so no points are given automatically. Try again with a bit more detail."
+    }
   },
   "daily": {
     "title": "Daily challenges",

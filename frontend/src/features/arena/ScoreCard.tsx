@@ -44,7 +44,8 @@ export function ScoreCard({
   missing,
   quickMode,
 }: {
-  score: number;
+  /** null: the grade isn't confirmed (pending review), so no score is shown. */
+  score: number | null;
   confidence: string | null;
   text: string;
   errors: Fix[];
@@ -58,13 +59,22 @@ export function ScoreCard({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-3">
-        <p>
-          <span className="font-heading text-[2.5rem] leading-none">
-            <Bidi>{nf.format(score)}</Bidi>
-          </span>
-          <span className="text-ink/70"> {t("outOf")}</span>
-        </p>
-        <ProgressBar value={score} max={100} label={t("scoreLabel")} className="min-w-40 flex-1" />
+        {score !== null && (
+          <>
+            <p>
+              <span className="font-heading text-[2.5rem] leading-none">
+                <Bidi>{nf.format(score)}</Bidi>
+              </span>
+              <span className="text-ink/70"> {t("outOf")}</span>
+            </p>
+            <ProgressBar
+              value={score}
+              max={100}
+              label={t("scoreLabel")}
+              className="min-w-40 flex-1"
+            />
+          </>
+        )}
         {confidence && (
           <Chip kind="confidence">
             {tc("chip.confidence", { level: tc(`confidence.${confidence}`) })}

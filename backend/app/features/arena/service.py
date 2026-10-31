@@ -8,6 +8,10 @@
            reward threshold (coins depend on it). Mid busy → the draft stands (Quick mode). Free.
 - solo   — ARENA_SOLO job: the same grade for a self-chosen concept; mid only when unsure.
            Costs COST["teachback_solo"]; points = POINTS["teachback_solo_per_10_score"] per 10.
+Arabic and Darija (MID_GRADE_LANGUAGES) skip the compact draft: ONE mid call grades them, since
+the compact model mis-grades them (DECISIONS.md 2026-10-31). Mid busy → compact fallback (Quick
+mode). Whatever the path, a grade that is still low-confidence pays nothing automatically: the
+answer becomes "pending_review" (solo: 0 points), visible to its author only.
 Rewards: an answer ≥ PEER_ANSWER_THRESHOLD earns EARN["peer_answer_good"] coins (daily cap) and
 POINTS["peer_answer_good"], once per answer; the asker's pin gives POINTS["pinned_best_answer"].
 Nicknames only; detailed feedback is shown to the answer's author only."""
@@ -40,6 +44,7 @@ GRADE_KIND = "ARENA_GRADE"
 SOLO_KIND = "ARENA_SOLO"
 CONTEXT_K = 4
 GRADE_STAGES = ("reading_chapter", "scoring_answer", "double_checking")
+MID_GRADE_LANGUAGES = ("ar", "ar-TN")  # graded by mid directly: no compact draft
 
 
 class Rejected(Exception):
@@ -71,6 +76,11 @@ def needs_review(g: Grade, *, peer: bool) -> bool:
     if g.confidence == "low":
         return True
     return peer and abs(g.score - economy.PEER_ANSWER_THRESHOLD) <= economy.TEACHBACK_REVIEW_BAND
+
+
+def pending_review(g: Grade) -> bool:
+    """Still unsure after grading: no automatic coins or points; the answer waits for a check."""
+    return g.flag == "ok" and g.confidence == "low"
 
 
 def parse_grade(content: Any) -> Grade | None:
@@ -247,7 +257,9 @@ async def grade(
     text: str,
     language: str,
 ) -> tuple[Grade, bool]:
-    """(grade, reviewed_by_mid). One compact call; a mid review only when needs_review()."""
+    """(grade, reviewed_by_mid). One compact call; a mid review only when needs_review().
+    Arabic / Darija: one mid call and no draft (mid busy → the gateway's compact fallback)."""
+    direct_mid = language in MID_GRADE_LANGUAGES
     await ctx.set_stage("reading_chapter")
     context = await _context(world_id, chapter.id, f"{prompt} {text}"[:500])
     values = {
@@ -269,6 +281,7 @@ async def grade(
                 lane="interactive",
                 messages=messages,
                 language=language,
+                tier="mid" if direct_mid else None,
                 prompt_version=version,
             )
         )
@@ -276,6 +289,9 @@ async def grade(
     draft = parse_grade(result.content)
     if draft is None:
         raise gateway.BadOutput("unusable grade", refusal="bad_json")
+    if direct_mid:
+        ctx.quick_mode = ctx.quick_mode or result.quick_mode
+        return draft, result.model_tier == "mid"
     if not needs_review(draft, peer=mode == "peer"):
         return draft, False
 
@@ -373,8 +389,9 @@ async def grade_answer(ctx: JobContext) -> dict[str, Any]:
             a.status = "rejected"
             a.ai_feedback = {"flag": g.flag}
         else:
-            a.status = "graded"
-            await daily.record(s, a.author_id, "teachback", chapter_id=q.chapter_id)
+            a.status = "pending_review" if pending_review(g) else "graded"
+            if a.status == "graded":
+                await daily.record(s, a.author_id, "teachback", chapter_id=q.chapter_id)
             a.ai_score, a.ai_confidence = g.score, g.confidence
             a.ai_feedback = {
                 "errors": [e.model_dump() for e in g.errors],
@@ -383,7 +400,7 @@ async def grade_answer(ctx: JobContext) -> dict[str, Any]:
                 "quick_mode": ctx.quick_mode,
             }
             a.reviewed_by_mid = reviewed
-            if g.score >= economy.PEER_ANSWER_THRESHOLD and not a.rewarded:
+            if a.status == "graded" and g.score >= economy.PEER_ANSWER_THRESHOLD and not a.rewarded:
                 a.rewarded = True
                 ref = f"answer:{a.id}"
                 earned = await wallet.earn(s, a.author_id, economy.EARN["peer_answer_good"], ref)
@@ -413,7 +430,8 @@ async def grade_solo(ctx: JobContext) -> dict[str, Any]:
         language=p.get("language") or "en",
     )
     points = 0
-    if g.flag == "ok":
+    waiting = pending_review(g)
+    if g.flag == "ok" and not waiting:
         points = economy.POINTS["teachback_solo_per_10_score"] * (g.score // 10)
         async with db.get_sessionmaker()() as s:
             await wallet.add_points(s, user_id, course.world_id, points, "solo", str(ctx.job_id))
@@ -428,4 +446,5 @@ async def grade_solo(ctx: JobContext) -> dict[str, Any]:
         "missing": g.missing,
         "reviewed_by_mid": reviewed,
         "points": points,
+        "pending_review": waiting,
     }

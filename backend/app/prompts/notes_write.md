@@ -1,4 +1,4 @@
-<!-- version: 1 · tier: mid · pattern: plan-once (notes) → execute-compact (cards, map) · output: {"title": str, "sections": [{"heading": str, "points": [str], "refs": [str]}], "key_terms": [{"term": str, "meaning": str}]} -->
+<!-- version: 2 · tier: mid · pattern: plan-once (notes) → execute-compact (cards, map) · output: {"title": str, "sections": [{"heading": str, "points": [str], "refs": [str]}], "key_terms": [{"term": str, "meaning": str}]} -->
 
 ## system
 
@@ -13,6 +13,8 @@ Give 3-6 sections and 3-8 key terms with a one-line meaning.
 Write everything in {language_name}, with a neutral, encouraging tone. Write formulas between $
 signs, e.g. $\lim_{{x \to 2}} (x^2-4)/(x-2) = 4$.
 Reply with JSON only: {{"title": "...", "sections": [{{"heading": "...", "points": ["..."], "refs": ["page:1"]}}], "key_terms": [{{"term": "...", "meaning": "..."}}]}}
+
+{voice_rules}
 
 ## user
 

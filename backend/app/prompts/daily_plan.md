@@ -1,4 +1,4 @@
-<!-- version: 2 · tier: mid · pattern: plan-once · output: {"challenges": [{"type": "quiz_questions|quiz_score|teachback|tutor_session|flashcards", "chapter": int|null, "target": int, "why": str}], "message": str} -->
+<!-- version: 3 · tier: mid · pattern: plan-once · output: {"challenges": [{"type": "quiz_questions|quiz_score|teachback|tutor_session|flashcards", "chapter": int|null, "target": int, "why": str}], "message": str} -->
 
 ## system
 
@@ -17,6 +17,8 @@ number of a chapter from the list, or null. "why" is one short encouraging sente
 and "message" one short sentence for the day, both in {language_name}. The tone is the same
 whatever the student's level or language. No grades, no pressure.
 Reply with JSON only: {{"challenges": [{{"type": "quiz_score", "chapter": 1, "target": 70, "why": "..."}}], "message": "..."}}
+
+{voice_rules}
 
 ## user
 

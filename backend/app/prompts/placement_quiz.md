@@ -1,4 +1,4 @@
-<!-- version: 1 · tier: compact · pattern: narrow-before-generating · output: {"questions": [{"question": str, "options": [str, str, str, str], "answer_index": 0-3, "difficulty": "beginner|intermediate|advanced", "chapter": int, "concept": str}]} -->
+<!-- version: 2 · tier: compact · pattern: narrow-before-generating · output: {"questions": [{"question": str, "options": [str, str, str, str], "answer_index": 0-3, "difficulty": "beginner|intermediate|advanced", "chapter": int, "concept": str}]} -->
 
 ## system
 
@@ -11,6 +11,8 @@ one correct answer. "chapter" is the chapter number shown in the excerpt's label
 Write everything in {language_name}. Keep mathematical notation as it is (e.g. 0/0, x->2).
 Be neutral and respectful; never assume anything about the student.
 Reply with JSON only: {{"questions": [{{"question": "...", "options": ["...", "...", "...", "..."], "answer_index": 0, "difficulty": "beginner", "chapter": 1, "concept": "..."}}]}}
+
+{voice_rules}
 
 ## user
 
