@@ -10,10 +10,9 @@ whenever an item closes.
       (`EMBED_PROVIDER=local`; DECISIONS.md). Dev: `ollama pull bge-m3` on the Mac (done) and
       `EMBED_PROVIDER=local` in `.env`. Production: the Railway `ollama` service (DEPLOY.md).
       Still worth telling the organisers we self-host embeddings (declared service).
-- [ ] **`.env` lines** (a human pastes them; Claude never opens `.env`):
-      `CLOUD_MODEL_COMPACT=llama3.2-3b`, `CLOUD_MODEL_MID=llama3.1-8b`, `LLM_DISABLE_THINKING=false`,
-      `EMBED_PROVIDER=local`. Then re-index the dev data once:
-      `cd backend && uv run python -m app.rag.reindex --provider local` (or in the container).
+- [x] `.env` lines added (31/10): cloud models, thinking off, `EMBED_PROVIDER=local`. Dev data
+      re-indexed with `bge-m3` (4 files, 47 chunks → `hack-04-chunks-local-bge-m3`); EN/FR/AR
+      queries find the right chapter (EN↔AR similarity 0.77 vs 0.38 unrelated).
 
 ## 2. In-slot work (needs the live key; Group A: Mon 02/11 00–12, Tue 03/11 12–24, …)
 Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
