@@ -30,7 +30,7 @@ class TurnIn(BaseModel):
 
 class JobRef(BaseModel):
     session_id: uuid.UUID
-    job_id: uuid.UUID
+    job_id: uuid.UUID | None  # None: ended while AI is paused, so no summary job
 
 
 class Idea(BaseModel):

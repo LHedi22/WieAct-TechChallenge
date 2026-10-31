@@ -4,14 +4,14 @@ import { useSystemStatus } from "@/hooks/useSystemStatus";
 import { numberLocale } from "@/i18n/languages";
 
 /** Dev-only Local/Cloud/Mock badge (ARCHITECTURE.md §Providers). Never shown in production builds. */
-export function ProviderBadge() {
+export function ProviderBadge({ className }: { className?: string }) {
   const { t } = useTranslation();
   const { data } = useSystemStatus();
   if (!import.meta.env.DEV || !data) return null;
   const label = t(`provider.${data.provider}`);
   const auto = data.configured_provider === "auto" ? ` · ${t("provider.auto")}` : "";
   return (
-    <Chip kind="confidence" className="self-start">
+    <Chip kind="confidence" className={className}>
       {t("provider.label")}: {label}
       {auto}
     </Chip>

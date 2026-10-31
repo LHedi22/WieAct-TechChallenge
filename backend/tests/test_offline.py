@@ -84,3 +84,21 @@ async def test_job_caught_by_the_switch(sm, api, gw, monkeypatch, lane):  # noqa
     else:
         assert job.status == "queued" and job.error == "deferred:offline"
         assert job.not_before > datetime.now(UTC)
+
+
+async def test_tutor_ends_without_a_summary_while_paused(api, sm, pptx, gw, monkeypatch):  # noqa: F811
+    from tests.test_tutor import say, start
+
+    _, chapter = await indexed(api, sm, pptx)
+    sid = await start(api, sm, chapter)
+    await say(api, sm, sid, "on empile")
+    go_offline(monkeypatch)
+    r = await api.post(f"/api/tutor/{sid}/end", headers=OWL_FR)
+    assert r.status_code == 200 and r.json()["job_id"] is None
+    s = (await api.get(f"/api/tutor/{sid}", headers=OWL_FR)).json()
+    assert s["status"] == "ended" and s["summary"] is None and s["pending_job_id"] is None
+    async with sm() as db:
+        summary_jobs = select(Job).where(
+            Job.kind == "TUTOR", Job.payload["mode"].astext == "summary"
+        )
+        assert await db.scalar(summary_jobs) is None

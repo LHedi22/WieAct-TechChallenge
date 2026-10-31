@@ -289,6 +289,41 @@ describe("Socratic Tutor", () => {
     expect(screen.getByText("وجدت الفكرة.")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /أعطني تلميحًا/ })).toBeNull(); // no composer once ended
   });
+
+  it("ends while AI is paused: saved without a summary", async () => {
+    let ended = false;
+    const calls = serve({
+      "GET /api/system/status": {
+        app_env: "production",
+        configured_provider: "cloud",
+        provider: "cloud",
+        slot_live: false,
+        next_slot: null,
+        next_slot_start: null,
+        offline_demo_mode: true,
+        reason: "outside_slot",
+        upload_max_mb: 50,
+      },
+      [`GET /api/tutor/${S}`]: () => [200, session(ended ? { status: "ended" } : {})],
+      [`POST /api/tutor/${S}/end`]: () => {
+        ended = true;
+        return [200, { session_id: S, job_id: null }];
+      },
+    });
+    const user = userEvent.setup();
+    show(
+      <TutorPage />,
+      "/worlds/:worldId/courses/:courseId/tutor/:sessionId",
+      `/worlds/${W}/courses/${C}/tutor/${S}`,
+    );
+    const end = await screen.findByRole("button", { name: "End session" });
+    await waitFor(() => expect(screen.getByRole("button", { name: "Send" })).toBeDisabled());
+    expect(end).toBeEnabled();
+    await user.click(end);
+    expect(await screen.findByText("Session saved")).toBeInTheDocument();
+    expect(screen.getByText(/AI is paused right now/)).toBeInTheDocument();
+    expect(calls.some((c) => c.key === `POST /api/tutor/${S}/end`)).toBe(true);
+  });
 });
 
 describe("Entry dialog", () => {

@@ -841,7 +841,9 @@
       "title": "Session summary",
       "found": "{count, plural, one {You found # key idea yourself.} other {You found # key ideas yourself.}}",
       "next": "Next:",
-      "quiz": "Take a quiz on this chapter"
+      "quiz": "Take a quiz on this chapter",
+      "savedTitle": "Session saved",
+      "pausedBody": "Your conversation is saved. There's no AI summary because AI is paused right now."
     }
   },
   "wallet": {

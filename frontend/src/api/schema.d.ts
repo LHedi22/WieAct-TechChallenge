@@ -1428,6 +1428,11 @@ export interface components {
        * @description set to make the result shareable/cached
        */
       cache_key?: string | null;
+      /**
+       * Topic
+       * @description vary it so load tests on the real platform never send repeated identical requests
+       */
+      topic?: string | null;
     };
     /** DocumentOut */
     DocumentOut: {
@@ -1796,11 +1801,8 @@ export interface components {
        * Format: uuid
        */
       session_id: string;
-      /**
-       * Job Id
-       * Format: uuid
-       */
-      job_id: string;
+      /** Job Id */
+      job_id: string | null;
     };
     /** JobView */
     JobView: {

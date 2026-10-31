@@ -841,7 +841,9 @@
       "title": "Bilan de la séance",
       "found": "{count, plural, one {Tu as trouvé # idée clé toi-même.} other {Tu as trouvé # idées clés toi-même.}}",
       "next": "Ensuite :",
-      "quiz": "Faire un quiz sur ce chapitre"
+      "quiz": "Faire un quiz sur ce chapitre",
+      "savedTitle": "Séance enregistrée",
+      "pausedBody": "Ta conversation est enregistrée. Pas de résumé IA : l'IA est en pause pour le moment."
     }
   },
   "wallet": {

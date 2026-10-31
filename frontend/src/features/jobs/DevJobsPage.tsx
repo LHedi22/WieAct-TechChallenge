@@ -32,7 +32,7 @@ export function DevJobsPage() {
       <header className="flex flex-col gap-3">
         <h1 className="text-h1">{t("title")}</h1>
         <p className="text-ink/70">{t("intro")}</p>
-        <ProviderBadge />
+        <ProviderBadge className="self-start" />
         <LanguageSwitcher />
       </header>
 
