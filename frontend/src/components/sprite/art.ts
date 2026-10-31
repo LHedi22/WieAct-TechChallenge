@@ -116,6 +116,87 @@ function boatPaint(x: number, y: number): string | null {
   return null;
 }
 
+// Buildings (32×32): boxes drawn in order, each with a 1px ink outline; later boxes paint over.
+type Box = [number, number, number, number, string, boolean?]; // x, y, w, h, fill, no outline
+
+function boxes(list: Box[]): Paint {
+  const layers: [number, number, number, number, string][] = [];
+  for (const [x, y, w, h, fill, bare] of list) {
+    if (!bare) layers.push([x - 1, y - 1, w + 2, h + 2, c.ink]);
+    layers.push([x, y, w, h, fill]);
+  }
+  return (px, py) => {
+    for (let i = layers.length - 1; i >= 0; i--) {
+      const [x, y, w, h, fill] = layers[i]!;
+      if (px >= x && px < x + w && py >= y && py < y + h) return fill;
+    }
+    return null;
+  };
+}
+
+const arches = (y: number, fill: string): Box[] =>
+  [5, 9, 13, 17, 21, 25].map((x) => [x, y, 2, 3, fill, true] as Box);
+
+const quizHall = boxes([
+  [3, 26, 26, 3, c.sand.dark],
+  [4, 10, 24, 16, c.sand.DEFAULT],
+  [6, 8, 20, 2, c.sand.dark],
+  ...arches(12, c.terracotta.ink),
+  ...arches(19, c.terracotta.ink),
+  [4, 17, 24, 1, c.sand.dark, true],
+  [6, 2, 1, 6, c.ink, true],
+  [7, 2, 4, 3, c.terracotta.DEFAULT, true],
+]);
+
+const tutorCafe = boxes([
+  [6, 12, 20, 16, c.whitewash],
+  [14, 20, 4, 8, c.primary.DEFAULT],
+  [16, 23, 1, 1, c.sand.DEFAULT, true],
+  [8, 15, 3, 3, c.primary.light],
+  [21, 15, 3, 3, c.primary.light],
+  [4, 10, 24, 2, c.primary.DEFAULT],
+  ...[5, 9, 13, 17, 21, 25].map((x) => [x, 10, 2, 2, c.whitewash, true] as Box),
+  [3, 6, 4, 4, c.bougainvillea],
+  [26, 22, 3, 1, c.terracotta.ink, true],
+  [27, 23, 1, 5, c.terracotta.ink, true],
+]);
+
+const studyStudio = boxes([
+  [6, 14, 20, 14, c.whitewash],
+  [10, 10, 12, 4, c.whitewash],
+  [12, 7, 8, 3, c.whitewash],
+  [14, 6, 4, 1, c.whitewash, true],
+  [15, 3, 2, 3, c.primary.DEFAULT, true],
+  [14, 21, 4, 7, c.primary.DEFAULT],
+  [9, 17, 2, 3, c.primary.DEFAULT],
+  [21, 17, 2, 3, c.primary.DEFAULT],
+  [6, 14, 20, 1, c.sand.DEFAULT, true],
+]);
+
+const audioStudio = boxes([
+  [7, 15, 18, 13, c.whitewash],
+  [9, 13, 14, 2, c.terracotta.DEFAULT],
+  [11, 11, 10, 2, c.terracotta.DEFAULT],
+  [13, 9, 6, 2, c.terracotta.DEFAULT],
+  [15, 7, 2, 2, c.terracotta.DEFAULT],
+  [10, 21, 3, 7, c.primary.DEFAULT],
+  [17, 18, 4, 3, c.sea.ink],
+  // the music sign: a note on a post
+  [27, 11, 1, 7, c.ink, true],
+  [25, 17, 3, 2, c.ink, true],
+  [28, 11, 2, 2, c.ink, true],
+]);
+
+const teachBackArena = boxes([
+  [3, 26, 26, 3, c.sand.dark],
+  [5, 24, 22, 2, c.sand.DEFAULT],
+  [4, 8, 24, 3, c.sand.DEFAULT],
+  [8, 6, 16, 2, c.sand.DEFAULT],
+  [12, 4, 8, 2, c.sand.DEFAULT],
+  ...[6, 12, 18, 24].map((x) => [x, 12, 2, 11, c.whitewash] as Box),
+  [4, 11, 24, 1, c.sand.dark, true],
+]);
+
 export const ART: Record<string, Paint> = {
   coin: outlined(
     (x, y) => dist(x, y, 8, 8) < 7.2,
@@ -160,6 +241,11 @@ export const ART: Record<string, Paint> = {
   island: islandPaint,
   islandLocked: islandPaint, // drawn the same; the map greys it out
   boat: boatPaint,
+  quizHall,
+  tutorCafe,
+  studyStudio,
+  audioStudio,
+  teachBackArena,
 };
 
 export function artSvg(name: string, w: number, h: number): string | null {
@@ -193,4 +279,60 @@ export function waterTileUrl(): string {
     wave(28, 27, c.sea.light) +
     `</svg>`;
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+}
+
+/** The island page's ground: one big pixel island (160×110 grid, the scene's 16:11) with sandy
+ * paths from the explorer to each building. Positions are in % of the scene. */
+export function islandSceneSvg(
+  spots: { x: number; y: number }[],
+  centre: { x: number; y: number },
+): string {
+  const W = 160;
+  const H = 110;
+  const pts = spots.map((p) => [(p.x / 100) * W, (p.y / 100) * H] as const);
+  const cx0 = (centre.x / 100) * W;
+  const cy0 = (centre.y / 100) * H;
+  const nearPath = (x: number, y: number) =>
+    pts.some(([bx, by]) => {
+      const dx = bx - cx0;
+      const dy = by - cy0;
+      const t = Math.max(0, Math.min(1, ((x - cx0) * dx + (y - cy0) * dy) / (dx * dx + dy * dy)));
+      return Math.hypot(x - (cx0 + t * dx), y - (cy0 + t * dy)) < 1.6;
+    });
+  const clear = (x: number, y: number) =>
+    Math.hypot(x - cx0, y - cy0) > 9 && pts.every(([bx, by]) => Math.hypot(x - bx, y - by) > 15);
+  const trees = new Set<string>();
+  for (let ty = 5; ty < H; ty += 11) {
+    for (let tx = 4 + (Math.floor(ty / 11) % 2) * 6; tx < W; tx += 13) {
+      const jx = tx + ((tx * 7 + ty * 13) % 5) - 2;
+      const jy = ty + ((tx * 11 + ty * 3) % 3) - 1;
+      if (clear(jx, jy) && !nearPath(jx, jy)) trees.add(`${jx},${jy}`);
+    }
+  }
+  const ground = (x: number, y: number) => {
+    const nx = (x + 0.5 - 80) / 74;
+    const ny = (y + 0.5 - 56) / 50;
+    return nx * nx + ny * ny + 0.05 * Math.sin(x * 0.21) + 0.05 * Math.cos(y * 0.29 + x * 0.07);
+  };
+  const paint: Paint = (x, y) => {
+    const d = ground(x, y);
+    if (d >= 1) return null;
+    if (d >= 0.88) return (x * 5 + y * 3) % 13 === 0 ? c.sea.foam : c.sea.light;
+    if (d >= 0.74) return (x * 3 + y) % 17 === 0 ? c.whitewash : c.sand.DEFAULT;
+    if (d >= 0.71) return c.sand.dark;
+    // tree: a 3×2 crown, shaded underneath, trunk below
+    for (let dx = 0; dx < 3; dx++) {
+      for (let dy = 0; dy < 2; dy++) {
+        if (trees.has(`${x - dx},${y - dy}`)) return dy === 1 ? c.olive.ink : c.olive.DEFAULT;
+      }
+    }
+    if (trees.has(`${x - 1},${y - 2}`)) return c.terracotta.ink;
+    if (nearPath(x, y)) return c.sand.DEFAULT;
+    return (x * 7 + y * 3) % 41 === 0 ? c.olive.DEFAULT : c.olive.light;
+  };
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" shape-rendering="crispEdges">` +
+    svgRects(W, H, paint) +
+    `</svg>`
+  );
 }

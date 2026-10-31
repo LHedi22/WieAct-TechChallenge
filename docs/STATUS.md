@@ -75,6 +75,10 @@ Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
       motion). Checked in EN 1440×900 and AR 390×844.
 - [x] **World map art** (31/10, user feedback): pixel-wave sea instead of stripes, drawn islands
       (shallows, sand, grass, trees, houses, flag), boat and top-bar icons (`sprite/art.ts`).
+- [x] **Island page art** (31/10): one big drawn island with sandy paths to the five buildings,
+      pixel art for each building (amphitheatre, blue-door café, domed library, music house,
+      columns), the explorer standing in the middle; on phones the placement banner sits above
+      the scene and the scene opens centred.
 - [ ] Optional: the KaTeX swap for `MathText` if the npm registry allows it.
 - [ ] Optional: "ask the AI after 10 min without a peer answer" (deferred, DECISIONS.md).
 

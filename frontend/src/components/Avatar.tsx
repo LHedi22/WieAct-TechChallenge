@@ -103,11 +103,14 @@ export function Avatar({
   look,
   size = 40,
   label,
+  bare,
   className,
 }: {
   look?: AvatarLook | null;
   size?: number;
   label?: string;
+  /** No background tile (the explorer standing in a scene). */
+  bare?: boolean;
   className?: string;
 }) {
   const l = look ?? DEFAULT_LOOK;
@@ -152,7 +155,7 @@ export function Avatar({
       role={label ? "img" : undefined}
       aria-label={label}
       aria-hidden={label ? undefined : true}
-      className={cx("pixelated shrink-0 rounded-pixel-step bg-sea-foam", className)}
+      className={cx("pixelated shrink-0 rounded-pixel-step", !bare && "bg-sea-foam", className)}
     >
       {px.map(([x, y, w, h, fill, opacity], i) => (
         <rect key={i} x={x} y={y} width={w} height={h} fill={fill} opacity={opacity} />

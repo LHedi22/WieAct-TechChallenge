@@ -68,8 +68,7 @@ export function BuildingDialog({
   const short = after < 0 && building.answer_cost !== 0;
   // Offline demo mode: what the class already made still opens; new AI work doesn't. The arena
   // room opens too (reading questions and answers needs no AI).
-  const paused =
-    useAiPaused() && building.answer_cost !== 0 && !(priced && livePrice.data?.cached);
+  const paused = useAiPaused() && building.answer_cost !== 0 && !(priced && livePrice.data?.cached);
 
   return (
     <div className="fixed inset-0 z-30 flex items-center justify-center p-4">

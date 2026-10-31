@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api, type IslandOut } from "@/api/client";
@@ -18,6 +19,8 @@ import {
   WaterTile,
 } from "@/components";
 import { cx } from "@/components/cx";
+import { islandSceneSvg } from "@/components/sprite/art";
+import { useCalmMotion } from "@/hooks/useCalmMotion";
 import { useMe } from "@/hooks/useSession";
 import { ErrorBanner } from "@/features/worlds/parts";
 import { BUILDING_POSITIONS, EXPLORER, accentOf } from "@/features/map/layout";
@@ -41,7 +44,19 @@ export function IslandPage() {
   const { t: tc, i18n } = useTranslation();
   const navigate = useNavigate();
   const me = useMe().data;
+  const calm = useCalmMotion();
+  // phones: the scene is wider than the screen, so open it scrolled to the middle of the island
+  const centre = useCallback((el: HTMLDivElement | null) => {
+    if (el) el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
+  }, []);
   const [picked, setPicked] = useState<Building | null>(null);
+  const ground = useMemo(
+    () =>
+      `data:image/svg+xml,${encodeURIComponent(
+        islandSceneSvg(Object.values(BUILDING_POSITIONS), EXPLORER),
+      )}`,
+    [],
+  );
   const query = useQuery({
     queryKey: ["island", courseId],
     queryFn: () => api.island(courseId),
@@ -66,8 +81,8 @@ export function IslandPage() {
       <ErrorBanner error={query.error} />
       {island && (
         <div className="grid flex-1 lg:grid-cols-[minmax(0,1fr)_20rem]">
-          <main className="relative min-w-0">
-            <div className="absolute inset-x-3 top-3 z-10 flex flex-wrap items-start gap-3">
+          <main className="relative flex min-w-0 flex-col">
+            <div className="z-10 flex flex-wrap items-start gap-3 p-3 lg:absolute lg:inset-x-3 lg:top-3 lg:p-0">
               <Link
                 to={`/worlds/${worldId}`}
                 className="inline-flex min-h-11 items-center gap-2 rounded-pixel-step border-2 border-ink bg-white px-3 font-semibold shadow-lip"
@@ -78,31 +93,36 @@ export function IslandPage() {
                 {t("back")}
               </Link>
               {!island.level && (
-                <Banner
-                  kind="placement"
-                  className="min-w-0 flex-1"
-                  action={
-                    <PixelButton variant="spend" onClick={() => void navigate(placement)}>
-                      {t("placement.start")}
-                    </PixelButton>
-                  }
-                >
-                  <span className="font-semibold">{t("placement.title")}</span>{" "}
-                  {t("placement.body")}
-                </Banner>
+                // solid backing: the banner's tint would otherwise sit on the busy island art
+                <div className="min-w-0 flex-1 basis-64 rounded-pixel-step bg-white">
+                  <Banner
+                    kind="placement"
+                    action={
+                      <PixelButton variant="spend" onClick={() => void navigate(placement)}>
+                        {t("placement.start")}
+                      </PixelButton>
+                    }
+                  >
+                    <span className="font-semibold">{t("placement.title")}</span>{" "}
+                    {t("placement.body")}
+                  </Banner>
+                </div>
               )}
             </div>
-            <div className="overflow-auto">
-              <WaterTile>
+            <div ref={centre} dir="ltr" className="flex-1 overflow-auto">
+              <WaterTile className="flex min-h-full items-center lg:pt-16">
                 <div
                   dir="ltr"
-                  className="relative mx-auto"
+                  className="relative mx-auto w-full max-w-[1100px]"
                   style={{ minWidth: "720px", aspectRatio: "16 / 11" }}
                   data-testid="island-scene"
                 >
-                  <div
+                  <img
+                    src={ground}
+                    alt=""
                     aria-hidden
-                    className="absolute inset-[12%] rounded-[40%] border-8 border-sand bg-olive-light"
+                    draggable={false}
+                    className="pixelated absolute inset-0 h-full w-full"
                   />
                   {island.buildings.map((b) => {
                     const pos = BUILDING_POSITIONS[b.key] ?? { x: 50, y: 50 };
@@ -111,15 +131,19 @@ export function IslandPage() {
                         key={b.key}
                         type="button"
                         onClick={() => setPicked(b)}
-                        className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 rounded-pixel-step focus-visible:outline focus-visible:outline-4 focus-visible:outline-sea"
+                        className="group absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 rounded-pixel-step focus-visible:outline focus-visible:outline-4 focus-visible:outline-sea"
                         // physical position on purpose: the island is geography, never mirrored
                         style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
                         data-building={b.key}
                       >
-                        <Sprite name={SPRITE[b.key] ?? "quizHall"} scale={3} />
+                        <Sprite
+                          name={SPRITE[b.key] ?? "quizHall"}
+                          scale={4}
+                          className="transition-transform duration-press group-hover:-translate-y-1"
+                        />
                         <span
                           dir={i18n.dir()}
-                          className="flex flex-col items-center rounded-pixel-step border-2 border-ink bg-white px-2 py-1 text-small font-semibold"
+                          className="flex flex-col items-center rounded-pixel-step border-2 border-ink bg-white px-2 py-1 text-small font-semibold shadow-lip group-hover:bg-sand"
                         >
                           {tc(`buildings.${b.key}`)}
                           <CostLabel building={b} />
@@ -132,9 +156,20 @@ export function IslandPage() {
                     className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
                     style={{ left: `${EXPLORER.x}%`, top: `${EXPLORER.y}%` }}
                   >
-                    <Avatar look={me?.avatar as AvatarLook | null} size={48} />
+                    <motion.div
+                      animate={calm ? undefined : { y: [0, -3, 0] }}
+                      transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      <Avatar look={me?.avatar as AvatarLook | null} size={72} bare />
+                    </motion.div>
+                    <div className="-mt-2 h-2 w-12 rounded-full bg-ink/20" />
+                    {me && (
+                      <Bidi className="mt-1 rounded-pixel-step border-2 border-ink bg-white px-2 text-small font-semibold">
+                        {me.nickname}
+                      </Bidi>
+                    )}
                   </div>
-                  <p className="absolute bottom-3 start-1/2 -translate-x-1/2 rounded-pixel-step border-2 border-ink bg-white px-3 py-2 text-small font-semibold">
+                  <p className="absolute bottom-1 start-1/2 -translate-x-1/2 rounded-pixel-step border-2 border-ink bg-white px-3 py-2 text-small font-semibold shadow-lip">
                     {t("hint")}
                   </p>
                 </div>
