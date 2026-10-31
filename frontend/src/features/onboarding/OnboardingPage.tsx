@@ -148,6 +148,7 @@ export function OnboardingPage() {
             />
             <Input
               label={t("profile.year")}
+              placeholder={t("profile.yearHint")}
               type="number"
               min={1}
               max={8}

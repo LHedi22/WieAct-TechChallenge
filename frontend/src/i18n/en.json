@@ -523,7 +523,8 @@
       "body": "All optional. We use it only to suggest what to study, never to judge you.",
       "university": "University",
       "field": "Field of study",
-      "year": "Year"
+      "year": "Year of study",
+      "yearHint": "e.g. 2 for second year"
     },
     "style": {
       "question": "Question {n} of {total}",

@@ -523,7 +523,8 @@
       "body": "Tout est facultatif. Cela sert seulement à te proposer quoi réviser, jamais à te juger.",
       "university": "Université",
       "field": "Filière",
-      "year": "Année"
+      "year": "Année d'études",
+      "yearHint": "ex. 2 pour la 2e année"
     },
     "style": {
       "question": "Question {n} sur {total}",
