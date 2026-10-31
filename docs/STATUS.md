@@ -73,6 +73,8 @@ Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
       a friendlier 24×24 explorer, hairstyles + hair colour, tabs of tap-to-pick tiles that preview
       each option, "Surprise me" (free extras only), a gently bobbing preview (still under reduced
       motion). Checked in EN 1440×900 and AR 390×844.
+- [x] **World map art** (31/10, user feedback): pixel-wave sea instead of stripes, drawn islands
+      (shallows, sand, grass, trees, houses, flag), boat and top-bar icons (`sprite/art.ts`).
 - [ ] Optional: the KaTeX swap for `MathText` if the npm registry allows it.
 - [ ] Optional: "ask the AI after 10 min without a peer answer" (deferred, DECISIONS.md).
 

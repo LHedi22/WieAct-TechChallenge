@@ -1,4 +1,5 @@
 import { color } from "@/theme/tokens";
+import { artSvg } from "./art";
 
 /**
  * Every sprite the app uses, with its native 1× pixel size. Real art: drop
@@ -97,7 +98,13 @@ function motifRects({ w, h, motif }: SpriteDef): [number, number, number, number
   }
 }
 
-function placeholder(def: SpriteDef): string {
+function placeholder(name: SpriteName, def: SpriteDef): string {
+  const art = artSvg(name, def.w, def.h);
+  if (art) {
+    return `data:image/svg+xml,${encodeURIComponent(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${def.w}" height="${def.h}" shape-rendering="crispEdges">${art}</svg>`,
+    )}`;
+  }
   const rects = motifRects(def)
     .map(
       ([x, y, rw, rh]) =>
@@ -116,5 +123,5 @@ export function spriteSource(name: SpriteName): { src: string; placeholder: bool
   const real = realSrc(name);
   return real
     ? { src: real, placeholder: false }
-    : { src: placeholder(SPRITES[name]), placeholder: true };
+    : { src: placeholder(name, SPRITES[name]), placeholder: true };
 }

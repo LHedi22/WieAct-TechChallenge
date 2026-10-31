@@ -5,7 +5,7 @@ import type { MapCourse } from "@/api/client";
 import { useUiStore } from "@/app/uiStore";
 import { Bidi, MasteryRing, PixelButton, Sprite, WaterTile } from "@/components";
 import { cx } from "@/components/cx";
-import { BOAT, accentOf, slotsFor } from "./layout";
+import { BOAT, type Slot, accentOf, slotsFor } from "./layout";
 
 export type Zoom = 1 | 2 | 3;
 
@@ -33,7 +33,10 @@ export function MapScene({ courses, zoom = 1, onOpen, onPlacement, preview, clas
   const [boat, setBoat] = useState(BOAT);
   const slots = slotsFor(courses.length);
   const dir = i18n.dir();
-  const scale = (preview ? 2 : 2 + zoom) as 2 | 3 | 4 | 5;
+  // bigger slots (fewer courses) get bigger islands; always an integer scale
+  const scaleFor = (slot: Slot) =>
+    (preview ? 2 : Math.min(6, (slot.w >= 26 ? 4 : slot.w >= 20 ? 3 : 2) + zoom)) as
+      2 | 3 | 4 | 5 | 6;
 
   const sail = (course: MapCourse, i: number) => {
     const slot = slots[i % slots.length]!;
@@ -108,7 +111,11 @@ export function MapScene({ courses, zoom = 1, onOpen, onPlacement, preview, clas
                 {slot.label === "above" && label}
                 {risen ? (
                   preview || !onOpen ? (
-                    <Sprite name="island" scale={scale} />
+                    <Sprite
+                      name="island"
+                      scale={scaleFor(slot)}
+                      className={cx(i % 2 === 1 && "-scale-x-100")}
+                    />
                   ) : (
                     <button
                       type="button"
@@ -122,13 +129,20 @@ export function MapScene({ courses, zoom = 1, onOpen, onPlacement, preview, clas
                     >
                       <Sprite
                         name={locked ? "islandLocked" : "island"}
-                        scale={scale}
-                        className={cx(locked && "opacity-80 grayscale")}
+                        scale={scaleFor(slot)}
+                        // every other island is flipped so neighbours don't look alike
+                        className={cx(
+                          i % 2 === 1 && "-scale-x-100",
+                          locked && "opacity-90 grayscale-[0.7]",
+                        )}
                       />
                     </button>
                   )
                 ) : (
-                  <div style={{ width: 48 * scale, height: 32 * scale }} aria-hidden />
+                  <div
+                    style={{ width: 48 * scaleFor(slot), height: 32 * scaleFor(slot) }}
+                    aria-hidden
+                  />
                 )}
                 {slot.label === "below" && label}
               </div>
