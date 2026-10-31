@@ -2,6 +2,9 @@
 
     uv run python -m app.evals quiz --langs en,fr,ar --n 20        # mock / local / cloud (in slot)
     uv run python -m app.evals quiz --world OLIVE-7Q2 --fresh      # bypass the cache
+    uv run python -m app.evals slot [--cloud]                      # every feature, 4 languages
+
+`slot` is documented in app/evals/slot.py.
 
 Writes backend/tests/evals/quiz/outputs/<provider>-<lang>.json with every question plus automatic
 checks (structure, 4 distinct options, answer in range, script matches the language, the concept
@@ -161,13 +164,35 @@ async def quiz_eval(langs: list[str], n: int, world_code: str, fresh: bool, out:
 def main(argv: list[str] | None = None) -> int:
     sys.stdout.reconfigure(errors="replace")
     p = argparse.ArgumentParser(prog="python -m app.evals")
-    p.add_argument("task", choices=["quiz"])
+    p.add_argument("task", choices=["quiz", "slot"])
     p.add_argument("--langs", default="en,fr,ar")
     p.add_argument("--n", type=int, default=20)
     p.add_argument("--world", default="OLIVE-7Q2")
     p.add_argument("--fresh", action="store_true", help="new generations (skip the cache)")
+    p.add_argument("--api", default="http://localhost:8000", help="slot: the running API")
+    p.add_argument("--course", default="Data Structures", help="slot: the demo world's course")
+    p.add_argument("--level", default="advanced", help="slot: study pack / audio level")
+    p.add_argument("--cloud", action="store_true", help="slot: allow the cloud provider")
+    p.add_argument("--timeout", type=float, default=1800, help="slot: max wait per job (s)")
+    p.add_argument("--regrade", action="store_true", help="slot: send Teach-Back answers again")
     args = p.parse_args(argv)
     langs = [x.strip() for x in args.langs.split(",") if x.strip()]
+    if args.task == "slot":
+        from app.evals.slot import LANGS, run
+
+        langs = langs if "--langs" in (argv or sys.argv) else list(LANGS)
+        return asyncio.run(
+            run(
+                args.api,
+                args.world,
+                args.course,
+                args.level,
+                langs,
+                args.cloud,
+                args.timeout,
+                args.regrade,
+            )
+        )
     return asyncio.run(quiz_eval(langs, args.n, args.world, args.fresh, OUT))
 
 

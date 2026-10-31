@@ -30,12 +30,12 @@ COURSE = "Calculus I"
 MISTAKE_TYPE = "misconception"
 
 
-def _answers(questions: list[dict]) -> list[dict]:
-    """Question 0: wrong twice (the trap); the rest right first time."""
+def _answers(questions: list[dict], trap: int = 0) -> list[dict]:
+    """The trap question: wrong twice; the rest right first time."""
     out = []
     for i, q in enumerate(questions):
         right = q["answer_index"]
-        if i == 0:
+        if i == trap:
             wrong = (right + 1) % len(q["options"])
             out.append({"first": wrong, "second": wrong, "status": "wrong"})
         else:
@@ -54,37 +54,62 @@ async def _student(s: AsyncSession, nickname: str, world: World) -> User:
     return user
 
 
-async def seed_wisdom(sm: async_sessionmaker, join_code: str) -> list[uuid.UUID]:
-    """Idempotent. Returns the WISDOM_TIP jobs queued (empty if the tip exists or the class quiz
-    set is not ready yet)."""
+def trap_concept(question: dict, chapter: Chapter) -> str:
+    """The concept a mistake on this question is counted under (the tagging job's rule)."""
+    return (question.get("concept") or chapter.title)[:80].strip().lower()
+
+
+async def class_quiz_set(
+    s: AsyncSession, world: World, course_name: str
+) -> tuple[Course, QuizSet, Chapter] | None:
+    """The first chapter's class quiz set of a course, or None while it isn't ready."""
+    course = await s.scalar(
+        select(Course).where(Course.world_id == world.id, Course.name == course_name)
+    )
+    if course is None:
+        return None
+    found = (
+        await s.execute(
+            select(QuizSet, Chapter)
+            .join(Chapter, Chapter.id == QuizSet.chapter_id)
+            .where(Chapter.course_id == course.id)
+            .order_by(Chapter.idx, QuizSet.language != "en", QuizSet.seed)
+            .limit(1)
+        )
+    ).first()
+    return None if found is None else (course, found[0], found[1])
+
+
+async def seed_wisdom(
+    sm: async_sessionmaker,
+    join_code: str,
+    *,
+    course_name: str = COURSE,
+    trap: int = 0,
+    students: tuple[str, ...] = STUDENTS,
+) -> list[uuid.UUID]:
+    """Idempotent. `students` all miss question `trap` of the course's class quiz set. Returns the
+    WISDOM_TIP jobs queued (empty if the tip exists or the class quiz set is not ready yet)."""
     async with sm() as s:
         world = await s.scalar(select(World).where(World.join_code == join_code))
-        course = await s.scalar(
-            select(Course).where(Course.world_id == world.id, Course.name == COURSE)
-        )
-        found = (
-            await s.execute(  # the first chapter whose class quiz set is ready
-                select(QuizSet, Chapter)
-                .join(Chapter, Chapter.id == QuizSet.chapter_id)
-                .where(Chapter.course_id == course.id)
-                .order_by(Chapter.idx, QuizSet.language != "en", QuizSet.seed)
-                .limit(1)
-            )
-        ).first()
+        found = await class_quiz_set(s, world, course_name)
         if found is None:
             return []
-        qs, chapter = found
-        concept = (qs.questions[0].get("concept") or chapter.title)[:80].strip().lower()
-        for nickname in STUDENTS:
+        course, qs, chapter = found
+        concept = trap_concept(qs.questions[trap], chapter)
+        for nickname in students:
             user = await _student(s, nickname, world)
             done = await s.scalar(
-                select(QuizAttempt.id).where(
-                    QuizAttempt.user_id == user.id, QuizAttempt.quiz_set_id == qs.id
+                select(Mistake.id).where(
+                    Mistake.user_id == user.id,
+                    Mistake.world_id == world.id,
+                    Mistake.concept == concept,
+                    Mistake.mistake_type == MISTAKE_TYPE,
                 )
             )
             if done:
                 continue
-            answers = _answers(qs.questions)
+            answers = _answers(qs.questions, trap)
             score = sum(a["status"] == "correct" for a in answers)
             attempt = QuizAttempt(
                 user_id=user.id,
@@ -110,7 +135,7 @@ async def seed_wisdom(sm: async_sessionmaker, join_code: str) -> list[uuid.UUID]
                     world_id=world.id,
                     chapter_id=chapter.id,
                     attempt_id=attempt.id,
-                    question_idx=0,
+                    question_idx=trap,
                     concept=concept,
                     mistake_type=MISTAKE_TYPE,
                 )
