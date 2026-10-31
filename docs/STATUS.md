@@ -69,8 +69,10 @@ Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
       prompt voice rules (31/10, DECISIONS.md).
 - [x] `ai_cache` race fixed (31/10): two packs in different languages embedding the same query at
       once crashed one job. Found by the mock slot run.
-- [ ] **Avatar step redesign** (onboarding step 4, user feedback 31/10: "make it smoother and more
-      fun to build").
+- [x] **Avatar step redesign** (31/10, user feedback "make it smoother and more fun to build"):
+      a friendlier 24×24 explorer, hairstyles + hair colour, tabs of tap-to-pick tiles that preview
+      each option, "Surprise me" (free extras only), a gently bobbing preview (still under reduced
+      motion). Checked in EN 1440×900 and AR 390×844.
 - [ ] Optional: the KaTeX swap for `MathText` if the npm registry allows it.
 - [ ] Optional: "ask the AI after 10 min without a peer answer" (deferred, DECISIONS.md).
 

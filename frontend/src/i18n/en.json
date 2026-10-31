@@ -655,6 +655,24 @@
         "scarf": "Blue scarf",
         "chechia": "Chechia",
         "headphones": "Headphones"
+      },
+      "surprise": "Surprise me",
+      "none": "Nothing",
+      "hair": "Hairstyle",
+      "hairColor": "Hair colour",
+      "tabs": {
+        "hair": "Hair",
+        "skin": "Skin",
+        "outfit": "Outfit",
+        "extras": "Extras"
+      },
+      "hairs": {
+        "short": "Short",
+        "curly": "Curly",
+        "long": "Long",
+        "bun": "Bun",
+        "spiky": "Spiky",
+        "wrap": "Headscarf"
       }
     },
     "languages": {

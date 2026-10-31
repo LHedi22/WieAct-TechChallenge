@@ -656,6 +656,24 @@
         "scarf": "وشاح أزرق",
         "chechia": "شاشية",
         "headphones": "سمّاعات"
+      },
+      "surprise": "فاجئني",
+      "none": "حتى شي",
+      "hair": "تسريحة الشعر",
+      "hairColor": "لون الشعر",
+      "tabs": {
+        "hair": "الشعر",
+        "skin": "البشرة",
+        "outfit": "اللبسة",
+        "extras": "زيادات"
+      },
+      "hairs": {
+        "short": "قصير",
+        "curly": "مكركب",
+        "long": "طويل",
+        "bun": "كعبوشة",
+        "spiky": "منفوش",
+        "wrap": "فولارة"
       }
     },
     "languages": {

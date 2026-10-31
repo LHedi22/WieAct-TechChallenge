@@ -655,6 +655,24 @@
         "scarf": "Écharpe bleue",
         "chechia": "Chéchia",
         "headphones": "Casque audio"
+      },
+      "surprise": "Surprends-moi",
+      "none": "Rien",
+      "hair": "Coiffure",
+      "hairColor": "Couleur des cheveux",
+      "tabs": {
+        "hair": "Cheveux",
+        "skin": "Teint",
+        "outfit": "Tenue",
+        "extras": "Accessoires"
+      },
+      "hairs": {
+        "short": "Courts",
+        "curly": "Bouclés",
+        "long": "Longs",
+        "bun": "Chignon",
+        "spiky": "En pics",
+        "wrap": "Foulard"
       }
     },
     "languages": {

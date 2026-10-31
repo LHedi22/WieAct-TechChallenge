@@ -1202,6 +1202,10 @@ export interface components {
       skin: string;
       /** Outfit */
       outfit: string;
+      /** Hair */
+      hair?: string | null;
+      /** Hair Color */
+      hair_color?: string | null;
       /** Extra */
       extra?: string | null;
     };
