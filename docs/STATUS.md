@@ -76,8 +76,9 @@ Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
 
 ## 6. Not yet seen in a real browser (covered by tests only)
 - Quiz Hall results Class Wisdom card · "Turn these into flashcards" · Audio playback with real
-  voices (headless Chromium has none) · Arabic OCR on a real Arabic scan · real embeddings (only
-  the mock's bag-of-words vectors so far) · the BuildingDialog "paused" note while offline.
+  voices (headless Chromium has none) · Arabic OCR on a real Arabic scan · the BuildingDialog
+  "paused" note while offline · the Teach-Back "waiting for review" banner · the Tutor "Session
+  saved" card while offline. (Real `bge-m3` embeddings: checked 31/10 by API, EN/FR/AR/Darija.)
 
 ## 7. Dev-only leftovers (not needed for the demo)
 - [ ] `scripts/setup_ollama.ps1/.sh` written but never run; Docker → host Ollama untested

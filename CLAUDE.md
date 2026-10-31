@@ -5,8 +5,9 @@ IEEE WIE ACT 5.0). Each course becomes an island on a Mediterranean archipelago 
 has five AI "buildings". **Phase 1 deadline: 10 Nov 2026** (report + repo + 90 s demo video).
 A working end-to-end app is required — no mockups, no notebooks.
 
-## Where we are (30 Oct)
-M0–M7 built and green on the mock; M8 (ship) in progress. **@docs/STATUS.md lists everything still
+## Where we are (31 Oct)
+M0–M7 built and green on the mock; M8 (ship) in progress (offline mode done; deploy, in-slot run,
+report, video, avatar redesign left). **@docs/STATUS.md lists everything still
 missing** (blockers, in-slot work, deploy, deliverables). Read it first and tick items there as
 they close. Our cloud key has **no embeddings model**, so embeddings come from our own Ollama with
 `bge-m3` (`EMBED_PROVIDER=local`; Mac in dev, a Railway service in production). Cloud models: compact `llama3.2-3b`, mid `llama3.1-8b`
@@ -50,6 +51,7 @@ docker compose up -d db qdrant mock-llm   # Postgres + Qdrant + mock LLM (work o
 python3 scripts/probe_models.py           # in-slot only: benchmark platform models → docs/MODELS.md
 python3 scripts/probe_embeddings.py [names]  # in-slot only: find the cloud embeddings model
 python3 scripts/export_stats.py [--api URL] [--load out.txt]  # /api/admin/stats → docs/report/
+docker compose exec backend uv run python -m app.evals slot [--cloud]  # every AI feature × 4 langs → tests/evals/slot/outputs
 cd backend && uv run uvicorn app.main:app --reload   # API on :8000
 cd backend && uv run python -m app.worker            # job worker
 cd backend && uv run pytest -q                       # backend tests

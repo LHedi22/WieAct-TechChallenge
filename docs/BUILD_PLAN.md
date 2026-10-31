@@ -226,3 +226,17 @@ warm-up are human steps. **Blocked:** no embeddings model on our cloud key (DECI
 so cloud indexing can't run yet. **README** rewritten (GenAI module, setup, privacy, services);
 screenshots still to capture. Report draft and video shot list in `docs/report/`; stats export
 via `scripts/export_stats.py`. Human: Darija review, ~10-student user test, video.
+
+_Status 31/10:_ **Embeddings unblocked**: our own Ollama with `bge-m3` (`EMBED_PROVIDER=local`,
+DECISIONS.md); dev re-indexed (47 chunks, 1024 dims), EN/FR/AR/Darija queries find the right
+chapter and a new upload is found in EN, FR and AR. **Teach-Back:** Arabic and Darija answers are
+graded by one mid call; a grade still unsure pays nothing until reviewed (`pending_review`,
+migration 0009); every student-facing prompt shares `_voice_rules.md`. **Offline:** ending a Tutor
+session while paused saves it without the summary. **Dev badge** in the top bar (M1 "Providers kept
+apart" ticked). **In-slot run** `python -m app.evals slot` (study pack, audio, daily plan,
+Teach-Back × 4 languages + one Class Wisdom tip, outputs for the prompt-evaluator) tested on the
+mock: 32 calls first run, 1 call and 0 repeated identical requests on a re-run. It found an
+`ai_cache` race (two packs embedding the same query at once crashed one job), fixed with an
+upsert and a deterministic test. Hooks executable in git. Tests: 304 backend, 66 frontend; ruff,
+eslint, tsc, i18n (793 keys × 4) pass. **Next:** the slot run with `--cloud` on Mon 02/11
+(STATUS.md §2), the avatar step redesign (user feedback), deploy.
