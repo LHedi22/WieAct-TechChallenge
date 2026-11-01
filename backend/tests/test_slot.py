@@ -36,3 +36,23 @@ def test_upcoming_skips_slots_that_already_ended():
 
 def test_window_closes_after_deadline():
     assert slot_for(at(11, 11, 0).date(), "A") is None
+
+
+def test_tz_falls_back_to_fixed_utc_plus_1_without_tzdata(monkeypatch):
+    # Host scripts (scripts/llm.py, slot.py) run on plain Python; Windows has no tz database.
+    import importlib
+    import zoneinfo
+
+    import app.core.slot as slot
+
+    def missing(key):
+        raise zoneinfo.ZoneInfoNotFoundError(key)
+
+    monkeypatch.setattr(zoneinfo, "ZoneInfo", missing)
+    try:
+        fallback = importlib.reload(slot)
+        assert fallback.TZ.utcoffset(None).total_seconds() == 3600
+        assert fallback.slot_for(datetime(2026, 10, 20).date(), "A").start.hour == 12
+    finally:
+        monkeypatch.undo()
+        importlib.reload(slot)
