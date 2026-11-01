@@ -34,3 +34,19 @@ const ACCENT_CHIP: Record<string, string> = {
 export function accentChip(colorKey: string): string {
   return cx("text-ink", ACCENT_CHIP[colorKey] ?? "bg-sand");
 }
+
+/** Runs at most `n` tasks at once; the rest wait in order. A failed task frees its slot too. */
+export function limitConcurrency(n: number) {
+  let active = 0;
+  const waiting: (() => void)[] = [];
+  return async <T>(task: () => Promise<T>): Promise<T> => {
+    if (active >= n) await new Promise<void>((resolve) => waiting.push(resolve));
+    active += 1;
+    try {
+      return await task();
+    } finally {
+      active -= 1;
+      waiting.shift()?.();
+    }
+  };
+}
