@@ -1,4 +1,4 @@
-# What's still missing — as of 31 Oct 2026, 01:00 Tunis
+# What's still missing — as of 1 Nov 2026
 
 Deadline **Tue 10 Nov** (report + repo + 90 s video); record the demo by **Mon 9 Nov**. M0–M7 are
 built and pass their Done-when checks on the mock. Remaining work, most urgent first. Details
@@ -51,6 +51,8 @@ Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
 - [ ] Check that a multi-MB upload works through the Vercel rewrite (fallback in DEPLOY.md).
 
 ## 4. Deliverables still to write or finish
+- [ ] **Merge `m5-economy-arena` into `main`** (M5–M8 live only on that branch); check CI is green
+      on `main` afterwards, since the submitted repo is the default branch.
 - [ ] **Screenshots** for the README (EN + AR, desktop + phone) → `docs/screenshots/`, linked
       from README. The Docker MCP browser can't save into the repo; use a desktop browser or a
       Playwright installed in the frontend container.
@@ -95,7 +97,7 @@ Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
 ## 8. Open decisions for humans (DECISIONS.md)
 Embeddings model / fallback · platform Qdrant reachable? (default: our own, declared) ·
 quota signal · slot alternation continuing to 10/11 · final app and mascot name · pixel art
-source (sprites are placeholders) · Darija TTS (default: transcript only).
+source (code-drawn art in `sprite/art.ts` for now; PNGs would replace it) · Darija TTS (default: transcript only).
 
 ## Scope guard (CLAUDE.md)
 If time runs short, cut in this order: Audio Studio → mind maps → Class Pool → global leaderboard

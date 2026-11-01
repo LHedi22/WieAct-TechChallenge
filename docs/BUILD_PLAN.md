@@ -1,8 +1,8 @@
 # Build plan — 27 Oct → 9 Nov 2026 (submit by 10 Nov)
 
 Work ONE milestone at a time. Start in plan mode, end with `/verify`, tick boxes here.
-Dates are targets; one team member builds everything (DECISIONS.md 2026-10-27), so apply the scope
-guard in CLAUDE.md early. M0–M2 are the critical path — everything AI depends on them.
+Dates are targets; M0–M4 were built by one team member, M5–M8 by a second one on branch
+`m5-economy-arena` (DECISIONS.md 2026-11-01), so apply the scope guard in CLAUDE.md early. M0–M2 are the critical path — everything AI depends on them.
 
 ## M0 · Foundations (27–28 Oct)
 - [x] Monorepo layout from ARCHITECTURE.md; `docker compose up` brings db (postgres), qdrant, mock-llm, backend, worker, frontend
@@ -240,3 +240,13 @@ mock: 32 calls first run, 1 call and 0 repeated identical requests on a re-run. 
 upsert and a deterministic test. Hooks executable in git. Tests: 304 backend, 66 frontend; ruff,
 eslint, tsc, i18n (793 keys × 4) pass. **Next:** the slot run with `--cloud` on Mon 02/11
 (STATUS.md §2), the avatar step redesign (user feedback), deploy.
+
+_Status 31/10 (later):_ **Avatar and art (user feedback):** the avatar step is a 24×24 explorer with
+optional hair and hair colour (validated in `/api/profile`), tabs of tap-to-pick tiles, "Surprise me"
+and a bobbing preview (still under reduced motion); checked in EN 1440×900 and AR 390×844. The map
+has a pixel-wave sea and drawn islands, boat and top-bar icons; the island page is one drawn island
+with sandy paths to five drawn buildings and the explorer in the middle (all code-drawn in
+`components/sprite/art.ts`; PNGs in `design/assets/sprites/` still replace them). **Daily:** the
+DAILY_PLAN cache key includes the UI language, and AI plan lines written in another language are
+hidden after a switch (no extra call). **Next:** merge `m5-economy-arena` into `main`, the slot run
+with `--cloud`, deploy.

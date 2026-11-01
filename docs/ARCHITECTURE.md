@@ -14,7 +14,7 @@ learning-world/
 │   └── src/
 │       ├── app/               # router, providers, layout shell (top bar, side panel)
 │       ├── api/               # typed client generated from FastAPI OpenAPI (openapi-typescript)
-│       ├── features/          # onboarding/, worlds/, map/, quiz/, tutor/, studio/, audio/, arena/, challenges/, wallet/
+│       ├── features/          # landing/, auth/, onboarding/, worlds/, map/, island/, placement/, quiz/, tutor/, studio/, audio/, arena/, daily/, wisdom/, wallet/, pool/, leaderboard/, jobs/, styleguide/
 │       ├── components/        # design-system primitives (PixelButton, PixelPanel, SoftCard, Chip, CoinCounter …)
 │       ├── hooks/useJob.ts    # polls GET /api/jobs/{id}; exposes stage, queuePosition, quickMode
 │       ├── i18n/{en,fr,ar,ar-TN}.json
@@ -34,7 +34,7 @@ learning-world/
 │       │   ├── quota.py       # parse quota headers → QuotaState
 │       │   └── log.py         # ai_call_log writer
 │       ├── rag/               # parsing (PyMuPDF, python-pptx, python-docx, Tesseract), chunking, VectorStore (Qdrant)
-│       ├── features/          # quiz/, tutor/, studio/, audio/, arena/, challenges/, wisdom/, onboarding/, worlds/
+│       ├── features/          # auth/, onboarding/, worlds/, placement/, quiz/, tutor/, studio/, audio/, arena/, daily/, wisdom/, wallet/, pool/, leaderboard/
 │       ├── prompts/           # *.md templates with {placeholders}; one file per task
 │       └── models/            # SQLAlchemy models
 │   └── tests/
