@@ -8,7 +8,7 @@ A working end-to-end app is required — no mockups, no notebooks.
 ## Where we are (1 Nov)
 M0–M7 built and green on the mock; M8 (ship) in progress (offline mode, avatar redesign and drawn
 map/island art done; deploy, in-slot run, report, video left). M5 onward was built by a second team
-member on branch `m5-economy-arena`, not yet merged into `main`. **@docs/STATUS.md lists everything still
+member on branch `m5-economy-arena`, merged into `main` on 1 Nov (PR #1). **@docs/STATUS.md lists everything still
 missing** (blockers, in-slot work, deploy, deliverables). Read it first and tick items there as
 they close. Our cloud key has **no embeddings model**, so embeddings come from our own Ollama with
 `bge-m3` (`EMBED_PROVIDER=local`; Mac in dev, a Railway service in production). Cloud models: compact `llama3.2-3b`, mid `llama3.1-8b`

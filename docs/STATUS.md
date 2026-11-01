@@ -51,8 +51,8 @@ Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
 - [ ] Check that a multi-MB upload works through the Vercel rewrite (fallback in DEPLOY.md).
 
 ## 4. Deliverables still to write or finish
-- [ ] **Merge `m5-economy-arena` into `main`** (M5–M8 live only on that branch); check CI is green
-      on `main` afterwards, since the submitted repo is the default branch.
+- [x] **Merge `m5-economy-arena` into `main`** (1 Nov, PR #1; CI green on backend, frontend, mock-llm
+      and secrets before the merge).
 - [ ] **Screenshots** for the README (EN + AR, desktop + phone) → `docs/screenshots/`, linked
       from README. The Docker MCP browser can't save into the repo; use a desktop browser or a
       Playwright installed in the frontend container.
