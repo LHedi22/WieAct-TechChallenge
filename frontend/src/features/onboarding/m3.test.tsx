@@ -258,6 +258,25 @@ describe("Onboarding", () => {
     await waitFor(() => expect(screen.getByText("elsewhere")).toBeInTheDocument());
     expect(calls.find((c) => c.key === "PUT /api/profile")?.body).toEqual({ finish: true });
   });
+
+  it("checks the year of study on the first step (the server takes 1–8 or nothing)", async () => {
+    serve(BASE);
+    const user = userEvent.setup();
+    show(<OnboardingPage />, "/welcome", "/welcome");
+    const year = screen.getByLabelText("Year of study");
+    for (const bad of ["2026", "0", "2.5"]) {
+      await user.clear(year);
+      await user.type(year, bad);
+      expect(screen.getByText("Enter a year from 1 to 8, or leave it empty.")).toBeInTheDocument();
+      expect(year).toHaveAttribute("aria-invalid", "true");
+      expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
+    }
+    await user.clear(year);
+    await user.type(year, "2");
+    expect(screen.queryByText("Enter a year from 1 to 8, or leave it empty.")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    expect(screen.getByText(/Step 2 of 5/)).toBeInTheDocument();
+  });
 });
 
 describe("World map", () => {

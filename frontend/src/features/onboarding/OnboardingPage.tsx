@@ -57,6 +57,8 @@ export function OnboardingPage() {
   const [optIn, setOptIn] = useState(true);
 
   const n = STEPS.indexOf(step) + 1;
+  // The server takes a whole year 1–8 or nothing; anything else would fail the final save (422).
+  const yearOk = profile.year === "" || /^[1-8]$/.test(profile.year.trim());
 
   const score = useMutation({
     mutationFn: () => api.scoreStyle(answers.filter(Boolean) as string[]),
@@ -149,8 +151,9 @@ export function OnboardingPage() {
               max={8}
               value={profile.year}
               onChange={(e) => setProfile({ ...profile, year: e.target.value })}
+              error={yearOk ? undefined : t("profile.yearInvalid")}
             />
-            <Nav onNext={() => setStep("style")} />
+            <Nav onNext={() => setStep("style")} nextDisabled={!yearOk} />
           </PixelPanel>
         )}
 
@@ -328,7 +331,15 @@ export function OnboardingPage() {
   );
 }
 
-function Nav({ onBack, onNext }: { onBack?: () => void; onNext: () => void }) {
+function Nav({
+  onBack,
+  onNext,
+  nextDisabled,
+}: {
+  onBack?: () => void;
+  onNext: () => void;
+  nextDisabled?: boolean;
+}) {
   const { t } = useTranslation("onboarding");
   return (
     <div className="flex justify-between gap-3">
@@ -339,7 +350,9 @@ function Nav({ onBack, onNext }: { onBack?: () => void; onNext: () => void }) {
       ) : (
         <span />
       )}
-      <PixelButton onClick={onNext}>{t("continue")}</PixelButton>
+      <PixelButton onClick={onNext} disabled={nextDisabled}>
+        {t("continue")}
+      </PixelButton>
     </div>
   );
 }
