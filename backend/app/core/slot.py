@@ -8,11 +8,16 @@ imports this module directly.
 
 from __future__ import annotations
 
+import zoneinfo
 from dataclasses import dataclass
-from datetime import date, datetime, time, timedelta
-from zoneinfo import ZoneInfo
+from datetime import date, datetime, time, timedelta, timezone
 
-TZ = ZoneInfo("Africa/Tunis")
+try:
+    TZ = zoneinfo.ZoneInfo("Africa/Tunis")
+except zoneinfo.ZoneInfoNotFoundError:
+    # No tz database (plain Python on Windows, used by the host scripts). Tunisia has had no DST
+    # since 2009, so a fixed UTC+1 gives the same times.
+    TZ = timezone(timedelta(hours=1), "Africa/Tunis")
 START = date(2026, 10, 20)
 END = date(2026, 11, 10)
 WEEKENDS_OPEN = False
