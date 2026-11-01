@@ -22,22 +22,10 @@
   .pixelated {
     image-rendering: pixelated;
   }
+  /* the wave tile itself comes from WaterTile (drawn from tokens, 128px × 64px) */
   .water-tile {
     background-color: theme("colors.sea.DEFAULT");
-    background-image:
-      linear-gradient(90deg, transparent 6px, theme("colors.sea.foam") 6px 14px, transparent 14px),
-      linear-gradient(
-        90deg,
-        transparent 22px,
-        theme("colors.sea.light") 22px 28px,
-        transparent 28px
-      );
-    background-size:
-      32px 16px,
-      32px 16px;
-    background-position:
-      0 6px,
-      16px 14px;
+    background-size: 128px 64px;
     background-repeat: repeat;
   }
 }

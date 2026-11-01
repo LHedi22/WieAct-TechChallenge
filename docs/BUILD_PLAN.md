@@ -1,8 +1,8 @@
 # Build plan — 27 Oct → 9 Nov 2026 (submit by 10 Nov)
 
 Work ONE milestone at a time. Start in plan mode, end with `/verify`, tick boxes here.
-Dates are targets; one team member builds everything (DECISIONS.md 2026-10-27), so apply the scope
-guard in CLAUDE.md early. M0–M2 are the critical path — everything AI depends on them.
+Dates are targets; M0–M4 were built by one team member, M5–M8 by a second one on branch
+`m5-economy-arena` (DECISIONS.md 2026-11-01), so apply the scope guard in CLAUDE.md early. M0–M2 are the critical path — everything AI depends on them.
 
 ## M0 · Foundations (27–28 Oct)
 - [x] Monorepo layout from ARCHITECTURE.md; `docker compose up` brings db (postgres), qdrant, mock-llm, backend, worker, frontend
@@ -48,7 +48,7 @@ vitest, i18n) all green.
   - [x] Qwen3 thinking off: append `" /no_think"` to the system message for qwen3 models; for cloud
         also send `chat_template_kwargs` `enable_thinking=false` and drop it on a 400; always strip
         `<think>…</think>`. Tested.
-  - [ ] Providers kept apart: Qdrant collection = `{prefix}-{provider}-{embedding model slug}` with
+  - [x] Providers kept apart: Qdrant collection = `{prefix}-{provider}-{embedding model slug}` with
         that provider's dim; `python -m app.rag.reindex --provider cloud` rebuilds the cloud
         collection; `ai_cache` keys and `ai_call_log` rows include provider and model;
         `/api/admin/stats` defaults to `provider=cloud`; Offline demo mode serves cloud-generated
@@ -61,7 +61,8 @@ vitest, i18n) all green.
 - [x] `useJob` hook + `LoadingStages` + queue/quick-mode banners wired to a demo job
 - [x] `/api/admin/stats`: calls per tier, split %, tokens, cache hits, refusals, fallbacks
 - [x] Tests for every row of the error contract in PLATFORM.md
-- [ ] **In-slot model probe:** `python3 scripts/probe_models.py` → fills docs/MODELS.md results, prints recommended `.env` lines (models, embedding dim, ceilings, quota header names); record in DECISIONS.md
+- [x] **In-slot model probe:** `python3 scripts/probe_models.py` → fills docs/MODELS.md results, prints recommended `.env` lines (models, embedding dim, ceilings, quota header names); record in DECISIONS.md
+      _30/10:_ compact `llama3.2-3b`, mid `llama3.1-8b` (DECISIONS.md); **no embeddings model on our key** (OPEN: to ask the organisers)
 **Done when:** a load script firing 30 jobs at mock (with 503 and quota faults on) completes all jobs, never exceeds 2 concurrent, shows fallbacks in stats, and the UI shows queue position, and `python scripts/llm.py use auto` switches between local and cloud at slot boundaries without restarting (verified against mock with `MOCK_BLOCKED`).
 
 _Status 28/10:_ load test PASS — `load.py --jobs 30 --faults 503,quota` against the compose stack:
@@ -135,22 +136,117 @@ outputs from our slot (prompt-evaluator agent or a human); KaTeX replaced by the
 (npm registry blocked); coins for Quiz/Tutor are recorded on jobs, charged from M5.
 
 ## M5 · Economy, leaderboards, Teach-Back (4–6 Nov)
-- [ ] Wallet ledgers, daily refill (Africa/Tunis), earn cap, refunds, demo purchase, out-of-coins screen
-- [ ] Points, streaks, class + global leaderboards (opt-out)
-- [ ] Teach-Back peer room (ask with moderation, answer, AI grade draft-then-revise, pin best, helpful votes, polling) + solo mode
+- [x] Wallet ledgers, daily refill (Africa/Tunis), earn cap, refunds, demo purchase, out-of-coins screen
+- [x] Points, streaks, class + global leaderboards (opt-out)
+- [x] Teach-Back peer room (ask with moderation, answer, AI grade draft-then-revise, pin best, helpful votes, polling) + solo mode
 **Done when:** two browsers in the same world can ask/answer and see scores and leaderboard change.
 
+_Status 30/10:_ **Done-when passes** through the real UI (MCP Playwright, two browser contexts, compose
+stack with mock-llm `p_503_mid` 0.15, seeded `OLIVE-7Q2`): Yasmine asks in the Data Structures arena
+(20 → 18 coins, moderation job) → Karim sees it in the polled feed, answers → scored 84 by ONE compact
+call (outside the review band, no mid) → +3 coins, +30 points → Yasmine sees the score and pins it →
++50 points → both leaderboards show Karim at 80. Also via the API with two dev users (a 45 answer: no
+coins; improved to 84: +3 coins once). AR at 390×844: `dir=rtl`, no horizontal scroll. Tests: 223
+backend (wallet, leaderboard, arena incl. review band, mid-busy keeps the draft, refunds, permissions),
+25 mock-llm, 46 frontend; ruff, eslint, tsc, i18n (687 keys × 4), constraint greps pass. **Open:** load
+smoke (10 jobs, 503 + quota) completes 10/10 with ≤ 2 in flight and all faults handled, but reports
+FAIL on "no fallback observed": with ~4 interactive jobs a double 503 is rare, so that check is
+chance-driven (same result before M5 today; M1's 30-job run saw 1) — make the check deterministic
+(e.g. one forced-503 interactive job) before the demo; "ask the AI after 10 min without a peer answer"
+deferred (DECISIONS); Darija strings drafted, need native review (M8); the visual compare with mockup 15
+was done in EN at 1440×900, AR checked by layout metrics only.
+
 ## M6 · Daily challenges + Class Wisdom (6–7 Nov)
-- [ ] Daily plan (plan-once mid) + daily return screen + challenge progress tracking
-- [ ] Wisdom: tag counting, threshold → mid tip, tips on loading screens and Quiz Hall
+- [x] Daily plan (plan-once mid) + daily return screen + challenge progress tracking
+- [x] Wisdom: tag counting, threshold → mid tip, tips on loading screens and Quiz Hall
 **Done when:** 3 seeded students making the same mistake produce a tip shown on the next loading screen.
 
+_Status 30/10:_ **Done-when passes**, in pytest (`test_done_when_seeded_tip_reaches_a_newcomer`: seed
+→ ONE mid WISDOM_TIP call → a newcomer gets the tip, student_count 3; re-seeding makes no second call)
+and through the real UI (MCP Playwright, compose stack on mock): `python -m app.seed` → seed-ana,
+seed-bilel and seed-cyrine share one Calculus mistake → one tip in en + ar (the world's languages, one
+call) → a brand-new Arabic student joins `OLIVE-7Q2` and the next loading screen (placement, then
+Teach-Back solo) shows the Arabic tip, RTL. Daily: first `GET /api/daily` writes a rule plan at once,
+the background DAILY_PLAN job (1 mid call) replaced it ("Planned for you") with the "why" lines;
+side panel and daily return screen checked in AR at 1440×900 and 390×844 (no horizontal scroll);
+Continue → map, no second redirect. Tests: 238 backend (daily: catalogue validation, rewards once, earn
+cap, all-3 bonus, AI plan never overrides progress; wisdom: threshold, distinct students, one call for
+N languages, no nicknames in the prompt, unusable reply → retried by the next student), 27 mock-llm,
+50 frontend; ruff, eslint, tsc, i18n (710 keys × 4), constraint greps pass; load smoke (10 jobs, 503 +
+quota) PASS with 2 fallbacks. **Open:** flashcard challenges + CHALLENGE_ITEMS wait for M7; the Quiz
+Hall results wisdom card is covered by typecheck and the tip component test, not yet seen in a browser;
+mock tips reuse the English concept word inside Arabic text (real models write it in the language);
+new Darija strings need native review (M8); real-model tips/plans not yet generated (next slot).
+
 ## M7 · Study Studio → Audio Studio (7–8 Nov; cut Audio first)
-- [ ] Notes, flashcards with SRS, mind map; shared cache; Class Pool payment
-- [ ] Audio script + Web Speech player with transcript and speed
+- [x] Notes, flashcards with SRS, mind map; shared cache; Class Pool payment
+- [x] Audio script + Web Speech player with transcript and speed
+
+_Status 30/10 (Phase A):_ **Study Studio + Class Pool pass** through the real UI (Playwright/Chromium
+against the compose stack on mock, demo world `OLIVE-7Q2`): student A (EN) opens the studio → 15
+coins, generate panel → loading stages → notes with page refs, mind map, 12 cards; Space flips, 1/2/3
+grade with the server's intervals (Again 1 min · Good 10 min · Easy 3 days). Student B (EN) opens it
+free with no new call; B gives 15 coins to the pool; student C (AR, 390×844) pays an Arabic pack
+from the pool (15 → 0), RTL, mirrored mind map, no horizontal scroll, no console errors. The log
+shows exactly 1 NOTES_WRITE (mid) + 1 FLASHCARDS + 1 MAP_WRITE (compact) per pack and nothing
+for later students. Tests: 251 backend (pack = 1 mid + 2 compact then free, shared pending job,
+pool pay + refund on failure, failed map keeps notes and cards and a free run fills it, SRS, daily
+`flashcards` challenge, quiz cards personal with no AI call, members only), 28 mock-llm, 55
+frontend; ruff, eslint, tsc, i18n (769 keys × 4), constraint greps pass; load smoke (10 jobs,
+503 + quota) PASS with 1 fallback. **Open:** "Turn these into flashcards" is covered by API and
+component tests, not yet clicked in a browser; mock notes reuse English concept words inside
+Arabic text (real models write in the language); new Darija strings need native review (M8); no
+real-model pack yet (in-slot); Audio is Phase B.
+
+_Status 30/10 (Phase B):_ **Audio Studio passes**: through the real UI (EN 1440×900, AR 390×844) a
+student pays 15 coins → loading stages → the episode transcript (headless Chromium has no voices, so
+the "no voice" transcript-only state shows, RTL, no horizontal scroll). Tests: 254 backend (1 mid call
+per episode then free, shared job, pool refund on an unusable script and a fresh retry call), 29
+mock-llm, 59 frontend (segment-by-segment speech with highlight, speed, jump, Darija and no-voice
+transcript-only). All five buildings now open. **Open:** playback with real voices checked only with a
+faked `speechSynthesis` (needs a desktop browser); Darija TTS stays OPEN (silma-tts); no real-model
+episode yet (in-slot).
 
 ## M8 · Ship (8–9 Nov)
-- [ ] Offline demo mode (`/api/system/status` + banner, disables new AI actions)
+- [x] Offline demo mode (`/api/system/status` + banner, disables new AI actions)
 - [ ] Deploy (Vercel + Render/Railway), seed demo world, Darija review by native speakers
 - [ ] User test with ~10 students simultaneously (in-slot); export stats for report
 - [ ] README (setup, architecture, GenAI module explanation, screenshots), demo video ≤ 1:30 (show shared world, fallback, queue + Wisdom tip), 6-page report
+
+_Status 30/10 (in progress):_ **Offline demo mode passes**: interactive starts answer 503
+`errors.offline` before any coin is reserved; background work waits for the next slot; a running
+job caught by the switch fails with a refund (interactive) or requeues (background); the banner
+shows on every screen with the next live time (Tunis, 24 h) and AI start buttons are disabled,
+while saved results and the arena feed stay open. Checked with `OFFLINE_DEMO_MODE=on` in EN and AR
+at 1440×900 and 390×844 (RTL, no horizontal scroll, no app console errors). Tests: 260 backend
+(6 offline), 64 frontend; load smoke PASS with the new deterministic forced-503 fallback check.
+**Deploy:** config in place (`backend/start-prod.sh` + `railway.toml`, `frontend/vercel.json`,
+`docs/DEPLOY.md`; the start script smoke-tested in a container); accounts, secrets, seed and
+warm-up are human steps. **Blocked:** no embeddings model on our cloud key (DECISIONS.md OPEN),
+so cloud indexing can't run yet. **README** rewritten (GenAI module, setup, privacy, services);
+screenshots still to capture. Report draft and video shot list in `docs/report/`; stats export
+via `scripts/export_stats.py`. Human: Darija review, ~10-student user test, video.
+
+_Status 31/10:_ **Embeddings unblocked**: our own Ollama with `bge-m3` (`EMBED_PROVIDER=local`,
+DECISIONS.md); dev re-indexed (47 chunks, 1024 dims), EN/FR/AR/Darija queries find the right
+chapter and a new upload is found in EN, FR and AR. **Teach-Back:** Arabic and Darija answers are
+graded by one mid call; a grade still unsure pays nothing until reviewed (`pending_review`,
+migration 0009); every student-facing prompt shares `_voice_rules.md`. **Offline:** ending a Tutor
+session while paused saves it without the summary. **Dev badge** in the top bar (M1 "Providers kept
+apart" ticked). **In-slot run** `python -m app.evals slot` (study pack, audio, daily plan,
+Teach-Back × 4 languages + one Class Wisdom tip, outputs for the prompt-evaluator) tested on the
+mock: 32 calls first run, 1 call and 0 repeated identical requests on a re-run. It found an
+`ai_cache` race (two packs embedding the same query at once crashed one job), fixed with an
+upsert and a deterministic test. Hooks executable in git. Tests: 304 backend, 66 frontend; ruff,
+eslint, tsc, i18n (793 keys × 4) pass. **Next:** the slot run with `--cloud` on Mon 02/11
+(STATUS.md §2), the avatar step redesign (user feedback), deploy.
+
+_Status 31/10 (later):_ **Avatar and art (user feedback):** the avatar step is a 24×24 explorer with
+optional hair and hair colour (validated in `/api/profile`), tabs of tap-to-pick tiles, "Surprise me"
+and a bobbing preview (still under reduced motion); checked in EN 1440×900 and AR 390×844. The map
+has a pixel-wave sea and drawn islands, boat and top-bar icons; the island page is one drawn island
+with sandy paths to five drawn buildings and the explorer in the middle (all code-drawn in
+`components/sprite/art.ts`; PNGs in `design/assets/sprites/` still replace them). **Daily:** the
+DAILY_PLAN cache key includes the UI language, and AI plan lines written in another language are
+hidden after a switch (no extra call). **Next:** merge `m5-economy-arena` into `main`, the slot run
+with `--cloud`, deploy.

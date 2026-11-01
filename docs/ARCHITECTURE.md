@@ -14,7 +14,7 @@ learning-world/
 │   └── src/
 │       ├── app/               # router, providers, layout shell (top bar, side panel)
 │       ├── api/               # typed client generated from FastAPI OpenAPI (openapi-typescript)
-│       ├── features/          # onboarding/, worlds/, map/, quiz/, tutor/, studio/, audio/, arena/, challenges/, wallet/
+│       ├── features/          # landing/, auth/, onboarding/, worlds/, map/, island/, placement/, quiz/, tutor/, studio/, audio/, arena/, daily/, wisdom/, wallet/, pool/, leaderboard/, jobs/, styleguide/
 │       ├── components/        # design-system primitives (PixelButton, PixelPanel, SoftCard, Chip, CoinCounter …)
 │       ├── hooks/useJob.ts    # polls GET /api/jobs/{id}; exposes stage, queuePosition, quickMode
 │       ├── i18n/{en,fr,ar,ar-TN}.json
@@ -34,7 +34,7 @@ learning-world/
 │       │   ├── quota.py       # parse quota headers → QuotaState
 │       │   └── log.py         # ai_call_log writer
 │       ├── rag/               # parsing (PyMuPDF, python-pptx, python-docx, Tesseract), chunking, VectorStore (Qdrant)
-│       ├── features/          # quiz/, tutor/, studio/, audio/, arena/, challenges/, wisdom/, onboarding/, worlds/
+│       ├── features/          # auth/, onboarding/, worlds/, placement/, quiz/, tutor/, studio/, audio/, arena/, daily/, wisdom/, wallet/, pool/, leaderboard/
 │       ├── prompts/           # *.md templates with {placeholders}; one file per task
 │       └── models/            # SQLAlchemy models
 │   └── tests/
@@ -105,13 +105,14 @@ and on failure do ONE compact "fix this JSON" repair call. Small models break JS
 | TUTOR_TURN | compact → mid when stuck ≥ 2 turns or "complex" flag | escalation | interactive | plan: chapter+level+lang+style; turns: none |
 | TUTOR_GUARD (rewrite a reply that leaks the answer as a guiding question; only flagged replies) | compact | guard | interactive | none |
 | TUTOR_SUMMARY | compact | summary | interactive | session id |
-| NOTES_WRITE / MAP_WRITE / AUDIO_SCRIPT | mid | narrow-before-generating, once then cached | background | world+chapter+level+lang |
-| FLASHCARDS (from notes) | compact | execute-compact | background | world+chapter+level+lang |
-| DAILY_PLAN | mid, once / student / day | plan-once | background (first login) | user+date |
-| CHALLENGE_ITEMS | compact | execute-compact | background | user+date |
-| WISDOM_TIP | mid, once per recurring tag | generate once, reuse | background | world+tag+lang |
-| TEACHBACK_GRADE | compact score; mid reviews low-confidence or top answers | draft-then-revise | interactive | answer id |
-| MODERATE_POST | compact | classification | interactive | text hash |
+| NOTES_WRITE (STUDY_PACK job, step 1) | mid | plan-once + narrow-before-generating (quiz-pool narrowing, no filter call) | interactive | chapter+level+lang (+job; `study_assets` is the class cache) |
+| FLASHCARDS / MAP_WRITE (STUDY_PACK steps 2–3, from the notes only) | compact | execute-compact | interactive | chapter+level+lang (+job) |
+| AUDIO_SCRIPT (AUDIO_EPISODE job) | mid | narrow-before-generating, once then cached | interactive | chapter+level+lang (+job; `study_assets` is the class cache) |
+| DAILY_PLAN (first `GET /api/daily` of a Tunis day; an instant rule plan shows meanwhile and stays if the job fails; applied only while nothing is done) | mid, once / student / day | plan-once | background | user+date |
+| CHALLENGE_ITEMS (unused: flashcard challenges review existing cards) | compact | execute-compact | background | user+date |
+| WISDOM_TIP (at `WISDOM_THRESHOLD` distinct students per world+concept+mistake type; ONE call writes the tip in every language of the world's members; later students only raise the count) | mid, once per pattern | generate-once | background | world+concept+type+langs+count |
+| TEACHBACK_GRADE (ARENA_GRADE / ARENA_SOLO jobs; the same call moderates the answer via `flag`) | compact draft; mid reviews only when confidence is low or the score is within `TEACHBACK_REVIEW_BAND` of `PEER_ANSWER_THRESHOLD` (solo: low confidence only); mid busy → the draft stands (Quick mode). `ar` / `ar-TN`: one mid call, no draft (compact fallback when mid is busy). Still low-confidence after grading → `pending_review`: no rewards, author-only | draft-then-revise (ar/ar-TN: mid direct) | interactive | none (personal) |
+| MODERATE_POST (ARENA_ASK job: peer questions; rejected → coins refunded) | compact | classification | interactive | text hash |
 | TRANSLATE_SHORT | compact | rewriting | background | text+lang |
 | PLACEMENT_QUIZ (8 Q per course, 2 chunks per chapter, one call; graded server-side) | compact | narrow-before-generating | interactive | course+lang (shared by the class) |
 | any mid task when saturated | compact | fallback (`quick_mode`) | — | — |
@@ -130,7 +131,9 @@ others read the cache when it lands.
 - `INDEX_DOCUMENT` job (background): parse → CHUNK_TAG (8 chunks per compact call, cached by file
   hash) → EMBED (32 per call) → Qdrant; ~5 calls for a 30-page PDF. Resumable after a Defer; the
   same file twice in a chapter is indexed once. `documents.progress/detail` drive the indexing screen.
-- Embeddings via the platform endpoint (own quota) through the gateway, batched.
+- Embeddings through the gateway, batched. `EMBED_PROVIDER=local`: our own Ollama with `bge-m3`
+  (the platform key has no embeddings model; DECISIONS.md 2026-10-31), otherwise the chat provider's
+  endpoint. Indexing and search pick the collection from the provider that made the vectors.
 - `VectorStore` interface: `upsert(chunks)`, `search(query_vec, filters={world_id, course_id, chapter_id}, k)`,
   `delete(document_id)`. Implementation: **`QdrantVectorStore`** with `qdrant-client` (async).
   One collection per provider (`{QDRANT_COLLECTION_PREFIX}-{provider}-{embedding model slug}`, see
@@ -159,14 +162,15 @@ others read the cache when it lands.
 `ai_call_log(id, ts, task_kind, model_tier, pattern, status_code, tokens_in, tokens_out, latency_ms, cache_hit, fallback, refusal_reason)`
 `quiz_sets(id, world_id, course_id, chapter_id, level, language, seed, questions jsonb)` · `quiz_attempts(id, user_id, quiz_set_id, world_id, course_id, chapter_id, level, language, answers jsonb, current, score, points, second_tries, status, finished_at)`
 `mistakes(id, user_id, world_id, chapter_id, attempt_id, question_idx, concept, mistake_type, created_at)`
-`wisdom_tips(id, world_id, course_id, concept, mistake_type, language, text, student_count)`
-`study_assets(id, world_id, chapter_id, level, language, kind[notes|flashcards|map|audio_script], content jsonb)`
-`flashcard_reviews(user_id, card_id, due_at, interval, ease)`
+`wisdom_tips(id, world_id, course_id, chapter_id, concept, mistake_type, language, text jsonb{trap,why,right}, student_count)` — unique (world, concept, mistake_type, language); `mistakes.concept` is the shared quiz question's concept so classmates' mistakes match
+`study_assets(id, world_id, chapter_id, level, language, kind[notes|map|audio_script], content jsonb)` — unique (chapter, level, language, kind)
+`flashcards(id, chapter_id, asset_id, user_id, front, back, concept, source[deck|quiz], ref)` — deck cards are shared (user NULL, asset = the pack's notes), quiz cards personal
+`flashcard_reviews(user_id, card_id, due_at, interval_s, ease, reps, updated_at)`
 `tutor_sessions(id, user_id, world_id, course_id, chapter_id, level, language, goal, ideas jsonb, hints_used, stuck_count, escalate_next, turns jsonb, pending_job_id, status, summary jsonb, ended_at)`
-`peer_questions(id, world_id, chapter_id, author_id, text, status, pinned_answer_id)` · `peer_answers(id, question_id, author_id, text, ai_score, ai_confidence, ai_feedback jsonb, helpful_count)`
-`coin_ledger(id, user_id, delta, kind[daily|earned|purchased|spend|refund|pool], ref, created_at)` · `points_ledger(id, user_id, world_id, delta, reason, created_at)`
-`daily_state(user_id, date, free_coins_left, earned_today, plan jsonb, challenges jsonb, streak)`
-`class_pool(world_id, balance)` · `cosmetics_owned(user_id, item_key)`
+`peer_questions(id, world_id, chapter_id, author_id, text, language, status[pending|open|rejected], reject_reason, pinned_answer_id)` · `peer_answers(id, question_id, author_id, text, status[grading|graded|rejected|failed], ai_score, ai_confidence, ai_feedback jsonb, reviewed_by_mid, rewarded)` — one per student per question · `peer_votes(answer_id, user_id)`
+`coin_ledger(id, user_id, day, bucket[free|earned|purchased|pass], kind[daily|earned|purchased|spend|refund|pass], delta, ref, created_at)` — `day` = Tunis day; one `daily` row per user-day, one refund per (ref, bucket) · `points_ledger(id, user_id, world_id, delta, reason, ref, created_at)` — unique (user, reason, ref)
+`daily_state(user_id, date, challenges jsonb, plan jsonb, planned_by[rule|ai], plan_job_id, seen_at)` — 3 challenges `{type[quiz_questions|quiz_score|teachback|tutor_session|flashcards], target, progress, done, why, world/course/chapter}`; free coins, earned-today and streak are derived from the ledgers
+`class_pool_ledger(id, world_id, user_id, kind[contribute|spend|refund], delta, ref)` — balance = sum; one refund per ref · `cosmetics_owned(user_id, item_key)`
 
 Balances are derived from ledgers (with a cached balance column if needed). Every coin change is
 a ledger row — never mutate a balance without one.
@@ -175,11 +179,11 @@ a ledger row — never mutate a balance without one.
 `/api/auth/{signup,login,logout,me,session}` (signed HttpOnly cookie) · `/api/profile` · `/api/onboarding/style`
 `/api/worlds/{id}/map` · `/api/courses/{id}` (island) · `/api/courses/{id}/presence` · `/api/placement/{course_id}`
 `/api/worlds` (create) · `/api/worlds/join` · `/api/worlds/{id}` (map data) · `/api/worlds/{id}/courses|chapters|documents`
-`/api/jobs/{id}` · `/api/economy` · `/api/wallet` · `/api/daily`
+`/api/jobs/{id}` · `/api/economy` · `/api/wallet` (+ `/demo-purchase`) · `/api/daily` (+ `/seen`: the daily return screen, shown to returning students on their first open of the day) — any paid start without enough coins → `402 errors.insufficient_coins`
 `/api/quiz/price` · `/api/quiz/start` · `/api/quiz/attempts/{id}` (+ `/answer`, `/skip`, `/finish`; `/api/quiz/attempts/from-job/{job}`) · `/api/placement/{start,finish}` · `/api/tutor/start` · `/api/tutor/{id}` (+ `/turn` with action message|hint|another_way|stuck, `/end`)
-`/api/studio/{chapter}/{notes|flashcards|map}` · `/api/audio/{chapter}`
-`/api/arena/questions` · `/api/arena/questions/{id}/answers` · `/api/arena/solo`
-`/api/leaderboard?scope=world|global&period=week|all` · `/api/wisdom?world&course`
+`/api/studio/{chapter}?level` (notes, map, card counts, missing parts, pending job, price, pool balance) · `/api/studio/{chapter}/price` · `/api/studio/{chapter}/generate {level, pay: me|pool}` · `/api/studio/{chapter}/cards?level` (due queue) · `/api/studio/cards/{id}/review {grade}` · `/api/quiz/attempts/{id}/flashcards` · `/api/worlds/{id}/pool` (GET/POST) · `/api/audio/{chapter}?level` (script, pending job, price, pool) · `/api/audio/{chapter}/price` · `/api/audio/{chapter}/generate {level, pay}`
+`/api/arena/questions?chapter_id` (feed, polled) · `/api/arena/questions/{id}` (+ `/answers`) · `/api/arena/answers/{id}/pin` · `/api/arena/answers/{id}/helpful` (POST/DELETE) · `/api/arena/solo`
+`/api/leaderboard?scope=world|global&period=week|all&world_id` · `/api/wisdom?world_id&course_id` (tips in the user's language, English fallback)
 `/api/admin/stats` (call log aggregates; dev/demo only) · `/api/system/status` (slot live? offline demo mode?)
 
 ## Config (.env)

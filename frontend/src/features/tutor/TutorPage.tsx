@@ -7,6 +7,7 @@ import { Banner, Bidi, Chip, MathText, PixelButton, SoftCard, Sprite } from "@/c
 import { cx } from "@/components/cx";
 import { JOB_POLL_MS, isTerminal, useJob } from "@/hooks/useJob";
 import { useOnce } from "@/hooks/useOnce";
+import { useAiPaused } from "@/hooks/useAiPaused";
 import { ErrorBanner } from "@/features/worlds/parts";
 
 /** …/tutor/new?chapter&level — opens a session (the first question is a job), then the chat. */
@@ -65,6 +66,7 @@ export function TutorPage() {
       void qc.invalidateQueries({ queryKey: ["tutor", sessionId] });
     },
   });
+  const paused = useAiPaused(); // offline demo mode: the transcript stays readable
   const end = useMutation({
     mutationFn: () => api.tutorEnd(sessionId),
     onSuccess: (r) => {
@@ -83,7 +85,8 @@ export function TutorPage() {
     );
   const island = `/worlds/${worldId}/courses/${courseId}`;
   // a failed or cancelled turn must not lock the chat: only a job still running counts
-  const busy = (!!session.pending_job_id && !jobDone) || send.isPending;
+  const running = !!session.pending_job_id && !jobDone;
+  const busy = running || send.isPending || paused; // ending stays possible while paused
   const quick = session.turns.some((x) => x.quick_mode);
   const act = (action: TutorAction, msg = "") => send.mutate({ msg, action });
 
@@ -102,7 +105,7 @@ export function TutorPage() {
           {session.status === "active" ? (
             <PixelButton
               variant="secondary"
-              disabled={busy || end.isPending}
+              disabled={running || send.isPending || end.isPending}
               onClick={() => end.mutate()}
             >
               {t("end")}
@@ -222,7 +225,7 @@ export function TutorPage() {
               <ErrorBanner error={send.error ?? end.error} />
             </div>
           ) : (
-            session.summary && <Summary session={session} island={island} navigate={navigate} />
+            !running && <Summary session={session} island={island} navigate={navigate} />
           )}
         </main>
         <GoalPanel session={session} />
@@ -295,19 +298,30 @@ function Summary({
   navigate: (to: string) => void;
 }) {
   const { t } = useTranslation("tutor");
-  const s = session.summary as { summary?: string; next_step?: string; ideas_found?: string[] };
+  // no summary: the session ended while AI was paused (offline demo mode)
+  const s = session.summary as {
+    summary?: string;
+    next_step?: string;
+    ideas_found?: string[];
+  } | null;
   return (
     <SoftCard className="mx-4 mb-6 flex flex-col gap-3 sm:mx-8">
-      <h2 className="text-h2">{t("summary.title")}</h2>
-      <p dir="auto">
-        <MathText text={s.summary ?? ""} />
-      </p>
-      {s.ideas_found && s.ideas_found.length > 0 && (
-        <p className="text-small">{t("summary.found", { count: s.ideas_found.length })}</p>
+      <h2 className="text-h2">{t(s ? "summary.title" : "summary.savedTitle")}</h2>
+      {s ? (
+        <>
+          <p dir="auto">
+            <MathText text={s.summary ?? ""} />
+          </p>
+          {s.ideas_found && s.ideas_found.length > 0 && (
+            <p className="text-small">{t("summary.found", { count: s.ideas_found.length })}</p>
+          )}
+          <p className="font-semibold" dir="auto">
+            {t("summary.next")} <MathText text={s.next_step ?? ""} />
+          </p>
+        </>
+      ) : (
+        <p>{t("summary.pausedBody")}</p>
       )}
-      <p className="font-semibold" dir="auto">
-        {t("summary.next")} <MathText text={s.next_step ?? ""} />
-      </p>
       <div className="flex flex-wrap gap-3">
         <PixelButton
           onClick={() =>

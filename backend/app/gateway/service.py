@@ -370,10 +370,15 @@ class Gateway:
         quota / 503 / network → Defer (the job resumes later), 400 ceiling → split the batch once,
         401 under auto → re-resolve and restart every batch on the new provider, so one
         document's vectors never mix providers. `cache_query` caches a single search query."""
-        res = await resolve(self.settings, self.sm, self._now())
-        if res.offline:
-            raise OfflineMode(res.reason)
-        profile = res.profile
+        fixed = self.settings.embed_profile()
+        if fixed is not None and fixed.provider != "cloud":
+            # Self-hosted embeddings (EMBED_PROVIDER=local): no slot, no platform quota.
+            profile = fixed
+        else:
+            res = await resolve(self.settings, self.sm, self._now())
+            if res.offline or (fixed is not None and res.profile.provider != "cloud"):
+                raise OfflineMode(res.reason or "outside_slot")
+            profile = res.profile
         key = None
         if cache_query and len(texts) == 1:
             key = cache.cache_key(
@@ -393,7 +398,7 @@ class Gateway:
                 vectors, calls = await self._embed_all(texts, lane, profile)
                 break
             except _Reroute:
-                if not rerouted:
+                if not rerouted and fixed is None:  # a fixed embeddings provider never switches
                     rerouted = True
                     res = await resolve(self.settings, self.sm, self._now())
                     if res.profile.provider != profile.provider:

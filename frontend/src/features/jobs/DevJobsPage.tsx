@@ -6,7 +6,7 @@ import { useUiStore } from "@/app/uiStore";
 import { Banner, LanguageSwitcher, PixelButton, PixelPanel, SoftCard } from "@/components";
 import { cx } from "@/components/cx";
 import { JobProgress } from "./JobProgress";
-import { OfflineBanner, ProviderBadge } from "./ProviderBadge";
+import { ProviderBadge } from "./ProviderBadge";
 
 type Lane = "interactive" | "background";
 
@@ -32,10 +32,9 @@ export function DevJobsPage() {
       <header className="flex flex-col gap-3">
         <h1 className="text-h1">{t("title")}</h1>
         <p className="text-ink/70">{t("intro")}</p>
-        <ProviderBadge />
+        <ProviderBadge className="self-start" />
         <LanguageSwitcher />
       </header>
-      <OfflineBanner />
 
       <PixelPanel className="flex flex-col gap-4">
         <fieldset className="flex flex-wrap items-center gap-2">

@@ -1,14 +1,29 @@
 from app.models.ai import AICache, AICallLog
+from app.models.arena import PeerAnswer, PeerQuestion, PeerVote
 from app.models.base import Base
 from app.models.course import Chapter, Course
+from app.models.daily import DailyState, WisdomTip
+from app.models.economy import CoinLedger, PointsLedger
 from app.models.job import Job
 from app.models.learner import ChapterMastery, CourseLevel, PlacementSet, Presence, Profile
 from app.models.rag import Chunk, Document, QuizSet
+from app.models.studio import ClassPoolLedger, Flashcard, FlashcardReview, StudyAsset
 from app.models.study import Mistake, QuizAttempt, TutorSession
 from app.models.user import User
 from app.models.world import World, WorldMember
 
 __all__ = [
+    "ClassPoolLedger",
+    "Flashcard",
+    "FlashcardReview",
+    "StudyAsset",
+    "DailyState",
+    "WisdomTip",
+    "CoinLedger",
+    "PointsLedger",
+    "PeerAnswer",
+    "PeerQuestion",
+    "PeerVote",
     "Mistake",
     "QuizAttempt",
     "TutorSession",

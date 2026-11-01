@@ -19,6 +19,12 @@ class DemoJobIn(BaseModel):
     lane: Literal["interactive", "background"] = "interactive"
     language: Literal["en", "fr", "ar", "ar-TN"] = "en"
     cache_key: str | None = Field(None, description="set to make the result shareable/cached")
+    topic: str | None = Field(
+        None,
+        max_length=80,
+        description="vary it so load tests on the "
+        "real platform never send repeated identical requests",
+    )
 
 
 class JobCreated(BaseModel):
@@ -35,7 +41,7 @@ async def create_demo_job(
         s,
         kind=demo.KIND,
         lane=body.lane,
-        payload={"language": body.language, "cache_key": body.cache_key},
+        payload={"language": body.language, "cache_key": body.cache_key, "topic": body.topic},
     )
     return JobCreated(job_id=str(job.id), cost=job.cost, cached=False)
 

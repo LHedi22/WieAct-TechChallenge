@@ -1,11 +1,13 @@
 """gateway.embed: the error contract applied to the (separately metered) embeddings endpoint."""
 
+import asyncio
+
 import pytest
 
 from app.gateway import Defer, KeyBlocked
 from app.gateway.service import EMBED_BATCH
 from tests.conftest import FAST_MOCK, MockConfig, create_mock_app
-from tests.test_gateway_contract import AUTO, log_rows, make_gateway, make_settings
+from tests.test_gateway_contract import AUTO, log_rows, make_gateway, make_settings, task
 
 
 def set_cfg(app, **cfg) -> None:
@@ -95,3 +97,94 @@ async def test_dev_blocked_without_auto_raises(monkeypatch, sm, mock_llm):
     gw, _ = make_gateway(make_settings(monkeypatch), sm, {"mock": mock_llm})
     with pytest.raises(KeyBlocked):
         await gw.embed(texts(1), "background")
+
+
+# --- Self-hosted embeddings (EMBED_PROVIDER=local): chat stays on the platform ------------------
+# Our key has no embeddings model (DECISIONS.md), so vectors come from our own Ollama (bge-m3):
+# the Mac in dev, a Railway service in production. Declared service; no platform quota is used.
+
+SELF = {
+    "EMBED_PROVIDER": "local",
+    "LOCAL_EMBEDDING_MODEL": "mock-embed",
+    "LOCAL_EMBEDDING_DIM": "384",
+}
+PROD = {k: v for k, v in AUTO.items() if k.startswith(("CLOUD_", "LOCAL_"))} | {
+    "LLM_PROVIDER": "cloud",
+    "APP_ENV": "production",
+    "SECRET_KEY": "prod-secret",
+}
+
+
+async def test_self_hosted_embeddings_beside_cloud_chat(monkeypatch, sm, mock_llm):
+    own = create_mock_app(MockConfig(**FAST_MOCK))
+    gw, _ = make_gateway(
+        make_settings(monkeypatch, **AUTO | SELF), sm, {"cloud": mock_llm, "local": own}
+    )
+    res = await gw.embed(texts(3), "background")
+    assert res.provider == "local" and len(res.vectors) == 3
+    assert mock_llm.state.stats.calls == 0  # nothing went to the platform
+    assert (await gw.run(task())).provider == "cloud"  # chat still on the platform
+
+
+async def test_self_hosted_embeddings_work_outside_the_slot_in_production(
+    monkeypatch, sm, mock_llm
+):
+    from datetime import UTC, datetime
+
+    from app.core.slot import TZ
+
+    own = create_mock_app(MockConfig(**FAST_MOCK))
+    outside = lambda: datetime(2026, 10, 28, 9, 0, tzinfo=TZ).astimezone(UTC)  # noqa: E731
+    gw, _ = make_gateway(
+        make_settings(monkeypatch, **PROD | SELF),
+        sm,
+        {"cloud": mock_llm, "local": own},
+        now=outside,
+    )
+    res = await gw.embed(["limit 0/0"], "interactive", cache_query=True)
+    assert res.provider == "local" and mock_llm.state.stats.calls == 0
+
+
+def test_production_accepts_self_hosted_embeddings_but_not_mock(monkeypatch):
+    assert make_settings(monkeypatch, **PROD | SELF).EMBED_PROVIDER == "local"
+    with pytest.raises(ValueError, match="EMBED_PROVIDER"):
+        make_settings(monkeypatch, **PROD | {"EMBED_PROVIDER": "mock"})
+
+
+async def test_parallel_identical_cache_writes_do_not_collide(sm):
+    """Two jobs embedding the same search query at once both store it: the second write must not
+    crash on the primary key (found by the slot run: two languages' study packs, one chapter).
+    The race made deterministic: another transaction holds the key, uncommitted, when put() runs."""
+    from app.gateway import cache
+    from app.models import AICache
+
+    key = "k" * 64
+    async with sm() as other:
+        other.add(
+            AICache(
+                key=key,
+                task_kind="EMBED",
+                content={"value": [0.1, 0.2]},
+                model_tier="embed",
+                provider="mock",
+                model="m",
+                hits=0,
+            )
+        )
+        await other.flush()  # row inserted, not committed: put() can't see it yet
+        write = asyncio.create_task(
+            cache.put(
+                sm,
+                key=key,
+                kind="EMBED",
+                content=[0.1, 0.2],
+                tier="embed",
+                provider="mock",
+                model="m",
+            )
+        )
+        await asyncio.sleep(0.3)  # put() is now waiting on the uncommitted key
+        await other.commit()
+    await write
+    row = await cache.get(sm, key)
+    assert row is not None and row.content == {"value": [0.1, 0.2]}

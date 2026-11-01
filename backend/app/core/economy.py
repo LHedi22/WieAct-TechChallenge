@@ -41,6 +41,16 @@ POINTS = {
 }
 SPENDING_ORDER = ["free", "earned", "purchased"]
 
+# Simulated for the hackathon ("demo purchase"); prices are placeholders to validate in user tests.
+PRODUCTS = {
+    "coin_pack": {"coins": 50, "price_tnd": 2},
+    "exam_pass": {"days": 14, "price_tnd": 10},
+}
+
+# Teach-Back draft-then-revise: the mid model reviews a compact grade only when it is unsure, or
+# when the score is this close to PEER_ANSWER_THRESHOLD (coins depend on that decision).
+TEACHBACK_REVIEW_BAND = 10
+
 # Avatar extras unlocked with points (points can never be bought; coins never buy cosmetics).
 COSMETICS = {
     "cap": 0,
@@ -78,6 +88,7 @@ def as_dict() -> dict:
         "earn": EARN,
         "points": POINTS,
         "peer_answer_threshold": PEER_ANSWER_THRESHOLD,
+        "products": PRODUCTS,
         "cosmetics": COSMETICS,
         "buildings": BUILDINGS,
     }

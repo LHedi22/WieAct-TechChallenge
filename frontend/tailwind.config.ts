@@ -31,7 +31,7 @@ export default {
       boxShadow: { lip: shadow.lip, "lip-pressed": shadow.lipPressed, panel: shadow.panel },
       transitionDuration: { press: `${motion.pressMs}ms`, sail: `${motion.sailMs}ms` },
       keyframes: {
-        water: { from: { backgroundPosition: "0 0" }, to: { backgroundPosition: "64px 32px" } },
+        water: { from: { backgroundPosition: "0 0" }, to: { backgroundPosition: "128px 64px" } },
       },
       animation: { water: `water ${motion.waterTileMs}ms linear infinite` },
     },

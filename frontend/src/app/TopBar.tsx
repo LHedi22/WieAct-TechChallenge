@@ -14,6 +14,7 @@ import {
   Sprite,
   StreakCounter,
 } from "@/components";
+import { ProviderBadge } from "@/features/jobs/ProviderBadge";
 import { useMe, useSignOut, useWallet } from "@/hooks/useSession";
 
 function useSecondsUntil(iso: string | undefined): number {
@@ -25,7 +26,8 @@ function useSecondsUntil(iso: string | undefined): number {
   return iso ? Math.max(0, Math.round((Date.parse(iso) - now) / 1000)) : 0;
 }
 
-/** Logo, world switcher, coins / points / streak / refill (from /api/wallet), avatar menu. */
+/** Logo, world switcher, dev provider badge, coins / points / streak / refill (from /api/wallet),
+ * avatar menu. */
 export function TopBar({ worldId }: { worldId?: string }) {
   const { t } = useTranslation("map");
   const navigate = useNavigate();
@@ -67,6 +69,7 @@ export function TopBar({ worldId }: { worldId?: string }) {
         </div>
       )}
       <div className="ms-auto flex flex-wrap items-center gap-2">
+        <ProviderBadge />
         {wallet && (
           <>
             <CoinCounter value={wallet.coins} />

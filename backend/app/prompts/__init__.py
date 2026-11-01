@@ -28,6 +28,19 @@ LANGUAGE_NAMES = {
 
 
 @lru_cache
+def voice_rules() -> str:
+    """Shared rules for student-facing prompts (_voice_rules.md), without its header comment."""
+    text = (DIR / "_voice_rules.md").read_text(encoding="utf-8")
+    body = re.sub(r"^<!--.*?-->\s*", "", text, flags=re.DOTALL)
+    return "\n".join(line.strip() for line in body.strip().splitlines())
+
+
+def voice_rules_version() -> int:
+    m = _VERSION.search((DIR / "_voice_rules.md").read_text(encoding="utf-8"))
+    return int(m.group(1)) if m else 0
+
+
+@lru_cache
 def _load(name: str) -> tuple[str, dict[str, str]]:
     text = (DIR / f"{name}.md").read_text(encoding="utf-8")
     m = _VERSION.search(text)
@@ -45,6 +58,7 @@ def render(name: str, **values: Any) -> tuple[str, list[dict[str, str]]]:
     version, sections = _load(name)
     if "language" in values:
         values.setdefault("language_name", LANGUAGE_NAMES.get(values["language"], "English"))
+    values.setdefault("voice_rules", voice_rules())
     messages = [
         {"role": role, "content": sections[role].format(**values)}
         for role in ("system", "user")

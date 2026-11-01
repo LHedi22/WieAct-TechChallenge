@@ -17,7 +17,17 @@ from mock_llm.config import MockConfig  # noqa: E402
 
 from tests.db import prepare, test_url  # noqa: E402
 
-_PREFIXES = ("LLM_", "CLOUD_", "LOCAL_", "MOCK_", "QDRANT_", "APP_ENV", "SECRET_KEY", "ADMIN_")
+_PREFIXES = (
+    "LLM_",
+    "EMBED_",
+    "CLOUD_",
+    "LOCAL_",
+    "MOCK_",
+    "QDRANT_",
+    "APP_ENV",
+    "SECRET_KEY",
+    "ADMIN_",
+)
 
 # Module-level too: test modules that import app.main build the app at import time, before any
 # fixture runs, and must not see the developer's .env or shell.
@@ -29,6 +39,8 @@ os.environ["LLM_PROVIDER"] = "mock"
 
 DEV_DB_URL = os.environ.get("DATABASE_URL", config.Settings().DATABASE_URL)
 TABLES = (
+    "daily_state, wisdom_tips, class_pool_ledger, flashcard_reviews, flashcards, study_assets, "
+    "coin_ledger, points_ledger, peer_votes, peer_answers, peer_questions, "
     "ai_call_log, ai_cache, jobs, mistakes, quiz_attempts, tutor_sessions, presence, "
     "placement_sets, chapter_mastery, course_levels, "
     "profiles, quiz_sets, chunks, documents, chapters, courses, "

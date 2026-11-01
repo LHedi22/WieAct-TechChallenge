@@ -47,6 +47,10 @@ class Settings(BaseSettings):
 
     # --- LLM provider ---
     LLM_PROVIDER: ProviderSetting = "mock"
+    # Embeddings: "same" follows LLM_PROVIDER. "local" = our own Ollama (bge-m3), also allowed in
+    # production: our key has no embeddings model (DECISIONS.md), so chat stays on the platform
+    # and vectors come from a declared self-hosted service (the Mac in dev, Railway in prod).
+    EMBED_PROVIDER: Literal["same", "cloud", "local", "mock"] = "same"
 
     CLOUD_BASE_URL: str = ""
     CLOUD_API_KEY: SecretStr = SecretStr("")
@@ -117,6 +121,8 @@ class Settings(BaseSettings):
                     f"APP_ENV=production requires LLM_PROVIDER=cloud (got {self.LLM_PROVIDER}); "
                     "local and mock providers are dev-only"
                 )
+            if self.EMBED_PROVIDER == "mock":
+                raise ValueError("APP_ENV=production refuses EMBED_PROVIDER=mock (fake vectors)")
             if self.SECRET_KEY.get_secret_value() in ("", "change-me-in-.env"):
                 raise ValueError("APP_ENV=production requires a real SECRET_KEY")
         # auto: this is only the fallback profile; app/gateway/providers.py picks cloud per job
@@ -150,6 +156,10 @@ class Settings(BaseSettings):
     def llm(self) -> LLMProfile:
         """The configured provider's profile (for auto: the local fallback)."""
         return self._llm
+
+    def embed_profile(self) -> LLMProfile | None:
+        """The fixed embeddings profile, or None when embeddings follow the chat provider."""
+        return None if self.EMBED_PROVIDER == "same" else self.profile_for(self.EMBED_PROVIDER)
 
     def collection_for(self, profile: LLMProfile) -> str:
         """Qdrant collection per provider + embedding model, so vectors never mix."""

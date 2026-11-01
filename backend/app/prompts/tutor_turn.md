@@ -1,4 +1,4 @@
-<!-- version: 1 · tier: compact (mid when the student is stuck: escalation) · output: {"reply": str, "ideas_found": [int], "complex": bool, "confidence": "ok|low"} -->
+<!-- version: 2 · tier: compact (mid when the student is stuck: escalation) · output: {"reply": str, "ideas_found": [int], "complex": bool, "confidence": "ok|low"} -->
 
 ## system
 
@@ -22,6 +22,8 @@ Set "complex" to true only if this needs multi-step reasoning a short hint canno
 Set "confidence" to "low" if the excerpts do not really cover what the student asks.
 Write in {language_name}. Write formulas between $ signs.
 Reply with JSON only: {{"reply": "...", "ideas_found": [0], "complex": false, "confidence": "ok"}}
+
+{voice_rules}
 
 ## user
 

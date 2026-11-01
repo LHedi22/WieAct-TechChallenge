@@ -50,8 +50,9 @@ Icons: lantern = hint, lock, trophy, chest, coin, star (points), flame (streak),
 - Island & building positions come from a layout JSON (`design/assets/layout.json`), not hard-coded
   per course — any number of courses (1–8) must lay out cleanly.
 - Labels are HTML (PixelPanel) positioned over the scene so they translate and stay crisp.
-- Until real sprites exist, use simple placeholder sprites (coloured blocks with outlines) behind
-  the same component API, so art can be swapped without code changes. Source art: export from the
+- Until real sprites exist, art is code-drawn from tokens in `components/sprite/art.ts` (islands,
+  boat, the five buildings, the island scene, top-bar icons) behind the same `Sprite` API; a PNG in
+  `design/assets/sprites/<name>.png` replaces it with no code change. Source art: export from the
   mockup tool, or draw in Aseprite/Piskel at 16 px grid.
 
 ## RTL & i18n rules

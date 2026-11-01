@@ -5,24 +5,19 @@ import { useNavigate } from "react-router-dom";
 import { api, type ProfileIn, type StyleOut } from "@/api/client";
 import { homePath } from "@/app/home";
 import {
-  Avatar,
   type AvatarLook,
   Bidi,
   DEFAULT_LOOK,
-  EXTRAS,
   Input,
   LanguageSwitcher,
   Mascot,
-  OUTFIT_SWATCH,
-  OUTFITS,
   PixelButton,
   PixelPanel,
-  SKIN_SWATCH,
-  SKINS,
   Sprite,
 } from "@/components";
 import { cx } from "@/components/cx";
-import { useEconomy, useMe } from "@/hooks/useSession";
+import { useMe } from "@/hooks/useSession";
+import { AvatarBuilder } from "./AvatarBuilder";
 import { ErrorBanner } from "@/features/worlds/parts";
 
 const STEPS = ["profile", "style", "goals", "avatar", "languages"] as const;
@@ -148,6 +143,7 @@ export function OnboardingPage() {
             />
             <Input
               label={t("profile.year")}
+              placeholder={t("profile.yearHint")}
               type="number"
               min={1}
               max={8}
@@ -435,144 +431,5 @@ function StyleResult({ style }: { style: StyleOut | null }) {
         </p>
       )}
     </section>
-  );
-}
-
-function AvatarBuilder({
-  nickname,
-  look,
-  onChange,
-  onNext,
-  onBack,
-}: {
-  nickname: string;
-  look: AvatarLook;
-  onChange: (l: AvatarLook) => void;
-  onNext: () => void;
-  onBack: () => void;
-}) {
-  const { t } = useTranslation("onboarding");
-  const cosmetics = useEconomy().data?.cosmetics ?? {};
-  return (
-    <PixelPanel className="flex flex-col gap-5">
-      <h2 className="text-h2">{t("avatar.title")}</h2>
-      <div className="flex flex-wrap items-start gap-5">
-        <Avatar look={look} size={144} label={t("avatar.preview")} />
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <p className="font-semibold">{t("avatar.nickname")}</p>
-          <Bidi className="rounded-pixel-step border-2 border-ink bg-white px-3 py-2">
-            {nickname}
-          </Bidi>
-          <p className="text-small text-ink/70">{t("avatar.nicknameHelp")}</p>
-        </div>
-      </div>
-      <Swatches
-        legend={t("avatar.skin")}
-        values={SKINS}
-        colors={SKIN_SWATCH}
-        value={look.skin}
-        onChange={(skin) => onChange({ ...look, skin })}
-      />
-      <Swatches
-        legend={t("avatar.outfit")}
-        values={OUTFITS}
-        colors={OUTFIT_SWATCH}
-        value={look.outfit}
-        onChange={(outfit) => onChange({ ...look, outfit })}
-      />
-      <fieldset className="flex flex-col gap-2">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <legend className="font-semibold">{t("avatar.extras")}</legend>
-          <span className="flex items-center gap-1 text-small text-ink/70">
-            <Sprite name="star" scale={1} />
-            {t("avatar.unlockMore")}
-          </span>
-        </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-          {EXTRAS.map((x) => {
-            const price = cosmetics[x] ?? 0;
-            const locked = price > 0;
-            const wearing = look.extra === x;
-            return (
-              <button
-                key={x}
-                type="button"
-                disabled={locked}
-                aria-pressed={wearing}
-                onClick={() => onChange({ ...look, extra: wearing ? null : x })}
-                className={cx(
-                  "flex flex-col items-center gap-1 rounded-pixel-step border-2 p-2 text-small",
-                  wearing ? "border-primary bg-primary/5" : "border-sand bg-white",
-                  locked && "cursor-not-allowed opacity-60",
-                )}
-              >
-                <Avatar look={{ ...look, extra: x }} size={40} />
-                <span className="font-semibold">{t(`avatar.items.${x}`)}</span>
-                <span className="text-ink/70">
-                  {locked ? (
-                    <span className="inline-flex items-center gap-1">
-                      <Sprite name="lock" scale={1} alt={t("avatar.locked")} />
-                      {t("avatar.points", { count: price })}
-                    </span>
-                  ) : wearing ? (
-                    t("avatar.wearing")
-                  ) : (
-                    t("avatar.free")
-                  )}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </fieldset>
-      <div className="mt-auto flex justify-between gap-3">
-        <PixelButton variant="secondary" onClick={onBack}>
-          {t("back")}
-        </PixelButton>
-        <PixelButton variant="spend" onClick={onNext}>
-          {t("continue")}
-        </PixelButton>
-      </div>
-    </PixelPanel>
-  );
-}
-
-function Swatches({
-  legend,
-  values,
-  colors,
-  value,
-  onChange,
-}: {
-  legend: string;
-  values: readonly string[];
-  colors: Record<string, string>;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  const { t } = useTranslation("onboarding");
-  return (
-    <fieldset className="flex flex-col gap-2">
-      <legend className="font-semibold">{legend}</legend>
-      <div className="flex flex-wrap gap-2">
-        {values.map((v, i) => (
-          <button
-            key={v}
-            type="button"
-            aria-pressed={value === v}
-            aria-label={t("avatar.option", { legend, n: i + 1 })}
-            onClick={() => onChange(v)}
-            className={cx(
-              "h-11 w-11 rounded-pixel-step border-2",
-              value === v
-                ? "border-primary outline outline-2 outline-offset-1 outline-primary"
-                : "border-ink",
-            )}
-            // swatch colours are design tokens (tokens.json avatarSkin / brand colours)
-            style={{ backgroundColor: colors[v] }}
-          />
-        ))}
-      </div>
-    </fieldset>
   );
 }

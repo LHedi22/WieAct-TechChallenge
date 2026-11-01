@@ -12,6 +12,8 @@ import { AuthPage } from "@/features/auth/AuthPage";
 import { IslandPage } from "@/features/island/IslandPage";
 import { MapPage } from "@/features/map/MapPage";
 import { PlacementPage } from "@/features/placement/PlacementPage";
+import { DEFAULT_LOOK } from "@/components";
+import { AvatarBuilder } from "./AvatarBuilder";
 import { OnboardingPage } from "./OnboardingPage";
 
 const W = "11111111-1111-1111-1111-111111111111";
@@ -33,6 +35,7 @@ const economy: Economy = {
   earn: {},
   points: {},
   peer_answer_threshold: 70,
+  products: { coin_pack: { coins: 50, price_tnd: 2 }, exam_pass: { days: 14, price_tnd: 10 } },
   cosmetics: { cap: 0, glasses: 0, scarf: 0, chechia: 300, headphones: 500 },
   buildings: {},
 };
@@ -43,8 +46,10 @@ const wallet: Wallet = {
   purchased: 0,
   points: 0,
   streak: 0,
+  earned_today: 0,
   refill_at: "2026-10-30T23:00:00Z",
-  placeholder: true,
+  exam_pass_until: null,
+  exam_pass_left_today: null,
 };
 const map: MapOut = {
   world_id: W,
@@ -197,9 +202,48 @@ describe("Onboarding", () => {
     await user.click(await screen.findByRole("button", { name: "Continue" })); // goals (optional)
     expect(await screen.findByText("You learn best with visuals and practice")).toBeInTheDocument();
     expect(screen.getByText(/point you to Study Studio and Quiz Hall/)).toBeInTheDocument();
+    await user.click(screen.getByRole("tab", { name: "Extras" }));
     expect(await screen.findByRole("button", { name: /Chechia/ })).toBeDisabled();
     expect(screen.getByRole("button", { name: /Chechia/ })).toHaveTextContent("300 pts");
     expect(screen.getByRole("button", { name: /Glasses/ })).toBeEnabled();
+  });
+
+  it("builds the explorer with tap-to-pick tiles and Surprise me (free extras only)", async () => {
+    serve(BASE);
+    const onChange = vi.fn();
+    const user = userEvent.setup();
+    show(
+      <AvatarBuilder
+        nickname="SeaTurtle42"
+        look={DEFAULT_LOOK}
+        onChange={onChange}
+        onNext={() => {}}
+        onBack={() => {}}
+      />,
+      "/welcome",
+      "/welcome",
+    );
+    expect(screen.getByRole("tab", { name: "Hair" })).toHaveAttribute("aria-selected", "true");
+    await user.click(screen.getByRole("button", { name: "Curly" }));
+    expect(onChange).toHaveBeenLastCalledWith({ ...DEFAULT_LOOK, hair: "curly" });
+    await user.click(screen.getByRole("button", { name: "Hair colour 3" }));
+    expect(onChange).toHaveBeenLastCalledWith({ ...DEFAULT_LOOK, hair_color: "c3" });
+    await user.click(screen.getByRole("tab", { name: "Skin" }));
+    await user.click(screen.getByRole("button", { name: "Skin tone 4" }));
+    expect(onChange).toHaveBeenLastCalledWith({ ...DEFAULT_LOOK, skin: "s4" });
+    await user.click(screen.getByRole("tab", { name: "Extras" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: /Chechia/ })).toBeDisabled());
+    const random = vi.spyOn(Math, "random").mockReturnValue(0.99);
+    await user.click(screen.getByRole("button", { name: "Surprise me" }));
+    random.mockRestore();
+    // the last option of each list, but never an extra that still costs points
+    expect(onChange).toHaveBeenLastCalledWith({
+      skin: "s5",
+      outfit: "o5",
+      hair: "wrap",
+      hair_color: "c4",
+      extra: "scarf",
+    });
   });
 
   it("Skip for now finishes onboarding", async () => {

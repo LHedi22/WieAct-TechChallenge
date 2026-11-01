@@ -26,6 +26,8 @@ SUGGEST = {
 }
 SKINS = ("s1", "s2", "s3", "s4", "s5")
 OUTFITS = ("o1", "o2", "o3", "o4", "o5")
+HAIRS = ("short", "curly", "long", "bun", "spiky", "wrap")  # wrap = headscarf
+HAIR_COLORS = ("c1", "c2", "c3", "c4")
 Language = Literal["en", "fr", "ar", "ar-TN"]
 
 
@@ -60,6 +62,8 @@ class StyleOut(BaseModel):
 class Avatar(BaseModel):
     skin: str
     outfit: str
+    hair: str | None = None  # older looks have none; the client draws "short"
+    hair_color: str | None = None
     extra: str | None = None
 
 
@@ -153,14 +157,19 @@ async def put_profile(body: ProfileIn, s: Session, user: CurrentUser) -> Profile
     profile = await _profile(s, user.id)
     if body.avatar is not None:
         a = body.avatar
-        if a.skin not in SKINS or a.outfit not in OUTFITS:
+        if (
+            a.skin not in SKINS
+            or a.outfit not in OUTFITS
+            or a.hair not in (None, *HAIRS)
+            or a.hair_color not in (None, *HAIR_COLORS)
+        ):
             raise HTTPException(400, "errors.avatar_invalid")
         if a.extra is not None:
             if a.extra not in economy.COSMETICS:
                 raise HTTPException(400, "errors.avatar_invalid")
             if economy.COSMETICS[a.extra] > 0:  # points arrive with M5; nothing is unlocked yet
                 raise HTTPException(403, "errors.cosmetic_locked")
-        profile.avatar = a.model_dump()
+        profile.avatar = a.model_dump(exclude_none=True)
     for name in (
         "university",
         "field",

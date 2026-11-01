@@ -6,6 +6,14 @@ import { SoftCard } from "./surfaces";
 
 export type StageState = "done" | "inProgress" | "next";
 
+/** A loading-screen tip with its own label (Class wisdom, or a general study tip). A bare node is
+ * labelled "Class wisdom". */
+export type LoadingTip = ReactNode | { title: string; body: ReactNode };
+
+function isTitled(tip: LoadingTip): tip is { title: string; body: ReactNode } {
+  return typeof tip === "object" && tip !== null && "body" in tip && "title" in tip;
+}
+
 export interface Stage {
   /** Backend stage key (jobs.stage), e.g. "reading_chapter" → i18n loading.stages.<key>. */
   key: string;
@@ -25,7 +33,7 @@ export function LoadingStages({
   showMascot = true,
 }: {
   stages: Stage[];
-  tip?: ReactNode;
+  tip?: LoadingTip;
   showMascot?: boolean;
 }) {
   const { t } = useTranslation();
@@ -54,8 +62,10 @@ export function LoadingStages({
         </ol>
         {tip && (
           <SoftCard className="bg-sand/20">
-            <p className="text-small font-semibold text-olive-ink">{t("wisdom.title")}</p>
-            <p>{tip}</p>
+            <p className="text-small font-semibold text-olive-ink">
+              {isTitled(tip) ? tip.title : t("wisdom.title")}
+            </p>
+            <div>{isTitled(tip) ? tip.body : tip}</div>
           </SoftCard>
         )}
       </div>

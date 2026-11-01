@@ -52,6 +52,15 @@ async def test_locked_cosmetic_and_bad_avatar(api):  # noqa: F811
     assert locked.status_code == 403 and locked.json()["detail"] == "errors.cosmetic_locked"
     bad = await api.put("/api/profile", json={"avatar": {"skin": "zz", "outfit": "o1"}})
     assert bad.status_code == 400
+    bad_hair = {"skin": "s1", "outfit": "o1", "hair": "mohawk"}
+    assert (await api.put("/api/profile", json={"avatar": bad_hair})).status_code == 400
+
+
+async def test_avatar_keeps_hair(api):  # noqa: F811
+    await api.post("/api/auth/signup", json=SIGNUP)
+    look = {"skin": "s3", "outfit": "o4", "hair": "wrap", "hair_color": "c2", "extra": "glasses"}
+    p = (await api.put("/api/profile", json={"avatar": look})).json()
+    assert p["avatar"] == look
 
 
 async def test_skip_still_finishes_onboarding(api):  # noqa: F811

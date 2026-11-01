@@ -8,6 +8,9 @@ interface UiState {
   reducedMotion: boolean;
   setLanguage: (language: Language) => void;
   setReducedMotion: (reducedMotion: boolean) => void;
+  /** Opened by any 402 (a paid start without enough coins); not persisted. */
+  outOfCoins: boolean;
+  setOutOfCoins: (open: boolean) => void;
 }
 
 /** localStorage can be missing or throw (private mode); fall back to memory. */
@@ -39,7 +42,13 @@ export const useUiStore = create<UiState>()(
       reducedMotion: false,
       setLanguage: (language) => set({ language }),
       setReducedMotion: (reducedMotion) => set({ reducedMotion }),
+      outOfCoins: false,
+      setOutOfCoins: (outOfCoins) => set({ outOfCoins }),
     }),
-    { name: "lw-ui", storage: createJSONStorage(safeStorage) },
+    {
+      name: "lw-ui",
+      storage: createJSONStorage(safeStorage),
+      partialize: ({ language, reducedMotion }) => ({ language, reducedMotion }),
+    },
   ),
 );

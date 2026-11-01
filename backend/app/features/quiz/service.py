@@ -14,7 +14,9 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import economy
+from app.features.daily import service as daily
 from app.features.quiz import pool
+from app.features.wallet import service as wallet
 from app.jobs.service import create_job
 from app.models import (
     Chapter,
@@ -88,8 +90,9 @@ async def start(s: AsyncSession, user: User, chapter: Chapter, level: str) -> di
         return {"attempt_id": attempt.id, "job_id": None, "cost": 0, "cached": True}
     # A classmate is already generating this chapter + level + language: share that job.
     job_id = await pool.pending_generation(s, chapter.id, level, language)
-    cost = economy.COST["quiz"]
+    cost = 0  # sharing that job reserves nothing: this student gets the class's set for free
     if job_id is None:
+        cost = economy.COST["quiz"]
         seed = await pool.next_seed(s, chapter.id, level, language)
         job = await create_job(
             s,
@@ -256,6 +259,8 @@ async def answer(s: AsyncSession, attempt: QuizAttempt, i: int, choice: int) -> 
             a["status"] = "wrong"
     answers[i] = a
     _advance(attempt, answers)
+    if a["status"] in DONE:  # a question answered for good counts for today's challenges
+        await daily.record(s, attempt.user_id, "quiz_questions", chapter_id=attempt.chapter_id)
     await s.commit()
     return question_view(i, q, a)
 
@@ -294,7 +299,8 @@ class Results(BaseModel):
     attempt_id: uuid.UUID
     score: int
     total: int
-    points: int
+    points: int  # from the answers
+    activity_points: int  # bonus for finishing (POINTS["activity_completed"])
     second_tries: int
     mastery: int
     weak: bool
@@ -324,6 +330,11 @@ async def finish(s: AsyncSession, user: User, attempt: QuizAttempt) -> Results:
     if first_finish:
         attempt.status = "finished"
         attempt.finished_at = datetime.now(UTC)
+        ref = str(attempt.id)
+        await wallet.add_points(s, user.id, attempt.world_id, attempt.points, "quiz_answers", ref)
+        await wallet.add_points(
+            s, user.id, attempt.world_id, economy.POINTS["activity_completed"], "activity", ref
+        )
         stmt = insert(ChapterMastery).values(
             user_id=user.id, chapter_id=chapter.id, mastery=mastery, weak=mastery < WEAK_BELOW
         )
@@ -345,6 +356,7 @@ async def finish(s: AsyncSession, user: User, attempt: QuizAttempt) -> Results:
                 world_id=attempt.world_id,
             )
             tag_job_id = job.id
+        await daily.record(s, user.id, "quiz_score", chapter_id=chapter.id, score_pct=pct)
     else:
         mastery = mastery_row.mastery if mastery_row else pct
     await s.commit()
@@ -373,6 +385,7 @@ async def finish(s: AsyncSession, user: User, attempt: QuizAttempt) -> Results:
         score=score,
         total=total,
         points=attempt.points,
+        activity_points=economy.POINTS["activity_completed"],
         second_tries=attempt.second_tries,
         mastery=mastery,
         weak=mastery < WEAK_BELOW,

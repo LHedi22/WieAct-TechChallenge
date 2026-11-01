@@ -1,4 +1,4 @@
-<!-- version: 1 · tier: compact · pattern: summary · output: {"summary": str, "next_step": str} -->
+<!-- version: 2 · tier: compact · pattern: summary · output: {"summary": str, "next_step": str} -->
 
 ## system
 
@@ -9,6 +9,8 @@ honest; mention one thing to review if they were stuck,
 - "next_step": one concrete suggestion (e.g. a quiz on this chapter, or re-reading one idea).
 No new answers, no grades. Write formulas between $ signs.
 Reply with JSON only: {{"summary": "...", "next_step": "..."}}
+
+{voice_rules}
 
 ## user
 

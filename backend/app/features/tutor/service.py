@@ -23,9 +23,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import gateway, prompts
 from app.core import db, economy
+from app.features.daily import service as daily
+from app.features.wallet import service as wallet
 from app.gateway import Task, TaskKind
 from app.jobs.registry import JobContext, job
-from app.jobs.service import create_job
+from app.jobs.service import AIPaused, create_job
 from app.models import Chapter, Course, Job, Profile, TutorSession, User
 from app.rag.search import search
 
@@ -201,19 +203,35 @@ async def turn(s: AsyncSession, session: TutorSession, text: str, action: Action
     return j.id
 
 
-async def end(s: AsyncSession, session: TutorSession) -> uuid.UUID:
+async def end(s: AsyncSession, session: TutorSession) -> uuid.UUID | None:
     if session.status != "active":
         raise Rejected("errors.tutor_ended", 409)
     if await _pending(s, session):
         raise Rejected("errors.tutor_busy", 409)
-    j = await create_job(
-        s,
-        kind=KIND,
-        lane="interactive",
-        payload={"session_id": str(session.id), "mode": "summary"},
-        user_id=session.user_id,
-        world_id=session.world_id,
-    )
+    if any(t["role"] == "student" for t in session.turns):  # a real session, not open-and-close
+        await wallet.add_points(
+            s,
+            session.user_id,
+            session.world_id,
+            economy.POINTS["activity_completed"],
+            "activity",
+            str(session.id),
+        )
+        await daily.record(s, session.user_id, "tutor_session", chapter_id=session.chapter_id)
+    try:
+        j = await create_job(
+            s,
+            kind=KIND,
+            lane="interactive",
+            payload={"session_id": str(session.id), "mode": "summary"},
+            user_id=session.user_id,
+            world_id=session.world_id,
+        )
+    except AIPaused:  # offline demo mode: the session is saved, just without the AI summary
+        session.status = "ended"
+        session.ended_at = datetime.now(UTC)
+        await s.commit()
+        return None
     session.pending_job_id = j.id
     await s.commit()
     return j.id

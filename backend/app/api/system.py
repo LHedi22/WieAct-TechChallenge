@@ -22,6 +22,7 @@ class SystemStatus(BaseModel):
     provider: str  # what the next job will use
     slot_live: bool
     next_slot: str | None
+    next_slot_start: datetime | None  # the banner shows it in the student's own locale
     offline_demo_mode: bool
     reason: str | None
     upload_max_mb: int
@@ -44,6 +45,7 @@ async def status(
         provider=res.profile.provider,
         slot_live=live,
         next_slot=nxt.label() if nxt else None,
+        next_slot_start=nxt.start if nxt else None,
         offline_demo_mode=offline,
         reason=res.reason or None,
         upload_max_mb=settings.UPLOAD_MAX_MB,

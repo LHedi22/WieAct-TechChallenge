@@ -324,7 +324,200 @@ def _summary(user: str, lang: str, system: str = "") -> dict[str, Any]:
     return {"summary": tx["summary"].format(c=concept), "next_step": tx["next"]}
 
 
+# --- Teach-Back: moderation and grading -----------------------------------------------------------
+ABUSE = re.compile(r"\b(idiot|stupid|moron|débile|connard)\b|حمار|غبي", re.I)
+PERSONAL = re.compile(r"[\w.+-]+@[\w-]+\.\w+|\+?\d[\d \-]{7,}\d|@\w{3,}")
+SECTION = re.compile(r"^([A-Z][A-Z ]+):\s*$", re.MULTILINE)
+GRADE_TEXT = {
+    "en": ("Check this against the material.", "You explained the main idea in your own words."),
+    "fr": ("Vérifie ce point dans le cours.", "Tu as expliqué l'idée principale avec tes mots."),
+    "ar": ("راجع هذه النقطة في الدرس.", "شرحت الفكرة الأساسية بكلماتك."),
+    "ar-TN": ("ثبّت في النقطة هاذي في الكور.", "فسّرت الفكرة الأساسية بكلامك."),
+}
+
+
+def _moderate(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    text = user.split("Question:", 1)[-1]
+    if ABUSE.search(text):
+        return {"verdict": "abusive"}
+    if PERSONAL.search(text):
+        return {"verdict": "personal_data"}
+    if "http" in text.lower() or not re.search(r"[^\W\d_]{3,}", text):
+        return {"verdict": "off_topic"}
+    return {"verdict": "ok"}
+
+
+def _sections(user: str) -> dict[str, str]:
+    parts = SECTION.split(user)  # ["head", NAME, body, NAME, body, ...]
+    return {name: body.strip() for name, body in zip(parts[1::2], parts[2::2], strict=True)}
+
+
+def _teachback(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    """Score = how much of the explanation's vocabulary appears in the excerpts (40-95)."""
+    sec = _sections(user)
+    answer = sec.get("STUDENT EXPLANATION", "")
+    excerpts = sec.get("COURSE EXCERPTS", "")
+    if ABUSE.search(answer):
+        return {"flag": "abusive", "score": 0, "confidence": "high", "errors": [], "good": "",
+                "missing": []}  # fmt: skip
+    words = set(_concepts(answer, 40))
+    known = set(_concepts(excerpts, 400))
+    ratio = len(words & known) / len(words) if words else 0.0
+    score = 40 + round(55 * ratio)
+    short = len(answer.split()) < 8
+    fix, good = GRADE_TEXT.get(lang, GRADE_TEXT["en"])
+    first = " ".join(answer.split()[:4])
+    return {
+        "flag": "ok",
+        "score": score,
+        "confidence": "low" if short else "high" if ratio > 0.5 else "medium",
+        "errors": [{"quote": first, "fix": fix}] if score < 85 and first else [],
+        "good": good,
+        "missing": [c for c in _concepts(excerpts, 6) if c not in words][:2],
+    }
+
+
+# --- Class Wisdom ---------------------------------------------------------------------------------
+TIP_LANG = re.compile(r'"(en|fr|ar|ar-TN)": \{"trap"')
+CONCEPT_LINE = re.compile(r"^Concept: (.+?) · ", re.MULTILINE)
+TIP_TEXT = {
+    "en": ("It is tempting to apply the usual rule to {c} straight away.",
+           "That skips the condition the rule depends on.",
+           "Check the condition first, then choose the method for {c}."),
+    "fr": ("On est tenté d'appliquer directement la règle habituelle à {c}.",
+           "Cela oublie la condition dont dépend la règle.",
+           "Vérifie d'abord la condition, puis choisis la méthode pour {c}."),
+    "ar": ("من المغري تطبيق القاعدة المعتادة على {c} مباشرة.",
+           "هذا يتجاهل الشرط الذي تعتمد عليه القاعدة.",
+           "تحقّق من الشرط أولًا ثم اختر الطريقة المناسبة لـ {c}."),
+    "ar-TN": ("ساهل باش تطبّق القاعدة العادية على {c} طول.",
+              "هكا تنسى الشرط اللي تعتمد عليه القاعدة.",
+              "ثبّت في الشرط الأول وبعد اختار الطريقة متاع {c}."),
+}  # fmt: skip
+
+
+def _wisdom(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    m = CONCEPT_LINE.search(user)
+    concept = m.group(1).strip() if m else "this idea"
+    langs = TIP_LANG.findall(system) or [lang]
+    tips = {}
+    for code in langs:
+        trap, why, right = TIP_TEXT.get(code, TIP_TEXT["en"])
+        tips[code] = {"trap": trap.format(c=concept), "why": why, "right": right.format(c=concept)}
+    return {"tips": tips}
+
+
+# --- Daily plan --------------------------------------------------------------------------------
+CHAPTER_LINE = re.compile(r"^(\d+)\. ", re.MULTILINE)
+PLAN_TEXT = {
+    "en": ("Start with your weakest chapter.", "Warm up with a few questions.",
+           "Explaining it is the best test.", "One step at a time today."),
+    "fr": ("Commence par ton chapitre le plus fragile.", "Échauffe-toi avec quelques questions.",
+           "L'expliquer est le meilleur test.", "Un pas à la fois aujourd'hui."),
+    "ar": ("ابدأ بالفصل الأضعف لديك.", "تمرّن ببعض الأسئلة.",
+           "شرح الفكرة هو أفضل اختبار.", "خطوة بخطوة اليوم."),
+    "ar-TN": ("ابدا بالفصل اللي تحس روحك فيه ضعيف.", "سخّن بشوية أسئلة.",
+              "كي تفسّرها تعرف روحك فهمتها.", "خطوة بخطوة اليوم."),
+}  # fmt: skip
+
+
+def _daily_plan(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    first = 1 if CHAPTER_LINE.search(user) else None
+    weak, warm, explain, msg = PLAN_TEXT.get(lang, PLAN_TEXT["en"])
+    challenges = [{"type": "quiz_questions", "chapter": None, "target": 5, "why": warm}]
+    if first:
+        challenges.insert(0, {"type": "quiz_score", "chapter": first, "target": 70, "why": weak})
+    challenges.append({"type": "teachback", "chapter": first, "target": 1, "why": explain})
+    return {"challenges": challenges, "message": msg}
+
+
+# --- Study Studio: notes (mid), then flashcards and mind map (compact) from the notes ----------
+REF_MARK = re.compile(r"\[((?:page|slide|section|part|image):[\w-]+)\]")
+NOTES_TEXT = {
+    "en": ("Revision notes", "What {c} means", "The material explains {c} step by step.",
+           "Check the conditions before using {c}.", "the idea of {c} in this chapter",
+           "What is {c}?", "{c} is explained in the notes with its conditions."),
+    "fr": ("Fiche de révision", "Ce que signifie {c}", "Le cours explique {c} étape par étape.",
+           "Vérifie les conditions avant d'utiliser {c}.", "l'idée de {c} dans ce chapitre",
+           "Qu'est-ce que {c} ?", "{c} est expliqué dans la fiche avec ses conditions."),
+    "ar": ("ملخّص للمراجعة", "معنى {c}", "يشرح الدرس {c} خطوة بخطوة.",
+           "تحقّق من الشروط قبل استعمال {c}.", "فكرة {c} في هذا الفصل",
+           "ما هو {c}؟", "يُشرح {c} في الملخّص مع شروطه."),
+    "ar-TN": ("ملخّص للمراجعة", "شنوّة معناها {c}", "الدرس يفسّر {c} خطوة بخطوة.",
+              "ثبّت في الشروط قبل ما تستعمل {c}.", "فكرة {c} في الفصل هذا",
+              "شنوّة {c}؟", "{c} مفسّر في الملخّص مع الشروط متاعو."),
+}  # fmt: skip
+
+
+def _notes_text(lang: str) -> tuple[str, ...]:
+    return NOTES_TEXT.get(lang, NOTES_TEXT.get(lang[:2], NOTES_TEXT["en"]))
+
+
+def _notes(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    title, heading, point, check, meaning, _, _ = _notes_text(lang)
+    refs = list(dict.fromkeys(REF_MARK.findall(user))) or ["page:1"]
+    concepts = _concepts(user, 4) or ["the topic"]
+    sections = [
+        {
+            "heading": heading.format(c=c),
+            "points": [point.format(c=c), check.format(c=c)],
+            "refs": [refs[i % len(refs)]],
+        }
+        for i, c in enumerate(concepts)
+    ]
+    terms = [{"term": c, "meaning": meaning.format(c=c)} for c in concepts]
+    return {"title": title, "sections": sections, "key_terms": terms}
+
+
+COUNT_MARK = re.compile(r"into (\d+) flashcards")
+
+
+def _flashcards(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    *_, front, back = _notes_text(lang)
+    m = COUNT_MARK.search(system)
+    count = int(m.group(1)) if m else 8
+    concepts = _concepts(user, count) or ["the topic"]
+    return {
+        "cards": [
+            {"front": front.format(c=c), "back": back.format(c=c), "concept": c}
+            for c in concepts[:count]
+        ]
+    }
+
+
+def _mind_map(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    title = _notes_text(lang)[0]
+    concepts = _concepts(user, 8) or ["topic"]
+    branches = [
+        {"label": c, "children": concepts[i + 1 : i + 3] or [c]} for i, c in enumerate(concepts[:4])
+    ]
+    return {"root": title, "branches": branches}
+
+
+AUDIO_TEXT = {
+    "en": ("Revision episode", "In this episode we review {c}.", "Let's look at {c} step by step.",
+           "To recap: remember how {c} works and when to use it."),
+    "fr": ("Épisode de révision", "Dans cet épisode, on révise {c}.",
+           "Regardons {c} étape par étape.", "En résumé : retiens comment marche {c}."),
+    "ar": ("حلقة مراجعة", "في هذه الحلقة نراجع {c}.", "لننظر إلى {c} خطوة بخطوة.",
+           "للتلخيص: تذكّر كيف يعمل {c} ومتى نستعمله."),
+    "ar-TN": ("حلقة مراجعة", "في الحلقة هذي باش نراجعو {c}.", "خلّي نشوفو {c} خطوة بخطوة.",
+              "باختصار: تفكّر كيفاش يخدم {c} ووقتاش نستعملوه."),
+}  # fmt: skip
+
+
+def _audio(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    title, intro, step, recap = AUDIO_TEXT.get(lang, AUDIO_TEXT.get(lang[:2], AUDIO_TEXT["en"]))
+    concepts = _concepts(user, 4) or ["the topic"]
+    segments = [intro.format(c=", ".join(concepts))]
+    segments += [step.format(c=c) for c in concepts]
+    segments.append(recap.format(c=concepts[0]))
+    return {"title": title, "segments": segments}
+
+
 GENERATORS = {
+    "MODERATE_POST": _moderate,
+    "TEACHBACK_GRADE": _teachback,
     "TUTOR_TURN": _tutor,
     "TUTOR_GUARD": _guard,
     "TUTOR_SUMMARY": _summary,
@@ -332,6 +525,12 @@ GENERATORS = {
     "QUIZ_GENERATE": _quiz,
     "PLACEMENT_QUIZ": _placement,
     "QUIZ_GRADE_TAG": _grade_tag,
+    "WISDOM_TIP": _wisdom,
+    "DAILY_PLAN": _daily_plan,
+    "NOTES_WRITE": _notes,
+    "FLASHCARDS": _flashcards,
+    "MAP_WRITE": _mind_map,
+    "AUDIO_SCRIPT": _audio,
 }
 
 

@@ -139,7 +139,11 @@ async def maybe_precompute(chapter_id: uuid.UUID) -> uuid.UUID | None:
         return created.id
 
 
-async def _context(ctx: JobContext, chapter: Chapter, course: Course, level: str, seed: int):
+async def chapter_context(
+    ctx: JobContext, chapter: Chapter, course: Course, level: str, seed: int = 1
+) -> list[Chunk]:
+    """narrow-before-generating without an extra call: vector search, then round-robin by concept
+    (also used by the Study Studio's notes)."""
     try:
         hits = await search(
             course.world_id,
@@ -182,7 +186,7 @@ async def quiz_pool(ctx: JobContext) -> dict[str, Any]:
     if existing:
         return {"quiz_set_id": str(existing), "cached": True}
     await ctx.set_stage("matching_level")
-    rows = await _context(ctx, chapter, course, level, seed)
+    rows = await chapter_context(ctx, chapter, course, level, seed)
     context = "\n\n".join(f"[{c.page_ref}] {c.text}" for c in rows)
     await ctx.set_stage("writing_questions")
     version, messages = prompts.render(

@@ -11,12 +11,21 @@ from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
+from app.core.db import get_sessionmaker
+from app.gateway.providers import paused_until
 from app.jobs.coins import coins
 from app.jobs.registry import spec_for
 from app.models import AICallLog, Job
 
 LANE_RANK = {"interactive": 0, "background": 1}
 DEFAULT_CALL_S = 8.0  # until the call log has history
+
+
+class AIPaused(Exception):
+    """Offline demo mode: a student-started AI action can't run now. Raised before anything is
+    reserved; cached results never reach create_job, so they keep working."""
+
+    key = "errors.offline"
 
 
 class JobView(BaseModel):
@@ -48,6 +57,9 @@ async def create_job(
     cost: int = 0,
 ) -> Job:
     spec = spec_for(kind)
+    offline, resume_at = await paused_until(get_settings(), get_sessionmaker())
+    if offline and (lane == "interactive" or resume_at is None):
+        raise AIPaused()
     job = Job(
         kind=kind,
         lane=lane,
@@ -57,10 +69,12 @@ async def create_job(
         user_id=user_id,
         world_id=world_id,
         cost=cost,
+        # Background work (tagging, tips, plans, pools, indexing) waits for the next live slot.
+        not_before=resume_at if offline else None,
     )
     s.add(job)
     await s.flush()
-    await coins.reserve(job)
+    await coins.reserve(s, job)
     await s.commit()
     return job
 
@@ -134,6 +148,6 @@ async def cancel(s: AsyncSession, job: Job) -> Job:
         raise NotCancellable(job.status)
     job.status = "cancelled"
     job.finished_at = datetime.now(UTC)
-    await coins.refund(job)
+    await coins.refund(s, job)
     await s.commit()
     return job

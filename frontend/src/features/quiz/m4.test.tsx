@@ -109,6 +109,7 @@ describe("Quiz attempt", () => {
       score: 1,
       total: 2,
       points: 5,
+      activity_points: 20,
       second_tries: 1,
       mastery: 40,
       weak: true,
@@ -189,7 +190,8 @@ describe("Quiz attempt", () => {
     await user.click(await screen.findByRole("button", { name: "See my results" }));
 
     expect(await screen.findByText("1 thing to look at again")).toBeInTheDocument();
-    expect(screen.getByText("+5")).toBeInTheDocument();
+    expect(screen.getByText("+25")).toBeInTheDocument(); // 5 for the answers + 20 for finishing
+    expect(screen.getByText("5 for your answers + 20 for finishing")).toBeInTheDocument();
     expect(screen.getByText("Weak spot")).toBeInTheDocument();
     const next = screen.getByRole("link", { name: /Go to the Socratic Tutor/ });
     expect(within(next).getByText("8 coins")).toBeInTheDocument();
@@ -287,6 +289,41 @@ describe("Socratic Tutor", () => {
     expect(screen.getByText("وجدت الفكرة.")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /أعطني تلميحًا/ })).toBeNull(); // no composer once ended
   });
+
+  it("ends while AI is paused: saved without a summary", async () => {
+    let ended = false;
+    const calls = serve({
+      "GET /api/system/status": {
+        app_env: "production",
+        configured_provider: "cloud",
+        provider: "cloud",
+        slot_live: false,
+        next_slot: null,
+        next_slot_start: null,
+        offline_demo_mode: true,
+        reason: "outside_slot",
+        upload_max_mb: 50,
+      },
+      [`GET /api/tutor/${S}`]: () => [200, session(ended ? { status: "ended" } : {})],
+      [`POST /api/tutor/${S}/end`]: () => {
+        ended = true;
+        return [200, { session_id: S, job_id: null }];
+      },
+    });
+    const user = userEvent.setup();
+    show(
+      <TutorPage />,
+      "/worlds/:worldId/courses/:courseId/tutor/:sessionId",
+      `/worlds/${W}/courses/${C}/tutor/${S}`,
+    );
+    const end = await screen.findByRole("button", { name: "End session" });
+    await waitFor(() => expect(screen.getByRole("button", { name: "Send" })).toBeDisabled());
+    expect(end).toBeEnabled();
+    await user.click(end);
+    expect(await screen.findByText("Session saved")).toBeInTheDocument();
+    expect(screen.getByText(/AI is paused right now/)).toBeInTheDocument();
+    expect(calls.some((c) => c.key === `POST /api/tutor/${S}/end`)).toBe(true);
+  });
 });
 
 describe("Entry dialog", () => {
@@ -311,8 +348,10 @@ describe("Entry dialog", () => {
         purchased: 0,
         points: 0,
         streak: 0,
+        earned_today: 0,
         refill_at: "2026-10-30T23:00:00Z",
-        placeholder: true,
+        exam_pass_until: null,
+        exam_pass_left_today: null,
       },
     });
     show(

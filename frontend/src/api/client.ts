@@ -38,6 +38,28 @@ export type TutorTurn = S["Turn"];
 export type TutorJob = S["JobRef"];
 export type TutorAction = S["TurnIn"]["action"];
 export type PlacementQuestions = S["QuestionsOut"];
+export type Purchase = S["PurchaseOut"];
+export type Product = S["PurchaseIn"]["product"];
+export type Leaderboard = S["Board"];
+export type LeaderboardEntry = S["Entry"];
+export type ArenaFeed = S["Feed"];
+export type ArenaQuestion = S["QuestionItem"];
+export type ArenaDetail = S["QuestionDetail"];
+export type ArenaAnswer = S["AnswerOut"];
+export type ArenaStarted = S["Started"];
+export type ArenaVotes = S["Votes"];
+export type WisdomTip = S["Tip"];
+export type Daily = S["Daily"];
+export type DailyChallenge = S["Challenge"];
+export type Studio = S["Studio"];
+export type StudyNotes = S["Notes"];
+export type MindMap = S["MindMap"];
+export type CardQueue = S["Queue"];
+export type StudyCard = S["CardOut"];
+export type CardGrade = S["ReviewIn"]["grade"];
+export type StudioPay = S["GenerateIn"]["pay"];
+export type ClassPool = S["PoolOut"];
+export type AudioEpisode = S["Episode"];
 
 const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
@@ -129,6 +151,18 @@ export const api = {
     request<ProfileOut>("/api/profile", { method: "PUT", body: JSON.stringify(body) }),
   economy: () => request<Economy>("/api/economy"),
   wallet: () => request<Wallet>("/api/wallet"),
+  demoPurchase: (product: Product) => post<Purchase>("/api/wallet/demo-purchase", { product }),
+  leaderboard: (scope: "world" | "global", period: "week" | "all", worldId?: string) =>
+    request<Leaderboard>(
+      `/api/leaderboard?scope=${scope}&period=${period}` +
+        (worldId ? `&world_id=${encodeURIComponent(worldId)}` : ""),
+    ),
+  wisdom: (worldId: string, courseId?: string) =>
+    request<S["Tips"]>(
+      `/api/wisdom?world_id=${worldId}` + (courseId ? `&course_id=${courseId}` : ""),
+    ),
+  daily: () => request<Daily>("/api/daily"),
+  dailySeen: () => post<Daily>("/api/daily/seen", {}),
   worldMap: (worldId: string) => request<MapOut>(`/api/worlds/${worldId}/map`),
   island: (courseId: string) => request<IslandOut>(`/api/courses/${courseId}`),
   presence: (courseId: string, chapterId?: string) =>
@@ -153,10 +187,49 @@ export const api = {
   quizSkip: (id: string, q: number) => post<QuizQuestion>(`/api/quiz/attempts/${id}/skip`, { q }),
   quizFinish: (id: string) => post<QuizResults>(`/api/quiz/attempts/${id}/finish`, {}),
 
+  quizFlashcards: (attemptId: string) =>
+    post<S["FromQuizOut"]>(`/api/quiz/attempts/${attemptId}/flashcards`, {}),
+
+  studio: (chapterId: string, level: string) =>
+    request<Studio>(`/api/studio/${chapterId}?level=${encodeURIComponent(level)}`),
+  studioPrice: (chapterId: string, level: string) =>
+    request<QuizPrice>(`/api/studio/${chapterId}/price?level=${encodeURIComponent(level)}`),
+  studioGenerate: (chapterId: string, level: string, pay: StudioPay) =>
+    post<S["GenerateOut"]>(`/api/studio/${chapterId}/generate`, { level, pay }),
+  studioCards: (chapterId: string, level: string) =>
+    request<CardQueue>(`/api/studio/${chapterId}/cards?level=${encodeURIComponent(level)}`),
+  reviewCard: (cardId: string, grade: CardGrade) =>
+    post<S["ReviewOut"]>(`/api/studio/cards/${cardId}/review`, { grade }),
+  audio: (chapterId: string, level: string) =>
+    request<AudioEpisode>(`/api/audio/${chapterId}?level=${encodeURIComponent(level)}`),
+  audioPrice: (chapterId: string, level: string) =>
+    request<QuizPrice>(`/api/audio/${chapterId}/price?level=${encodeURIComponent(level)}`),
+  audioGenerate: (chapterId: string, level: string, pay: StudioPay) =>
+    post<S["GenerateOut"]>(`/api/audio/${chapterId}/generate`, { level, pay }),
+  pool: (worldId: string) => request<ClassPool>(`/api/worlds/${worldId}/pool`),
+  givePool: (worldId: string, amount: number) =>
+    post<ClassPool>(`/api/worlds/${worldId}/pool`, { amount }),
+
   tutorStart: (chapterId: string, level: string) =>
     post<TutorJob>("/api/tutor/start", { chapter_id: chapterId, level }),
   tutorSession: (id: string) => request<TutorSession>(`/api/tutor/${id}`),
   tutorTurn: (id: string, text: string, action: TutorAction) =>
     post<TutorJob>(`/api/tutor/${id}/turn`, { text, action }),
   tutorEnd: (id: string) => post<TutorJob>(`/api/tutor/${id}/end`, {}),
+
+  arenaFeed: (chapterId: string) =>
+    request<ArenaFeed>(`/api/arena/questions?chapter_id=${encodeURIComponent(chapterId)}`),
+  arenaAsk: (chapterId: string, text: string) =>
+    post<ArenaStarted>("/api/arena/questions", { chapter_id: chapterId, text }),
+  arenaQuestion: (id: string) => request<ArenaDetail>(`/api/arena/questions/${id}`),
+  arenaAnswer: (questionId: string, text: string) =>
+    post<ArenaStarted>(`/api/arena/questions/${questionId}/answers`, { text }),
+  arenaPin: (answerId: string) =>
+    request<void>(`/api/arena/answers/${answerId}/pin`, { method: "POST" }),
+  arenaHelpful: (answerId: string, helpful: boolean) =>
+    request<ArenaVotes>(`/api/arena/answers/${answerId}/helpful`, {
+      method: helpful ? "POST" : "DELETE",
+    }),
+  arenaSolo: (chapterId: string, concept: string, text: string) =>
+    post<ArenaStarted>("/api/arena/solo", { chapter_id: chapterId, concept, text }),
 };

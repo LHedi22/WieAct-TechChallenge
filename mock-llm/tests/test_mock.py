@@ -200,3 +200,82 @@ async def test_placement_fixture_spans_chapters_and_difficulties():
     assert len(qs) == 8 and {q["chapter"] for q in qs} == {1, 2}
     assert {q["difficulty"] for q in qs} == {"beginner", "intermediate", "advanced"}
     assert "correcte" in qs[0]["question"]
+
+
+async def _reply(system: str, user: str) -> dict:
+    async with client() as c:
+        r = await c.post("/v1/chat/completions", json=chat_body(system=system, user=user))
+    return json.loads(r.json()["choices"][0]["message"]["content"])
+
+
+@pytest.mark.parametrize(
+    ("text", "verdict"),
+    [
+        ("Why does a stack make undo easy?", "ok"),
+        ("you are all stupid", "abusive"),
+        ("text me at sea.turtle@mail.com", "personal_data"),
+        ("promo http://spam.example", "off_topic"),
+    ],
+)
+async def test_moderation_fixture(text, verdict):
+    system = "Moderate. <!-- task: MODERATE_POST --> <!-- lang: en -->"
+    assert (await _reply(system, f"Course: DS\n\nQuestion: {text}"))["verdict"] == verdict
+
+
+async def test_teachback_grade_rewards_explanations_grounded_in_the_excerpts():
+    system = "Grade. <!-- task: TEACHBACK_GRADE --> <!-- lang: fr -->"
+    excerpts = "A stack is last in first out: push adds on top, pop removes the most recent item."
+
+    def user(answer):
+        return f"COURSE EXCERPTS:\n{excerpts}\n\nQUESTION: undo?\n\nSTUDENT EXPLANATION:\n{answer}"
+
+    good = await _reply(system, user("Undo pops the most recent action from the stack top first"))
+    weak = await _reply(system, user("Undo works like a queue at the bank where everyone waits"))
+    assert good["flag"] == weak["flag"] == "ok"
+    assert good["score"] > 70 > weak["score"] and weak["errors"][0]["quote"] == "Undo works like a"
+    assert weak["good"].startswith("Tu as")  # feedback in the requested language
+    assert (await _reply(system, user("idiot")))["flag"] == "abusive"
+
+
+async def test_wisdom_tip_answers_every_requested_language():
+    system = (
+        'Tips. {"tips": {"en": {"trap": "...", "why": "...", "right": "..."}, '
+        '"ar": {"trap": "...", "why": "...", "right": "..."}}} '
+        "<!-- task: WISDOM_TIP --> <!-- lang: en -->"
+    )
+    out = await _reply(
+        system, "Course: Calc · Chapter: Limits\nConcept: limits · Kind of mistake: x"
+    )
+    assert set(out["tips"]) == {"en", "ar"}
+    assert "limits" in out["tips"]["en"]["trap"] and out["tips"]["ar"]["why"]
+
+
+async def test_daily_plan_picks_three_challenges_in_the_student_language():
+    system = "Plan. <!-- task: DAILY_PLAN --> <!-- lang: fr -->"
+    out = await _reply(system, "Chapters:\n1. Calculus · Limits (mastery 40%)\n\nRecent mistakes:")
+    assert [c["type"] for c in out["challenges"]] == ["quiz_score", "quiz_questions", "teachback"]
+    assert out["challenges"][0]["chapter"] == 1 and "chapitre" in out["challenges"][0]["why"]
+
+
+async def test_study_pack_notes_cards_and_map_follow_the_request():
+    ctx = (
+        "[page:3] Limits describe values near a point. Limits limits continuity.\n\n"
+        "[slide:2] Derivative slope"
+    )
+    notes = await _reply("Notes. <!-- task: NOTES_WRITE --> <!-- lang: fr -->", ctx)
+    assert notes["sections"] and notes["key_terms"] and notes["title"] == "Fiche de révision"
+    assert {r for s in notes["sections"] for r in s["refs"]} <= {"page:3", "slide:2"}
+    cards = await _reply(
+        "Turn revision notes into 3 flashcards. <!-- task: FLASHCARDS --> <!-- lang: ar -->",
+        "limits continuity derivative slope points values",
+    )
+    assert len(cards["cards"]) == 3 and "؟" in cards["cards"][0]["front"]
+    tree = await _reply(
+        "Map. <!-- task: MAP_WRITE --> <!-- lang: en -->", "limits continuity slope"
+    )
+    assert tree["root"] and tree["branches"][0]["label"] and tree["branches"][0]["children"]
+
+
+async def test_audio_script_is_segments_in_the_language():
+    out = await _reply("Audio. <!-- task: AUDIO_SCRIPT --> <!-- lang: fr -->", "limits continuity")
+    assert out["title"] == "Épisode de révision" and len(out["segments"]) >= 3

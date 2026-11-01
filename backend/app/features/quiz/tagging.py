@@ -8,10 +8,11 @@ import uuid
 from typing import Any, Literal
 
 from pydantic import BaseModel, ValidationError
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 
 from app import gateway, prompts
 from app.core import db
+from app.features.wisdom import service as wisdom
 from app.gateway import Task, TaskKind
 from app.jobs.registry import JobContext, job
 from app.models import Chapter, Course, Mistake, QuizAttempt, QuizSet
@@ -90,7 +91,11 @@ async def tag_mistakes(ctx: JobContext) -> dict[str, Any]:
         await s.execute(delete(Mistake).where(Mistake.attempt_id == attempt_id))  # idempotent
         for i in idx:
             tag = tags.get(i)
-            concept = (tag.concept if tag else qs.questions[i].get("concept") or chapter.title)[:80]
+            # The shared question's own concept first: it is the same text for the whole class,
+            # so Class Wisdom can count students per concept (the tagger's wording varies).
+            concept = (
+                qs.questions[i].get("concept") or (tag.concept if tag else "") or chapter.title
+            )[:80]
             s.add(
                 Mistake(
                     user_id=attempt.user_id,
@@ -103,7 +108,10 @@ async def tag_mistakes(ctx: JobContext) -> dict[str, Any]:
                 )
             )
         await s.commit()
-        count = len(
-            list(await s.scalars(select(Mistake.id).where(Mistake.attempt_id == attempt_id)))
+        rows = await s.execute(
+            select(Mistake.concept, Mistake.mistake_type).where(Mistake.attempt_id == attempt_id)
         )
+        pairs = {(concept, kind) for concept, kind in rows}
+        count = await s.scalar(select(func.count()).where(Mistake.attempt_id == attempt_id))
+        await wisdom.check_patterns(s, attempt.world_id, pairs)
     return {"tagged": count}
