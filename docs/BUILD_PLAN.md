@@ -248,5 +248,5 @@ has a pixel-wave sea and drawn islands, boat and top-bar icons; the island page 
 with sandy paths to five drawn buildings and the explorer in the middle (all code-drawn in
 `components/sprite/art.ts`; PNGs in `design/assets/sprites/` still replace them). **Daily:** the
 DAILY_PLAN cache key includes the UI language, and AI plan lines written in another language are
-hidden after a switch (no extra call). **Next:** merge `m5-economy-arena` into `main`, the slot run
-with `--cloud`, deploy.
+hidden after a switch (no extra call). **Next:** the slot run with `--cloud`,
+deploy. (Merged into `main` on 1 Nov, PR #1.)
