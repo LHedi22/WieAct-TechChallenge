@@ -7,7 +7,7 @@ import { cx } from "@/components/cx";
 import { JOB_POLL_MS } from "@/hooks/useJob";
 import { useSystemStatus } from "@/hooks/useSystemStatus";
 import { FileBadge } from "./parts";
-import { ACCEPT, accentChip, kindOf, useFileSize } from "./util";
+import { ACCEPT, accentChip, kindOf, limitConcurrency, useFileSize } from "./util";
 
 interface Item {
   key: string;
@@ -23,8 +23,11 @@ interface Item {
 
 const TYPE_KEYS = ["pdf", "slides", "word", "images", "text"] as const;
 const SUPPORTED = new Set(["pdf", "pptx", "docx", "txt", "image"]);
+/** Files sent at once; the rest queue. Ten big files at once made connections drop (slow links,
+ *  Docker Desktop's port forward) and starved the indexing poll. */
+const UPLOAD_PARALLEL = 3;
 
-/** Step 4 of the create wizard: files per chapter, uploaded in parallel, each with its state. */
+/** Step 4 of the create wizard: files per chapter, uploaded 3 at a time, each with its state. */
 export function UploadStep({ world, onBuild }: { world: WorldOut; onBuild: () => void }) {
   const { t } = useTranslation("worlds");
   const { t: tc } = useTranslation();
@@ -37,6 +40,7 @@ export function UploadStep({ world, onBuild }: { world: WorldOut; onBuild: () =>
   const [dragging, setDragging] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   const selectId = useId();
+  const [queue] = useState(() => limitConcurrency(UPLOAD_PARALLEL));
 
   // Live per-document status from the indexing rollup, polled while an upload is still read.
   const indexing = useQuery({
@@ -81,8 +85,7 @@ export function UploadStep({ world, onBuild }: { world: WorldOut; onBuild: () =>
         patch(key, { state: "error", errorKey: "errors.file_too_large" });
         continue;
       }
-      api
-        .upload(chapterId, file)
+      queue(() => api.upload(chapterId, file))
         .then((up) => patch(key, { state: "uploaded", doc: up.document, reused: up.reused }))
         .catch((e: unknown) =>
           patch(key, {
