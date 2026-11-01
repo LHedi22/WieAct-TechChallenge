@@ -524,7 +524,8 @@
       "university": "University",
       "field": "Field of study",
       "year": "Year of study",
-      "yearHint": "e.g. 2 for second year"
+      "yearHint": "e.g. 2 for second year",
+      "yearInvalid": "Enter a year from 1 to 8, or leave it empty."
     },
     "style": {
       "question": "Question {n} of {total}",
