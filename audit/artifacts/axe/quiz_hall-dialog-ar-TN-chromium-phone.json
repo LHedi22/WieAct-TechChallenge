@@ -1,0 +1,16 @@
+{
+ "screen": "quiz_hall-dialog",
+ "lang": "ar-TN",
+ "project": "chromium-phone",
+ "violations": [
+  {
+   "id": "color-contrast",
+   "impact": "serious",
+   "nodes": 1,
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "targets": [
+    ".bg-olive-light\\/30"
+   ]
+  }
+ ]
+}

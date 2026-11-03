@@ -1,0 +1,18 @@
+{
+ "screen": "island",
+ "lang": "fr",
+ "project": "chromium-phone",
+ "violations": [
+  {
+   "id": "color-contrast",
+   "impact": "serious",
+   "nodes": 3,
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "targets": [
+    ".bg-olive-light\\/30",
+    "button[data-building=\"audio_studio\"] > .py-1.group-hover\\:bg-sand.shadow-lip > .text-terracotta-ink.inline-flex.gap-1",
+    ".bg-terracotta-light\\/30"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,669 @@
+[
+ {
+  "check": "placement set hides answers/explanations",
+  "status": 200,
+  "expected": [
+   200
+  ],
+  "pass": true
+ },
+ {
+  "check": "fresh quiz attempt hides answer/hint/explanation",
+  "status": 200,
+  "expected": [
+   200
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member GET /api/worlds/e5a214c8-bb89-4818-9421-9f18bcc221b6",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member GET /api/worlds/e5a214c8-bb89-4818-9421-9f18bcc221b6/map",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member GET /api/worlds/e5a214c8-bb89-4818-9421-9f18bcc221b6/indexing",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member GET /api/courses/c91691a0-2eaf-4f0c-a9e9-48438f335b11",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member POST /api/courses/c91691a0-2eaf-4f0c-a9e9-48438f335b11/presence",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member GET /api/placement/c91691a0-2eaf-4f0c-a9e9-48438f335b11",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member POST /api/placement/start",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member GET /api/quiz/price",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member POST /api/quiz/start",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member POST /api/tutor/start",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member GET /api/studio/105ca36a-2e2e-4b95-a012-c3faa548160d",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member GET /api/studio/105ca36a-2e2e-4b95-a012-c3faa548160d/price",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member GET /api/studio/105ca36a-2e2e-4b95-a012-c3faa548160d/cards",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member POST /api/studio/105ca36a-2e2e-4b95-a012-c3faa548160d/generate",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member GET /api/audio/105ca36a-2e2e-4b95-a012-c3faa548160d",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member POST /api/audio/105ca36a-2e2e-4b95-a012-c3faa548160d/generate",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member GET /api/arena/questions",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member POST /api/arena/questions",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member POST /api/arena/solo",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member GET /api/wisdom",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member GET /api/worlds/e5a214c8-bb89-4818-9421-9f18bcc221b6/pool",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member POST /api/worlds/e5a214c8-bb89-4818-9421-9f18bcc221b6/pool",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member GET /api/leaderboard",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member POST /api/worlds/e5a214c8-bb89-4818-9421-9f18bcc221b6/courses",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member POST /api/courses/c91691a0-2eaf-4f0c-a9e9-48438f335b11/chapters",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member DELETE /api/courses/c91691a0-2eaf-4f0c-a9e9-48438f335b11",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member GET arena question",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member answers arena question",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member votes helpful",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member uploads document",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member deletes document",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "member-bob reads alice's tutor job",
+  "status": 200,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": false
+ },
+ {
+  "check": "member-bob cancels alice's tutor job",
+  "status": 409,
+  "expected": [
+   401,
+   403,
+   404,
+   409
+  ],
+  "pass": true
+ },
+ {
+  "check": "member-bob reads alice's placement job",
+  "status": 200,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": false
+ },
+ {
+  "check": "member-bob cancels alice's placement job",
+  "status": 409,
+  "expected": [
+   401,
+   403,
+   404,
+   409
+  ],
+  "pass": true
+ },
+ {
+  "check": "member-bob reads alice's attempt",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "member-bob answers in alice's attempt",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "member-bob finishes alice's attempt",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "member-bob makes flashcards from alice's attempt",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "member-bob reads alice's tutor session",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "member-bob posts a turn in alice's tutor session",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "member-bob ends alice's tutor session",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member-carol reads alice's tutor job",
+  "status": 200,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": false
+ },
+ {
+  "check": "non-member-carol cancels alice's tutor job",
+  "status": 409,
+  "expected": [
+   401,
+   403,
+   404,
+   409
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member-carol reads alice's placement job",
+  "status": 200,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": false
+ },
+ {
+  "check": "non-member-carol cancels alice's placement job",
+  "status": 409,
+  "expected": [
+   401,
+   403,
+   404,
+   409
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member-carol reads alice's attempt",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member-carol answers in alice's attempt",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member-carol finishes alice's attempt",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member-carol makes flashcards from alice's attempt",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member-carol reads alice's tutor session",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member-carol posts a turn in alice's tutor session",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "non-member-carol ends alice's tutor session",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "member (not creator) adds course",
+  "status": 201,
+  "expected": [
+   403
+  ],
+  "pass": false
+ },
+ {
+  "check": "member (not creator) adds chapter",
+  "status": 201,
+  "expected": [
+   403
+  ],
+  "pass": false
+ },
+ {
+  "check": "member (not creator) uploads",
+  "status": 202,
+  "expected": [
+   403
+  ],
+  "pass": false
+ },
+ {
+  "check": "member (not creator) deletes document",
+  "status": 204,
+  "expected": [
+   403
+  ],
+  "pass": false
+ },
+ {
+  "check": "member (not creator) deletes course",
+  "status": 204,
+  "expected": [
+   403
+  ],
+  "pass": false
+ },
+ {
+  "check": "non-author pins an answer",
+  "status": 404,
+  "expected": [
+   403
+  ],
+  "pass": false
+ },
+ {
+  "check": "author votes own answer helpful",
+  "status": 404,
+  "expected": [
+   400,
+   403,
+   409
+  ],
+  "pass": false
+ },
+ {
+  "check": "question author does not see another student's AI feedback",
+  "status": 200,
+  "expected": [
+   200
+  ],
+  "pass": true
+ },
+ {
+  "check": "alice reads carol's world W2",
+  "status": 404,
+  "expected": [
+   401,
+   403,
+   404
+  ],
+  "pass": true
+ },
+ {
+  "check": "anonymous GET /api/wallet",
+  "status": 401,
+  "expected": [
+   401
+  ],
+  "pass": true
+ },
+ {
+  "check": "anonymous GET /api/worlds/e5a214c8-bb89-4818-9421-9f18bcc221b6",
+  "status": 401,
+  "expected": [
+   401
+  ],
+  "pass": true
+ },
+ {
+  "check": "anonymous GET /api/daily",
+  "status": 401,
+  "expected": [
+   401
+  ],
+  "pass": true
+ },
+ {
+  "check": "anonymous GET /api/jobs/fa22fa48-2869-497a-b92b-f000e404fdb4",
+  "status": 404,
+  "expected": [
+   401
+  ],
+  "pass": false
+ },
+ {
+  "check": "anonymous admin stats (ADMIN_TOKEN blank)",
+  "status": 200,
+  "expected": [
+   401,
+   403
+  ],
+  "pass": false
+ }
+]

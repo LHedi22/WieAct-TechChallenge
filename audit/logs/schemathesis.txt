@@ -1,0 +1,1713 @@
+Schemathesis v4.33.0
+━━━━━━━━━━━━━━━━━━━━
+
+ ✅  Loaded specification from http://127.0.0.1:8000/openapi.json (in 2.35s)
+
+     Base URL:         http://127.0.0.1:8000/
+     Specification:    Open API 3.1.0
+     Operations:       67 selected / 69 total
+
+ ✅  API capabilities:
+
+     Supports NULL byte in headers:                            ✘
+     Accepts backslash and control characters in URL paths:    ✓
+
+ ⏭   Examples (in 0.15s)
+
+     ⏭  67 skipped
+
+ ❌  Coverage (in 15.83s)
+
+     ✅ 21 passed  ❌ 46 failed
+
+ ❌  Fuzzing (in 15.26s)
+
+     ✅ 12 passed  ❌ 55 failed
+
+ ❌  Stateful (in 44.93s)
+
+     Scenarios:    233
+     API Links:    41 covered / 232 selected / 232 total (232 inferred)
+
+     ✅ 186 passed  ❌ 47 failed
+
+=================================== FAILURES ===================================
+________________ DELETE /api/arena/answers/{answer_id}/helpful _________________
+1. Test Case ID: IxPE3V
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.arena_not_found"}`
+
+Reproduce with:
+
+    curl -X DELETE -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/arena/answers/e3e70682-c209-1cac-a29f-6fbed82c07cd/helpful
+
+    st replay IxPE3V
+
+_______________________ DELETE /api/courses/{course_id} ________________________
+1. Test Case ID: kgTZyC
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 204, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X DELETE -H 'x-ui-language;' -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/courses/95f0fa64-1fd4-41c0-8dab-75228820565d
+
+    st replay kgTZyC
+
+_____________________ DELETE /api/documents/{document_id} ______________________
+1. Test Case ID: KJi3Hy
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 204, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.document_not_found"}`
+
+Reproduce with:
+
+    curl -X DELETE -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/documents/e3e70682-c209-1cac-a29f-6fbed82c07cd
+
+    st replay KJi3Hy
+
+___________________________ GET /api/arena/questions ___________________________
+1. Test Case ID: wkDFV1
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X GET -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' 'http://127.0.0.1:8000/api/arena/questions?chapter_id=e3e70682-c209-1cac-a29f-6fbed82c07cd'
+
+    st replay wkDFV1
+
+____________________ GET /api/arena/questions/{question_id} ____________________
+1. Test Case ID: O5whA1
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.arena_not_found"}`
+
+Reproduce with:
+
+    curl -X GET -H 'X-Dev-User: schema_fuzz' http://127.0.0.1:8000/api/arena/questions/fc89dbc0-d07e-4185-a92c-3c178fd90d68
+
+    st replay O5whA1
+
+_________________________ GET /api/audio/{chapter_id} __________________________
+1. Test Case ID: 6Ll9Bd
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X GET -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' 'http://127.0.0.1:8000/api/audio/e3e70682-c209-1cac-a29f-6fbed82c07cd?level='
+
+    st replay 6Ll9Bd
+
+______________________ GET /api/audio/{chapter_id}/price _______________________
+1. Test Case ID: blZuav
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X GET -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' 'http://127.0.0.1:8000/api/audio/e3e70682-c209-1cac-a29f-6fbed82c07cd/price?level='
+
+    st replay blZuav
+
+_________________________ GET /api/courses/{course_id} _________________________
+1. Test Case ID: OOfHon
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X GET -H 'X-Dev-User: schema_fuzz' http://127.0.0.1:8000/api/courses/3e225573-4e78-48c8-bb08-efbeeb795c22
+
+    st replay OOfHon
+
+____________________________ GET /api/jobs/{job_id} ____________________________
+1. Test Case ID: UgPbUx
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.job_not_found"}`
+
+Reproduce with:
+
+    curl -X GET -H 'X-Dev-User: schema_fuzz' http://127.0.0.1:8000/api/jobs/e3e70682-c209-1cac-a29f-6fbed82c07cd
+
+    st replay UgPbUx
+
+_____________________________ GET /api/leaderboard _____________________________
+1. Test Case ID: yhbmeA
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X GET -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language;' -H 'Cookie: [Filtered]' 'http://127.0.0.1:8000/api/leaderboard?world_id=e3e70682-c209-1cac-a29f-6fbed82c07cd&x-schemathesis-unknown-property=42'
+
+    st replay yhbmeA
+
+2. Test Case ID: Esj1bs
+
+- ST202 Schema-valid request rejected
+
+    Valid data should have been accepted
+    Expected: 2xx, 3xx, 401, 403, 404, 409, 429, 5xx
+
+- ST103 Undocumented status code
+
+    Received: 400
+    Documented: 200, 422
+
+[400] Bad Request:
+
+    `{"detail":"errors.world_required"}`
+
+Reproduce with:
+
+    curl -X GET -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/leaderboard
+
+    st replay Esj1bs
+
+________________________ GET /api/placement/{course_id} ________________________
+1. Test Case ID: 3mxCjI
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.placement_not_ready"}`
+
+Reproduce with:
+
+    curl -X GET -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/placement/1b8d8b29-eb91-44e3-ac25-f6cb8d6fddf7
+
+    st replay 3mxCjI
+
+_______________________________ GET /api/profile _______________________________
+1. Test Case ID: wV0qmL
+
+- ST108 Response violates schema
+
+    "00:00:00" is not valid under any of the schemas listed in the 'anyOf' keyword
+
+    Validated against the response schema for status code 200.
+
+    Schema at /properties/reminder_time:
+
+        {
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "time"
+                },
+                {
+                    "type": "null"
+                }
+            ],
+            "title": "Reminder Time"
+        }
+
+    Value:
+
+        "00:00:00"
+
+[200] OK:
+
+    `{"university":"","field":"","year":1,"mix":{"visual":40,"practice":20,"listening":20,"teaching":20},"languages":[],"daily_minutes":5,"reminder_time":"00:00:00","goal":null,"leaderboard_opt_in":true,"avatar":null,"onboarded":false}`
+
+Reproduce with:
+
+    curl -X GET -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/profile
+
+    st replay wV0qmL
+
+_____________________ GET /api/quiz/attempts/{attempt_id} ______________________
+1. Test Case ID: f0htAp
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.quiz_not_found"}`
+
+Reproduce with:
+
+    curl -X GET -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/quiz/attempts/e3e70682-c209-1cac-a29f-6fbed82c07cd
+
+    st replay f0htAp
+
+_____________________________ GET /api/quiz/price ______________________________
+1. Test Case ID: ZL0YvM
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X GET -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' 'http://127.0.0.1:8000/api/quiz/price?chapter_id=e3e70682-c209-1cac-a29f-6fbed82c07cd&level='
+
+    st replay ZL0YvM
+
+_________________________ GET /api/studio/{chapter_id} _________________________
+1. Test Case ID: qJiuLP
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X GET -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' 'http://127.0.0.1:8000/api/studio/e3e70682-c209-1cac-a29f-6fbed82c07cd?level='
+
+    st replay qJiuLP
+
+______________________ GET /api/studio/{chapter_id}/cards ______________________
+1. Test Case ID: E2MVpJ
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X GET -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' 'http://127.0.0.1:8000/api/studio/e3e70682-c209-1cac-a29f-6fbed82c07cd/cards?level='
+
+    st replay E2MVpJ
+
+______________________ GET /api/studio/{chapter_id}/price ______________________
+1. Test Case ID: JK4H2R
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X GET -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' 'http://127.0.0.1:8000/api/studio/e3e70682-c209-1cac-a29f-6fbed82c07cd/price?level='
+
+    st replay JK4H2R
+
+_____________________________ GET /api/tutor/start _____________________________
+1. Test Case ID: Kp7vrB
+
+- ST204 Wrong response to undeclared method
+
+    Unsupported method GET returned 422, expected 405 Method Not Allowed
+
+    Return 405 for methods not listed in the OpenAPI spec
+
+[422] Unprocessable Content:
+
+    `{"detail":[{"type":"uuid_parsing","loc":["path","session_id"],"msg":"Input should be a valid UUID, invalid character: found `s` at 0","input":"start","ctx":{"error":"invalid character: found `s` at 0"}}]}`
+
+Reproduce with:
+
+    curl -X GET -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language;' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"chapter_id": "952a7785-d6c1-42f4-854f-b53db1231f62", "level": "beginner"}' http://127.0.0.1:8000/api/tutor/start
+
+    st replay Kp7vrB
+
+_________________________ GET /api/tutor/{session_id} __________________________
+1. Test Case ID: EzYyKR
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.tutor_not_found"}`
+
+Reproduce with:
+
+    curl -X GET -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/tutor/e3e70682-c209-1cac-a29f-6fbed82c07cd
+
+    st replay EzYyKR
+
+_______________________________ GET /api/wisdom ________________________________
+1. Test Case ID: AADhXf
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X GET -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language;' -H 'Cookie: [Filtered]' 'http://127.0.0.1:8000/api/wisdom?world_id=e3e70682-c209-1cac-a29f-6fbed82c07cd&x-schemathesis-unknown-property=42'
+
+    st replay AADhXf
+
+__________________________ GET /api/worlds/{world_id} __________________________
+1. Test Case ID: ZMguwL
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X GET -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/worlds/6a7a1549-ad81-4f85-8c2b-29c3c1275299
+
+    st replay ZMguwL
+
+_____________________ GET /api/worlds/{world_id}/indexing ______________________
+1. Test Case ID: HsamCZ
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X GET -H 'X-Dev-User: schema_fuzz' http://127.0.0.1:8000/api/worlds/e3e70682-c209-1cac-a29f-6fbed82c07cd/indexing
+
+    st replay HsamCZ
+
+_______________________ GET /api/worlds/{world_id}/pool ________________________
+1. Test Case ID: MBX9Rm
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X GET -H 'X-Dev-User: schema_fuzz' http://127.0.0.1:8000/api/worlds/a56997d8-31af-321f-8b9f-eaa0a3a5e537/pool
+
+    st replay MBX9Rm
+
+_________________________ OPTIONS /api/arena/questions _________________________
+1. Test Case ID: Yquek7
+
+- ST205 Allow header mismatch
+
+    `Allow: GET` does not match the schema. Missing documented methods: POST
+
+    List exactly the methods this resource supports in `Allow`
+
+[405] Method Not Allowed:
+
+    `{"detail":"Method Not Allowed"}`
+
+Reproduce with:
+
+    curl -X OPTIONS -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language;' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"chapter_id": "dcfb3080-f6cb-4673-90a6-2ec8992f644f", "text": "00000000"}' http://127.0.0.1:8000/api/arena/questions
+
+    st replay Yquek7
+
+_____________________________ OPTIONS /api/auth/me _____________________________
+1. Test Case ID: GyoBeL
+
+- ST205 Allow header mismatch
+
+    `Allow: GET` does not match the schema. Missing documented methods: PATCH
+
+    List exactly the methods this resource supports in `Allow`
+
+[405] Method Not Allowed:
+
+    `{"detail":"Method Not Allowed"}`
+
+Reproduce with:
+
+    curl -X OPTIONS -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language;' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/auth/me
+
+    st replay GyoBeL
+
+_______________________ OPTIONS /api/courses/{course_id} _______________________
+1. Test Case ID: jfMZdP
+
+- ST205 Allow header mismatch
+
+    `Allow: DELETE` does not match the schema. Missing documented methods: GET
+
+    List exactly the methods this resource supports in `Allow`
+
+[405] Method Not Allowed:
+
+    `{"detail":"Method Not Allowed"}`
+
+Reproduce with:
+
+    curl -X OPTIONS -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language;' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/courses/e93add4c-a63e-46f9-937c-d06f00c80611
+
+    st replay jfMZdP
+
+_____________________________ OPTIONS /api/profile _____________________________
+1. Test Case ID: gvj6rB
+
+- ST205 Allow header mismatch
+
+    `Allow: GET` does not match the schema. Missing documented methods: PUT
+
+    List exactly the methods this resource supports in `Allow`
+
+[405] Method Not Allowed:
+
+    `{"detail":"Method Not Allowed"}`
+
+Reproduce with:
+
+    curl -X OPTIONS -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language;' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"university": "", "field": "", "year": 1, "languages": [], "daily_minutes": 5, "reminder_time": "00:00:00Z", "goal": null, "leaderboard_opt_in": null, "avatar": null, "finish": false}' http://127.0.0.1:8000/api/profile
+
+    st replay gvj6rB
+
+_____________________________ OPTIONS /api/worlds ______________________________
+1. Test Case ID: eTMMJz
+
+- ST205 Allow header mismatch
+
+    `Allow: GET` does not match the schema. Missing documented methods: POST
+
+    List exactly the methods this resource supports in `Allow`
+
+[405] Method Not Allowed:
+
+    `{"detail":"Method Not Allowed"}`
+
+Reproduce with:
+
+    curl -X OPTIONS -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language;' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"name": "0"}' http://127.0.0.1:8000/api/worlds
+
+    st replay eTMMJz
+
+______________________________ PATCH /api/auth/me ______________________________
+1. Test Case ID: ZRTeZO
+
+- ST103 Undocumented status code
+
+    Received: 400
+    Documented: 200, 422
+
+[400] Bad Request:
+
+    `{"detail":"There was an error parsing the body"}`
+
+Reproduce with:
+
+    curl -X PATCH -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -d '�-�]U�����' http://127.0.0.1:8000/api/auth/me
+
+    st replay ZRTeZO
+
+_________________ POST /api/arena/answers/{answer_id}/helpful __________________
+1. Test Case ID: zeRqdJ
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.arena_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/arena/answers/e3e70682-c209-1cac-a29f-6fbed82c07cd/helpful
+
+    st replay zeRqdJ
+
+___________________ POST /api/arena/answers/{answer_id}/pin ____________________
+1. Test Case ID: z7lj1d
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 204, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.arena_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/arena/answers/e3e70682-c209-1cac-a29f-6fbed82c07cd/pin
+
+    st replay z7lj1d
+
+__________________________ POST /api/arena/questions ___________________________
+1. Test Case ID: iLto2R
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 202, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -d '{"chapter_id": "dcfb3080-f6cb-4673-90a6-2ec8992f644f", "text": "00000000"}' http://127.0.0.1:8000/api/arena/questions
+
+    st replay iLto2R
+
+_______________ POST /api/arena/questions/{question_id}/answers ________________
+1. Test Case ID: evulDS
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 202, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.arena_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"text": "00000000000000000000"}' http://127.0.0.1:8000/api/arena/questions/e3e70682-c209-1cac-a29f-6fbed82c07cd/answers
+
+    st replay evulDS
+
+_____________________________ POST /api/arena/solo _____________________________
+1. Test Case ID: t6MpRx
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 202, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -d '{"chapter_id": "f6c4aaa4-0685-4ed6-8636-2b36dbd57dec", "concept": "00", "text": "00000000000000000000"}' http://127.0.0.1:8000/api/arena/solo
+
+    st replay t6MpRx
+
+____________________ POST /api/audio/{chapter_id}/generate _____________________
+1. Test Case ID: 9X5ioX
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"level": "", "pay": "me"}' http://127.0.0.1:8000/api/audio/e3e70682-c209-1cac-a29f-6fbed82c07cd/generate
+
+    st replay 9X5ioX
+
+_____________________________ POST /api/auth/login _____________________________
+1. Test Case ID: Qnz2Z0
+
+- ST103 Undocumented status code
+
+    Received: 401
+    Documented: 200, 422
+
+[401] Unauthorized:
+
+    `{"detail":"errors.login_failed"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -d '{"nickname": "0", "password": "[Filtered]"}' http://127.0.0.1:8000/api/auth/login
+
+    st replay Qnz2Z0
+
+____________________________ POST /api/auth/signup _____________________________
+1. Test Case ID: 5flVUt
+
+- ST202 Schema-valid request rejected
+
+    Valid data should have been accepted
+    Expected: 2xx, 3xx, 401, 403, 404, 409, 429, 5xx
+
+- ST103 Undocumented status code
+
+    Received: 400
+    Documented: 201, 422
+
+[400] Bad Request:
+
+    `{"detail":"errors.password_short"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -d '{"nickname": "000", "password": "[Filtered]", "ui_language": "ar-TN"}' http://127.0.0.1:8000/api/auth/signup
+
+    st replay 5flVUt
+
+__________________ POST /api/chapters/{chapter_id}/documents ___________________
+1. Test Case ID: hSsato
+
+- ST103 Undocumented status code
+
+    Received: 400
+    Documented: 202, 422
+
+[400] Bad Request:
+
+    `{"detail":"errors.file_type"}`
+
+Reproduce with:
+
+    curl -X POST -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' -H 'Content-Type: multipart/form-data; boundary=bbb22a5a1a7202543010d9de884611ec' -d $'--bbb22a5a1a7202543010d9de884611ec\r\nContent-Disposition: form-data; name="file"; filename="file"\r\n\r\n\r\n--bbb22a5a1a7202543010d9de884611ec--\r\n' http://127.0.0.1:8000/api/chapters/260fd580-c89f-4b7d-961e-a2765286767d/documents
+
+    st replay hSsato
+
+2. Test Case ID: 7VNSWx
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 202, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: multipart/form-data; boundary=bbb22a5a1a7202543010d9de884611ec' -d $'--bbb22a5a1a7202543010d9de884611ec\r\nContent-Disposition: form-data; name="file"; filename="file"\r\n\r\n\r\n--bbb22a5a1a7202543010d9de884611ec--\r\n' http://127.0.0.1:8000/api/chapters/dcfb3080-f6cb-4673-90a6-2ec8992f644f/documents
+
+    st replay 7VNSWx
+
+____________________ POST /api/courses/{course_id}/chapters ____________________
+1. Test Case ID: 7V55Np
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 201, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language;' -H 'Content-Type: application/json' -d '{"\ud9b8\udeb7\u000e\udba2\uddf7\ud840\ude56B": {"\u00e6\uda3d\udcd8T\u00b3\u00e1|\u00157\u851a": [{"LPT1": -3.605568641151714e+16, "\ud825\ude24?\u00e4\ud929\ude83\\0e\ud839\udf2a\u00d1\u00c0\u0088\ud849\udef1,\u0001\u00b0QF\u0099\udbca\uddf9": 145, "w\ud8cf\udd7ec\t\ud2eb\u00a9\ud9ea\ude6eEy\u0007": null}]}, "": {"\ud8a2\ude3f`": -5.857434895734035e+16, "\u007f": 87470, "\u023a": -660585}, "|\u00e2L\\\ud9cf\ude51v": {"\u00ac\udb05\udffbw": -8.421810151387205e+194, "": null, "4\u00d3\uda12\udf9b\u0093\u00f2\udb10\udf8e\u009e": "\u009en\u001b\u008b\ud961\udc82\ud930\udd6d\udb93\udd73\u0093,\ud8e9\udcfei7H\u0017\u00b6\ud9e8\udf35\ud81f\ude67^v\u0017\u00ddW\u00e8,\u00d2\u00cb"}, "\u00b6\u00bei\u008a_\udb5a\udfae\\\u00e7\u00c8": "f\u00e9R\uda34\udee9\u009a=\udbfa\udecfd\udb31\ude39!", "N\udbb9\udc98#\u009b\u00dd\u00fa\u001b\u00b8\u00ce\u0087": {}, "title": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"}' http://127.0.0.1:8000/api/courses/4264ed36-1586-500f-9cfb-723b2dd12208/chapters
+
+    st replay 7V55Np
+
+____________________ POST /api/courses/{course_id}/presence ____________________
+1. Test Case ID: 3BrEsh
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 204, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"chapter_id": "f6b3253b-218d-4a11-a766-05f55dd17d10"}' http://127.0.0.1:8000/api/courses/97fcee98-a220-3d7e-aa68-4ab4312ad555/presence
+
+    st replay 3BrEsh
+
+________________________ POST /api/jobs/{job_id}/cancel ________________________
+1. Test Case ID: Ld5gjp
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.job_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' http://127.0.0.1:8000/api/jobs/e3e70682-c209-1cac-a29f-6fbed82c07cd/cancel
+
+    st replay Ld5gjp
+
+__________________________ POST /api/onboarding/style __________________________
+1. Test Case ID: 8j0Ful
+
+- ST103 Undocumented status code
+
+    Received: 400
+    Documented: 200, 422
+
+[400] Bad Request:
+
+    `{"detail":"There was an error parsing the body"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '�' http://127.0.0.1:8000/api/onboarding/style
+
+    st replay 8j0Ful
+
+__________________________ POST /api/placement/finish __________________________
+1. Test Case ID: w2yLWk
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.placement_not_ready"}`
+
+Reproduce with:
+
+    curl -X POST -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"course_id": "b9f48ec4-bcfa-40c7-bb6b-6908bdd8acd8", "answers": []}' http://127.0.0.1:8000/api/placement/finish
+
+    st replay w2yLWk
+
+__________________________ POST /api/placement/start ___________________________
+1. Test Case ID: H8PxPJ
+
+- ST103 Undocumented status code
+
+    Received: 409
+    Documented: 200, 422
+
+[409] Conflict:
+
+    `{"detail":"errors.placement_no_material"}`
+
+Reproduce with:
+
+    curl -X POST -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"course_id": "019e83ac-44dd-451b-951b-00b6d814e4df"}' http://127.0.0.1:8000/api/placement/start
+
+    st replay H8PxPJ
+
+__________________ POST /api/quiz/attempts/from-job/{job_id} ___________________
+1. Test Case ID: 19mAvI
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.job_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/quiz/attempts/from-job/e3e70682-c209-1cac-a29f-6fbed82c07cd
+
+    st replay 19mAvI
+
+_________________ POST /api/quiz/attempts/{attempt_id}/answer __________________
+1. Test Case ID: HGXFoi
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.quiz_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"q": 0, "choice": 0}' http://127.0.0.1:8000/api/quiz/attempts/e3e70682-c209-1cac-a29f-6fbed82c07cd/answer
+
+    st replay HGXFoi
+
+_________________ POST /api/quiz/attempts/{attempt_id}/finish __________________
+1. Test Case ID: bLGLCR
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.quiz_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/quiz/attempts/e3e70682-c209-1cac-a29f-6fbed82c07cd/finish
+
+    st replay bLGLCR
+
+_______________ POST /api/quiz/attempts/{attempt_id}/flashcards ________________
+1. Test Case ID: xzcaqJ
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.quiz_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/quiz/attempts/e3e70682-c209-1cac-a29f-6fbed82c07cd/flashcards
+
+    st replay xzcaqJ
+
+__________________ POST /api/quiz/attempts/{attempt_id}/skip ___________________
+1. Test Case ID: LKYFAV
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.quiz_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"q": 0}' http://127.0.0.1:8000/api/quiz/attempts/e3e70682-c209-1cac-a29f-6fbed82c07cd/skip
+
+    st replay LKYFAV
+
+_____________________________ POST /api/quiz/start _____________________________
+1. Test Case ID: 24n0xu
+
+- ST103 Undocumented status code
+
+    Received: 400
+    Documented: 200, 422
+
+[400] Bad Request:
+
+    `{"detail":"errors.level_invalid"}`
+
+Reproduce with:
+
+    curl -X POST -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"chapter_id": "2eda662a-7ef7-46fa-9d3f-3256e4063c1d", "level": ""}' http://127.0.0.1:8000/api/quiz/start
+
+    st replay 24n0xu
+
+2. Test Case ID: OIoEbi
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -d '{"chapter_id": "dcfb3080-f6cb-4673-90a6-2ec8992f644f", "level": ""}' http://127.0.0.1:8000/api/quiz/start
+
+    st replay OIoEbi
+
+___________________ POST /api/studio/cards/{card_id}/review ____________________
+1. Test Case ID: mA09oA
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.card_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"grade": "again"}' http://127.0.0.1:8000/api/studio/cards/e3e70682-c209-1cac-a29f-6fbed82c07cd/review
+
+    st replay mA09oA
+
+____________________ POST /api/studio/{chapter_id}/generate ____________________
+1. Test Case ID: NVgjRy
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"level": "", "pay": "me"}' http://127.0.0.1:8000/api/studio/e3e70682-c209-1cac-a29f-6fbed82c07cd/generate
+
+    st replay NVgjRy
+
+____________________________ POST /api/tutor/start _____________________________
+1. Test Case ID: oHUMcu
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -d '{"chapter_id": "f6c4aaa4-0685-4ed6-8636-2b36dbd57dec", "level": "advanced"}' http://127.0.0.1:8000/api/tutor/start
+
+    st replay oHUMcu
+
+_______________________ POST /api/tutor/{session_id}/end _______________________
+1. Test Case ID: lGLHMc
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.tutor_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/tutor/e3e70682-c209-1cac-a29f-6fbed82c07cd/end
+
+    st replay lGLHMc
+
+______________________ POST /api/tutor/{session_id}/turn _______________________
+1. Test Case ID: loyOeD
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.tutor_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"text": "", "action": "message"}' http://127.0.0.1:8000/api/tutor/e3e70682-c209-1cac-a29f-6fbed82c07cd/turn
+
+    st replay loyOeD
+
+________________________ POST /api/wallet/demo-purchase ________________________
+1. Test Case ID: hwnXUF
+
+- ST103 Undocumented status code
+
+    Received: 400
+    Documented: 200, 422
+
+[400] Bad Request:
+
+    `{"detail":"There was an error parsing the body"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -d $'��q�\x10�' http://127.0.0.1:8000/api/wallet/demo-purchase
+
+    st replay hwnXUF
+
+_______________________________ POST /api/worlds _______________________________
+1. Test Case ID: GQB5WY
+
+- ST103 Undocumented status code
+
+    Received: 400
+    Documented: 201, 422
+
+[400] Bad Request:
+
+    `{"detail":"There was an error parsing the body"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d $'�\x11\x13' http://127.0.0.1:8000/api/worlds
+
+    st replay GQB5WY
+
+____________________________ POST /api/worlds/join _____________________________
+1. Test Case ID: Fcvhha
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.join_code_unknown"}`
+
+Reproduce with:
+
+    curl -X POST -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"code": "0000"}' http://127.0.0.1:8000/api/worlds/join
+
+    st replay Fcvhha
+
+_____________________ POST /api/worlds/{world_id}/courses ______________________
+1. Test Case ID: G4rKjt
+
+- ST201 Schema-violating request accepted
+
+    Invalid data should have been rejected
+    Expected: 400, 401, 403, 404, 405, 406, 409, 415, 422, 428, 429, 5xx
+    Invalid component: in body - exam_date: Incorrect type
+
+[201] Created:
+
+    `{"id":"f7a41108-caa1-4809-8448-7bb33f0feba4","name":"0","color_key":"island-2","exam_date":"1970-01-01","chapters":[]}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language;' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"name": "0", "chapters": [], "exam_date": 0}' http://127.0.0.1:8000/api/worlds/33695858-6caf-4c14-8e42-4e37d6d7ccb0/courses
+
+    st replay G4rKjt
+
+2. Test Case ID: m3KBgJ
+
+- ST103 Undocumented status code
+
+    Received: 400
+    Documented: 201, 422
+
+[400] Bad Request:
+
+    `{"detail":"There was an error parsing the body"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language: null' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '�e' http://127.0.0.1:8000/api/worlds/0af3b9ff-29a5-4a8d-af3c-dd604bdf6e3e/courses
+
+    st replay m3KBgJ
+
+_______________________ POST /api/worlds/{world_id}/pool _______________________
+1. Test Case ID: GJg3pl
+
+- ST103 Undocumented status code
+
+    Received: 400
+    Documented: 200, 422
+
+[400] Bad Request:
+
+    `{"detail":"errors.pool_amount_invalid"}`
+
+Reproduce with:
+
+    curl -X POST -H 'x-ui-language: null' -H 'x-schemathesis-unknown-property: 42' -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"amount": 0}' http://127.0.0.1:8000/api/worlds/fd2dd6dc-ccd8-4f89-8aa9-f02f6456a41c/pool
+
+    st replay GJg3pl
+
+2. Test Case ID: YjhqDa
+
+- ST202 Schema-valid request rejected
+
+    Valid data should have been accepted
+    Expected: 2xx, 3xx, 401, 403, 404, 409, 429, 5xx
+
+[400] Bad Request:
+
+    `{"detail":"errors.pool_amount_invalid"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -d '{"amount": 0}' http://127.0.0.1:8000/api/worlds/a8ad1ae2-cd29-46e0-b4c1-cf62a0663734/pool
+
+    st replay YjhqDa
+
+_______________________________ PUT /api/profile _______________________________
+1. Test Case ID: OYaMYT
+
+- ST108 Response violates schema
+
+    "00:00:00" is not valid under any of the schemas listed in the 'anyOf' keyword
+
+    Validated against the response schema for status code 200.
+
+    Schema at /properties/reminder_time:
+
+        {
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "time"
+                },
+                {
+                    "type": "null"
+                }
+            ],
+            "title": "Reminder Time"
+        }
+
+    Value:
+
+        "00:00:00"
+
+[200] OK:
+
+    `{"university":"","field":"","year":1,"mix":{"visual":40,"practice":20,"listening":20,"teaching":20},"languages":[],"daily_minutes":5,"reminder_time":"00:00:00","goal":null,"leaderboard_opt_in":true,"avatar":null,"onboarded":false}`
+
+Reproduce with:
+
+    curl -X PUT -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -d '{}' http://127.0.0.1:8000/api/profile
+
+    st replay OYaMYT
+
+________________________________ Stateful tests ________________________________
+1. Test Case ID: zTwsYq
+
+- ST202 Schema-valid request rejected
+
+    Valid data should have been accepted
+    Expected: 2xx, 3xx, 401, 403, 404, 409, 429, 5xx
+    Hint: The request body contains 4 additional properties not defined in the schema (`Uí󍆝Xm𨳝`, `W¿    򉀷򈅃e`, `Ó𥳤9d` and 1 more). The server appears to reject properties the schema allows. Declare `additionalProperties: false` if extras are not accepted, or make the server ignore unknown fields.
+
+[400] Bad Request:
+
+    `{"detail":"errors.level_invalid"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"name": "\u00b4n\u00e7;\u0002", "exam_date": "2026-11-03", "chapters": ["*p\u0092\u00e1%2", "(\u256f\u00b0\u25a1\u00b0\uff09\u256f\ufe35 \u253b\u2501\u253b)", "", "]a\ud915\udd8f\udab3\udd28S\udbe4\udd5a\u0003", "", "\ud8e6\udcc2\u00f0\u0082\ud932\udd6f", "", "\u00e3q\uda71\udc34", "\uda00\udf38\u0002", "\udaf8\udd1a\ud974\ude12\u00fe\u00f8", "\u00a6!\u001d\u00cb\u0080\u00df\udbfa\udd00\u0097*\u00d5\ud95e\udfeb\u00fc$\u00ae!", "\u00a6", "\ud97a\udf9eC", "\u00d9", "", "iB\u00f4r\u00bb\udae6\udd0c3w\uda97\uddde\u00be", "", ""]}' http://127.0.0.1:8000/api/worlds/33695858-6caf-4c14-8e42-4e37d6d7ccb0/courses
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language;' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"\u00e4Yn\u00c4\u00bf\u00af\ud937\udcd1\u0091?\ud83a\udf48\u0093\u00c5": [-2.00001, 5.960464477539063e-08, "\u00e4y\uda21\udc19F\u00d8"], "\u00d3\ud857\udce49d\u0007": [], "W\u00bf\u009b\u001d\ud9e4\udc37\ud9e0\udd43e": [{}, [true, -155861228, true], {}], "U\u00ed\u0095\udaf4\udd9dXm\ud863\udcdd": [{}, []], "level": "", "chapter_id": "1b749caf-e950-4f00-8e1f-7ebf349c8e1e"}' http://127.0.0.1:8000/api/quiz/start
+
+    st replay zTwsYq
+
+2. Test Case ID: DrfiZj
+
+- ST103 Undocumented status code
+
+    Received: 409
+    Documented: 200, 422
+
+[409] Conflict:
+
+    `{"detail":"errors.tutor_busy"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -d '{"\u00a9\u00eb\u009c\u00aers\u00b5\u009d\u00ba\u0007": [], "chapter_id": "5e9a2c1f-3333-404b-88bb-70ed1123cd57", "level": "intermediate"}' http://127.0.0.1:8000/api/tutor/start
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/tutor/f9c0b451-9c4f-4ee1-ade6-b592295cb962/end
+
+    st replay DrfiZj
+
+3. Test Case ID: Xc8Q4I
+
+- ST202 Schema-valid request rejected
+
+    Valid data should have been accepted
+    Expected: 2xx, 3xx, 401, 403, 404, 409, 429, 5xx
+    Hint: The request body contains 5 additional properties not defined in the schema (``, `f    `, `Ä»â` and 2 more). The server appears to reject properties the schema allows. Declare `additionalProperties: false` if extras are not accepted, or make the server ignore unknown fields.
+
+[400] Bad Request:
+
+    `{"detail":"errors.file_type"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: multipart/form-data; boundary=b30a68e6e937f6937f3852fa2083f696' -d $'--b30a68e6e937f6937f3852fa2083f696\r\nContent-Disposition: form-data; name="\xf2\x9c\x97\x90M"\r\n\r\ntrue\r\n--b30a68e6e937f6937f3852fa2083f696\r\nContent-Disposition: form-data; name="\xf2\x9c\x97\x90M"\r\n\r\nnull\r\n--b30a68e6e937f6937f3852fa2083f696\r\nContent-Disposition: form-data; name="\xf2\x9c\x97\x90M"\r\n\r\ntrue\r\n--b30a68e6e937f6937f3852fa2083f696\r\nContent-Disposition: form-data; name="\xc2\x9d"\r\n\r\n-366\r\n--b30a68e6e937f6937f3852fa2083f696\r\nContent-Disposition: form-data; name="\xc2\x9ef%0D"\r\n\r\n-1961844\r\n--b30a68e6e937f6937f3852fa2083f696\r\nContent-Disposition: form-data; name="öô𬄁"\r\n\r\n{}\r\n--b30a68e6e937f6937f3852fa2083f696\r\nContent-Disposition: form-data; name="Ä»â"\r\n\r\nfalse\r\n--b30a68e6e937f6937f3852fa2083f696\r\nContent-Disposition: form-data; name="Ä»â"\r\n\r\nnull\r\n--b30a68e6e937f6937f3852fa2083f696\r\nContent-Disposition: form-data; name="file"; filename="file"\r\n\r\n\xf1\x9f\x94\xa2Ï1\r\n--b30a68e6e937f6937f3852fa2083f696--\r\n' http://127.0.0.1:8000/api/chapters/c01683b9-ce97-427a-94c7-e01253bf9cc8/documents
+
+    st replay Xc8Q4I
+
+4. Test Case ID: dzhehp
+
+- ST103 Undocumented status code
+
+    Received: 400
+    Documented: 200, 422
+
+[400] Bad Request:
+
+    `{"detail":"There was an error parsing the body"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language: "CK>C' -H 'Content-Type: application/json' -d $'6��|pF\xee\xb4\x82,' http://127.0.0.1:8000/api/worlds/join
+
+    st replay dzhehp
+
+5. Test Case ID: Jzf5Iz
+
+- ST202 Schema-valid request rejected
+
+    Valid data should have been accepted
+    Expected: 2xx, 3xx, 401, 403, 404, 409, 429, 5xx
+
+[422] Unprocessable Content:
+
+    `{"detail":[{"type":"uuid_parsing","loc":["path","world_id"],"msg":"Input should be a valid UUID, invalid character: found `N` at 0","input":"None","ctx":{"error":"invalid character: found `N` at 0"}}]}`
+
+Reproduce with:
+
+    curl -X GET -H 'X-Dev-User: schema_fuzz' http://127.0.0.1:8000/api/daily
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -d '{"amount": 0}' http://127.0.0.1:8000/api/worlds/None/pool
+
+    st replay Jzf5Iz
+
+6. Test Case ID: ahm7f8
+
+- ST202 Schema-valid request rejected
+
+    Valid data should have been accepted
+    Expected: 2xx, 3xx, 401, 403, 404, 409, 429, 5xx
+
+[422] Unprocessable Content:
+
+    `{"detail":[{"type":"uuid_parsing","loc":["path","course_id"],"msg":"Input should be a valid UUID, invalid character: found `N` at 0","input":"None","ctx":{"error":"invalid character: found `N` at 0"}}]}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' http://127.0.0.1:8000/api/daily/seen
+    curl -X DELETE -H 'X-Dev-User: schema_fuzz' http://127.0.0.1:8000/api/courses/None
+
+    st replay ahm7f8
+
+7. Test Case ID: B0Kfuy
+
+- ST101 Server error
+
+- ST103 Undocumented status code
+
+    Received: 500
+    Documented: 202, 422
+
+[500] Internal Server Error:
+
+    `Internal Server Error`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language: null' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"\u0086": [[], {"Q\u00a6\u00a7": -11712}, 2321366026274232.0], "\uda59\udc69\ud8a4\udc03\u00f4\u009f\udb44\udcae\u0088*\u0094": {}, "chapter_id": "c01683b9-ce97-427a-94c7-e01253bf9cc8", "concept": "\u00e0\"\udba0\udd4c\u00c3m\u00b5\u00c6", "text": "\u00d6\u001a\u00e5jo\u00f9\u00d4\u00dcJ\u009c{\u009d\u009c\u00f5\u00fa\u0080\u000e\u7140\ud8e4\udfb7T\ud97b\ude9b\u00a8\u00bb\ud9af\ude21\udb56\udf4f\u00a0\u00d3O\u00e4\u00adA\udb83\udf6c2\u009a\u0000\u00f5!#r"}' http://127.0.0.1:8000/api/arena/solo
+
+    st replay B0Kfuy
+
+8. Test Case ID: h9N9AF
+
+- ST202 Schema-valid request rejected
+
+    Valid data should have been accepted
+    Expected: 2xx, 3xx, 401, 403, 404, 409, 429, 5xx
+
+[422] Unprocessable Content:
+
+    `{"detail":[{"type":"uuid_parsing","loc":["path","course_id"],"msg":"Input should be a valid UUID, invalid character: found `N` at 0","input":"None","ctx":{"error":"invalid character: found `N` at 0"}}]}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' http://127.0.0.1:8000/api/daily/seen
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -d '{"chapter_id": "62fec9e5-f7aa-497a-9f36-7dbcdae6152e"}' http://127.0.0.1:8000/api/courses/None/presence
+
+    st replay h9N9AF
+
+9. Test Case ID: M35ZE0
+
+- ST202 Schema-valid request rejected
+
+    Valid data should have been accepted
+    Expected: 2xx, 3xx, 401, 403, 404, 409, 429, 5xx
+
+[422] Unprocessable Content:
+
+    `{"detail":[{"type":"uuid_parsing","loc":["path","course_id"],"msg":"Input should be a valid UUID, invalid character: found `N` at 0","input":"None","ctx":{"error":"invalid character: found `N` at 0"}}]}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language: null' http://127.0.0.1:8000/api/daily/seen
+    curl -X GET -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/courses/None
+
+    st replay M35ZE0
+
+10. Test Case ID: G8NbpH
+
+- ST202 Schema-valid request rejected
+
+    Valid data should have been accepted
+    Expected: 2xx, 3xx, 401, 403, 404, 409, 429, 5xx
+
+[422] Unprocessable Content:
+
+    `{"detail":[{"type":"uuid_parsing","loc":["path","world_id"],"msg":"Input should be a valid UUID, invalid character: found `N` at 0","input":"None","ctx":{"error":"invalid character: found `N` at 0"}}]}`
+
+Reproduce with:
+
+    curl -X GET -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/daily
+    curl -X GET -H 'X-Dev-User: schema_fuzz' http://127.0.0.1:8000/api/worlds/None/indexing
+
+    st replay G8NbpH
+
+11. Test Case ID: OsBqyc
+
+- ST103 Undocumented status code
+
+    Received: 409
+    Documented: 200, 422
+
+[409] Conflict:
+
+    `{"detail":"errors.tutor_busy"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -d '{"\u001f": {"\u00eb\u00d8\udb59\ude32\u009c9\u00b0\u0098\u00be\u00e7\u0084": true, "\u0083b\u0013I\ud904\uddea\u00ea\u00da": {}, "\ud9d9\udde4\ud8f6\udded\u0099\u0090\udbc9\udef7\u00a8q\ud058_\uda31\udd4c\u0091\udba1\udcb5\u0011J": [-589, -1.6054722638663917e+260, 4.377111474293888e+16]}, "": {}, ")": [-0.5, null, "\u00e6"], "\uda1f\udf41\ud9d4\udd9d\ud98c\udcc2\u008d": [true, false, false], "level": "advanced", "chapter_id": "2b9c7c82-3146-4607-81b9-3e5a2bdab089"}' http://127.0.0.1:8000/api/tutor/start
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language: null' -H 'Content-Type: application/json' -d '{"\ud8d9\udc79{\u00d5\u00a4x": [-12138339073, [66842318747630, null, 4.0887436525450374e+73]], "\u009e\udb10\ude57T\u00e2\uda06\udc88\uda19\udf98\udb0f\udd7e\ud855\udc4d\ud9a3\udf2b\u0000\u00c5\u00c9\u0011\u00f5!\u0082\u00edLV\uda7a\ude0a\ud9ee\udeb8": "g\u0019", "": null, "action": "message", "text": "00000000"}' http://127.0.0.1:8000/api/tutor/557d324f-7b32-43e9-b8cd-8addaf7ab21f/turn
+
+    st replay OsBqyc
+
+12. Test Case ID: xb6x1k
+
+- ST103 Undocumented status code
+
+    Received: 400
+    Documented: 202, 422
+
+[400] Bad Request:
+
+    `{"detail":"There was an error parsing the body"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '�x�' http://127.0.0.1:8000/api/arena/solo
+
+    st replay xb6x1k
+
+13. Test Case ID: FxAxJe
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 200, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language: null' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"\u007f\ud92c\udd51j": {}, "\u00d4\u0086": null, "\ud8da\udc3e\u00d1\u00f6\u009e \u00f3\u0089": {"\u0087\u00c5\ud80a\udda9\uda6c\udcadCa9\ue837\udb28\udc32\u001a\u00a6w\u008a\uda11\uddc9\u008br": [], "\u00d3\u001bH\ud823\udef9\udad0\udf1d\u00bb\udb58\uddff\ud8d2\uddfe\u00be\ud92e\udebf\u0006\u00d6\u00f3\udb89\udd58\u00dd\u153d\u00ee\u0015": [[]], "\u00f1": []}, "\u00d6\ud80f\udf1c\ud95c\udc45\ud9fa\udc6c\u00dc\u0012v\u00ef\u001e\u00f5\udb22\udf40": {"None": [true, "8\u00da"], "E\u008b": null, "\ud9ef\udeaa\u4377\uf6ef": null}, "\u0017\ud969\udc25w\u00be\u00ee": {}, "course_id": "1337a22f-8874-2eaa-aaeb-5685356ab0cf"}' http://127.0.0.1:8000/api/placement/start
+
+    st replay FxAxJe
+
+14. Test Case ID: GMQDOm
+
+- ST103 Undocumented status code
+
+    Received: 400
+    Documented: 200, 422
+
+[400] Bad Request:
+
+    `{"detail":"There was an error parsing the body"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -d $'�\x0c�' http://127.0.0.1:8000/api/tutor/93872c43-fa74-1edb-a219-d760a83a967b/turn
+
+    st replay GMQDOm
+
+15. Test Case ID: GxTEmf
+
+- ST202 Schema-valid request rejected
+
+    Valid data should have been accepted
+    Expected: 2xx, 3xx, 401, 403, 404, 409, 429, 5xx
+
+[422] Unprocessable Content:
+
+    `{"detail":[{"type":"uuid_parsing","loc":["path","world_id"],"msg":"Input should be a valid UUID, invalid character: found `N` at 0","input":"None","ctx":{"error":"invalid character: found `N` at 0"}}]}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language: #z' http://127.0.0.1:8000/api/daily/seen
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language;' -H 'Content-Type: application/json' -d '{"name": "\udac5\ude459\u00b7?\u00b6\udbd3\udeb9B\u0014\u008e\u00a2\u00d5\u00ccD:\u0092\u00ea\u00c5\u00b3\ud95f\ude9f\u00d7\u00a9\u0080\u00fc\u00c1\u00a7*#", "chapters": ["\u00ef\uda32\udf3c\u0087\uda31\udca42f", "\u00f2i FE\u00ea\u00f7\u00a6t\u00dah", "v\u00b9\u00b06\u00ac\u00d5:\ud850\udf0a\u00ef\u00dfy\u00a0\b", "\u0000\u00e9\u00b3\u009f2\u00bb\u0095O\uda4b\ude3d", "\u00d2\u00e8O\u0091&\u0092\u0018\u00fa\u00df*o", "\u00ac3", ".c\ud847\ude01mO\u00c4;\u00ce\u00bfKz", "b\u009f\u0081\u009ew", "w\u00e4=\ud96c\ude30\u5c082\u00d2\udbed\udd47X\u00a8\u00cd\u00ab\u00ff\u00d9\ud85f\udf4bD\u00c5\u0080\ud8ab\udf1bs\u008d\uda11\ude11t"]}' http://127.0.0.1:8000/api/worlds/None/courses
+
+    st replay GxTEmf
+
+16. Test Case ID: RcoeMk
+
+- ST202 Schema-valid request rejected
+
+    Valid data should have been accepted
+    Expected: 2xx, 3xx, 401, 403, 404, 409, 429, 5xx
+
+[422] Unprocessable Content:
+
+    `{"detail":[{"type":"uuid_parsing","loc":["path","course_id"],"msg":"Input should be a valid UUID, invalid character: found `N` at 0","input":"None","ctx":{"error":"invalid character: found `N` at 0"}}]}`
+
+Reproduce with:
+
+    curl -X GET -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language: null' http://127.0.0.1:8000/api/daily
+    curl -X GET -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language: null' http://127.0.0.1:8000/api/placement/None
+
+    st replay RcoeMk
+
+17. Test Case ID: hg5ush
+
+- ST103 Undocumented status code
+
+    Received: 404
+    Documented: 201, 422
+
+[404] Not Found:
+
+    `{"detail":"errors.world_not_found"}`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: application/json' -H 'Cookie: [Filtered]' -d '{"\u00a7M\\\u00f7\u0088\u00a10\u00b2\u00c5/!\u07e6\u00c8\u00fe\u00aaF\u00d5": [], "\u007f\ud8bd\udc5f\u00fe": false, "\u008a\u00bco\u00ce": null, "chapters": ["\u0287\u01dd\u026f\u0250 \u0287\u1d09s \u0279olop \u026fnsd\u1d09 \u026f\u01dd\u0279o\u02e5", "__dict__", ",w\u00be", "0/0", "\u00ae", "\u00da$\u0000\f\udac5\udcdd|", "\ud961\ude91i", "", "l\uda0e\udc76}\u00c8tK", "\u00dfG`!\u00fb\u00c9\u008e\u0088\u00b9\u0013 \u0019\ud9bf\udc01", "\u0088\ud9e0\udc8eH\ud928\udd8d", "\u00c5", "", "T\u009d\u0088\u00b3\u0011\u0001\u000e\u00e0\u009d\u00de@&\u0017\uda3f\uddf1\u00ab\u0007P\udb65\udea7\u00fa\u007f\ud855\udd69\ud965\ude08\u00e6\u0016\u008d<\u00958", "\u00ef\u00ee\u00da\u0094\u009b", "-Infinity"], "name": "\uda34\ude94\u00d5g\u00f2\u0099t\u00e5\u00d4\u0011\u0089\udb85\udcaf\u009e\u00b0\ud970\udf4a[\u001d\u00d8\u0096\uda96\udc79S\ud891\udddf\u009f"}' http://127.0.0.1:8000/api/worlds/14ebd08f-cb20-1eb3-bc28-6f2e5ad8ab4e/courses
+
+    st replay hg5ush
+
+18. Test Case ID: ikNKO4
+
+- ST202 Schema-valid request rejected
+
+    Valid data should have been accepted
+    Expected: 2xx, 3xx, 401, 403, 404, 409, 429, 5xx
+
+[422] Unprocessable Content:
+
+    `{"detail":[{"type":"uuid_parsing","loc":["path","chapter_id"],"msg":"Input should be a valid UUID, invalid character: found `N` at 0","input":"None","ctx":{"error":"invalid character: found `N` at 0"}}]}`
+
+Reproduce with:
+
+    curl -X GET -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language: null' http://127.0.0.1:8000/api/daily
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'Content-Type: multipart/form-data; boundary=181003715739265210249aad0f2da102' -d $'--181003715739265210249aad0f2da102\r\nContent-Disposition: form-data; name="/"\r\n\r\n{"\\u00a1\\u00d2f80rr\\ud8a7\\udf6c\\udad0\\udddd\\ud921\\udcdb\\ud92c\\udf96\\u00c0\\u00bc\\u0007\\u00d5\\ud864\\udcb6\\u00d5\\ud8ba\\ude39\\u0000\\udb38\\udf27\\u008e\\u001f\\udb96\\udea2B\\u00df": true}\r\n--181003715739265210249aad0f2da102\r\nContent-Disposition: form-data; name="file"; filename="file"\r\n\r\n\x04hq\xf1\x9f\x84\xaf0í\xc2\x90\r\n--181003715739265210249aad0f2da102--\r\n' http://127.0.0.1:8000/api/chapters/None/documents
+
+    st replay ikNKO4
+
+19. Test Case ID: bRqVsG
+
+- ST202 Schema-valid request rejected
+
+    Valid data should have been accepted
+    Expected: 2xx, 3xx, 401, 403, 404, 409, 429, 5xx
+
+[422] Unprocessable Content:
+
+    `{"detail":[{"type":"missing","loc":["query","world_id"],"msg":"Field required","input":null}]}`
+
+Reproduce with:
+
+    curl -X GET -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/daily
+    curl -X GET -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language;' 'http://127.0.0.1:8000/api/wisdom?course_id=46d208e1-8b1a-45bb-a518-0d9a1efd58d9'
+
+    st replay bRqVsG
+
+20. Test Case ID: SU8Lic
+
+- ST202 Schema-valid request rejected
+
+    Valid data should have been accepted
+    Expected: 2xx, 3xx, 401, 403, 404, 409, 429, 5xx
+
+[422] Unprocessable Content:
+
+    `{"detail":[{"type":"uuid_parsing","loc":["path","world_id"],"msg":"Input should be a valid UUID, invalid character: found `N` at 0","input":"None","ctx":{"error":"invalid character: found `N` at 0"}}]}`
+
+Reproduce with:
+
+    curl -X GET -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language: null' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/daily
+    curl -X GET -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/worlds/None/pool
+
+    st replay SU8Lic
+
+21. Test Case ID: kNrtS9
+
+- ST101 Server error
+
+- ST103 Undocumented status code
+
+    Received: 500
+    Documented: 202, 422
+
+[500] Internal Server Error:
+
+    `Internal Server Error`
+
+Reproduce with:
+
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language: rkR' -H 'Content-Type: application/json' -d '{"\u0091": {"\u5edfmK\u00cc": "z\u0019\ud989\udebd"}, "\u00ffK\u0091\ud8bd\ude21\u009cZ\udb7f\udc24\u00be": {}, "\ud9e8\udd8e": [{"": null, "\ud877\udc10\u00a6\udb3e\udc4dB\u00e8\u0006": true, "\u008b\u000b": "\u00de\b2\u0014\udb36\udf0b+\u00ea\u00fer"}, "\u0019\ud890\udf7b(\u001b\ud9b2\ude28\u00c2"], "Y": {"\u0090": [null]}, "k\uda26\udc90\u00af\u00afi": {"0": true, "\u0017\ud873\udcdcq": 4.972834163689542e+16, "s\u00a2\ud843\udd3a\u00d8u": -9007199254740992.0}, "chapter_id": "9404cf44-2d49-4ff0-9bdc-fe97a31d057c", "text": "\u00a9J\u00bb=a\udb2e\udc68]\u00ed(\uda27\udc4fN\u00e8\udaea\udc70\u00f1\u0017\u00db\ud807\uded5\u0000\u0091H"}' http://127.0.0.1:8000/api/arena/questions
+
+    st replay kNrtS9
+
+22. Test Case ID: ujLYdL
+
+- ST101 Server error
+
+- ST103 Undocumented status code
+
+    Received: 500
+    Documented: 201, 422
+
+[500] Internal Server Error:
+
+    `Internal Server Error`
+
+Reproduce with:
+
+    curl -X GET -H 'X-Dev-User: schema_fuzz' 'http://127.0.0.1:8000/api/wisdom?world_id=0af3b9ff-29a5-4a8d-af3c-dd604bdf6e3e&course_id=46d208e1-8b1a-45bb-a518-0d9a1efd58d9'
+    curl -X GET -H 'X-Dev-User: schema_fuzz' -H 'Cookie: [Filtered]' http://127.0.0.1:8000/api/courses/21277f42-1f55-4a7b-8592-84bfa0978a55
+    curl -X POST -H 'X-Dev-User: schema_fuzz' -H 'x-ui-language: null' -H 'Content-Type: application/json' -d '{"": {}, "\u00e4\u61b6\u00bf;": [[-4.658839939440298e+143], [-4.753664668927091e+16]], "A\u00f4\ud987\udf00\udba7\udfc8X": [{}], "F\u0003\u000e": [[]], "\u00b1[<\ud93d\udfda": [], "chapters": ["\u00a6\u00c9\u00d1[6\ue052\uda56\ude83\uda03\udf3eS", "\u0000\ud8ed\udea9\u0092\u00c2\ud9d1\udc30"], "name": "*\u00d8(\u00fd`\u0097"}' http://127.0.0.1:8000/api/worlds/7f7c72a9-1012-40da-8881-cae451f96281/courses
+
+    st replay ujLYdL
+
+=================================== WARNINGS ===================================
+
+Authentication failed: 1 operation returned only 401/403 responses
+
+401 Unauthorized (1 operation):
+  - POST /api/auth/login
+
+💡 Ensure valid authentication credentials are set via `--auth` or `-H`
+
+=================================== SUMMARY ====================================
+
+API Operations:
+  Selected: 67/69
+  Tested: 67
+
+Test Phases:
+  ⏭  Examples
+  ❌ Coverage
+  ❌ Fuzzing
+  ❌ Stateful
+
+Failures:
+  ❌ ST101 Server error: 3
+  ❌ ST108 Response violates schema: 2
+  ❌ ST205 Allow header mismatch: 5
+  ❌ ST202 Schema-valid request rejected: 15
+  ❌ ST201 Schema-violating request accepted: 1
+  ❌ ST103 Undocumented status code: 66
+  ❌ ST204 Wrong response to undeclared method: 1
+
+For more information, run `st explain <code>` for ST101, ST103, ST108, ST201, ST202, ST204, ST205.
+
+Warnings:
+  ⚠️ Authentication failed: 1 operation returned only 401/403 responses
+
+Test cases:
+  1999 generated, 88 found 93 unique failures
+
+Seed: 107385938408271782607177458382052575450
+
+======================= 93 failures, 1 warning in 76.56s =======================

@@ -1,0 +1,358 @@
+[
+ {
+  "scenario": "quota",
+  "fault": {
+   "p_quota": 1.0,
+   "quota_delay_s": 5.0
+  },
+  "final": {
+   "status": "done",
+   "quick_mode": false,
+   "error": null
+  },
+  "states": [
+   {
+    "status": "queued",
+    "stage": "scoring_answer",
+    "queue_position": 1,
+    "eta_s": 6,
+    "waiting_reason": "quota",
+    "quick_mode": false,
+    "error": null
+   },
+   {
+    "status": "queued",
+    "stage": "scoring_answer",
+    "queue_position": 1,
+    "eta_s": 4,
+    "waiting_reason": "quota",
+    "quick_mode": false,
+    "error": null
+   },
+   {
+    "status": "queued",
+    "stage": "scoring_answer",
+    "queue_position": 1,
+    "eta_s": 3,
+    "waiting_reason": "quota",
+    "quick_mode": false,
+    "error": null
+   },
+   {
+    "status": "queued",
+    "stage": "scoring_answer",
+    "queue_position": 1,
+    "eta_s": 2,
+    "waiting_reason": "quota",
+    "quick_mode": false,
+    "error": null
+   },
+   {
+    "status": "running",
+    "stage": "scoring_answer",
+    "queue_position": null,
+    "eta_s": null,
+    "waiting_reason": null,
+    "quick_mode": false,
+    "error": null
+   },
+   {
+    "status": "done",
+    "stage": "scoring_answer",
+    "queue_position": null,
+    "eta_s": null,
+    "waiting_reason": null,
+    "quick_mode": false,
+    "error": null
+   }
+  ],
+  "coins": [
+   70,
+   62
+  ],
+  "ui_text_end": "Teach-Back Arena\nPeer room\nSolo mode\nLeave arena",
+  "console_errors": []
+ },
+ {
+  "scenario": "mid503",
+  "fault": {
+   "p_503_mid": 1.0,
+   "p_quota": 0.0
+  },
+  "final": {
+   "status": "done",
+   "quick_mode": true,
+   "error": null
+  },
+  "states": [
+   {
+    "status": "running",
+    "stage": "writing_notes",
+    "queue_position": null,
+    "eta_s": null,
+    "waiting_reason": null,
+    "quick_mode": false,
+    "error": null
+   },
+   {
+    "status": "running",
+    "stage": "making_flashcards",
+    "queue_position": null,
+    "eta_s": null,
+    "waiting_reason": null,
+    "quick_mode": false,
+    "error": null
+   },
+   {
+    "status": "running",
+    "stage": "drawing_map",
+    "queue_position": null,
+    "eta_s": null,
+    "waiting_reason": null,
+    "quick_mode": false,
+    "error": null
+   },
+   {
+    "status": "done",
+    "stage": "drawing_map",
+    "queue_position": null,
+    "eta_s": null,
+    "waiting_reason": null,
+    "quick_mode": true,
+    "error": null
+   }
+  ],
+  "coins": [
+   70,
+   55
+  ],
+  "ui_text_end": "Study Studio\n\nCalculus I · Intermediate\n\nBack to island\nRevision notes\nFlashcards\nMind map",
+  "console_errors": []
+ },
+ {
+  "scenario": "ceiling400",
+  "fault": {
+   "max_tokens_ceiling": 200,
+   "p_503_mid": 0.0
+  },
+  "final": {
+   "status": "done",
+   "quick_mode": false,
+   "error": null
+  },
+  "states": [
+   {
+    "status": "running",
+    "stage": "thinking",
+    "queue_position": null,
+    "eta_s": null,
+    "waiting_reason": null,
+    "quick_mode": false,
+    "error": null
+   },
+   {
+    "status": "done",
+    "stage": "thinking",
+    "queue_position": null,
+    "eta_s": null,
+    "waiting_reason": null,
+    "quick_mode": false,
+    "error": null
+   }
+  ],
+  "coins": [
+   70,
+   62
+  ],
+  "ui_text_end": "Socratic Tutor\n\nCalculus I · Limits and derivatives\n\nEnd session\n\nLet's work on section together. What do you already know about it?\n\nWhy is 0/0 not equal to 1?\n\nGood start. What happens if you try the first step on a small example?\n\nGive me a hint (0/3)\nExplain it another way\nType your thinking, even if you're not sure…\nI'm stuck\nSend\n\nSESSION GOAL\n\nUnderstand section in your own words\n\nHints used\n0 of 3\n\nIdeas you've found\n\nWhat section means\nWhy the first step matters\nHow to check the result\n\nThe tutor asks questions instead of giving answers. Tap \"I'm stuck\" any time for a smaller step.",
+  "console_errors": []
+ },
+ {
+  "scenario": "badjson",
+  "fault": {
+   "p_bad_json": 1.0,
+   "p_503_mid": 0.0
+  },
+  "final": {
+   "status": "done",
+   "quick_mode": false,
+   "error": null
+  },
+  "states": [
+   {
+    "status": "done",
+    "stage": "scoring_answer",
+    "queue_position": null,
+    "eta_s": null,
+    "waiting_reason": null,
+    "quick_mode": false,
+    "error": null
+   }
+  ],
+  "coins": [
+   70,
+   62
+  ],
+  "ui_text_end": "Teach-Back Arena\nPeer room\nSolo mode\nLeave arena",
+  "console_errors": []
+ },
+ {
+  "scenario": "blocked401",
+  "fault": {
+   "blocked": true
+  },
+  "final": {
+   "status": "failed",
+   "quick_mode": false,
+   "error": "errors.offline"
+  },
+  "states": [
+   {
+    "status": "failed",
+    "stage": "writing_notes",
+    "queue_position": null,
+    "eta_s": null,
+    "waiting_reason": null,
+    "quick_mode": false,
+    "error": "errors.offline"
+   }
+  ],
+  "coins": [
+   70,
+   70
+  ],
+  "ui_text_end": "Study Studio\n\nCalculus I · Intermediate\n\nBack to island\nRevision notes\nFlashcards\nMind map",
+  "console_errors": []
+ },
+ {
+  "scenario": "timeout",
+  "fault": {
+   "latency_mid_ms": [
+    100000,
+    100000
+   ],
+   "p_503_mid": 0.0
+  },
+  "final": {
+   "status": "running",
+   "quick_mode": false,
+   "error": null
+  },
+  "states": [
+   {
+    "status": "running",
+    "stage": "writing_notes",
+    "queue_position": null,
+    "eta_s": null,
+    "waiting_reason": null,
+    "quick_mode": false,
+    "error": null
+   },
+   {
+    "status": "queued",
+    "stage": "writing_notes",
+    "queue_position": 1,
+    "eta_s": 11,
+    "waiting_reason": "transient",
+    "quick_mode": false,
+    "error": null
+   },
+   {
+    "status": "queued",
+    "stage": "writing_notes",
+    "queue_position": 1,
+    "eta_s": 10,
+    "waiting_reason": "transient",
+    "quick_mode": false,
+    "error": null
+   },
+   {
+    "status": "queued",
+    "stage": "writing_notes",
+    "queue_position": 1,
+    "eta_s": 9,
+    "waiting_reason": "transient",
+    "quick_mode": false,
+    "error": null
+   },
+   {
+    "status": "queued",
+    "stage": "writing_notes",
+    "queue_position": 1,
+    "eta_s": 8,
+    "waiting_reason": "transient",
+    "quick_mode": false,
+    "error": null
+   },
+   {
+    "status": "queued",
+    "stage": "writing_notes",
+    "queue_position": 1,
+    "eta_s": 7,
+    "waiting_reason": "transient",
+    "quick_mode": false,
+    "error": null
+   },
+   {
+    "status": "queued",
+    "stage": "writing_notes",
+    "queue_position": 1,
+    "eta_s": 6,
+    "waiting_reason": "transient",
+    "quick_mode": false,
+    "error": null
+   },
+   {
+    "status": "queued",
+    "stage": "writing_notes",
+    "queue_position": 1,
+    "eta_s": 5,
+    "waiting_reason": "transient",
+    "quick_mode": false,
+    "error": null
+   },
+   {
+    "status": "queued",
+    "stage": "writing_notes",
+    "queue_position": 1,
+    "eta_s": 4,
+    "waiting_reason": "transient",
+    "quick_mode": false,
+    "error": null
+   },
+   {
+    "status": "queued",
+    "stage": "writing_notes",
+    "queue_position": 1,
+    "eta_s": 3,
+    "waiting_reason": "transient",
+    "quick_mode": false,
+    "error": null
+   },
+   {
+    "status": "queued",
+    "stage": "writing_notes",
+    "queue_position": 1,
+    "eta_s": 1,
+    "waiting_reason": "transient",
+    "quick_mode": false,
+    "error": null
+   },
+   {
+    "status": "running",
+    "stage": "writing_notes",
+    "queue_position": null,
+    "eta_s": null,
+    "waiting_reason": null,
+    "quick_mode": false,
+    "error": null
+   }
+  ],
+  "coins": [
+   70,
+   55
+  ],
+  "ui_text_end": "Study Studio\n\nCalculus I · Intermediate\n\nBack to island\nRevision notes\nFlashcards\nMind map",
+  "console_errors": []
+ }
+]

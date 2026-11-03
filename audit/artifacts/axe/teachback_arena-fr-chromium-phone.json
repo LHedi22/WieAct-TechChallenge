@@ -1,0 +1,17 @@
+{
+ "screen": "teachback_arena",
+ "lang": "fr",
+ "project": "chromium-phone",
+ "violations": [
+  {
+   "id": "color-contrast",
+   "impact": "serious",
+   "nodes": 2,
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "targets": [
+    ".self-start",
+    ".py-0\\.5"
+   ]
+  }
+ ]
+}

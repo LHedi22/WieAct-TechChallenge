@@ -1,0 +1,32 @@
+[
+ {
+  "building": "quiz_hall",
+  "url": "/worlds/e5a214c8-bb89-4818-9421-9f18bcc221b6/courses/030efc30-8dfc-443d-8a52-06bb81dfad04/quiz/94ff6cea-0fa0-46ca-b08d-fe51009a59a1",
+  "chars_before": 223,
+  "chars_after_reload": 223
+ },
+ {
+  "building": "socratic_tutor",
+  "url": "/worlds/e5a214c8-bb89-4818-9421-9f18bcc221b6/courses/030efc30-8dfc-443d-8a52-06bb81dfad04/tutor/8114ba8a-d38f-4ef7-a162-665c9fd3297a",
+  "chars_before": 171,
+  "chars_after_reload": 171
+ },
+ {
+  "building": "study_studio",
+  "url": "/worlds/e5a214c8-bb89-4818-9421-9f18bcc221b6/courses/030efc30-8dfc-443d-8a52-06bb81dfad04/studio?chapter=8d5e34ee-c4ce-47f7-b44f-5b98633f66e8&level=beginner",
+  "chars_before": 538,
+  "chars_after_reload": 536
+ },
+ {
+  "building": "audio_studio",
+  "url": "/worlds/e5a214c8-bb89-4818-9421-9f18bcc221b6/courses/030efc30-8dfc-443d-8a52-06bb81dfad04/audio?chapter=8d5e34ee-c4ce-47f7-b44f-5b98633f66e8&level=beginner",
+  "chars_before": 562,
+  "chars_after_reload": 560
+ },
+ {
+  "building": "teachback_arena",
+  "url": "/worlds/e5a214c8-bb89-4818-9421-9f18bcc221b6/courses/030efc30-8dfc-443d-8a52-06bb81dfad04/arena?chapter=8d5e34ee-c4ce-47f7-b44f-5b98633f66e8&level=beginner",
+  "chars_before": 568,
+  "chars_after_reload": 568
+ }
+]

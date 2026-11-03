@@ -1,0 +1,16 @@
+{
+ "screen": "today",
+ "lang": "ar-TN",
+ "project": "chromium-desktop",
+ "violations": [
+  {
+   "id": "color-contrast",
+   "impact": "serious",
+   "nodes": 1,
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "targets": [
+    ".gap-1"
+   ]
+  }
+ ]
+}

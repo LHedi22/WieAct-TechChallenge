@@ -1,0 +1,159 @@
+{
+ "world_id": "7c6d7137-c957-4b82-ba7a-a85b6cc9f05f",
+ "name": "Upload lab a90ff <img src=x onerror=\"window.__xss=1\">",
+ "join_code": "PEARL-3VW",
+ "percent": 64,
+ "eta_s": 167,
+ "done": false,
+ "chapters": [
+  {
+   "chapter_id": "924fa5d2-a7c7-4961-9f47-2cc52677a684",
+   "course_id": "b38f8c03-335d-4983-9900-1b82706c84ff",
+   "course_name": "Course <img src=x onerror=\"window.__xss=1\">",
+   "idx": 1,
+   "title": "Chapter <img src=x onerror=\"window.__xss=1\">",
+   "state": "in_progress",
+   "documents": [
+    {
+     "id": "73c97134-ec9d-4675-bfcc-4cce5117365f",
+     "chapter_id": "924fa5d2-a7c7-4961-9f47-2cc52677a684",
+     "filename": "passwd.txt",
+     "kind": "txt",
+     "size": 920,
+     "status": "ready",
+     "progress": 100,
+     "detail": null,
+     "page_count": 1,
+     "error": null,
+     "created_at": "2026-11-03T08:32:34.756363Z"
+    },
+    {
+     "id": "914b6f17-f1f7-426c-a44d-3b30b41fb371",
+     "chapter_id": "924fa5d2-a7c7-4961-9f47-2cc52677a684",
+     "filename": "دروس_النهايات.txt",
+     "kind": "txt",
+     "size": 2970,
+     "status": "ready",
+     "progress": 100,
+     "detail": null,
+     "page_count": 1,
+     "error": null,
+     "created_at": "2026-11-03T08:32:34.826723Z"
+    },
+    {
+     "id": "3fca4ca4-b346-448d-9f71-fcbaf80d5c30",
+     "chapter_id": "924fa5d2-a7c7-4961-9f47-2cc52677a684",
+     "filename": "corrupt.pdf",
+     "kind": "pdf",
+     "size": 2409,
+     "status": "failed",
+     "progress": 0,
+     "detail": null,
+     "page_count": null,
+     "error": "errors.document_unreadable",
+     "created_at": "2026-11-03T08:32:34.882588Z"
+    },
+    {
+     "id": "6520ce81-809f-495d-be78-d87f1e311d99",
+     "chapter_id": "924fa5d2-a7c7-4961-9f47-2cc52677a684",
+     "filename": "protected.pdf",
+     "kind": "pdf",
+     "size": 1827,
+     "status": "failed",
+     "progress": 0,
+     "detail": null,
+     "page_count": null,
+     "error": "errors.indexing_failed",
+     "created_at": "2026-11-03T08:32:34.949025Z"
+    },
+    {
+     "id": "8e013471-510a-42e7-b332-c95ca3ea61a2",
+     "chapter_id": "924fa5d2-a7c7-4961-9f47-2cc52677a684",
+     "filename": "fake.pdf",
+     "kind": "pdf",
+     "size": 1650,
+     "status": "failed",
+     "progress": 0,
+     "detail": null,
+     "page_count": null,
+     "error": "errors.document_unreadable",
+     "created_at": "2026-11-03T08:32:35.005799Z"
+    },
+    {
+     "id": "ec57999a-c46b-442c-a93e-13f50c3185de",
+     "chapter_id": "924fa5d2-a7c7-4961-9f47-2cc52677a684",
+     "filename": "name<img src=x onerror=\"window.__xss=1\">.txt",
+     "kind": "txt",
+     "size": 920,
+     "status": "tagging",
+     "progress": 40,
+     "detail": {
+      "n": 1,
+      "of": 1,
+      "key": "part"
+     },
+     "page_count": 1,
+     "error": null,
+     "created_at": "2026-11-03T08:32:35.061486Z"
+    },
+    {
+     "id": "4626a48f-2781-4252-a850-c4a37e000c2b",
+     "chapter_id": "924fa5d2-a7c7-4961-9f47-2cc52677a684",
+     "filename": "bomb.docx",
+     "kind": "docx",
+     "size": 477228,
+     "status": "parsing",
+     "progress": 40,
+     "detail": {
+      "n": 1,
+      "of": 1,
+      "key": "section"
+     },
+     "page_count": 1,
+     "error": null,
+     "created_at": "2026-11-03T08:32:35.132693Z"
+    },
+    {
+     "id": "02862abe-10a7-4e40-bc91-ffffe793ff6d",
+     "chapter_id": "924fa5d2-a7c7-4961-9f47-2cc52677a684",
+     "filename": "dup.txt",
+     "kind": "txt",
+     "size": 1240,
+     "status": "uploaded",
+     "progress": 0,
+     "detail": null,
+     "page_count": null,
+     "error": null,
+     "created_at": "2026-11-03T08:32:37.437321Z"
+    }
+   ]
+  },
+  {
+   "chapter_id": "c1ef1178-d1e4-4d4a-bac5-00568c886a1c",
+   "course_id": "b38f8c03-335d-4983-9900-1b82706c84ff",
+   "course_name": "Course <img src=x onerror=\"window.__xss=1\">",
+   "idx": 2,
+   "title": "Big files",
+   "state": "waiting",
+   "documents": [
+    {
+     "id": "eae4ce60-50a8-490b-abaa-8b4ec120c953",
+     "chapter_id": "c1ef1178-d1e4-4d4a-bac5-00568c886a1c",
+     "filename": "long500.pdf",
+     "kind": "pdf",
+     "size": 213575,
+     "status": "uploaded",
+     "progress": 0,
+     "detail": null,
+     "page_count": null,
+     "error": null,
+     "created_at": "2026-11-03T08:32:35.189570Z"
+    }
+   ]
+  }
+ ],
+ "quizzes": {
+  "state": "waiting",
+  "ready": 0
+ }
+}
