@@ -58,7 +58,7 @@ def _set_cookie(response: Response, user: User) -> None:
         sign_session(user.id),
         max_age=SESSION_MAX_AGE_S,
         httponly=True,
-        secure=s.SESSION_COOKIE_SECURE,
+        secure=s.session_cookie_secure,
         samesite=s.SESSION_COOKIE_SAMESITE,
         path="/",
     )
@@ -114,7 +114,7 @@ async def login(body: LoginIn, response: Response, s: Session) -> Me:
 async def logout(response: Response) -> Response:
     s = get_settings()
     response.delete_cookie(
-        COOKIE_NAME, path="/", secure=s.SESSION_COOKIE_SECURE, samesite=s.SESSION_COOKIE_SAMESITE
+        COOKIE_NAME, path="/", secure=s.session_cookie_secure, samesite=s.SESSION_COOKIE_SAMESITE
     )
     response.status_code = 204
     return response

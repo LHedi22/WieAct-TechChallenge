@@ -58,7 +58,8 @@ the key). The app creates the collection
    | `OFFLINE_DEMO_MODE` | `auto` |
 
    Leave `SESSION_COOKIE_SAMESITE=lax` and `CORS_ORIGINS` at their defaults: the browser only
-   ever talks to the Vercel domain.
+   ever talks to the Vercel domain. Leave `SESSION_COOKIE_SECURE` unset (or `auto`): the cookie is
+   then `Secure` because `APP_ENV=production`; never set it to `false` on Railway.
 5. **Settings → Networking → Generate domain.** Check `https://<domain>/api/health` →
    `"status": "ok"`, `"app_env": "production"`. Outside our slot, `/api/system/status` shows
    `"offline_demo_mode": true`, which is expected.

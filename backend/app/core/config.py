@@ -11,7 +11,14 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, PrivateAttr, SecretStr, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    PrivateAttr,
+    SecretStr,
+    field_validator,
+    model_validator,
+)
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -98,7 +105,8 @@ class Settings(BaseSettings):
     SECRET_KEY: SecretStr = SecretStr("change-me-in-.env")
     # Session cookie: lax for same-site dev; a cross-site deploy needs none + secure
     SESSION_COOKIE_SAMESITE: Literal["lax", "strict", "none"] = "lax"
-    SESSION_COOKIE_SECURE: bool = False
+    # Empty or "auto" = Secure whenever APP_ENV=production (audit F-SEC-1), plain in development
+    SESSION_COOKIE_SECURE: bool | None = None
     APP_TIMEZONE: str = "Africa/Tunis"
     CORS_ORIGINS: str = "http://localhost:5173"
     OFFLINE_DEMO_MODE: Literal["auto", "on", "off"] = "auto"
@@ -117,6 +125,17 @@ class Settings(BaseSettings):
     ADMIN_TOKEN: SecretStr = SecretStr("")
 
     _llm: LLMProfile = PrivateAttr()
+
+    @field_validator("SESSION_COOKIE_SECURE", mode="before")
+    @classmethod
+    def _auto_secure(cls, v: object) -> object:
+        return None if isinstance(v, str) and v.strip().lower() in ("", "auto") else v
+
+    @property
+    def session_cookie_secure(self) -> bool:
+        if self.SESSION_COOKIE_SECURE is None:
+            return self.APP_ENV == "production"
+        return self.SESSION_COOKIE_SECURE
 
     @model_validator(mode="after")
     def _check_and_resolve(self) -> Settings:
