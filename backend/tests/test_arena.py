@@ -7,6 +7,7 @@ from sqlalchemy import func, select
 
 import app.gateway as gateway_module
 from app.core import economy
+from app.core.config import get_settings
 from app.features.arena.service import CRITERIA, Grade, needs_review, parse_grade
 from app.gateway import Defer, Result, TaskKind
 from app.jobs.worker import Worker
@@ -28,10 +29,11 @@ def levels_for(score):
     return out
 
 
-def g(score, confidence="high", flag="ok"):
+def g(score, confidence="high", flag="ok", evidence="A stack keeps"):
+    """A scripted grade reply; every level's evidence must be in the answer (audit N-1)."""
     return {
         "flag": flag,
-        "criteria": levels_for(score),
+        "criteria": {k: {**v, "evidence": evidence} for k, v in levels_for(score).items()},
         "confidence": confidence,
         "errors": [{"quote": "A stack keeps", "fix": "Say which end."}] if score < 85 else [],
         "good": "You linked undo to the order of actions.",
@@ -85,10 +87,11 @@ async def wallet(api, who):  # noqa: F811
 
 
 # --- units ---------------------------------------------------------------------------------------
-def test_review_only_when_unsure_or_near_the_threshold():
+def test_review_when_unsure_high_or_near_the_threshold():
     t, band = economy.PEER_ANSWER_THRESHOLD, economy.TEACHBACK_REVIEW_BAND
-    assert not needs_review(Grade(score=95, confidence="high"), peer=True)
-    assert not needs_review(Grade(score=t - band - 1, confidence="medium"), peer=True)
+    high = get_settings().TEACHBACK_REVIEW_HIGH_SCORE
+    assert needs_review(Grade(score=high, confidence="high"), peer=False)  # audit N-1
+    assert not needs_review(Grade(score=t - band - 10, confidence="medium"), peer=True)
     assert needs_review(Grade(score=t + band, confidence="high"), peer=True)
     assert needs_review(Grade(score=20, confidence="low"), peer=True)
     assert not needs_review(Grade(score=t, confidence="high"), peer=False)  # solo: no coins
@@ -113,11 +116,12 @@ async def test_ask_answer_pin_and_rewards(api, sm, pptx, grades):  # noqa: F811
     (item,) = feed.json()["questions"]
     assert item["status"] == "open" and item["author"]["nickname"] == "NightOwl7"
 
-    grades["compact"].append(g(90))  # confident and far from 70: no mid review
+    grades["compact"].append(g(90))
+    grades["mid"].append(g(90))  # a high draft pays only after mid confirms it (audit N-1)
     d = await send(api, sm, qid)
     mine = d["my_answer"]
     assert mine["status"] == "graded" and mine["score"] == 90 and mine["feedback"]["good"]
-    assert grades["calls"] == ["compact"]
+    assert grades["calls"] == ["compact", "mid"]
     w = await wallet(api, SEA)
     assert w["earned"] == economy.EARN["peer_answer_good"]
     assert w["points"] == economy.POINTS["peer_answer_good"]
@@ -136,6 +140,7 @@ async def test_ask_answer_pin_and_rewards(api, sm, pptx, grades):  # noqa: F811
 
     # improving the answer grades it again but never pays twice
     grades["compact"].append(g(100))
+    grades["mid"].append(g(100))
     d = await send(api, sm, qid, GOOD + " Like a pile of plates.")
     assert d["my_answer"]["score"] == 100 and d["my_answer"]["pinned"]
     assert (await wallet(api, SEA))["earned"] == economy.EARN["peer_answer_good"]
@@ -150,15 +155,17 @@ async def test_mid_reviews_the_draft_near_the_threshold(api, sm, pptx, grades): 
     assert (await wallet(api, SEA))["earned"] == 0
 
 
-async def test_mid_busy_keeps_the_draft_in_quick_mode(api, sm, pptx, grades):  # noqa: F811
+async def test_mid_busy_keeps_it_pending(api, sm, pptx, grades, monkeypatch):  # noqa: F811
+    """Audit N-1: the compact draft no longer stands when mid can't review it."""
+    monkeypatch.setattr("app.features.arena.service.REVIEW_RETRY_S", 3600)
     _, qid = await room(api, sm, pptx)
     grades["compact"].append(g(70, "medium"))
     grades["mid"].append(Defer(3, "saturated"))
     d = await send(api, sm, qid)
     mine = d["my_answer"]
-    assert mine["score"] == 70 and mine["feedback"]["quick_mode"] is True
+    assert mine["status"] == "pending_review" and mine["score"] is None
     assert grades["calls"] == ["compact", "mid"]  # no compact fallback call on top
-    assert (await wallet(api, SEA))["earned"] == economy.EARN["peer_answer_good"]
+    assert (await wallet(api, SEA))["earned"] == 0
 
 
 async def test_abusive_answer_is_hidden_and_unrewarded(api, sm, pptx, grades):  # noqa: F811
@@ -193,7 +200,7 @@ async def test_permissions_and_helpful_votes(api, sm, pptx, grades):  # noqa: F8
     _, qid = await room(api, sm, pptx)
     own = await api.post(f"/api/arena/questions/{qid}/answers", json={"text": GOOD}, headers=OWL_FR)
     assert own.status_code == 403 and own.json()["detail"] == "errors.arena_own_question"
-    grades["compact"].append(g(90))
+    grades["compact"].append(g(50))  # below the review band: no mid call
     d = await send(api, sm, qid)
     aid = d["my_answer"]["id"]
     assert (await api.post(f"/api/arena/answers/{aid}/helpful", headers=SEA)).status_code == 403
@@ -254,6 +261,7 @@ async def test_full_path_on_the_mock_one_compact_call(api, sm, pptx):  # noqa: F
 SAND_AR = {"X-Dev-User": "SandFox", "X-UI-Language": "ar"}
 DUNE_TN = {"X-Dev-User": "DuneCat", "X-UI-Language": "ar-TN"}
 AR_TEXT = "المكدس يحتفظ بآخر عملية في الأعلى، لذلك التراجع يحذفها أولاً: آخر من يدخل أول من يخرج."
+AR_EVIDENCE = "المكدس يحتفظ"
 
 
 async def arabic_room(api, sm, pptx, who):  # noqa: F811
@@ -271,7 +279,7 @@ async def arabic_room(api, sm, pptx, who):  # noqa: F811
 @pytest.mark.parametrize("who", [SAND_AR, DUNE_TN], ids=["ar", "ar-TN"])
 async def test_arabic_and_darija_are_graded_by_mid_directly(api, sm, pptx, grades, who):  # noqa: F811
     _, qid = await arabic_room(api, sm, pptx, who)
-    grades["mid"].append(g(90))
+    grades["mid"].append(g(90, evidence=AR_EVIDENCE))
     d = await send(api, sm, qid, AR_TEXT, who=who)
     assert grades["calls"] == ["mid"]  # no compact draft first
     assert d["my_answer"]["status"] == "graded" and d["my_answer"]["score"] == 90
@@ -280,7 +288,7 @@ async def test_arabic_and_darija_are_graded_by_mid_directly(api, sm, pptx, grade
 
 async def test_low_confidence_answer_waits_for_review_without_rewards(api, sm, pptx, grades):  # noqa: F811
     _, qid = await arabic_room(api, sm, pptx, SAND_AR)
-    grades["mid"].append(g(90, "low"))
+    grades["mid"].append(g(90, "low", evidence=AR_EVIDENCE))
     d = await send(api, sm, qid, AR_TEXT, who=SAND_AR)
     mine = d["my_answer"]
     assert mine["status"] == "pending_review" and mine["score"] is None
@@ -306,7 +314,7 @@ async def test_english_low_confidence_after_review_also_waits(api, sm, pptx, gra
 async def test_solo_low_confidence_pays_no_points(api, sm, pptx, grades):  # noqa: F811
     world, chapter = await indexed(api, sm, pptx)
     await join(api, world, SAND_AR)
-    grades["mid"].append(g(90, "low"))
+    grades["mid"].append(g(90, "low", evidence=AR_EVIDENCE))
     r = await api.post(
         "/api/arena/solo",
         json={"chapter_id": chapter, "concept": "stacks", "text": AR_TEXT},

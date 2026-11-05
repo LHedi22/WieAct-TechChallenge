@@ -357,6 +357,7 @@ def _teachback(user: str, lang: str, system: str = "") -> dict[str, Any]:
     the real prompt (audit N-2) it writes no total score: the backend adds the levels up."""
     sec = _sections(user)
     answer = sec.get("STUDENT EXPLANATION", "")
+    answer = answer.replace("<<<STUDENT_TEXT", "").replace("STUDENT_TEXT>>>", "").strip()
     excerpts = sec.get("COURSE EXCERPTS", "")
     if ABUSE.search(answer):
         return {"flag": "abusive", "criteria": {}, "confidence": "high", "errors": [], "good": "",

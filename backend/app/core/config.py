@@ -14,6 +14,7 @@ from typing import Literal
 from pydantic import (
     BaseModel,
     ConfigDict,
+    Field,
     PrivateAttr,
     SecretStr,
     field_validator,
@@ -85,6 +86,12 @@ class Settings(BaseSettings):
     LLM_TIMEOUT_S: float = 90
     # Interactive mid calls (a student is waiting): shorter budget, then compact (audit F-RES-2)
     LLM_INTERACTIVE_MID_TIMEOUT_S: float = 45
+    # Teach-Back review routing (audit N-1): a compact draft at or above this score is checked by
+    # mid before anything is awarded; mid reviews per Tunis day are capped for everyone and per
+    # student (beyond the cap, attempts stay pending until the next day's budget).
+    TEACHBACK_REVIEW_HIGH_SCORE: int = Field(80, ge=10, le=100)
+    TEACHBACK_REVIEW_DAILY_CAP: int = Field(150, ge=0)
+    TEACHBACK_REVIEW_USER_DAILY_CAP: int = Field(6, ge=0)
     LLM_MAX_RPM: int = 18
     LLM_MAX_CONCURRENCY: int = 2
     # Embeddings are metered separately (own quota); they share the per-key concurrency limit

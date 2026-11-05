@@ -982,9 +982,9 @@
     },
     "retry": "Réessayer",
     "pending": {
-      "title": "En attente de vérification",
-      "body": "L'IA n'était pas sûre de la note de cette réponse : aucune pièce ni aucun point n'est attribué automatiquement, et la classe ne la voit pas encore. Tu peux l'améliorer pour qu'elle soit notée à nouveau.",
-      "solo": "L'IA n'était pas sûre de la note de cette explication : aucun point n'est attribué automatiquement. Réessaie avec un peu plus de détails."
+      "title": "Vérification en cours",
+      "body": "Cette note est vérifiée par le plus grand modèle d'IA. Aucune pièce ni aucun point n'est attribué avant la fin de la vérification, et la classe ne voit pas encore la réponse. Tu peux toujours l'améliorer.",
+      "solo": "Cette note est vérifiée par le plus grand modèle d'IA. Les points arrivent une fois la vérification terminée ; rien à faire de ton côté."
     }
   },
   "daily": {

@@ -982,9 +982,9 @@
     },
     "retry": "Try again",
     "pending": {
-      "title": "Waiting for a check",
-      "body": "The AI wasn't sure how to grade this answer, so no coins or points are given automatically and classmates don't see it yet. You can improve it and it will be graded again.",
-      "solo": "The AI wasn't sure how to grade this explanation, so no points are given automatically. Try again with a bit more detail."
+      "title": "Being double-checked",
+      "body": "This grade is being double-checked by the larger AI model. No coins or points are given until the check is done, and classmates don't see the answer yet. You can still improve it.",
+      "solo": "This grade is being double-checked by the larger AI model. Your points arrive once the check is done; you don't need to do anything."
     }
   },
   "daily": {

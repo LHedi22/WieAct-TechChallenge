@@ -3,6 +3,7 @@
     uv run python -m app.evals quiz --langs en,fr,ar --n 20        # mock / local / cloud (in slot)
     uv run python -m app.evals quiz --world OLIVE-7Q2 --fresh      # bypass the cache
     uv run python -m app.evals slot [--cloud]                      # every feature, 4 languages
+    uv run python -m app.evals teachback [--langs …] [--cloud]     # Teach-Back graded set (N-1/N-2)
 
 `slot` is documented in app/evals/slot.py.
 
@@ -164,7 +165,7 @@ async def quiz_eval(langs: list[str], n: int, world_code: str, fresh: bool, out:
 def main(argv: list[str] | None = None) -> int:
     sys.stdout.reconfigure(errors="replace")
     p = argparse.ArgumentParser(prog="python -m app.evals")
-    p.add_argument("task", choices=["quiz", "slot"])
+    p.add_argument("task", choices=["quiz", "slot", "teachback"])
     p.add_argument("--langs", default="en,fr,ar")
     p.add_argument("--n", type=int, default=20)
     p.add_argument("--world", default="OLIVE-7Q2")
@@ -177,6 +178,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--regrade", action="store_true", help="slot: send Teach-Back answers again")
     args = p.parse_args(argv)
     langs = [x.strip() for x in args.langs.split(",") if x.strip()]
+    if args.task == "teachback":
+        from app.evals import teachback
+
+        langs = langs if "--langs" in (argv or sys.argv) else ["en", "fr", "ar", "ar-TN"]
+        return asyncio.run(teachback.run(langs, args.world, args.course, args.cloud))
     if args.task == "slot":
         from app.evals.slot import LANGS, run
 
