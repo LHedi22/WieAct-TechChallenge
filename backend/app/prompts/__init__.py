@@ -28,11 +28,17 @@ LANGUAGE_NAMES = {
 
 
 @lru_cache
-def voice_rules() -> str:
-    """Shared rules for student-facing prompts (_voice_rules.md), without its header comment."""
-    text = (DIR / "_voice_rules.md").read_text(encoding="utf-8")
+def fragment(name: str) -> str:
+    """A shared prompt fragment (prompts/_<name>.md) without its header comment. It is passed in
+    as a value, so its braces are literal."""
+    text = (DIR / f"_{name}.md").read_text(encoding="utf-8")
     body = re.sub(r"^<!--.*?-->\s*", "", text, flags=re.DOTALL)
     return "\n".join(line.strip() for line in body.strip().splitlines())
+
+
+def voice_rules() -> str:
+    """Shared rules for student-facing prompts (_voice_rules.md), without its header comment."""
+    return fragment("voice_rules")
 
 
 def voice_rules_version() -> int:
@@ -59,6 +65,7 @@ def render(name: str, **values: Any) -> tuple[str, list[dict[str, str]]]:
     if "language" in values:
         values.setdefault("language_name", LANGUAGE_NAMES.get(values["language"], "English"))
     values.setdefault("voice_rules", voice_rules())
+    values.setdefault("teachback_rubric", fragment("teachback_rubric"))
     messages = [
         {"role": role, "content": sections[role].format(**values)}
         for role in ("system", "user")

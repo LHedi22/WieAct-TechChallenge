@@ -59,13 +59,44 @@ class Fix(BaseModel):
     fix: str = ""
 
 
+# The rubric (audit N-2): the model rates each criterion with an integer level and the server adds
+# them up, 10 points per level (max 100). No score ever appears in a prompt, so nothing anchors it.
+CRITERIA: dict[str, int] = {"accuracy": 4, "coverage": 3, "reasoning": 2, "example": 1}
+POINTS_PER_LEVEL = 10
+
+
+class Criterion(BaseModel):
+    level: int = 0
+    evidence: str = ""
+
+
 class Grade(BaseModel):
     flag: Literal["ok", "off_topic", "abusive"] = "ok"
-    score: int = Field(ge=0, le=100)
+    score: int = Field(ge=0, le=100)  # always the server's total of the criteria
     confidence: Literal["high", "medium", "low"] = "medium"
     errors: list[Fix] = Field(default_factory=list, max_length=3)
     good: str = ""
     missing: list[str] = Field(default_factory=list, max_length=2)
+    criteria: dict[str, Criterion] = Field(default_factory=dict)
+
+
+def total(criteria: dict[str, Criterion]) -> int:
+    return min(100, POINTS_PER_LEVEL * sum(c.level for c in criteria.values()))
+
+
+def _criteria(raw: Any) -> dict[str, Criterion] | None:
+    if not isinstance(raw, dict):
+        return None
+    out: dict[str, Criterion] = {}
+    for name, top in CRITERIA.items():
+        item = raw.get(name)
+        item = item if isinstance(item, dict) else {"level": item}
+        try:
+            level = int(round(float(item.get("level"))))
+        except (TypeError, ValueError):
+            level = 0
+        out[name] = Criterion(level=max(0, min(top, level)), evidence=str(item.get("evidence") or ""))
+    return out
 
 
 def needs_review(g: Grade, *, peer: bool) -> bool:
@@ -84,17 +115,23 @@ def pending_review(g: Grade) -> bool:
 
 
 def parse_grade(content: Any) -> Grade | None:
-    if not isinstance(content, dict) or content.get("score") is None:
-        return None  # no score is unusable, never a silent 0
-    data = dict(content)
+    """The model's reply → a Grade whose score is the server's total of the rubric levels. Any
+    "score" the model writes is ignored; an "ok" grade without criteria is unusable (None)."""
+    if not isinstance(content, dict):
+        return None
+    data = {k: v for k, v in content.items() if k != "score"}
     try:
-        data["score"] = max(0, min(100, int(round(float(data["score"])))))
+        if data.get("flag") not in ("ok", "off_topic", "abusive"):
+            data["flag"] = "ok"
+        criteria = _criteria(data.get("criteria"))
+        if criteria is None and data["flag"] == "ok":
+            return None  # no rubric, no score: never a silent number
+        data["criteria"] = criteria or {}
+        data["score"] = total(criteria) if criteria and data["flag"] == "ok" else 0
         data["errors"] = [e for e in data.get("errors") or [] if isinstance(e, dict)][:3]
         data["missing"] = [str(m) for m in data.get("missing") or []][:2]
         if data.get("confidence") not in ("high", "medium", "low"):
             data["confidence"] = "medium"
-        if data.get("flag") not in ("ok", "off_topic", "abusive"):
-            data["flag"] = "ok"
         return Grade.model_validate(data)
     except (TypeError, ValueError, ValidationError):
         return None
@@ -297,7 +334,7 @@ async def grade(
 
     await ctx.set_stage("double_checking")
     version, messages = prompts.render(
-        "teachback_review", draft=json.dumps(draft.model_dump(), ensure_ascii=False), **values
+        "teachback_review", draft=json.dumps(draft.model_dump(exclude={"score"}), ensure_ascii=False), **values
     )
     try:
         reviewed = ctx.note(

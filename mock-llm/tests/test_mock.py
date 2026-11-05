@@ -232,7 +232,11 @@ async def test_teachback_grade_rewards_explanations_grounded_in_the_excerpts():
     good = await _reply(system, user("Undo pops the most recent action from the stack top first"))
     weak = await _reply(system, user("Undo works like a queue at the bank where everyone waits"))
     assert good["flag"] == weak["flag"] == "ok"
-    assert good["score"] > 70 > weak["score"] and weak["errors"][0]["quote"] == "Undo works like a"
+    def total(r):  # the backend's sum (no score in the reply: audit N-2)
+        return 10 * sum(c["level"] for c in r["criteria"].values())
+
+    assert "score" not in good and total(good) > total(weak)
+    assert weak["errors"][0]["quote"] == "Undo works like a"
     assert weak["good"].startswith("Tu as")  # feedback in the requested language
     assert (await _reply(system, user("idiot")))["flag"] == "abusive"
 

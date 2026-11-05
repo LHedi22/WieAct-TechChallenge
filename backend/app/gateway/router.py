@@ -30,7 +30,7 @@ ROUTES: dict[TaskKind, Route] = {
     K.DAILY_PLAN: Route("mid", "plan-once", 400),
     K.CHALLENGE_ITEMS: Route("compact", "execute-compact", 400),
     K.WISDOM_TIP: Route("mid", "generate-once", 160),
-    K.TEACHBACK_GRADE: Route("compact", "draft-then-revise", 300),
+    K.TEACHBACK_GRADE: Route("compact", "draft-then-revise", 450),
     K.MODERATE_POST: Route("compact", "classification", 40),
     K.TRANSLATE_SHORT: Route("compact", "rewriting", 200),
     K.PLACEMENT_QUIZ: Route("compact", "narrow-before-generating", 1100),

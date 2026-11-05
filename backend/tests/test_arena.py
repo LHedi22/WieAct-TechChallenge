@@ -7,7 +7,7 @@ from sqlalchemy import func, select
 
 import app.gateway as gateway_module
 from app.core import economy
-from app.features.arena.service import Grade, needs_review, parse_grade
+from app.features.arena.service import CRITERIA, Grade, needs_review, parse_grade
 from app.gateway import Defer, Result, TaskKind
 from app.jobs.worker import Worker
 from app.models import AICallLog
@@ -19,10 +19,19 @@ from tests.test_worlds_api import SEA, api, make_world, pptx  # noqa: F401  (fix
 GOOD = "A stack keeps the most recent action on top, so undo just pops it: last in, first out."
 
 
+def levels_for(score):
+    """Rubric levels (audit N-2) whose server total is `score` (a multiple of 10)."""
+    left, out = score // 10, {}
+    for name, top in CRITERIA.items():
+        out[name] = {"level": min(top, left)}
+        left -= out[name]["level"]
+    return out
+
+
 def g(score, confidence="high", flag="ok"):
     return {
         "flag": flag,
-        "score": score,
+        "criteria": levels_for(score),
         "confidence": confidence,
         "errors": [{"quote": "A stack keeps", "fix": "Say which end."}] if score < 85 else [],
         "good": "You linked undo to the order of actions.",
@@ -88,10 +97,12 @@ def test_review_only_when_unsure_or_near_the_threshold():
 
 
 def test_parse_grade_is_tolerant():
-    out = parse_grade({"score": "87.6", "confidence": "sure", "flag": "?", "errors": ["x", {}]})
-    assert (out.score, out.confidence, out.flag, len(out.errors)) == (88, "medium", "ok", 1)
-    assert parse_grade({"score": 140}).score == 100
-    assert parse_grade("not json") is None and parse_grade({"good": "no score"}) is None
+    out = parse_grade(
+        {"criteria": levels_for(90), "confidence": "sure", "flag": "?", "errors": ["x", {}]}
+    )
+    assert (out.score, out.confidence, out.flag, len(out.errors)) == (90, "medium", "ok", 1)
+    assert parse_grade({"criteria": {"accuracy": {"level": 40}}}).score == 40  # clamped to 4
+    assert parse_grade("not json") is None and parse_grade({"good": "no rubric"}) is None
 
 
 # --- peer room -----------------------------------------------------------------------------------
@@ -102,10 +113,10 @@ async def test_ask_answer_pin_and_rewards(api, sm, pptx, grades):  # noqa: F811
     (item,) = feed.json()["questions"]
     assert item["status"] == "open" and item["author"]["nickname"] == "NightOwl7"
 
-    grades["compact"].append(g(88))  # confident and far from 70: no mid review
+    grades["compact"].append(g(90))  # confident and far from 70: no mid review
     d = await send(api, sm, qid)
     mine = d["my_answer"]
-    assert mine["status"] == "graded" and mine["score"] == 88 and mine["feedback"]["good"]
+    assert mine["status"] == "graded" and mine["score"] == 90 and mine["feedback"]["good"]
     assert grades["calls"] == ["compact"]
     w = await wallet(api, SEA)
     assert w["earned"] == economy.EARN["peer_answer_good"]
@@ -114,7 +125,7 @@ async def test_ask_answer_pin_and_rewards(api, sm, pptx, grades):  # noqa: F811
     # the asker sees the answer (score, no private feedback) and pins it
     seen = (await api.get(f"/api/arena/questions/{qid}", headers=OWL_FR)).json()
     (theirs,) = seen["answers"]
-    assert theirs["score"] == 88 and theirs["feedback"] is None and seen["can_pin"]
+    assert theirs["score"] == 90 and theirs["feedback"] is None and seen["can_pin"]
     assert (
         await api.post(f"/api/arena/answers/{theirs['id']}/pin", headers=OWL_FR)
     ).status_code == 204
@@ -124,28 +135,28 @@ async def test_ask_answer_pin_and_rewards(api, sm, pptx, grades):  # noqa: F811
     assert (await wallet(api, SEA))["points"] == expected
 
     # improving the answer grades it again but never pays twice
-    grades["compact"].append(g(95))
+    grades["compact"].append(g(100))
     d = await send(api, sm, qid, GOOD + " Like a pile of plates.")
-    assert d["my_answer"]["score"] == 95 and d["my_answer"]["pinned"]
+    assert d["my_answer"]["score"] == 100 and d["my_answer"]["pinned"]
     assert (await wallet(api, SEA))["earned"] == economy.EARN["peer_answer_good"]
 
 
 async def test_mid_reviews_the_draft_near_the_threshold(api, sm, pptx, grades):  # noqa: F811
     _, qid = await room(api, sm, pptx)
-    grades["compact"].append(g(72, "medium"))
-    grades["mid"].append(g(64))  # the review lowers it below 70: no reward
+    grades["compact"].append(g(70, "medium"))
+    grades["mid"].append(g(60))  # the review lowers it below 70: no reward
     d = await send(api, sm, qid)
-    assert grades["calls"] == ["compact", "mid"] and d["my_answer"]["score"] == 64
+    assert grades["calls"] == ["compact", "mid"] and d["my_answer"]["score"] == 60
     assert (await wallet(api, SEA))["earned"] == 0
 
 
 async def test_mid_busy_keeps_the_draft_in_quick_mode(api, sm, pptx, grades):  # noqa: F811
     _, qid = await room(api, sm, pptx)
-    grades["compact"].append(g(75, "medium"))
+    grades["compact"].append(g(70, "medium"))
     grades["mid"].append(Defer(3, "saturated"))
     d = await send(api, sm, qid)
     mine = d["my_answer"]
-    assert mine["score"] == 75 and mine["feedback"]["quick_mode"] is True
+    assert mine["score"] == 70 and mine["feedback"]["quick_mode"] is True
     assert grades["calls"] == ["compact", "mid"]  # no compact fallback call on top
     assert (await wallet(api, SEA))["earned"] == economy.EARN["peer_answer_good"]
 
@@ -199,7 +210,7 @@ async def test_permissions_and_helpful_votes(api, sm, pptx, grades):  # noqa: F8
 
 async def test_solo_costs_coins_and_pays_points_per_ten(api, sm, pptx, grades):  # noqa: F811
     _, chapter = await indexed(api, sm, pptx)
-    grades["compact"].append(g(76, "high"))  # solo: no review band, confident → compact only
+    grades["compact"].append(g(70, "high"))  # solo: no review band, confident → compact only
     r = await api.post(
         "/api/arena/solo",
         json={"chapter_id": chapter, "concept": "stacks", "text": GOOD},
@@ -208,7 +219,7 @@ async def test_solo_costs_coins_and_pays_points_per_ten(api, sm, pptx, grades): 
     assert r.status_code == 202 and r.json()["cost"] == economy.COST["teachback_solo"]
     await Worker(sm).drain(timeout_s=30)
     job = (await api.get(f"/api/jobs/{r.json()['job_id']}", headers=OWL_FR)).json()
-    assert job["status"] == "done" and job["result"]["score"] == 76
+    assert job["status"] == "done" and job["result"]["score"] == 70
     assert job["result"]["points"] == 7 * economy.POINTS["teachback_solo_per_10_score"]
     w = await wallet(api, OWL_FR)
     assert w["coins"] == economy.DAILY_FREE_COINS - economy.COST["teachback_solo"]
@@ -219,7 +230,7 @@ async def test_full_path_on_the_mock_one_compact_call(api, sm, pptx):  # noqa: F
     _, qid = await room(api, sm, pptx)
     d = await send(api, sm, qid)
     mine = d["my_answer"]
-    assert mine["status"] == "graded" and 40 <= mine["score"] <= 95
+    assert mine["status"] == "graded" and 10 <= mine["score"] <= 100
     assert mine["feedback"]["good"].startswith("Tu as")  # SeaTurtle42 uses French
     async with sm() as s:
         tiers = dict(
@@ -260,10 +271,10 @@ async def arabic_room(api, sm, pptx, who):  # noqa: F811
 @pytest.mark.parametrize("who", [SAND_AR, DUNE_TN], ids=["ar", "ar-TN"])
 async def test_arabic_and_darija_are_graded_by_mid_directly(api, sm, pptx, grades, who):  # noqa: F811
     _, qid = await arabic_room(api, sm, pptx, who)
-    grades["mid"].append(g(88))
+    grades["mid"].append(g(90))
     d = await send(api, sm, qid, AR_TEXT, who=who)
     assert grades["calls"] == ["mid"]  # no compact draft first
-    assert d["my_answer"]["status"] == "graded" and d["my_answer"]["score"] == 88
+    assert d["my_answer"]["status"] == "graded" and d["my_answer"]["score"] == 90
     assert (await wallet(api, who))["earned"] == economy.EARN["peer_answer_good"]
 
 

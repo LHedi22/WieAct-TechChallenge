@@ -127,3 +127,4 @@ that isn't in the docs. Humans resolve OPEN items.
 - Hosting: Vercel (frontend, static build + `/api` rewrite), Railway (API + job worker in one service, Postgres, uploads volume)
 - Qdrant Cloud (free tier) — hosted Qdrant for the demo, unless the platform's Qdrant is reachable
 - No other LLM or AI API is used.
+- 2026-11-05 · Teach-Back scoring is a rubric (audit N-2): the model rates accuracy 0-4, coverage 0-3, reasoning 0-2, example 0-1 with calibration examples (`prompts/_teachback_rubric.md`); the server totals 10 points per level and ignores any model score; an "ok" grade without criteria is unusable. No numeric score left in any prompt (the old 74 example anchored every grade). Graded set: `app/evals/teachback_set.json` (5 kinds × en/fr/ar/ar-TN), checks in `app/evals/teachback.py`. Scores are now multiples of 10.
