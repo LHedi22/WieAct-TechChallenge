@@ -24,6 +24,7 @@ class Tip(BaseModel):
     why: str
     right: str
     student_count: int
+    made_by: str | None = None  # provider that wrote it; the UI labels non-platform test data
 
 
 class Tips(BaseModel):
@@ -48,6 +49,7 @@ async def tips(
                 mistake_type=t.mistake_type,
                 language=t.language,
                 student_count=t.student_count,
+                made_by=t.provider,
                 **t.text,
             )
             for t in rows

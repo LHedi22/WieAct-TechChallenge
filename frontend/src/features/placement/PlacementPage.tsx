@@ -3,7 +3,16 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { api, type PlacementQuestion, type PlacementResult } from "@/api/client";
-import { Bidi, Chip, Mascot, PixelButton, PixelPanel, ProgressBar, SoftCard } from "@/components";
+import {
+  Bidi,
+  Chip,
+  Mascot,
+  PixelButton,
+  PixelPanel,
+  ProgressBar,
+  SoftCard,
+  TestDataChip,
+} from "@/components";
 import { cx } from "@/components/cx";
 import { JobProgress } from "@/features/jobs/JobProgress";
 import { useWisdomTip } from "@/features/wisdom/useWisdomTip";
@@ -49,6 +58,7 @@ export function PlacementPage() {
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 bg-whitewash px-4 py-8">
       <header className="flex items-center justify-between gap-3">
         <h1 className="text-h2">{t("title")}</h1>
+        <TestDataChip madeBy={start.data?.made_by} />
         <button
           type="button"
           onClick={() => void navigate(island)}

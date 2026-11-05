@@ -3,7 +3,7 @@ import { type ReactNode, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { api, type StudioPay } from "@/api/client";
-import { Bidi, PixelButton, PixelPanel, QuickCopyNotice, Sprite } from "@/components";
+import { Bidi, PixelButton, PixelPanel, QuickCopyNotice, Sprite, TestDataChip } from "@/components";
 import { cx } from "@/components/cx";
 import { JobProgress } from "@/features/jobs/JobProgress";
 import { useWisdomTip } from "@/features/wisdom/useWisdomTip";
@@ -100,6 +100,7 @@ export function StudioPage() {
     } else if (tab === "notes" && s.notes) {
       body = (
         <div className="flex flex-col gap-4">
+          <TestDataChip madeBy={s.made_by} />
           {s.quick_mode && (
             <QuickCopyNotice busy={generate.isPending} onUpgrade={() => generate.mutate("me")} />
           )}

@@ -27,6 +27,7 @@ class Episode(BaseModel):
     language: str
     script: Script | None
     quick_mode: bool = False  # script written by the compact fallback; full version is free
+    made_by: str | None = None  # provider that wrote it; the UI labels non-platform test data
     pending_job_id: uuid.UUID | None
     pool_balance: int
     cost: int

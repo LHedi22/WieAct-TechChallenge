@@ -19,6 +19,7 @@ from sqlalchemy.dialects.postgresql import insert
 
 from app import gateway, prompts
 from app.core import db
+from app.core.provenance import replaces, servable
 from app.gateway import BadOutput, Task, TaskKind
 from app.jobs.registry import JobContext, job
 from app.jobs.service import create_job
@@ -120,6 +121,7 @@ async def maybe_precompute(chapter_id: uuid.UUID) -> uuid.UUID | None:
                 QuizSet.chapter_id == chapter_id,
                 QuizSet.level == POOL_LEVEL,
                 QuizSet.language == language,
+                servable(QuizSet.provider),
             )
         )
         if exists or await pending_generation(s, chapter_id, POOL_LEVEL, language):
@@ -181,6 +183,7 @@ async def quiz_pool(ctx: JobContext) -> dict[str, Any]:
                 QuizSet.level == level,
                 QuizSet.language == language,
                 QuizSet.seed == seed,
+                servable(QuizSet.provider),
             )
         )
     if existing:
@@ -215,18 +218,22 @@ async def quiz_pool(ctx: JobContext) -> dict[str, Any]:
     if len(questions) < MIN_VALID:
         raise BadOutput(f"only {len(questions)} valid questions", refusal="bad_quiz")
     async with db.get_sessionmaker()() as s:
+        stmt = insert(QuizSet).values(
+            id=uuid.uuid4(),
+            world_id=course.world_id,
+            chapter_id=chapter_id,
+            level=level,
+            language=language,
+            seed=seed,
+            questions=questions,
+            provider=result.provider,
+        )
         await s.execute(
-            insert(QuizSet)
-            .values(
-                id=uuid.uuid4(),
-                world_id=course.world_id,
-                chapter_id=chapter_id,
-                level=level,
-                language=language,
-                seed=seed,
-                questions=questions,
+            stmt.on_conflict_do_update(  # a platform-made set replaces a test one (F-OFF-1)
+                index_elements=["chapter_id", "level", "language", "seed"],
+                set_={"questions": stmt.excluded.questions, "provider": stmt.excluded.provider},
+                where=replaces(QuizSet.provider, stmt.excluded.provider),
             )
-            .on_conflict_do_nothing(index_elements=["chapter_id", "level", "language", "seed"])
         )
         await s.commit()
         set_id = await s.scalar(

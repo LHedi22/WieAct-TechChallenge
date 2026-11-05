@@ -1194,6 +1194,8 @@ export interface components {
       points: number;
       /** Questions */
       questions: components["schemas"]["QuestionView"][];
+      /** Made By */
+      made_by?: string | null;
     };
     /** Author */
     Author: {
@@ -1549,6 +1551,8 @@ export interface components {
        * @default false
        */
       quick_mode: boolean;
+      /** Made By */
+      made_by?: string | null;
       /** Pending Job Id */
       pending_job_id: string | null;
       /** Pool Balance */
@@ -2061,6 +2065,8 @@ export interface components {
       job_id: string | null;
       /** Questions */
       questions: components["schemas"]["AskedQuestion"][] | null;
+      /** Made By */
+      made_by?: string | null;
     };
     /** PoolOut */
     PoolOut: {
@@ -2230,6 +2236,8 @@ export interface components {
       course_id: string;
       /** Questions */
       questions: components["schemas"]["AskedQuestion"][];
+      /** Made By */
+      made_by?: string | null;
     };
     /** Queue */
     Queue: {
@@ -2481,6 +2489,8 @@ export interface components {
        * @default false
        */
       quick_mode: boolean;
+      /** Made By */
+      made_by?: string | null;
       /** Pending Job Id */
       pending_job_id: string | null;
       cards: components["schemas"]["CardCounts"];
@@ -2565,6 +2575,8 @@ export interface components {
       right: string;
       /** Student Count */
       student_count: number;
+      /** Made By */
+      made_by?: string | null;
     };
     /** Tips */
     Tips: {

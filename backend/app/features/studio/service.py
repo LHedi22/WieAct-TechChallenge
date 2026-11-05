@@ -74,6 +74,7 @@ async def status(s: AsyncSession, user: User, chapter: Chapter, level: str) -> d
         "map": found["map"].content if "map" in found else None,
         "missing": await pack.missing(s, chapter.id, level, language),
         "quick_mode": pack.is_quick(found.get("notes")),
+        "made_by": found["notes"].provider if "notes" in found else None,
         "pending_job_id": await pack.pending_generation(s, chapter.id, level, language),
         "cards": counts,
         "pool_balance": await pool.balance(s, course.world_id),

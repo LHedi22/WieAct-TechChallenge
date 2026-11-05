@@ -19,6 +19,7 @@ from sqlalchemy.dialects.postgresql import insert
 
 from app import gateway, prompts
 from app.core import db
+from app.core.provenance import replaces, servable
 from app.features.quiz.pool import chapter_context
 from app.gateway import BadOutput, Task, TaskKind
 from app.jobs.registry import JobContext, job
@@ -130,6 +131,7 @@ async def assets(s, chapter_id: uuid.UUID, level: str, language: str) -> dict[st
             StudyAsset.chapter_id == chapter_id,
             StudyAsset.level == level,
             StudyAsset.language == language,
+            servable(StudyAsset.provider),
         )
     )
     return {a.kind: a for a in rows}
@@ -174,10 +176,19 @@ def is_quick(asset) -> bool:
 
 
 async def save_asset(
-    world_id, chapter_id, level, language, kind, content, *, replace: bool = False
+    world_id,
+    chapter_id,
+    level,
+    language,
+    kind,
+    content,
+    *,
+    provider: str | None,
+    replace: bool = False,
 ) -> uuid.UUID:
-    """Store a class asset once. `replace=True` overwrites it (the full version of a Quick-mode
-    copy), keeping its id so the deck that hangs off the notes stays attached."""
+    """Store a class asset once, with the provider that made it (audit F-OFF-1). `replace=True`
+    overwrites it (the full version of a Quick-mode copy); a platform-made asset also replaces a
+    test one. The id is kept, so the deck that hangs off the notes stays attached."""
     async with db.get_sessionmaker()() as s:
         stmt = insert(StudyAsset).values(
             id=uuid.uuid4(),
@@ -187,17 +198,25 @@ async def save_asset(
             language=language,
             kind=kind,
             content=content,
+            provider=provider,
         )
-        conflict = ["chapter_id", "level", "language", "kind"]
-        if replace:
-            stmt = stmt.on_conflict_do_update(
-                index_elements=conflict, set_={"content": stmt.excluded.content}
-            )
-        else:
-            stmt = stmt.on_conflict_do_nothing(index_elements=conflict)
+        new = {"content": stmt.excluded.content, "provider": stmt.excluded.provider}
+        stmt = stmt.on_conflict_do_update(
+            index_elements=["chapter_id", "level", "language", "kind"],
+            set_=new,
+            where=None if replace else replaces(StudyAsset.provider, stmt.excluded.provider),
+        )
         await s.execute(stmt)
         await s.commit()
-        return (await assets(s, chapter_id, level, language))[kind].id
+        # the row under this key, whoever made it (assets() hides non-platform rows in production)
+        return await s.scalar(
+            select(StudyAsset.id).where(
+                StudyAsset.chapter_id == chapter_id,
+                StudyAsset.level == level,
+                StudyAsset.language == language,
+                StudyAsset.kind == kind,
+            )
+        )
 
 
 def _key(ctx: JobContext, chapter: Chapter, level: str, language: str, part: str) -> str:
@@ -238,7 +257,7 @@ async def _notes(ctx, chapter, course, level, language) -> dict[str, Any]:
         raise BadOutput("no usable notes", refusal="bad_notes")
     if result.quick_mode:  # compact fallback: mark it so the class can get the mid version later
         notes = {**notes, "quick_mode": True}
-    return notes
+    return notes, result.provider
 
 
 async def _cards(ctx, chapter, course, level, language, text: str) -> list[dict[str, str]]:
@@ -272,7 +291,7 @@ async def _map(ctx, chapter, course, level, language, text: str) -> dict[str, An
     tree = valid_map(result.content)
     if tree is None:
         raise BadOutput("no usable mind map", refusal="bad_map")
-    return tree
+    return tree, result.provider
 
 
 @job(KIND, stages=("reading_chapter", "writing_notes", "making_flashcards", "drawing_map"))
@@ -292,9 +311,9 @@ async def study_pack(ctx: JobContext) -> dict[str, Any]:
     if "notes" in found and not upgrade:
         notes, notes_id = found["notes"].content, found["notes"].id
     else:
-        notes = await _notes(ctx, chapter, course, level, language)  # failure fails the job
+        notes, made_by = await _notes(ctx, chapter, course, level, language)  # fails the job
         notes_id = await save_asset(
-            world_id, chapter_id, level, language, "notes", notes, replace=upgrade
+            world_id, chapter_id, level, language, "notes", notes, provider=made_by, replace=upgrade
         )
     text = notes_text(notes)
 
@@ -326,12 +345,12 @@ async def study_pack(ctx: JobContext) -> dict[str, Any]:
     await ctx.set_stage("drawing_map")
     if "map" not in found:
         try:
-            tree = await _map(ctx, chapter, course, level, language, text)
+            tree, made_by = await _map(ctx, chapter, course, level, language, text)
         except gateway.Defer:
             raise
         except gateway.GatewayError:
             failed.append("map")
         else:
-            await save_asset(world_id, chapter_id, level, language, "map", tree)
+            await save_asset(world_id, chapter_id, level, language, "map", tree, provider=made_by)
     # Public job result: what is ready; the content itself comes from GET /api/studio.
     return {"chapter_id": str(chapter_id), "level": level, "missing": failed}

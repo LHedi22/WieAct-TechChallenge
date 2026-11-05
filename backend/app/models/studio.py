@@ -28,6 +28,8 @@ class StudyAsset(Base):
     __table_args__ = (UniqueConstraint("chapter_id", "level", "language", "kind"),)
 
     id: Mapped[uuid.UUID] = uuid_pk()
+    # who made it (cloud | local | mock); production serves cloud only (audit F-OFF-1)
+    provider: Mapped[str | None] = mapped_column(String(8))
     world_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("worlds.id", ondelete="CASCADE"))
     chapter_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("chapters.id", ondelete="CASCADE"))
     level: Mapped[str] = mapped_column(String(12))

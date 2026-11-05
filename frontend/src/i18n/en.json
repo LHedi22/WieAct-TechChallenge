@@ -204,7 +204,8 @@
     "quickCopy": {
       "body": "Written by the faster model while the platform was busy.",
       "upgrade": "Make the full version · Free"
-    }
+    },
+    "testData": "Test data ({provider})"
   },
   "styleguide": {
     "title": "Learning World · style guide",

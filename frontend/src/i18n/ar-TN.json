@@ -205,7 +205,8 @@
     "quickCopy": {
       "body": "كتبو الموديل الخفيف وقتلّي البلاتفورم كانت مشغولة.",
       "upgrade": "اعمل النسخة الكاملة · بلاش"
-    }
+    },
+    "testData": "داتا تجريبية ({provider})"
   },
   "styleguide": {
     "title": "Learning World · دليل الستيل",

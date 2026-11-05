@@ -204,7 +204,8 @@
     "quickCopy": {
       "body": "كتبه النموذج الأسرع بينما كانت المنصّة مشغولة.",
       "upgrade": "اصنع النسخة الكاملة · مجانًا"
-    }
+    },
+    "testData": "بيانات تجريبية ({provider})"
   },
   "styleguide": {
     "title": "Learning World · دليل الأسلوب",

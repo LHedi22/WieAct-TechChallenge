@@ -62,6 +62,7 @@ async def status(s: AsyncSession, user: User, chapter: Chapter, level: str) -> d
         "language": language,
         "script": found[ASSET].content if ASSET in found else None,
         "quick_mode": pack.is_quick(found.get(ASSET)),
+        "made_by": found[ASSET].provider if ASSET in found else None,
         "pending_job_id": await _pending(s, chapter.id, level, language),
         "pool_balance": await pool.balance(s, course.world_id),
         **await price(s, chapter.id, level, language),
@@ -142,6 +143,13 @@ async def audio_episode(ctx: JobContext) -> dict[str, Any]:
     if result.quick_mode:  # compact fallback: the class can get the mid version later, free
         script = {**script, "quick_mode": True}
     await pack.save_asset(
-        course.world_id, chapter_id, level, language, ASSET, script, replace=existing is not None
+        course.world_id,
+        chapter_id,
+        level,
+        language,
+        ASSET,
+        script,
+        provider=result.provider,
+        replace=existing is not None,
     )
     return {"chapter_id": str(chapter_id), "segments": len(script["segments"])}

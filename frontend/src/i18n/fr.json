@@ -204,7 +204,8 @@
     "quickCopy": {
       "body": "Écrit par le modèle rapide pendant que la plateforme était occupée.",
       "upgrade": "Faire la version complète · Gratuit"
-    }
+    },
+    "testData": "Données de test ({provider})"
   },
   "styleguide": {
     "title": "Learning World · guide de style",

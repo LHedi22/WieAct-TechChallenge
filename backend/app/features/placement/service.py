@@ -14,6 +14,7 @@ from sqlalchemy.dialects.postgresql import insert
 
 from app import gateway, prompts
 from app.core import db
+from app.core.provenance import replaces, servable
 from app.features.quiz.pool import Question, pick_context
 from app.gateway import BadOutput, Task, TaskKind
 from app.jobs.registry import JobContext, job
@@ -55,7 +56,9 @@ async def find_set(course_id: uuid.UUID, language: str) -> PlacementSet | None:
     async with db.get_sessionmaker()() as s:
         return await s.scalar(
             select(PlacementSet).where(
-                PlacementSet.course_id == course_id, PlacementSet.language == language
+                PlacementSet.course_id == course_id,
+                PlacementSet.language == language,
+                servable(PlacementSet.provider),
             )
         )
 
@@ -131,10 +134,19 @@ async def generate(ctx: JobContext) -> dict[str, Any]:
     if len(questions) < MIN_VALID:
         raise BadOutput(f"only {len(questions)} valid questions", refusal="bad_quiz")
     async with db.get_sessionmaker()() as s:
+        stmt = insert(PlacementSet).values(
+            id=uuid.uuid4(),
+            course_id=course_id,
+            language=language,
+            questions=questions,
+            provider=result.provider,
+        )
         await s.execute(
-            insert(PlacementSet)
-            .values(id=uuid.uuid4(), course_id=course_id, language=language, questions=questions)
-            .on_conflict_do_nothing(index_elements=["course_id", "language"])
+            stmt.on_conflict_do_update(  # a platform-made set replaces a test one (F-OFF-1)
+                index_elements=["course_id", "language"],
+                set_={"questions": stmt.excluded.questions, "provider": stmt.excluded.provider},
+                where=replaces(PlacementSet.provider, stmt.excluded.provider),
+            )
         )
         await s.commit()
     # The result is public (GET /api/jobs/{id}): never put the questions or answers in it.
