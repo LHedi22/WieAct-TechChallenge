@@ -108,6 +108,11 @@ class Settings(BaseSettings):
     TESSERACT_LANGS: str = "ara+fra+eng"
     # Empty = find `tesseract` on PATH (or the default Windows install folder)
     TESSERACT_CMD: str = ""
+    # Upload parsing runs in a child process (audit F-DOS-1): killed after this long without
+    # progress, after PARSE_MAX_S in total, or above PARSE_MEM_MB of address space.
+    PARSE_IDLE_TIMEOUT_S: float = 120
+    PARSE_MAX_S: float = 900
+    PARSE_MEM_MB: int = 1536
     # If set, /api/admin/stats requires the X-Admin-Token header
     ADMIN_TOKEN: SecretStr = SecretStr("")
 

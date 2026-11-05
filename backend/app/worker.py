@@ -6,6 +6,7 @@ import logging
 
 from app.core.config import get_settings
 from app.core.db import get_sessionmaker
+from app.jobs import heartbeat
 from app.jobs.worker import Worker
 
 log = logging.getLogger("worker")
@@ -20,7 +21,14 @@ async def main() -> None:
         settings.LLM_MAX_CONCURRENCY,
         settings.LLM_MAX_RPM,
     )
-    await Worker(get_sessionmaker(), background_slots=settings.LLM_MAX_CONCURRENCY).run_forever()
+    sm = get_sessionmaker()
+    # Liveness for /api/health (pg_stat_activity), audit F-DOS-1. Kept as a reference so the
+    # task isn't garbage-collected.
+    beat = asyncio.create_task(heartbeat.run_forever(settings.DATABASE_URL))
+    try:
+        await Worker(sm, background_slots=settings.LLM_MAX_CONCURRENCY).run_forever()
+    finally:
+        beat.cancel()
 
 
 if __name__ == "__main__":

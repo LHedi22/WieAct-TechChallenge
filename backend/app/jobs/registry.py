@@ -18,6 +18,7 @@ class JobContext:
     payload: dict[str, Any]
     set_stage: Callable[[str], Awaitable[None]]
     quick_mode: bool = False  # set by the handler when any gateway result was quick_mode
+    attempts: int = 1  # this claim's attempt number (1 = first run)
 
     def note(self, result: Result) -> Result:
         self.quick_mode = self.quick_mode or result.quick_mode

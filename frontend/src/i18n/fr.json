@@ -110,6 +110,7 @@
       "file_too_large": "Ce fichier dépasse la taille maximale.",
       "document_empty": "Nous n'avons trouvé aucun texte dans ce fichier.",
       "document_unreadable": "Ce fichier semble abîmé ou protégé. Essaie de l'exporter à nouveau.",
+      "document_too_complex": "Ce fichier est trop lourd ou trop complexe à lire sans risque. Découpe-le ou exporte-le à nouveau en PDF.",
       "document_not_found": "Ce fichier n'existe plus.",
       "indexing_failed": "Nous n'avons pas pu lire ce fichier. Essaie de le téléverser à nouveau.",
       "nickname_invalid": "Un pseudo contient 3 à 32 lettres, chiffres, - ou _.",

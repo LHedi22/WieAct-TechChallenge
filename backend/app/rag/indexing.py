@@ -3,12 +3,19 @@
 
 Request economy for a 30-page PDF (~30 chunks): ⌈30/8⌉ = 4 tag calls + 1 embeddings call.
 Resumable: a Defer requeues the job and every step is idempotent — chunk ids are derived from the
-document id, tag batches are cached by file hash, vectors are replaced per document."""
+document id, tag batches are cached by file hash, vectors are replaced per document.
+
+Parsing runs in a child process (`rag/parse_child.py`) with a memory limit, an idle timeout and an
+overall deadline (audit F-DOS-1): a hostile or huge upload is killed instead of freezing the worker,
+and a document that was mid-parse when its job died fails instead of being parsed again."""
 
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
+import os
+import sys
 import uuid
 from pathlib import Path
 from typing import Any, Literal
@@ -23,7 +30,8 @@ from app.gateway import Defer, GatewayError, Task, TaskKind
 from app.jobs.registry import JobContext, job
 from app.models import Chapter, Chunk, Course, Document
 from app.rag.chunking import chunk
-from app.rag.parsing import Page, ParseError, page_steps
+from app.rag.parsing import Page, ParseError
+from app.rag.safety import TOO_COMPLEX
 from app.rag.store import VectorPoint, get_store
 
 log = logging.getLogger("rag")
@@ -34,6 +42,17 @@ TAG_CHARS = 1200  # of each chunk sent for tagging (the concepts show early; kee
 LEVELS = ("beginner", "intermediate", "advanced")
 # progress bands on the indexing screen
 P_PARSE, P_TAG, P_EMBED = 40, 75, 100
+# The parse child (a module list so tests can swap it); run from the backend folder.
+PARSE_CMD: list[str] | None = [sys.executable, "-m", "app.rag.parse_child"]
+BACKEND_DIR = Path(__file__).resolve().parents[2]
+LINE_LIMIT = 32 * 1024 * 1024  # one page of text per JSON line
+# Fewer threads and malloc arenas in the parse child: keeps its memory use predictable
+CHILD_ENV = {
+    "MALLOC_ARENA_MAX": "2",
+    "OMP_NUM_THREADS": "1",
+    "OMP_THREAD_LIMIT": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+}
 
 
 class JobFailed(GatewayError):
@@ -74,19 +93,63 @@ async def _update_doc(doc_id: uuid.UUID, **values: Any) -> None:
 
 
 async def _parse(doc: Document) -> list[Page]:
-    total, steps = page_steps(upload_path(doc), doc.kind)
-    pages: list[Page] = []
+    """Parse in a killable child process; any limit breach is `errors.document_too_complex`."""
+    settings = get_settings()
     unit = UNIT[doc.kind]
-    for n, step in enumerate(steps, start=1):
-        page = await asyncio.to_thread(step)
-        if page is not None:
-            pages.append(page)
-        await _update_doc(
-            doc.id,
-            progress=int(P_PARSE * n / max(total, 1)),
-            detail={"key": unit, "n": n, "of": total},
-            page_count=total,
-        )
+    # The memory limit is set inside the child by a launcher that then exec()s the parser:
+    # preexec_fn would be simpler but can deadlock when the worker has threads.
+    limited = [sys.executable, "-m", "app.rag.limit_exec", str(settings.PARSE_MEM_MB)]
+    proc = await asyncio.create_subprocess_exec(
+        *(limited if os.name == "posix" else []),
+        *PARSE_CMD,
+        str(upload_path(doc)),
+        doc.kind,
+        stdout=asyncio.subprocess.PIPE,
+        cwd=str(BACKEND_DIR),
+        env={**os.environ, **CHILD_ENV},
+        limit=LINE_LIMIT,
+    )
+    loop = asyncio.get_running_loop()
+    deadline = loop.time() + settings.PARSE_MAX_S
+    pages: list[Page] = []
+    total, done = 1, False
+    try:
+        while True:
+            remaining = deadline - loop.time()
+            if remaining <= 0:
+                raise TimeoutError
+            line = await asyncio.wait_for(
+                proc.stdout.readline(), min(settings.PARSE_IDLE_TIMEOUT_S, remaining)
+            )
+            if not line:
+                break
+            msg = json.loads(line)
+            if "error" in msg:
+                raise ParseError(msg["error"])
+            if "total" in msg:
+                total = max(int(msg["total"]), 1)
+                continue
+            if msg.get("done"):
+                done = True
+                continue
+            n = int(msg["n"])
+            if msg.get("page"):
+                pages.append(Page(**msg["page"]))
+            await _update_doc(
+                doc.id,
+                progress=int(P_PARSE * n / total),
+                detail={"key": unit, "n": n, "of": total},
+                page_count=total,
+            )
+        if await proc.wait() != 0 or not done:
+            raise ParseError(TOO_COMPLEX)  # killed by the memory limit, crashed, or cut short
+    except (TimeoutError, ValueError, KeyError, TypeError) as e:
+        log.warning("parse of document %s stopped: %s", doc.id, type(e).__name__)
+        raise ParseError(TOO_COMPLEX) from e
+    finally:
+        if proc.returncode is None:
+            proc.kill()
+            await proc.wait()
     return pages
 
 
@@ -181,6 +244,11 @@ async def index_document(ctx: JobContext) -> dict[str, Any]:
         )
     if doc.status == "ready":
         return {"document_id": str(doc_id), "chunks": len(rows), "status": "ready"}
+    if doc.status == "parsing" and not rows and ctx.attempts > 1:
+        # A previous attempt died while parsing this file (worker crash, OOM): never parse it
+        # again, or one poison upload stalls the queue after every restart.
+        await _update_doc(doc_id, status="failed", error=TOO_COMPLEX, detail=None)
+        raise JobFailed(TOO_COMPLEX)
 
     status: Literal["parsing", "tagging", "embedding"] = "parsing"
     try:

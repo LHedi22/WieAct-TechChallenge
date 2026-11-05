@@ -110,6 +110,7 @@
       "file_too_large": "This file is over the size limit.",
       "document_empty": "We couldn't find any text in this file.",
       "document_unreadable": "This file looks damaged or protected. Try exporting it again.",
+      "document_too_complex": "This file is too large or too complex to read safely. Split it, or export it again as PDF.",
       "document_not_found": "This file no longer exists.",
       "indexing_failed": "We couldn't read this file. Try uploading it again.",
       "nickname_invalid": "Nicknames use 3 to 32 letters, digits, - or _.",

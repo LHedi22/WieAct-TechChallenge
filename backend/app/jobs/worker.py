@@ -92,6 +92,7 @@ class Worker:
             lane=job.lane,
             payload=job.payload or {},
             set_stage=lambda stage: self._set_stage(job.id, stage),
+            attempts=job.attempts or 1,
         )
         status, values = "failed", {}
         try:
