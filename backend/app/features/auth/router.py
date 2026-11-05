@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from typing import Literal
 
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
@@ -20,6 +20,7 @@ from app.core.security import (
     sign_session,
     verify_password,
 )
+from app.features.auth import ratelimit
 from app.models import Profile, User, WorldMember
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -100,12 +101,25 @@ async def signup(body: SignupIn, response: Response, s: Session) -> Me:
     return await _me(s, user)
 
 
+def _client_ip(request: Request) -> str | None:
+    forwarded = request.headers.get("x-forwarded-for", "")
+    if forwarded:
+        return forwarded.split(",")[0].strip() or None
+    return request.client.host if request.client else None
+
+
 @router.post("/login", response_model=Me)
-async def login(body: LoginIn, response: Response, s: Session) -> Me:
-    user = await s.scalar(select(User).where(User.nickname == body.nickname.strip()))
+async def login(body: LoginIn, request: Request, response: Response, s: Session) -> Me:
+    nickname, ip = body.nickname.strip(), _client_ip(request)
+    # Attempt limits (audit F-SEC-5): a locked nickname or IP waits, even with the right password.
+    if wait := ratelimit.limiter.retry_after(nickname, ip):
+        raise HTTPException(429, "errors.too_many_attempts", headers={"Retry-After": str(wait)})
+    user = await s.scalar(select(User).where(User.nickname == nickname))
     # Same answer for an unknown nickname and a wrong password (no account probing).
     if user is None or not verify_password(user.password_hash, body.password):
+        ratelimit.limiter.failed(nickname, ip)
         raise HTTPException(401, "errors.login_failed")
+    ratelimit.limiter.succeeded(nickname)
     _set_cookie(response, user)
     return await _me(s, user)
 

@@ -119,6 +119,7 @@
       "try_again": "Something went wrong. Please try again.",
       "nickname_taken": "That nickname is taken. Try adding a number.",
       "login_failed": "Nickname or password doesn't match.",
+      "too_many_attempts": "Too many sign-in attempts. Wait a few minutes, then try again.",
       "password_short": "Use at least 8 characters for your password.",
       "avatar_invalid": "That avatar option doesn't exist.",
       "cosmetic_locked": "Earn more points to unlock this.",

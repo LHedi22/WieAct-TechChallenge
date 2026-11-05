@@ -119,6 +119,7 @@
       "try_again": "Un problème est survenu. Réessaie.",
       "nickname_taken": "Ce pseudo est déjà pris. Ajoute un chiffre.",
       "login_failed": "Pseudo ou mot de passe incorrect.",
+      "too_many_attempts": "Trop de tentatives de connexion. Attends quelques minutes puis réessaie.",
       "password_short": "Utilise au moins 8 caractères pour ton mot de passe.",
       "avatar_invalid": "Cette option d'avatar n'existe pas.",
       "cosmetic_locked": "Gagne plus de points pour débloquer ceci.",

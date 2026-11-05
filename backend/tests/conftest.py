@@ -62,6 +62,14 @@ def isolated_settings(monkeypatch):
     config.get_settings.cache_clear()
 
 
+@pytest.fixture(autouse=True)
+def fresh_login_limiter(monkeypatch):
+    """Sign-in attempt counts are process-wide (audit F-SEC-5): start every test from zero."""
+    from app.features.auth import ratelimit  # noqa: PLC0415
+
+    monkeypatch.setattr(ratelimit, "limiter", ratelimit.LoginLimiter())
+
+
 @pytest.fixture(scope="session")
 def pg_url() -> str:
     url = test_url(DEV_DB_URL)
