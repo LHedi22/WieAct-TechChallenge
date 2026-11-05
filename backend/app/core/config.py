@@ -83,6 +83,8 @@ class Settings(BaseSettings):
     # --- shared by every provider ---
     LLM_DISABLE_THINKING: bool = True
     LLM_TIMEOUT_S: float = 90
+    # Interactive mid calls (a student is waiting): shorter budget, then compact (audit F-RES-2)
+    LLM_INTERACTIVE_MID_TIMEOUT_S: float = 45
     LLM_MAX_RPM: int = 18
     LLM_MAX_CONCURRENCY: int = 2
     # Embeddings are metered separately (own quota); they share the per-key concurrency limit

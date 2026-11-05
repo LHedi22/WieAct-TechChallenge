@@ -39,6 +39,7 @@ class CallFailed(Exception):  # noqa: N818 - reads better at call sites than Cal
     error: CallError
     headers: dict[str, str] = field(default_factory=dict)
     latency_ms: int = 0
+    timed_out: bool = False  # the request ran past its timeout (the server may still answer it)
 
 
 def _error_text(e: openai.APIStatusError) -> str:
@@ -104,6 +105,7 @@ class LLMClient:
         json_mode: bool,
         kind: str,
         language: str,
+        timeout_s: float | None = None,
     ) -> Reply:
         msgs = self.prepare(model, messages, kind, language)
         for _ in range(3):  # at most: drop response_format, drop chat_template_kwargs, real call
@@ -128,6 +130,8 @@ class LLMClient:
                 kwargs["response_format"] = {"type": "json_object"}
             if use_tk:
                 kwargs["extra_body"] = {"chat_template_kwargs": {"enable_thinking": False}}
+            if timeout_s is not None:  # per call (interactive mid has a shorter budget)
+                kwargs["timeout"] = timeout_s
             t0 = time.monotonic()
             try:
                 raw = await self._sdk.chat.completions.with_raw_response.create(**kwargs)
@@ -153,7 +157,11 @@ class LLMClient:
                     continue
                 headers = dict(e.response.headers)
                 raise CallFailed(classify(e.status_code, headers, text), headers, ms) from e
-            except openai.APIConnectionError as e:  # includes timeouts
+            except openai.APITimeoutError as e:
+                ms = int((time.monotonic() - t0) * 1000)
+                err = classify(None, {}, type(e).__name__)
+                raise CallFailed(err, {}, ms, timed_out=True) from e
+            except openai.APIConnectionError as e:
                 ms = int((time.monotonic() - t0) * 1000)
                 raise CallFailed(classify(None, {}, type(e).__name__), {}, ms) from e
             ms = int((time.monotonic() - t0) * 1000)

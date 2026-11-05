@@ -127,6 +127,7 @@ class Gateway:
         json_mode: bool,
         messages: list[dict[str, Any]],
         kind: TaskKind | None = None,
+        timeout_s: float | None = None,
     ) -> Reply:
         async with self.limiter.slot(task.lane):
             try:
@@ -137,6 +138,7 @@ class Gateway:
                     json_mode=json_mode,
                     kind=(kind or task.kind).value,
                     language=task.language,
+                    timeout_s=timeout_s,
                 )
             except CallFailed as failed:
                 self.quota.update(profile.provider, failed.headers)
@@ -201,8 +203,16 @@ class Gateway:
                 profile.provider, model, messages, max_tokens=max_tokens, json=json_mode
             )
             failed: CallFailed | None = None
+            # A student waiting on an interactive mid call gets a shorter budget (audit F-RES-2)
+            budget = (
+                self.settings.LLM_INTERACTIVE_MID_TIMEOUT_S
+                if task.lane == "interactive" and tier == "mid"
+                else None
+            )
             try:
-                reply = await self._call(task, profile, model, max_tokens, json_mode, messages)
+                reply = await self._call(
+                    task, profile, model, max_tokens, json_mode, messages, timeout_s=budget
+                )
             except CallFailed as e:
                 failed = e
             if failed is not None:  # handled outside `except` so raises below aren't chained
@@ -260,6 +270,22 @@ class Gateway:
                     if self.settings.APP_ENV == "production":
                         raise OfflineMode("blocked")
                     raise KeyBlocked(err.message)
+                if (
+                    failed.timed_out
+                    and task.lane == "interactive"
+                    and tier == "mid"
+                    and task.allow_fallback
+                ):
+                    # Too slow for a waiting student: answer with compact now (Quick mode) rather
+                    # than resending the identical mid request (the platform may still be on it).
+                    tier, model, quick_mode, pattern = (
+                        "compact",
+                        self._model(profile, "compact"),
+                        True,
+                        "fallback",
+                    )
+                    notes.append("mid timed out: compact fallback")
+                    continue
                 if err.kind == "transient":
                     if not retried_net:
                         retried_net = True
