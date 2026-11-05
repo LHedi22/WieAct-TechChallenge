@@ -55,7 +55,7 @@ def _set_cookie(response: Response, user: User) -> None:
     s = get_settings()
     response.set_cookie(
         COOKIE_NAME,
-        sign_session(user.id),
+        sign_session(user.id, user.session_epoch),
         max_age=SESSION_MAX_AGE_S,
         httponly=True,
         secure=s.session_cookie_secure,
@@ -111,7 +111,11 @@ async def login(body: LoginIn, response: Response, s: Session) -> Me:
 
 
 @router.post("/logout", status_code=204)
-async def logout(response: Response) -> Response:
+async def logout(response: Response, db: Session, user: OptionalUser) -> Response:
+    """Ends the session on the server too: every cookie issued before now stops working."""
+    if user is not None:
+        user.session_epoch = (user.session_epoch or 0) + 1
+        await db.commit()
     s = get_settings()
     response.delete_cookie(
         COOKIE_NAME, path="/", secure=s.session_cookie_secure, samesite=s.SESSION_COOKIE_SAMESITE
