@@ -20,7 +20,7 @@ from typing import Any
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core.config import LLMProfile, Settings
-from app.gateway import cache, log
+from app.gateway import cache, forcequick, log
 from app.gateway.client import CallFailed, LLMClient, Reply
 from app.gateway.errors import (
     BadOutput,
@@ -216,6 +216,19 @@ class Gateway:
         messages = task.messages
         quick_mode = shrunk = retried_503 = retried_net = rerouted = False
         notes: list[str] = []
+        if (
+            tier == "mid"
+            and task.lane == "interactive"
+            and task.allow_fallback
+            and forcequick.active()
+        ):  # admin demo switch (audit F-VID-1): a real compact call, shown as Quick mode
+            tier, model, quick_mode, pattern = (
+                "compact",
+                self._model(profile, "compact"),
+                True,
+                "forced-fallback",
+            )
+            notes.append("forced quick mode (admin demo switch)")
 
         for _ in range(MAX_ATTEMPTS):
             rhash = cache.request_hash(

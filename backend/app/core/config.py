@@ -95,6 +95,10 @@ class Settings(BaseSettings):
     LLM_JSON_MODE: Literal["auto", "on", "off"] = "auto"
     # Dev/test only, ignored in production: pretend our slot is live/off (tests LLM_PROVIDER=auto)
     LLM_SLOT_FORCE: Literal["", "live", "off"] = ""
+    # Demo switch (audit F-VID-1): "on" forces Quick mode for interactive mid tasks for the whole
+    # session. Development only: production refuses to start with it; there an admin switches it
+    # on for up to 30 minutes at runtime (POST /api/admin/force-quick).
+    FORCE_QUICK_MODE: Literal["off", "on"] = "off"
 
     # --- vector store ---
     QDRANT_URL: str = "http://127.0.0.1:6333"
@@ -151,6 +155,11 @@ class Settings(BaseSettings):
                 raise ValueError("APP_ENV=production refuses EMBED_PROVIDER=mock (fake vectors)")
             if self.SECRET_KEY.get_secret_value() in ("", "change-me-in-.env"):
                 raise ValueError("APP_ENV=production requires a real SECRET_KEY")
+            if self.FORCE_QUICK_MODE != "off":
+                raise ValueError(
+                    "APP_ENV=production refuses FORCE_QUICK_MODE=on; switch Quick mode on at "
+                    "runtime with POST /api/admin/force-quick (it turns itself off)"
+                )
         # auto: this is only the fallback profile; app/gateway/providers.py picks cloud per job
         # while our slot is live and the key works.
         default: Provider = "local" if self.LLM_PROVIDER == "auto" else self.LLM_PROVIDER
