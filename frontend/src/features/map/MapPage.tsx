@@ -240,7 +240,10 @@ function ClassPanel({ data }: { data: MapOut }) {
       </PixelPanel>
       {/* only the creator manages course material (the API refuses others: audit F-ACL-1) */}
       {data.is_creator && (
-        <Link to={`/worlds/${data.world_id}/upload`} className="font-semibold text-primary underline">
+        <Link
+          to={`/worlds/${data.world_id}/upload`}
+          className="font-semibold text-primary underline"
+        >
           {t("class.addMaterial")}
         </Link>
       )}
