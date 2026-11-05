@@ -80,12 +80,14 @@ async def _ok(r: httpx.Response) -> Any:
     return r.json() if r.content else None
 
 
-async def _wait(c: httpx.AsyncClient, job_id: str | None, timeout_s: float) -> dict[str, Any]:
+async def _wait(
+    c: httpx.AsyncClient, job_id: str | None, timeout_s: float, headers: dict[str, str]
+) -> dict[str, Any]:
     if not job_id:
         return {"status": "none"}
     t0 = time.monotonic()
-    while True:
-        view = await _ok(await c.get(f"/api/jobs/{job_id}"))
+    while True:  # as a member of the world: jobs are not public (audit F-ACL-2)
+        view = await _ok(await c.get(f"/api/jobs/{job_id}", headers=headers))
         if view["status"] in TERMINAL or time.monotonic() - t0 > timeout_s:
             return {k: view.get(k) for k in ("status", "error", "quick_mode", "result")} | {
                 "wait_s": round(time.monotonic() - t0, 1)
@@ -145,7 +147,7 @@ async def _student(
     daily = await _ok(await c.get("/api/daily", headers=_h(lang)))
 
     out: dict[str, dict[str, Any]] = {}
-    job = await _wait(c, pack.get("job_id"), timeout_s)
+    job = await _wait(c, pack.get("job_id"), timeout_s, _h(lang))
     studio = await _ok(await c.get(f"/api/studio/{ch}", params={"level": level}, headers=_h(lang)))
     cards = await _ok(
         await c.get(f"/api/studio/{ch}/cards", params={"level": level}, headers=_h(lang))
@@ -158,7 +160,7 @@ async def _student(
         "map": studio["map"],
         "cards": [{k: x.get(k) for k in ("front", "back", "concept")} for x in cards["cards"]],
     }
-    job = await _wait(c, episode.get("job_id"), timeout_s)
+    job = await _wait(c, episode.get("job_id"), timeout_s, _h(lang))
     audio = await _ok(await c.get(f"/api/audio/{ch}", params={"level": level}, headers=_h(lang)))
     out["audio"] = {
         "started": episode,
@@ -173,12 +175,12 @@ async def _student(
                 "kind": kind,
                 "text": text,
                 "started": st,
-                "job": await _wait(c, st.get("job_id"), timeout_s),
+                "job": await _wait(c, st.get("job_id"), timeout_s, _h(lang)),
             }
             for kind, text, st in zip(("solid", "partial"), SOLO[lang], solos, strict=True)
         ],
     }
-    job = await _wait(c, daily.get("plan_job_id"), timeout_s)
+    job = await _wait(c, daily.get("plan_job_id"), timeout_s, _h(lang))
     daily = await _ok(await c.get("/api/daily", headers=_h(lang)))
     out["daily_plan"] = {
         "job": job,
@@ -216,7 +218,7 @@ async def _wisdom(
     if trap is None:
         return {"skipped": "every concept of the class quiz set already has a tip"}
     jobs = await seed_wisdom(sm, code, course_name=course, trap=trap, students=TRAP_STUDENTS)
-    waited = [await _wait(c, str(j), timeout_s) for j in jobs]
+    waited = [await _wait(c, str(j), timeout_s, _h(LANGS[0])) for j in jobs]
     tips = {}
     for lang in LANGS:
         got = await _ok(await c.get("/api/wisdom", params={"world_id": world_id}, headers=_h(lang)))

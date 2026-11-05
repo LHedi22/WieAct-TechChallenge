@@ -55,7 +55,7 @@ async def test_generated_once_for_the_class_and_answers_never_leak(api, sm, pptx
     assert again["job_id"] == start["job_id"]  # a classmate at the same moment shares the job
     await Worker(sm).drain(timeout_s=60)
 
-    job = (await api.get(f"/api/jobs/{start['job_id']}")).json()
+    job = (await api.get(f"/api/jobs/{start['job_id']}", headers=SEA)).json()
     assert job["status"] == "done" and "answer_index" not in json.dumps(job)
     cached = (
         await api.post("/api/placement/start", json={"course_id": course}, headers=OWL_FR)

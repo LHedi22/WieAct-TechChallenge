@@ -51,12 +51,17 @@ def api(sm):
     return httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test")
 
 
+DEV = {"X-Dev-User": "JobTester"}  # jobs are owner-only to read since audit F-ACL-2
+
+
 async def get(api, job_id):
-    return (await api.get(f"/api/jobs/{job_id}")).json()
+    return (await api.get(f"/api/jobs/{job_id}", headers=DEV)).json()
 
 
 async def test_demo_job_runs_end_to_end(sm, gw, api):
-    created = await api.post("/api/dev/demo-jobs", json={"lane": "interactive", "language": "fr"})
+    created = await api.post(
+        "/api/dev/demo-jobs", headers=DEV, json={"lane": "interactive", "language": "fr"}
+    )
     assert created.status_code == 202 and created.json()["cost"] == 0
     job_id = created.json()["job_id"]
     queued = await get(api, job_id)
@@ -74,7 +79,7 @@ async def test_demo_job_runs_end_to_end(sm, gw, api):
 async def test_quick_mode_reaches_the_job(sm, gw, api, mock_llm):
     mock_llm.state.cfg = mock_llm.state.cfg.model_copy(update={"p_503_mid": 1.0})
     gw._sleep = lambda _: asyncio.sleep(0)
-    job_id = (await api.post("/api/dev/demo-jobs", json={})).json()["job_id"]
+    job_id = (await api.post("/api/dev/demo-jobs", headers=DEV, json={})).json()["job_id"]
     await Worker(sm).drain()
     done = await get(api, job_id)
     assert done["status"] == "done" and done["quick_mode"]
@@ -83,10 +88,14 @@ async def test_quick_mode_reaches_the_job(sm, gw, api, mock_llm):
 
 async def test_interactive_jumps_the_background_queue(sm, api):
     bg = [
-        (await api.post("/api/dev/demo-jobs", json={"lane": "background"})).json()["job_id"]
+        (await api.post("/api/dev/demo-jobs", headers=DEV, json={"lane": "background"})).json()[
+            "job_id"
+        ]
         for _ in range(2)
     ]
-    fg = (await api.post("/api/dev/demo-jobs", json={"lane": "interactive"})).json()["job_id"]
+    fg = (await api.post("/api/dev/demo-jobs", headers=DEV, json={"lane": "interactive"})).json()[
+        "job_id"
+    ]
     assert (await get(api, fg))["queue_position"] == 1
     assert [(await get(api, j))["queue_position"] for j in bg] == [2, 3]
 
@@ -102,7 +111,7 @@ async def test_quota_defers_the_job_then_it_completes(sm, gw, api, monkeypatch):
         return await real_run(task)
 
     monkeypatch.setattr(gateway_module, "run", flaky)
-    job_id = (await api.post("/api/dev/demo-jobs", json={})).json()["job_id"]
+    job_id = (await api.post("/api/dev/demo-jobs", headers=DEV, json={})).json()["job_id"]
     worker = Worker(sm)
     await worker.tick()
     await asyncio.wait(list(worker.running["interactive"]))
@@ -119,23 +128,23 @@ async def test_gateway_error_fails_the_job_with_an_i18n_key(sm, api, monkeypatch
         raise BadOutput("nope")
 
     monkeypatch.setattr(gateway_module, "run", broken)
-    job_id = (await api.post("/api/dev/demo-jobs", json={})).json()["job_id"]
+    job_id = (await api.post("/api/dev/demo-jobs", headers=DEV, json={})).json()["job_id"]
     await Worker(sm).drain()
     failed = await get(api, job_id)
     assert failed["status"] == "failed" and failed["error"] == "errors.ai_failed"
 
 
 async def test_cancel_only_while_queued(sm, gw, api):
-    job_id = (await api.post("/api/dev/demo-jobs", json={})).json()["job_id"]
-    r = await api.post(f"/api/jobs/{job_id}/cancel")
+    job_id = (await api.post("/api/dev/demo-jobs", headers=DEV, json={})).json()["job_id"]
+    r = await api.post(f"/api/jobs/{job_id}/cancel", headers=DEV)
     assert r.status_code == 200 and r.json()["status"] == "cancelled"
     await Worker(sm).drain()  # a cancelled job never runs
     assert (await get(api, job_id))["status"] == "cancelled"
-    assert (await api.post(f"/api/jobs/{job_id}/cancel")).status_code == 409
+    assert (await api.post(f"/api/jobs/{job_id}/cancel", headers=DEV)).status_code == 409
 
 
 async def test_unknown_job_is_404(api):
-    r = await api.get("/api/jobs/00000000-0000-0000-0000-000000000000")
+    r = await api.get("/api/jobs/00000000-0000-0000-0000-000000000000", headers=DEV)
     assert r.status_code == 404 and r.json()["detail"] == "errors.job_not_found"
 
 
@@ -182,7 +191,7 @@ async def test_background_jobs_are_capped_so_interactive_can_run(sm):
 
 async def test_admin_stats_and_system_status(sm, gw, api):
     for _ in range(2):
-        await api.post("/api/dev/demo-jobs", json={"cache_key": "ch1:en"})
+        await api.post("/api/dev/demo-jobs", headers=DEV, json={"cache_key": "ch1:en"})
     await Worker(sm).drain()
     stats = (await api.get("/api/admin/stats", params={"provider": "mock"})).json()
     assert stats["calls"] == 1 and stats["cache_hits"] == 1 and stats["repeated_identical"] == 0

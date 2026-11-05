@@ -34,7 +34,7 @@ async def test_one_mid_call_per_episode_then_free_for_the_class(api, sm, pptx): 
     shared = (await generate(api, chapter, SEA)).json()
     assert shared == {"job_id": start["job_id"], "cost": 0, "cached": False}
     await Worker(sm).drain(timeout_s=60)
-    job = (await api.get(f"/api/jobs/{start['job_id']}")).json()
+    job = (await api.get(f"/api/jobs/{start['job_id']}", headers=OWL_FR)).json()
     assert job["status"] == "done" and job["stages"] == ["reading_chapter", "writing_script"]
     assert await coins(api, OWL_FR) == wallet - economy.COST["generate_shared_asset"]
 
@@ -60,7 +60,9 @@ async def test_unusable_script_refunds_the_pool_and_a_retry_calls_again(  # noqa
     monkeypatch.setitem(mock_app.GENERATORS, "AUDIO_SCRIPT", lambda *a, **k: {"segments": []})
     start = (await generate(api, chapter, OWL_FR, pay="pool")).json()
     await Worker(sm).drain(timeout_s=60)
-    assert (await api.get(f"/api/jobs/{start['job_id']}")).json()["status"] == "failed"
+    assert (await api.get(f"/api/jobs/{start['job_id']}", headers=OWL_FR)).json()[
+        "status"
+    ] == "failed"
     assert (await api.get(pool_url, headers=SEA)).json()["balance"] == 20
 
     monkeypatch.setitem(mock_app.GENERATORS, "AUDIO_SCRIPT", real)

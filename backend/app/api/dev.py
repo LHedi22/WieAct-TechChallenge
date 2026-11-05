@@ -35,13 +35,14 @@ class JobCreated(BaseModel):
 
 @router.post("/demo-jobs", response_model=JobCreated, status_code=202)
 async def create_demo_job(
-    body: DemoJobIn, s: Annotated[AsyncSession, Depends(get_session)]
+    body: DemoJobIn, s: Annotated[AsyncSession, Depends(get_session)], user: CurrentUser
 ) -> JobCreated:
     job = await service.create_job(
         s,
         kind=demo.KIND,
         lane=body.lane,
         payload={"language": body.language, "cache_key": body.cache_key, "topic": body.topic},
+        user_id=user.id,  # jobs are owner-only to read (audit F-ACL-2)
     )
     return JobCreated(job_id=str(job.id), cost=job.cost, cached=False)
 

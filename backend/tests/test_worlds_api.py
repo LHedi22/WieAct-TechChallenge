@@ -169,7 +169,7 @@ async def test_dev_search_job(api, sm, pptx):
     )
     assert r.status_code == 202
     await Worker(sm).drain(timeout_s=30)
-    job = (await api.get(f"/api/jobs/{r.json()['job_id']}")).json()
+    job = (await api.get(f"/api/jobs/{r.json()['job_id']}", headers=SEA)).json()
     hits = job["result"]["hits"]
     assert job["status"] == "done" and hits and hits[0]["chapter_id"] == chapter
     assert "queue" in hits[0]["text"].lower()

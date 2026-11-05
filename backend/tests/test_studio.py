@@ -49,7 +49,7 @@ async def test_one_pack_costs_one_mid_and_two_compact_calls_then_is_free(api, sm
     assert await coins(api, OWL_FR) == wallet - economy.COST["generate_shared_asset"]
 
     await Worker(sm).drain(timeout_s=60)
-    job = (await api.get(f"/api/jobs/{start['job_id']}")).json()
+    job = (await api.get(f"/api/jobs/{start['job_id']}", headers=OWL_FR)).json()
     assert job["status"] == "done" and job["result"]["missing"] == []
     assert job["stages"] == ["reading_chapter", "writing_notes", "making_flashcards", "drawing_map"]
     assert (await calls(sm, "NOTES_WRITE"), await calls(sm, "FLASHCARDS")) == (1, 1)
@@ -82,7 +82,7 @@ async def test_pool_pays_and_a_failed_pack_refunds_the_pool(api, sm, pptx, monke
     start = (await generate(api, chapter, OWL_FR, pay="pool")).json()
     assert (await api.get(pool_url, headers=SEA)).json()["balance"] == 5
     await Worker(sm).drain(timeout_s=60)
-    job = (await api.get(f"/api/jobs/{start['job_id']}")).json()
+    job = (await api.get(f"/api/jobs/{start['job_id']}", headers=OWL_FR)).json()
     assert job["status"] == "failed"
     assert (await api.get(pool_url, headers=SEA)).json()["balance"] == 20  # refunded
     assert await coins(api, OWL_FR) == wallet  # the student's wallet was never touched
@@ -105,7 +105,7 @@ async def test_a_failed_map_keeps_the_notes_and_cards_and_a_free_run_fills_it(  
     monkeypatch.setitem(mock_app.GENERATORS, "MAP_WRITE", lambda *a, **k: {"root": ""})
     start = (await generate(api, chapter, OWL_FR)).json()
     await Worker(sm).drain(timeout_s=60)
-    job = (await api.get(f"/api/jobs/{start['job_id']}")).json()
+    job = (await api.get(f"/api/jobs/{start['job_id']}", headers=OWL_FR)).json()
     assert job["status"] == "done" and job["result"]["missing"] == ["map"]
     view = await studio(api, chapter, SEA)
     assert view["notes"] and view["map"] is None and view["cards"]["total"] > 0
