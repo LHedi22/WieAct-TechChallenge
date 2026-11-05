@@ -517,3 +517,18 @@ fatal"), but every Tutor, quiz and pack start fails during that time. Consider r
 
 **N-9, embedding retries cost quota.** During an embeddings outage one interactive start made 16 calls, and
 on the platform each uses a unit of the separately metered embeddings quota. Consider capping the retries.
+
+## Errata, 5 Nov
+
+These correct two statements above. The text above is left as written.
+
+1. **Main journeys: 16, not 20.** The summary, the Phase 2 table row and the Phase 2 section say
+   "20/20". `audit/e2e/tests/main.spec.ts` runs 16 main journeys: 4 languages × 4 browser setups
+   (Chromium 1440×900, Chromium 390×844, Firefox, WebKit). All 16 passed, and they passed again after
+   each fix tier. `audit/REQUIREMENTS.md` is corrected.
+2. **The arena feedback "leak" was a false positive.** In the Tier 1 and Tier 2 re-runs
+   (`audit/logs/tier1-acl.log`, `tier2-acl.log`), `acl_probe.py` reported "question author does not see
+   another student's AI feedback" as FAIL. The probe looked for the *key* `feedback` in the response, but
+   that key is always present and is `null` on answers that aren't the viewer's own. The Phase 3 result
+   ("a third student sees no AI feedback … Pass") stands. The probe now flags only a non-null feedback on
+   someone else's answer.

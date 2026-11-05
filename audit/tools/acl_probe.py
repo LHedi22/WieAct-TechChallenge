@@ -245,7 +245,10 @@ def main():
     if qid:
         # peer feedback stays with its author: alice (question author) must not see bob's ai_feedback
         s, r = call(A, "GET", f"/api/arena/questions/{qid}")
-        leaked = [k for k in ("ai_feedback", "feedback") if k in json.dumps(r)]
+        # a leak is a non-null feedback on an answer that isn't alice's (the key itself is always
+        # there with null: checking only for the key was a false positive, errata 2026-11-05)
+        rows = (r.get("answers") or []) + [r.get("my_answer")] if isinstance(r, dict) else []
+        leaked = [a["id"] for a in rows if a and not a.get("is_mine") and (a.get("feedback") or a.get("ai_feedback"))]
         check("question author does not see another student's AI feedback", 200 if not leaked else 500, {200}, str(leaked))
         s, r = call(B, "GET", f"/api/arena/questions/{qid}")
         print("bob (author of answer) view:", str(r)[:300])

@@ -8,7 +8,7 @@ Sources: Spec = `EdNova_Challenge_Specification.pdf`, Guide = `EdNova_Guide.pdf`
 ## Challenge rules, deliverables, platform contract
 | Requirement | Source | Code | Proof | Status |
 | --- | --- | --- | --- | --- |
-| Working end-to-end app, no mockups | Spec | whole repo | Phase 2: 20/20 main journeys, 16/16 sweeps | works |
+| Working end-to-end app, no mockups | Spec | whole repo | Phase 2: 16/16 main journeys, 16/16 sweeps (errata 2026-11-05: 16, not 20) | works |
 | Key never in code/repo/logs | Spec | `config.py` SecretStr, `.gitignore` | gitleaks full history (119 commits): 0 leaks; bundle scan clean | works |
 | Base URL configurable | Spec | `CLOUD_BASE_URL` | constraint-auditor; prodlike points it at the mock | works |
 | No streaming; jobs + polling | Guide | `jobs/`, `useJob` | every journey | works |
