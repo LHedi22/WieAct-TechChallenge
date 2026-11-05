@@ -19,6 +19,7 @@ from app.core.wallet_rules import tunis_day
 from app.features.daily import plan
 from app.features.wallet import service as wallet
 from app.gateway import Task, TaskKind
+from app.gateway.cache import content_key
 from app.jobs.registry import JobContext, job
 from app.jobs.service import create_job
 from app.models import (
@@ -192,7 +193,9 @@ async def plan_day(ctx: JobContext) -> dict[str, Any]:
                 lane="background",
                 messages=messages,
                 language=user.ui_language,
-                cache_key=f"daily:{user.id}:{day.isoformat()}:{user.ui_language}:v{version}",
+                # Shared only between students whose full prompt is identical; the prompt holds
+                # no identity (audit F-CACHE-1: the per-user key repeated identical mid calls).
+                cache_key=content_key(messages, language=user.ui_language),
                 prompt_version=version,
             )
         )

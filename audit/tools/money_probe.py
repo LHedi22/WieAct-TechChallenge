@@ -4,6 +4,7 @@ Each scenario fires N identical requests at once from threads, then checks the A
 ledgers in Postgres (via `docker compose exec db psql`)."""
 
 import json
+import os
 import subprocess
 import sys
 import time
@@ -18,7 +19,7 @@ R = uuid.uuid4().hex[:5]
 
 def sql(q):
     out = subprocess.run(
-        ["docker", "compose", "-p", "lw-audit", "exec", "-T", "db", "psql", "-U", "lw", "-d", "learningworld", "-tAc", q],
+        ["docker", "compose", "-p", os.environ.get("AUDIT_PROJECT", "lw-audit"), "exec", "-T", "db", "psql", "-U", "lw", "-d", "learningworld", "-tAc", q],
         capture_output=True, text=True,
     )
     return out.stdout.strip()

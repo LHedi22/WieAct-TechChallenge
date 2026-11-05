@@ -56,9 +56,13 @@ queue position and ETA. Coins are committed on success and refunded on failure.
 a 30-page PDF + a 12-slide PPTX index with 6 tagging calls (8 chunks per call) + 2 embeddings calls
 (32 texts per call); a quiz is 10 questions in one call; a study pack is 1 mid + 2 compact calls
 for the whole class; a Class Wisdom tip is one call for every language of the class.
-Shareable outputs are cached per `world, chapter, level, language` and identical requests in
-flight are single-flighted. The end-to-end test runs finished with **0 repeated identical
-requests**.
+Shareable outputs are cached per `world, chapter, level, language`, the daily plan is cached on
+its full prompt (which holds no identity), and identical requests in flight are single-flighted.
+Repeated identical requests, measured on the mock on 5 Nov 2026 after 32 browser students, the
+fault probes and a 30-job load test: **0 in our call log**; an independent proxy in front of the
+mock saw **2**, both retries of one request that we deliberately made time out (the server still
+answered after our 90 s timeout). Before the audit fix the same kind of run gave 37, 30 of them
+daily plans (`docs/report/AUDIT.md`, F-CACHE-1).
 
 **Error contract → behaviour** (`backend/tests/test_gateway_contract.py` covers every row)
 

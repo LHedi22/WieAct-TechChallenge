@@ -19,6 +19,16 @@ def cache_key(provider: str, model: str, kind: str, prompt_version: str, key: st
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
+def content_key(messages: list[dict[str, Any]], **params: Any) -> str:
+    """A cache key from the full rendered prompt and the request parameters (audit F-CACHE-1).
+
+    For tasks whose prompt holds no identity (no nickname, no user id): students who would send a
+    byte-identical request share one answer, and any difference in the prompt (mistakes, goals,
+    style, language) gets its own entry. `cache_key()` adds provider, model, kind and version."""
+    raw = json.dumps([messages, params], sort_keys=True, ensure_ascii=False)
+    return "content:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
 def request_hash(provider: str, model: str, messages: list[dict[str, Any]], **params: Any) -> str:
     raw = json.dumps([provider, model, messages, params], sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
