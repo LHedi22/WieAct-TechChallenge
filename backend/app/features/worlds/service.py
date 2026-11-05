@@ -64,6 +64,14 @@ class Rejected(Exception):
         self.params = params
 
 
+class Forbidden(Exception):
+    """A member asked for something only the world's creator may do (audit F-ACL-1)."""
+
+    def __init__(self, key: str = "errors.forbidden") -> None:
+        super().__init__(key)
+        self.key = key
+
+
 def new_join_code() -> str:
     suffix = "".join(secrets.choice(CODE_CHARS) for _ in range(3))
     return f"{secrets.choice(CODE_WORDS)}-{suffix}"
@@ -109,12 +117,28 @@ async def member_world(s: AsyncSession, user: User, world_id: uuid.UUID) -> Worl
     return world
 
 
+async def creator_world(s: AsyncSession, user: User, world_id: uuid.UUID) -> World:
+    """The world, for changing its course material: outsiders get NotFound (as for reads), members
+    who aren't the creator get Forbidden. Members read and learn; the creator curates."""
+    world = await member_world(s, user, world_id)
+    if world.creator_id != user.id:
+        raise Forbidden()
+    return world
+
+
 async def member_chapter(s: AsyncSession, user: User, chapter_id: uuid.UUID) -> Chapter:
     chapter = await s.get(Chapter, chapter_id)
     if chapter is None:
         raise NotFound("errors.world_not_found")
     course = await s.get(Course, chapter.course_id)
     await member_world(s, user, course.world_id)
+    return chapter
+
+
+async def creator_chapter(s: AsyncSession, user: User, chapter_id: uuid.UUID) -> Chapter:
+    chapter = await member_chapter(s, user, chapter_id)
+    course = await s.get(Course, chapter.course_id)
+    await creator_world(s, user, course.world_id)
     return chapter
 
 
