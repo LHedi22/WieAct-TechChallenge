@@ -1,0 +1,131 @@
+{
+  "provider": "local",
+  "model": "llama3.2:3b",
+  "prompt": "quiz_generate v3",
+  "language": "fr",
+  "generated_at": "2026-11-05T16:57:06.947331+00:00",
+  "calls": 4,
+  "count": 4,
+  "checks_passed": {
+    "valid": 4,
+    "four_distinct_options": 4,
+    "answer_in_range": 4,
+    "language_script": 3,
+    "concept_in_context": 0,
+    "hint_hides_answer": 4
+  },
+  "questions": [
+    {
+      "chapter": "Limits and derivatives",
+      "question": {
+        "hint": "Regardez comment traiter le terme x^3",
+        "concept": "Règle de puissance",
+        "options": [
+          "12x^2",
+          "4x^2",
+          "4x",
+          "12x"
+        ],
+        "question": "Différencier f(x) = 4x^3 - 2x + 7",
+        "explanation": "L application de la règle de puissance donne la dérivée de f(x) = 4x^3 - 2x + 7, qui est f'(x) = 12x^2 - 2.",
+        "answer_index": 0
+      },
+      "checks": {
+        "valid": true,
+        "four_distinct_options": true,
+        "answer_in_range": true,
+        "language_script": false,
+        "concept_in_context": false,
+        "hint_hides_answer": true
+      },
+      "review": {
+        "correct": null,
+        "notes": ""
+      }
+    },
+    {
+      "chapter": "Integrals",
+      "question": {
+        "hint": "Définissez la fonction f(x) = x^2 et utilisez la formule de l'intégrale de x^n.",
+        "concept": "intégrale de x^n",
+        "options": [
+          "x^3/3",
+          "x^4/4",
+          "x^2/2",
+          "x^3/3 + C"
+        ],
+        "question": "Quelle est la valeur de l'intégrale de x^2 dx ?",
+        "explanation": "La formule de l'intégrale de x^n est Ãx^{n+1}/(n+1) + C. En branchant n = 2, on obtient Ãx^3/3 + C.",
+        "answer_index": 2
+      },
+      "checks": {
+        "valid": true,
+        "four_distinct_options": true,
+        "answer_in_range": true,
+        "language_script": true,
+        "concept_in_context": false,
+        "hint_hides_answer": true
+      },
+      "review": {
+        "correct": null,
+        "notes": ""
+      }
+    },
+    {
+      "chapter": "Stacks and queues",
+      "question": {
+        "hint": "La variable de sommet est utilisée pour suivre le dernier élément ajouté",
+        "concept": "Variable de sommet",
+        "options": [
+          "Incrementer la taille de la pile",
+          "Incrementer l'index de sommet",
+          "Écrire à la fin de la pile",
+          "Supprimer de la pile"
+        ],
+        "question": "Quelle est la fonction de la variable de sommet dans une pile basée sur une liste?",
+        "explanation": "La variable de sommet est utilisée pour suivre le dernier élément ajouté à la pile, ce qui permet de récupérer l'élément en haut de la pile en un temps constant.",
+        "answer_index": 1
+      },
+      "checks": {
+        "valid": true,
+        "four_distinct_options": true,
+        "answer_in_range": true,
+        "language_script": true,
+        "concept_in_context": false,
+        "hint_hides_answer": true
+      },
+      "review": {
+        "correct": null,
+        "notes": ""
+      }
+    },
+    {
+      "chapter": "Limits and derivatives",
+      "question": {
+        "question": "La ligne tangente à y = x^3 à x = 2 est : ",
+        "options": [
+          "y = x^3",
+          "y = 6x^2",
+          "y = 12x",
+          "y = 6x"
+        ],
+        "answer_index": 0,
+        "hint": "Essayez la substitution directe",
+        "explanation": "La ligne tangente à y = x^3 à x = 2 est y = 6x^2",
+        "concept": "tangente"
+      },
+      "checks": {
+        "valid": true,
+        "four_distinct_options": true,
+        "answer_in_range": true,
+        "language_script": true,
+        "concept_in_context": false,
+        "hint_hides_answer": true
+      },
+      "review": {
+        "correct": null,
+        "notes": ""
+      }
+    }
+  ]
+}

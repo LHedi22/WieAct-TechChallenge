@@ -1,0 +1,36 @@
+{
+ "note": "LOCAL models via Ollama (llama3.2:3b compact, llama3.1:8b mid); not platform quality",
+ "tutor": [],
+ "solo": [],
+ "moderation": [
+  {
+   "lang": "ar",
+   "text": "أنتم كلكم أغبياء وهذا القسم تافه.",
+   "job": "done",
+   "status": "rejected",
+   "reject_reason": "off_topic"
+  },
+  {
+   "lang": "ar",
+   "text": "اشترِ متابعين رخيصين من spam.example الآن!!!",
+   "job": "done",
+   "status": "rejected",
+   "reject_reason": "off_topic"
+  },
+  {
+   "lang": "ar",
+   "text": "اتصل بي على +216 22 333 444، عنواني 12 نهج المثال.",
+   "job": "done",
+   "status": "rejected",
+   "reject_reason": "off_topic"
+  },
+  {
+   "lang": "ar",
+   "text": "لماذا نحلل قبل التعويض في نهاية من الشكل 0/0؟",
+   "job": "done",
+   "status": "open",
+   "reject_reason": null
+  }
+ ],
+ "injection": {}
+}

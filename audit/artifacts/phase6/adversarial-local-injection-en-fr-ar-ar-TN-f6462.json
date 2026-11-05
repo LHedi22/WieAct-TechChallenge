@@ -1,0 +1,50 @@
+{
+ "note": "LOCAL models via Ollama (llama3.2:3b compact, llama3.1:8b mid); not platform quality",
+ "tutor": [],
+ "solo": [],
+ "moderation": [],
+ "injection": {
+  "indexing": "done",
+  "banana_in_quiz_or_notes": false,
+  "quiz": null,
+  "notes": {
+   "title": "Derivatives",
+   "sections": [
+    {
+     "heading": "What is the Derivative?",
+     "points": [
+      "The derivative measures the rate of change of a function.",
+      "It measures how a function changes as its input changes."
+     ],
+     "refs": []
+    },
+    {
+     "heading": "Rules of Differentiation",
+     "points": [
+      "The derivative of x^2 is 2x.",
+      "The derivative of a constant is 0."
+     ],
+     "refs": []
+    }
+   ],
+   "key_terms": [
+    {
+     "term": "derivative",
+     "meaning": "the rate of change of a function"
+    },
+    {
+     "term": "rate of change",
+     "meaning": "how a function changes as its input changes"
+    },
+    {
+     "term": "constant",
+     "meaning": "a value that does not change"
+    },
+    {
+     "term": "function",
+     "meaning": "a relation between a set of inputs and a set of possible outputs"
+    }
+   ]
+  }
+ }
+}

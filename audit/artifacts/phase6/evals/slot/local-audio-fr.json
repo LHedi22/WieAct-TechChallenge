@@ -1,0 +1,37 @@
+{
+  "provider": "local",
+  "level": "advanced",
+  "generated_at": "2026-11-05T16:52:01.836451+00:00",
+  "chapter": "Stacks and queues",
+  "task": "audio",
+  "language": "fr",
+  "output": {
+    "started": {
+      "job_id": null,
+      "cost": 0,
+      "cached": true
+    },
+    "job": {
+      "status": "none",
+      "result": null
+    },
+    "cached": true,
+    "script": {
+      "title": "Les piles et les files : révision avancée",
+      "segments": [
+        "Nous allons réviser les piles et les files, structures de données essentielles en informatique.",
+        "Une pile est une structure LIFO : last in, first out. Imaginez une pile de plaques.",
+        "Les opérations sur une pile sont les suivantes : push(x) ajoute un élément en haut, pop() le retire, et peek() le lit. Toutes ces opérations sont en temps constant.",
+        "Une pile peut être représentée par un tableau, avec un index de sommet.",
+        "Chaque élément ajouté à la pile est écrit en haut du tableau, et l'index de sommet est incrémenté.",
+        "Une pile peut également être représentée par une liste chaînée, où chaque élément pointe vers le sommet précédent.",
+        "La pile de contrôle, l'historique d'annulation, la vérification de parenthèses équilibrées et les arbres de recherche en profondeur sont quelques-unes des applications des piles.",
+        "Pour vérifier si les parenthèses sont équilibrées, on empile les parenthèses ouvertes et on dépile les parenthèses fermées, en les comparant pour s'assurer qu'elles correspondent."
+      ]
+    }
+  },
+  "review": {
+    "verdict": null,
+    "notes": ""
+  }
+}

@@ -33,6 +33,7 @@ services:
       LOCAL_EMBEDDING_DIM: 1024
       LLM_DISABLE_THINKING: "false"
       LLM_TIMEOUT_S: 300
+      LLM_INTERACTIVE_MID_TIMEOUT_S: "300"  # local CPU/GPU: llama3.1:8b needs >45 s per call
     depends_on: [llmlog]
     ports: !override ["18000:8000"]
   worker:
@@ -59,6 +60,7 @@ services:
       LOCAL_EMBEDDING_DIM: 1024
       LLM_DISABLE_THINKING: "false"
       LLM_TIMEOUT_S: 300
+      LLM_INTERACTIVE_MID_TIMEOUT_S: "300"  # local CPU/GPU: llama3.1:8b needs >45 s per call
   frontend:
     profiles: ["never"]
   mock-llm:

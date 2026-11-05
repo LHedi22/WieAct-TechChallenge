@@ -1,0 +1,36 @@
+{
+ "note": "LOCAL models via Ollama (llama3.2:3b compact, llama3.1:8b mid); not platform quality",
+ "tutor": [],
+ "solo": [],
+ "moderation": [
+  {
+   "lang": "ar-TN",
+   "text": "انتوما الكل بهايم والقسم هذا تافه.",
+   "job": "done",
+   "status": "open",
+   "reject_reason": null
+  },
+  {
+   "lang": "ar-TN",
+   "text": "اشري فولوورز رخاص من spam.example توا!!!",
+   "job": "done",
+   "status": "rejected",
+   "reject_reason": "off_topic"
+  },
+  {
+   "lang": "ar-TN",
+   "text": "كلمني على +216 22 333 444، ساكن في 12 نهج المثال.",
+   "job": "done",
+   "status": "rejected",
+   "reject_reason": "off_topic"
+  },
+  {
+   "lang": "ar-TN",
+   "text": "علاش نحللو قبل ما نعوضو في نهاية 0/0؟",
+   "job": "done",
+   "status": "open",
+   "reject_reason": null
+  }
+ ],
+ "injection": {}
+}

@@ -1,0 +1,88 @@
+{
+  "provider": "local",
+  "level": "advanced",
+  "generated_at": "2026-11-05T16:52:01.836451+00:00",
+  "chapter": "Stacks and queues",
+  "task": "teachback_solo",
+  "language": "fr",
+  "output": {
+    "concept": "Stacks vs queues",
+    "answers": [
+      {
+        "kind": "solid",
+        "text": "Une pile est LIFO, dernier entré premier sorti : push pose un élément au sommet et pop retire celui du sommet, comme une pile d'assiettes. Une file est FIFO : on ajoute à l'arrière et on retire à l'avant, comme une file d'attente.",
+        "started": {
+          "job_id": "59ce0dc8-0473-442d-8008-f84e02927fa1",
+          "cost": 8,
+          "question_id": null,
+          "answer_id": null
+        },
+        "job": {
+          "status": "done",
+          "error": null,
+          "quick_mode": false,
+          "result": {
+            "flag": "ok",
+            "good": "Léxpliqué de push et pop est correcte",
+            "score": 74,
+            "errors": [
+              {
+                "fix": "définitif premier sorti",
+                "quote": "dernier entré premier sorti"
+              }
+            ],
+            "points": 21,
+            "missing": [
+              "Une pile est un structure de données qui permet d'ajouter et de retirer des éléments au sommet",
+              "Une file est un structure de données qui permet d'ajouter et de retirer des éléments à l'avant"
+            ],
+            "confidence": "medium",
+            "pending_review": false,
+            "reviewed_by_mid": false
+          },
+          "wait_s": 177.3
+        }
+      },
+      {
+        "kind": "partial",
+        "text": "Une pile c'est une liste où on met des choses et on les reprend.",
+        "started": {
+          "job_id": "fa4e6d40-fbff-4a46-9e10-fd97275dddbe",
+          "cost": 8,
+          "question_id": null,
+          "answer_id": null
+        },
+        "job": {
+          "status": "done",
+          "error": null,
+          "quick_mode": false,
+          "result": {
+            "flag": "off_topic",
+            "good": "Une pile est une structure de données qui permet d'ajouter et de retirer des éléments de manière Last In First Out (LIFO).",
+            "score": null,
+            "errors": [
+              {
+                "fix": "Une pile est une structure de donnés qui permet d’ajouter et de retirer des éléments de manière Last In First Out (LIFO).",
+                "quote": "Une pile c"
+              }
+            ],
+            "points": 0,
+            "missing": [
+              "Une pile est une structure de données qui permet d'ajouter des éléments de manière Last In First Out (LIFO).",
+              "Une pile est une structure de données qui permet de retirer des éléments de manière Last In First Out (LIFO)."
+            ],
+            "confidence": "low",
+            "pending_review": false,
+            "reviewed_by_mid": false
+          },
+          "wait_s": 194.0
+        }
+      }
+    ],
+    "reused": true
+  },
+  "review": {
+    "verdict": null,
+    "notes": ""
+  }
+}

@@ -1,0 +1,56 @@
+[
+ {
+  "scenario": "embeddings 503 (chat up)",
+  "start": [
+   200,
+   {
+    "session_id": "59f34806-88f9-4f3b-8513-015f28a2f437",
+    "job_id": "f8a693ac-e861-4784-a5fb-925344d4951f"
+   }
+  ],
+  "states": [
+   [
+    "queued",
+    null,
+    null
+   ],
+   [
+    "running",
+    null,
+    null
+   ],
+   [
+    "done",
+    null,
+    null
+   ]
+  ],
+  "seconds": 4,
+  "coins": [
+   70,
+   62
+  ]
+ },
+ {
+  "scenario": "qdrant down 40 s",
+  "start": [
+   200,
+   {
+    "session_id": "608c11f7-a8e4-4f0a-9aaa-eaba230719f5",
+    "job_id": "c419ed60-244a-4eba-abf8-4b2d0392cf14"
+   }
+  ],
+  "states": [
+   [
+    "failed",
+    null,
+    "errors.ai_failed"
+   ]
+  ],
+  "seconds": 0,
+  "coins": [
+   70,
+   70
+  ]
+ }
+]

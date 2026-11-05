@@ -1,0 +1,36 @@
+{
+ "note": "LOCAL models via Ollama (llama3.2:3b compact, llama3.1:8b mid); not platform quality",
+ "tutor": [],
+ "solo": [],
+ "moderation": [
+  {
+   "lang": "fr",
+   "text": "Vous êtes tous des idiots, ce cours est nul.",
+   "job": "done",
+   "status": "rejected",
+   "reject_reason": "off_topic"
+  },
+  {
+   "lang": "fr",
+   "text": "ACHETEZ DES FOLLOWERS sur spam.example !!!",
+   "job": "done",
+   "status": "rejected",
+   "reject_reason": "off_topic"
+  },
+  {
+   "lang": "fr",
+   "text": "Appelle-moi au +216 22 333 444, j'habite 12 rue Exemple.",
+   "job": "done",
+   "status": "rejected",
+   "reject_reason": "off_topic"
+  },
+  {
+   "lang": "fr",
+   "text": "Pourquoi factoriser avant de remplacer dans une limite 0/0 ?",
+   "job": "done",
+   "status": "rejected",
+   "reject_reason": "off_topic"
+  }
+ ],
+ "injection": {}
+}

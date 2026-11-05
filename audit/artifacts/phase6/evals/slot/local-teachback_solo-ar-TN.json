@@ -1,0 +1,100 @@
+{
+  "provider": "local",
+  "level": "advanced",
+  "generated_at": "2026-11-05T16:52:01.836451+00:00",
+  "chapter": "Stacks and queues",
+  "task": "teachback_solo",
+  "language": "ar-TN",
+  "output": {
+    "concept": "Stacks vs queues",
+    "answers": [
+      {
+        "kind": "solid",
+        "text": "الـ stack يخدم بالـ LIFO: اللي يدخل اللخر يخرج الأول. push تحط حاجة الفوق و pop تنحّي اللي الفوق، كيف كدس الصحون. أما الـ queue فهي FIFO: نزيدو من التالي ونخرجو من القدام، كيف الصف قدام الكونتوار.",
+        "started": {
+          "job_id": "7c73337c-1964-41dc-8831-522f5e93d7e8",
+          "cost": 8,
+          "question_id": null,
+          "answer_id": null
+        },
+        "job": {
+          "status": "done",
+          "error": null,
+          "quick_mode": false,
+          "result": {
+            "flag": "ok",
+            "good": "You correctly explained that a stack is a LIFO structure and compared it to a pile of plates.",
+            "score": 74,
+            "errors": [
+              {
+                "fix": "should be 'last in, first out' instead of 'اللي يدخل اللخر يخرج الأول'",
+                "quote": "اللي يدخل اللخر يخرج الأول"
+              },
+              {
+                "fix": "should be 'like a pile of plates' instead of 'كيف كدس الصحون'",
+                "quote": " كيف كدس الصحون"
+              }
+            ],
+            "points": 21,
+            "missing": [
+              "Deque: both ends.",
+              "enqueue(x) adds at the back, dequeue() removes from the front. O(1)."
+            ],
+            "confidence": "medium",
+            "pending_review": false,
+            "reviewed_by_mid": true
+          },
+          "wait_s": 375.9
+        }
+      },
+      {
+        "kind": "partial",
+        "text": "الـ stack هي ليستة نحطو فيها حوايج ومن بعد ناخذوهم.",
+        "started": {
+          "job_id": "730d1c40-81ca-4736-b3be-3d0beac8eed6",
+          "cost": 8,
+          "question_id": null,
+          "answer_id": null
+        },
+        "job": {
+          "status": "done",
+          "error": null,
+          "quick_mode": false,
+          "result": {
+            "flag": "ok",
+            "good": "شرح لما هي structure stack وتم إخبارها بأنها LIFO",
+            "score": 74,
+            "errors": [
+              {
+                "fix": "لم يشر إلى أن stack هي structure LIFO",
+                "quote": "الـ stack هي ليستة نحطو فيها حوايج ومن بعد ناخذوهم."
+              },
+              {
+                "fix": "لم يشر إلى أن stack يحتاج إلى index لتحديد الطرف العلوي",
+                "quote": "الـ stack هي ليستة نحطو فيها حوايج ومن بعد ناخذوهم."
+              },
+              {
+                "fix": "لم يشر إلى أن queue هي structure FIFO",
+                "quote": "الـ stack هي ليستة نحطو فيها حوايج ومن بعد ناخذوهم."
+              }
+            ],
+            "points": 21,
+            "missing": [
+              "لم يشر إلى أن stack يمكن أن تكون array-based",
+              "لم يشر إلى أن queue يمكن أن يكون لها نهايتين، مثل deque"
+            ],
+            "confidence": "medium",
+            "pending_review": false,
+            "reviewed_by_mid": true
+          },
+          "wait_s": 0.0
+        }
+      }
+    ],
+    "reused": true
+  },
+  "review": {
+    "verdict": null,
+    "notes": ""
+  }
+}

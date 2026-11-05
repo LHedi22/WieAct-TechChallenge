@@ -3,6 +3,7 @@ laptop, so outages are made with `docker stop/start` and the mock's fault switch
     PYTHONIOENCODING=utf-8 python audit/tools/chaos_probe.py"""
 
 import json
+import os
 import subprocess
 import sys
 import time
@@ -14,6 +15,8 @@ from acl_probe import call  # noqa: E402
 
 MOCK = "http://127.0.0.1:9000"
 OUT = []
+P = os.environ.get("AUDIT_PROJECT", "lw-audit")  # compose project whose containers are stopped
+ONLY = set(sys.argv[1:]) or {"1", "2", "3", "4"}  # scenarios to run (each fits a 10-min step)
 
 
 def mock(**cfg):
@@ -60,49 +63,53 @@ def record(name, u, start_resp, states, secs, coins_before):
 
 
 # 1. Embeddings failing while chat works: tutor start needs a query embedding (narrow-before-generating)
-u, ch = student()
-c0 = call(u, "GET", "/api/wallet")[1]["coins"]
-mock(p_503_embed=1.0)
-try:
-    s, r = call(u, "POST", "/api/tutor/start", {"chapter_id": ch, "level": "beginner"})
-    states, secs = follow(u, r["job_id"], 150) if isinstance(r, dict) and r.get("job_id") else ([], 0)
-finally:
-    mock(p_503_embed=0.0)
-record("embeddings 503 (chat up)", u, (s, r), states, secs, c0)
+if "1" in ONLY:
+    u, ch = student()
+    c0 = call(u, "GET", "/api/wallet")[1]["coins"]
+    mock(p_503_embed=1.0)
+    try:
+        s, r = call(u, "POST", "/api/tutor/start", {"chapter_id": ch, "level": "beginner"})
+        states, secs = follow(u, r["job_id"], 150) if isinstance(r, dict) and r.get("job_id") else ([], 0)
+    finally:
+        mock(p_503_embed=0.0)
+    record("embeddings 503 (chat up)", u, (s, r), states, secs, c0)
 
 # 2. Qdrant down for 40 s while a tutor session starts
-u, ch = student()
-c0 = call(u, "GET", "/api/wallet")[1]["coins"]
-docker("stop", "lw-audit-qdrant-1")
-try:
-    s, r = call(u, "POST", "/api/tutor/start", {"chapter_id": ch, "level": "advanced"})
-    hs, health = call(None, "GET", "/api/health")
-    print("health while qdrant down:", hs, health)
-    time.sleep(40)
-finally:
-    docker("start", "lw-audit-qdrant-1")
-states, secs = follow(u, r["job_id"], 200) if isinstance(r, dict) and r.get("job_id") else ([], 0)
-record("qdrant down 40 s", u, (s, r), states, secs, c0)
+if "2" in ONLY:
+    u, ch = student()
+    c0 = call(u, "GET", "/api/wallet")[1]["coins"]
+    docker("stop", f"{P}-qdrant-1")
+    try:
+        s, r = call(u, "POST", "/api/tutor/start", {"chapter_id": ch, "level": "advanced"})
+        hs, health = call(None, "GET", "/api/health")
+        print("health while qdrant down:", hs, health)
+        time.sleep(40)
+    finally:
+        docker("start", f"{P}-qdrant-1")
+    states, secs = follow(u, r["job_id"], 200) if isinstance(r, dict) and r.get("job_id") else ([], 0)
+    record("qdrant down 40 s", u, (s, r), states, secs, c0)
 
 # 3. Postgres restart while a study pack is running
-u, ch = student()
-c0 = call(u, "GET", "/api/wallet")[1]["coins"]
-s, r = call(u, "POST", f"/api/studio/{ch}/generate", {"level": "intermediate", "pay": "me"})
-time.sleep(3)
-docker("restart", "lw-audit-db-1")
-time.sleep(10)
-states, secs = follow(u, r["job_id"], 240) if isinstance(r, dict) and r.get("job_id") else ([], 0)
-record("postgres restart mid-job", u, (s, r), states, secs, c0)
-hs, health = call(None, "GET", "/api/health")
-print("health after db restart:", hs, health)
+if "3" in ONLY:
+    u, ch = student()
+    c0 = call(u, "GET", "/api/wallet")[1]["coins"]
+    s, r = call(u, "POST", f"/api/studio/{ch}/generate", {"level": "intermediate", "pay": "me"})
+    time.sleep(3)
+    docker("restart", f"{P}-db-1")
+    time.sleep(10)
+    states, secs = follow(u, r["job_id"], 240) if isinstance(r, dict) and r.get("job_id") else ([], 0)
+    record("postgres restart mid-job", u, (s, r), states, secs, c0)
+    hs, health = call(None, "GET", "/api/health")
+    print("health after db restart:", hs, health)
 
 # 4. API restart while a job runs (worker untouched): the job must finish, polling must resume
-u, ch = student()
-c0 = call(u, "GET", "/api/wallet")[1]["coins"]
-s, r = call(u, "POST", "/api/tutor/start", {"chapter_id": ch, "level": "intermediate"})
-docker("restart", "lw-audit-backend-1")
-time.sleep(15)
-states, secs = follow(u, r["job_id"], 200) if isinstance(r, dict) and r.get("job_id") else ([], 0)
-record("API restart mid-job", u, (s, r), states, secs, c0)
+if "4" in ONLY:
+    u, ch = student()
+    c0 = call(u, "GET", "/api/wallet")[1]["coins"]
+    s, r = call(u, "POST", "/api/tutor/start", {"chapter_id": ch, "level": "intermediate"})
+    docker("restart", f"{P}-backend-1")
+    time.sleep(15)
+    states, secs = follow(u, r["job_id"], 200) if isinstance(r, dict) and r.get("job_id") else ([], 0)
+    record("API restart mid-job", u, (s, r), states, secs, c0)
 
-json.dump(OUT, open("audit/logs/chaos_probe.json", "w"), indent=1, default=str)
+json.dump(OUT, open(f"audit/logs/chaos_probe-{'-'.join(sorted(ONLY))}.json", "w"), indent=1, default=str)

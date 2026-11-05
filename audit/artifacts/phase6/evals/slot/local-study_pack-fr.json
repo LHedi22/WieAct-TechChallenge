@@ -1,0 +1,153 @@
+{
+  "provider": "local",
+  "level": "advanced",
+  "generated_at": "2026-11-05T16:52:01.836451+00:00",
+  "chapter": "Stacks and queues",
+  "task": "study_pack",
+  "language": "fr",
+  "output": {
+    "started": {
+      "job_id": "0965bb88-9fe5-4751-bf40-596900d296c0",
+      "cost": 15,
+      "cached": false
+    },
+    "job": {
+      "status": "done",
+      "error": null,
+      "quick_mode": false,
+      "result": null,
+      "wait_s": 500.2
+    },
+    "cached": false,
+    "notes": {
+      "title": "Stacks and queues",
+      "sections": [
+        {
+          "heading": "Définitions",
+          "points": [
+            "Une pile est une structure LIFO : last in, first out.",
+            "La pile est un ensemble de données avec des opérations push, pop et peek.",
+            "Les opérations sont toutes en temps O(1).",
+            "Une pile peut être représentée par un tableau ou une liste chaînée."
+          ],
+          "refs": [
+            "slide:1",
+            "slide:2"
+          ]
+        },
+        {
+          "heading": "Modèles de mise en œuvre",
+          "points": [
+            "La pile peut être implémentée à l'aide d'un tableau avec un index de sommet.",
+            "La pile peut être implémentée à l'aide d'une liste chaînée avec des pointeurs.",
+            "La pile a une complexité en temps O(1) pour les opérations push, pop et peek.",
+            "La pile a une complexité en espace O(n) où n est la taille de la pile."
+          ],
+          "refs": [
+            "slide:3",
+            "slide:4"
+          ]
+        },
+        {
+          "heading": "Utilisations",
+          "points": [
+            "Les piles sont utilisées pour l'historique d'annulation, la pile d'appel et la vérification de parenthèses équilibrées.",
+            "Les piles sont utilisées pour la recherche en profondeur (DFS)."
+          ],
+          "refs": [
+            "slide:5"
+          ]
+        },
+        {
+          "heading": "Vérification de parenthèses équilibrées",
+          "points": [
+            "Pour chaque parenthèse d'ouverture, on pousse sur la pile.",
+            "Pour chaque parenthèse de fermeture, on pop la pile et on compare."
+          ],
+          "refs": [
+            "slide:6"
+          ]
+        }
+      ],
+      "key_terms": [
+        {
+          "term": "pile",
+          "meaning": "structure LIFO"
+        },
+        {
+          "term": "push",
+          "meaning": "ajouter un élément en haut de la pile"
+        },
+        {
+          "term": "pop",
+          "meaning": "retirer l'élément en haut de la pile"
+        },
+        {
+          "term": "peek",
+          "meaning": "lire l'élément en haut de la pile"
+        },
+        {
+          "term": "LIFO",
+          "meaning": "last in, first out"
+        },
+        {
+          "term": "DFS",
+          "meaning": "recherche en profondeur"
+        }
+      ]
+    },
+    "map": {
+      "root": "Piles et files",
+      "branches": [
+        {
+          "label": "Définitions",
+          "children": [
+            "Structure LIFO : last in, first out",
+            "Ensemble de données avec push, pop et peek",
+            "Opérations en temps O(1)",
+            "Représentation par un tableau ou une liste chaînée"
+          ]
+        },
+        {
+          "label": "Modèles de mise en œuvre",
+          "children": [
+            "Tableau avec un index de sommet",
+            "Liste chaînée avec des pointeurs",
+            "Complexité en temps O(1)",
+            "Complexité en espace O(n)"
+          ]
+        },
+        {
+          "label": "Utilisations",
+          "children": [
+            "Historique d'annulation",
+            "Pile d'appel",
+            "Vérification de parenthèses équilibrées",
+            "Recherche en profondeur (DFS)"
+          ]
+        },
+        {
+          "label": "Vérification de parenthèses équilibrées",
+          "children": [
+            "Pour chaque parenthèse d'ouverture, on pousse sur la pile",
+            "Pour chaque parenthèse de fermeture, on pop la pile et on compare"
+          ]
+        },
+        {
+          "label": "Clés",
+          "children": [
+            "Pile: structure LIFO",
+            "Push: ajouter un élément en haut de la pile",
+            "Pop: retirer l'élément en haut de la pile",
+            "Peek: lire l'élément en haut de la pile"
+          ]
+        }
+      ]
+    },
+    "cards": []
+  },
+  "review": {
+    "verdict": null,
+    "notes": ""
+  }
+}
