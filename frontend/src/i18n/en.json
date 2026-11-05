@@ -101,6 +101,7 @@
       "offline": "Offline demo mode: new AI actions are paused until our next time slot.",
       "job_not_found": "This activity no longer exists.",
       "job_not_cancellable": "Too late to cancel: the AI is already working on it.",
+      "job_interrupted": "This activity was interrupted by a server restart. Your coins were refunded: please try again.",
       "network": "Can't reach the server. Check your connection.",
       "unexpected": "Something went wrong. Please try again.",
       "forbidden": "You don't have access to this.",

@@ -139,7 +139,9 @@ async def test_unknown_job_is_404(api):
     assert r.status_code == 404 and r.json()["detail"] == "errors.job_not_found"
 
 
-async def test_stale_running_jobs_are_requeued(sm):
+async def test_stale_running_jobs_are_failed_not_requeued(sm):
+    """Changed by the audit F-RES-1 fix: a job whose worker died is failed and refunded (a
+    requeue re-ran poison work after every restart). Full lease tests: test_job_lease.py."""
     async with sm() as s:
         job = await create_job(s, kind=demo.KIND, lane="background")
         await s.execute(
@@ -148,7 +150,9 @@ async def test_stale_running_jobs_are_requeued(sm):
             .values(status="running", started_at=datetime.now(UTC) - timedelta(hours=1))
         )
         await s.commit()
-    assert await Worker(sm).recover_stale() == 1
+    assert await Worker(sm).sweep() == 1
+    async with sm() as s:
+        assert (await s.get(Job, job.id)).status == "failed"
 
 
 async def test_two_workers_never_claim_the_same_job(sm):

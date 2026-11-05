@@ -16,6 +16,7 @@ class Job(Base):
     __table_args__ = (
         # Worker picks by lane priority, respecting not_before (SELECT … FOR UPDATE SKIP LOCKED).
         Index("ix_jobs_queue", "status", "lane", "not_before"),
+        Index("ix_jobs_lease", "status", "lease_until"),
     )
 
     id: Mapped[uuid.UUID] = uuid_pk()
@@ -42,3 +43,7 @@ class Job(Base):
     created_at: Mapped[datetime] = created_at()
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Lease of a running job (audit F-RES-1): the worker that runs it renews lease_until; the
+    # sweep fails and refunds jobs whose lease expired (their worker died or froze).
+    lease_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    worker_id: Mapped[str | None] = mapped_column(String(64))

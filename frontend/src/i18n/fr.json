@@ -101,6 +101,7 @@
       "offline": "Mode démo hors ligne : les nouvelles actions IA reprennent à notre prochain créneau.",
       "job_not_found": "Cette activité n'existe plus.",
       "job_not_cancellable": "Trop tard pour annuler : l'IA y travaille déjà.",
+      "job_interrupted": "Cette activité a été interrompue par un redémarrage du serveur. Tes pièces ont été remboursées : réessaie.",
       "network": "Impossible de joindre le serveur. Vérifie ta connexion.",
       "unexpected": "Un problème est survenu. Réessaie.",
       "forbidden": "Tu n'as pas accès à cette page.",
