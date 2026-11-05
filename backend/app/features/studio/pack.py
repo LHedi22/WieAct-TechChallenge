@@ -167,21 +167,35 @@ async def pending_generation(s, chapter_id: uuid.UUID, level: str, language: str
 
 
 # --- the job -----------------------------------------------------------------------------------
-async def save_asset(world_id, chapter_id, level, language, kind, content) -> uuid.UUID:
+def is_quick(asset) -> bool:
+    """A class asset written by the compact fallback while the mid model was saturated (audit
+    F-QUICK-1): shown with a Quick-mode notice, and anyone may make the full version for free."""
+    return bool(asset is not None and (asset.content or {}).get("quick_mode"))
+
+
+async def save_asset(
+    world_id, chapter_id, level, language, kind, content, *, replace: bool = False
+) -> uuid.UUID:
+    """Store a class asset once. `replace=True` overwrites it (the full version of a Quick-mode
+    copy), keeping its id so the deck that hangs off the notes stays attached."""
     async with db.get_sessionmaker()() as s:
-        await s.execute(
-            insert(StudyAsset)
-            .values(
-                id=uuid.uuid4(),
-                world_id=world_id,
-                chapter_id=chapter_id,
-                level=level,
-                language=language,
-                kind=kind,
-                content=content,
-            )
-            .on_conflict_do_nothing(index_elements=["chapter_id", "level", "language", "kind"])
+        stmt = insert(StudyAsset).values(
+            id=uuid.uuid4(),
+            world_id=world_id,
+            chapter_id=chapter_id,
+            level=level,
+            language=language,
+            kind=kind,
+            content=content,
         )
+        conflict = ["chapter_id", "level", "language", "kind"]
+        if replace:
+            stmt = stmt.on_conflict_do_update(
+                index_elements=conflict, set_={"content": stmt.excluded.content}
+            )
+        else:
+            stmt = stmt.on_conflict_do_nothing(index_elements=conflict)
+        await s.execute(stmt)
         await s.commit()
         return (await assets(s, chapter_id, level, language))[kind].id
 
@@ -222,6 +236,8 @@ async def _notes(ctx, chapter, course, level, language) -> dict[str, Any]:
     notes = valid_notes(result.content, {c.page_ref for c in rows})
     if notes is None:
         raise BadOutput("no usable notes", refusal="bad_notes")
+    if result.quick_mode:  # compact fallback: mark it so the class can get the mid version later
+        notes = {**notes, "quick_mode": True}
     return notes
 
 
@@ -272,11 +288,14 @@ async def study_pack(ctx: JobContext) -> dict[str, Any]:
     world_id = course.world_id
 
     await ctx.set_stage("writing_notes")
-    if "notes" in found:
+    upgrade = "notes" in found and is_quick(found["notes"])  # the full version of a quick copy
+    if "notes" in found and not upgrade:
         notes, notes_id = found["notes"].content, found["notes"].id
     else:
         notes = await _notes(ctx, chapter, course, level, language)  # failure fails the job
-        notes_id = await save_asset(world_id, chapter_id, level, language, "notes", notes)
+        notes_id = await save_asset(
+            world_id, chapter_id, level, language, "notes", notes, replace=upgrade
+        )
     text = notes_text(notes)
 
     failed: list[str] = []

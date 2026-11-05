@@ -14,6 +14,7 @@ export {
 export { Banner, type BannerKind } from "./Banner";
 export { Bidi } from "./Bidi";
 export { Chip, type ChipKind } from "./Chip";
+export { QuickCopyNotice } from "./QuickCopyNotice";
 export { CoinCounter, PointsCounter, RefillTimer, StreakCounter } from "./Counters";
 export { Input } from "./Input";
 export { LanguageSwitcher } from "./LanguageSwitcher";

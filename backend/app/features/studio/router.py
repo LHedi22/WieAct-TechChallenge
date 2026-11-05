@@ -62,6 +62,7 @@ class Studio(BaseModel):
     notes: Notes | None
     map: MindMap | None
     missing: list[str]  # parts not generated yet: notes | flashcards | map
+    quick_mode: bool = False  # notes written by the compact fallback; full version is free
     pending_job_id: uuid.UUID | None
     cards: CardCounts
     pool_balance: int

@@ -26,6 +26,7 @@ class Episode(BaseModel):
     level: str
     language: str
     script: Script | None
+    quick_mode: bool = False  # script written by the compact fallback; full version is free
     pending_job_id: uuid.UUID | None
     pool_balance: int
     cost: int

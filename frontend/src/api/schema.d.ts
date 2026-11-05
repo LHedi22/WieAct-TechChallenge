@@ -11,7 +11,12 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Health */
+    /**
+     * Health
+     * @description 200 unless Postgres is down, so compose's backend healthcheck (which the worker waits on)
+     *     never depends on the worker. `?strict=1` also answers 503 when the worker isn't alive: the
+     *     production watchdog in start-prod.sh uses it to restart a frozen worker.
+     */
     get: operations["health_api_health_get"];
     put?: never;
     post?: never;
@@ -69,7 +74,7 @@ export interface paths {
     put?: never;
     /**
      * Cancel Job
-     * @description "Cancel and keep my coins" — only while the job is still in the queue.
+     * @description "Cancel and keep my coins" — only while the job is still in the queue, only by its owner.
      */
     post: operations["cancel_job_api_jobs__job_id__cancel_post"];
     delete?: never;
@@ -138,7 +143,10 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Logout */
+    /**
+     * Logout
+     * @description Ends the session on the server too: every cookie issued before now stops working.
+     */
     post: operations["logout_api_auth_logout_post"];
     delete?: never;
     options?: never;
@@ -1536,6 +1544,11 @@ export interface components {
       /** Language */
       language: string;
       script: components["schemas"]["Script"] | null;
+      /**
+       * Quick Mode
+       * @default false
+       */
+      quick_mode: boolean;
       /** Pending Job Id */
       pending_job_id: string | null;
       /** Pool Balance */
@@ -1664,7 +1677,7 @@ export interface components {
        * Status
        * @enum {string}
        */
-      status: "ok" | "error";
+      status: "ok" | "degraded" | "error";
       /**
        * Db
        * @enum {string}
@@ -1675,6 +1688,13 @@ export interface components {
        * @enum {string}
        */
       qdrant: "ok" | "error";
+      /**
+       * Worker
+       * @enum {string}
+       */
+      worker: "ok" | "stale" | "down" | "unknown";
+      /** Worker Age S */
+      worker_age_s?: number | null;
       /** Provider */
       provider: string;
       /** App Env */
@@ -2456,6 +2476,11 @@ export interface components {
       map: components["schemas"]["MindMap"] | null;
       /** Missing */
       missing: string[];
+      /**
+       * Quick Mode
+       * @default false
+       */
+      quick_mode: boolean;
       /** Pending Job Id */
       pending_job_id: string | null;
       cards: components["schemas"]["CardCounts"];
@@ -2719,7 +2744,9 @@ export type $defs = Record<string, never>;
 export interface operations {
   health_api_health_get: {
     parameters: {
-      query?: never;
+      query?: {
+        strict?: boolean;
+      };
       header?: never;
       path?: never;
       cookie?: never;
@@ -2733,6 +2760,15 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Health"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
@@ -2760,11 +2796,16 @@ export interface operations {
   get_job_api_jobs__job_id__get: {
     parameters: {
       query?: never;
-      header?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
       path: {
         job_id: string;
       };
-      cookie?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
     };
     requestBody?: never;
     responses: {
@@ -2791,11 +2832,16 @@ export interface operations {
   cancel_job_api_jobs__job_id__cancel_post: {
     parameters: {
       query?: never;
-      header?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
       path: {
         job_id: string;
       };
-      cookie?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
     };
     requestBody?: never;
     responses: {
@@ -2921,9 +2967,14 @@ export interface operations {
   logout_api_auth_logout_post: {
     parameters: {
       query?: never;
-      header?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
       path?: never;
-      cookie?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
     };
     requestBody?: never;
     responses: {
@@ -2933,6 +2984,15 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
       };
     };
   };
@@ -5111,9 +5171,14 @@ export interface operations {
   create_demo_job_api_dev_demo_jobs_post: {
     parameters: {
       query?: never;
-      header?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
       path?: never;
-      cookie?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
     };
     requestBody: {
       content: {

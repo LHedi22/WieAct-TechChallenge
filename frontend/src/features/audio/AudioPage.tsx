@@ -3,7 +3,7 @@ import { type ReactNode, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { api, type StudioPay } from "@/api/client";
-import { Bidi, Sprite } from "@/components";
+import { Bidi, QuickCopyNotice, Sprite } from "@/components";
 import { JobProgress } from "@/features/jobs/JobProgress";
 import { GeneratePanel } from "@/features/studio/GeneratePanel";
 import { useWisdomTip } from "@/features/wisdom/useWisdomTip";
@@ -59,7 +59,14 @@ export function AudioPage() {
         </JobProgress>
       );
     } else if (e.script) {
-      body = <Player script={e.script} language={e.language || i18n.language} />;
+      body = (
+        <div className="flex flex-col gap-4">
+          {e.quick_mode && (
+            <QuickCopyNotice busy={generate.isPending} onUpgrade={() => generate.mutate("me")} />
+          )}
+          <Player script={e.script} language={e.language || i18n.language} />
+        </div>
+      );
     } else {
       body = (
         <GeneratePanel

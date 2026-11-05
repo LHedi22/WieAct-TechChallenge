@@ -50,8 +50,13 @@ async def price(s: AsyncSession, chapter_id: uuid.UUID, level: str, language: st
     part that failed earlier is free too: the class already paid for the pack."""
     missing = await pack.missing(s, chapter_id, level, language)
     if "notes" not in missing or await pack.pending_generation(s, chapter_id, level, language):
+        # also free: the full version of a Quick-mode copy (the class already paid for the pack)
         return {"cost": economy.COST["cached_content"], "cached": not missing}
     return {"cost": economy.COST["generate_shared_asset"], "cached": False}
+
+
+async def _quick(s: AsyncSession, chapter_id: uuid.UUID, level: str, language: str) -> bool:
+    return pack.is_quick((await pack.assets(s, chapter_id, level, language)).get("notes"))
 
 
 async def status(s: AsyncSession, user: User, chapter: Chapter, level: str) -> dict[str, Any]:
@@ -68,6 +73,7 @@ async def status(s: AsyncSession, user: User, chapter: Chapter, level: str) -> d
         "notes": found["notes"].content if "notes" in found else None,
         "map": found["map"].content if "map" in found else None,
         "missing": await pack.missing(s, chapter.id, level, language),
+        "quick_mode": pack.is_quick(found.get("notes")),
         "pending_job_id": await pack.pending_generation(s, chapter.id, level, language),
         "cards": counts,
         "pool_balance": await pool.balance(s, course.world_id),
@@ -83,7 +89,7 @@ async def generate(
     _check_level(level)
     language = user.ui_language
     missing = await pack.missing(s, chapter.id, level, language)
-    if not missing:
+    if not missing and not await _quick(s, chapter.id, level, language):
         return {"job_id": None, "cost": 0, "cached": True}
     job_id = await pack.pending_generation(s, chapter.id, level, language)
     if job_id:

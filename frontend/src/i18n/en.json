@@ -200,6 +200,10 @@
       "study_studio": "Study Studio",
       "audio_studio": "Audio Studio",
       "teachback_arena": "Teach-Back Arena"
+    },
+    "quickCopy": {
+      "body": "Written by the faster model while the platform was busy.",
+      "upgrade": "Make the full version · Free"
     }
   },
   "styleguide": {
