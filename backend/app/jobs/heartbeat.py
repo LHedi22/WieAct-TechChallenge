@@ -66,7 +66,11 @@ def status_from(names: Iterable[str], now: float) -> tuple[str, int | None]:
 
 async def worker_status(session: AsyncSession) -> tuple[str, int | None]:
     rows = await session.scalars(
-        text("SELECT application_name FROM pg_stat_activity WHERE application_name LIKE :p"),
+        # pg_stat_activity is server-wide: only this database's worker counts
+        text(
+            "SELECT application_name FROM pg_stat_activity"
+            " WHERE application_name LIKE :p AND datname = current_database()"
+        ),
         {"p": PREFIX + "%"},
     )
     return status_from(list(rows), time.time())
