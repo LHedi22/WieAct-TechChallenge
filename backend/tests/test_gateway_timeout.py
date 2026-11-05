@@ -82,3 +82,47 @@ async def test_background_mid_timeout_keeps_the_long_budget_and_is_deferred(setu
     mids = [c for c in transport.calls if c[0] == "mock-mid"]
     assert mids and all(timeout == 90 for _, timeout in mids)
     assert not [c for c in transport.calls if c[0] == "mock-compact"]  # no fallback in background
+
+
+async def test_an_abandoned_mid_call_keeps_its_concurrency_slot(sm, monkeypatch):
+    """Found while re-measuring Tier 2: after the client gives up at 45 s, the platform may still
+    be working on that request, so it still counts against the 2-in-flight limit. The gateway now
+    keeps the slot until the long budget (LLM_TIMEOUT_S) has passed; it costs no new quota unit."""
+    import asyncio  # noqa: PLC0415
+
+    monkeypatch.setenv("LLM_TIMEOUT_S", "90")
+    monkeypatch.setenv("LLM_INTERACTIVE_MID_TIMEOUT_S", "45")
+    settings = Settings()
+    transport = SlowMid(create_mock_app(MockConfig(**FAST_MOCK), seed=7))
+    held = asyncio.Event()
+    holds: list[float] = []
+
+    async def sleep(s: float) -> None:
+        if s >= 40:  # the ghost hold (90 - 45): block until the test lets it go
+            holds.append(s)
+            await held.wait()
+
+    limiter = Limiter(6000, 2, burst=50)
+    gw = Gateway(
+        settings,
+        sm,
+        client_factory=lambda p: LLMClient(
+            p,
+            timeout_s=90,
+            disable_thinking=True,
+            http_client=httpx.AsyncClient(transport=transport),
+        ),
+        sleep=sleep,
+        limiter=limiter,
+    )
+    res = await gw.run(Task(kind=TaskKind.NOTES_WRITE, lane="interactive", messages=MESSAGES))
+    assert res.quick_mode
+    await asyncio.sleep(0)  # let the hold task start
+    assert holds == [45.0] and limiter.active == 1  # the abandoned call still counts
+    assert limiter.max_active <= 2  # the held slot never pushes past the platform's limit
+    held.set()
+    for _ in range(20):
+        if limiter.active == 0:
+            break
+        await asyncio.sleep(0)
+    assert limiter.active == 0

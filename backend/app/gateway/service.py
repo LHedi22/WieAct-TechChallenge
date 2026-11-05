@@ -81,6 +81,7 @@ class Gateway:
         self._ceilings: dict[str, int] = {}  # learned max_tokens ceiling per provider
         self._embed_ceilings: dict[str, int] = {}  # learned inputs-per-call ceiling per provider
         self._inflight: dict[tuple[str, str, str], asyncio.Future[None]] = {}
+        self._background: set[asyncio.Task] = set()  # slot holds after timeouts
         self._sleep = sleep
         self._now = now or (lambda: datetime.now(UTC))
 
@@ -129,22 +130,40 @@ class Gateway:
         kind: TaskKind | None = None,
         timeout_s: float | None = None,
     ) -> Reply:
-        async with self.limiter.slot(task.lane):
-            try:
-                reply = await self.client(profile).chat(
-                    model,
-                    messages,
-                    max_tokens=max_tokens,
-                    json_mode=json_mode,
-                    kind=(kind or task.kind).value,
-                    language=task.language,
-                    timeout_s=timeout_s,
-                )
-            except CallFailed as failed:
-                self.quota.update(profile.provider, failed.headers)
-                raise
+        await self.limiter.acquire(task.lane)
+        held_later = False
+        try:
+            reply = await self.client(profile).chat(
+                model,
+                messages,
+                max_tokens=max_tokens,
+                json_mode=json_mode,
+                kind=(kind or task.kind).value,
+                language=task.language,
+                timeout_s=timeout_s,
+            )
+        except CallFailed as failed:
+            self.quota.update(profile.provider, failed.headers)
+            hold_s = self.settings.LLM_TIMEOUT_S - (timeout_s or self.settings.LLM_TIMEOUT_S)
+            if failed.timed_out and hold_s > 0:
+                # We stopped waiting, but the platform may still be working on this request, so
+                # it still counts against the in-flight limit: keep its slot until the long
+                # budget has passed (no new quota unit). Found while re-measuring audit F-RES-2.
+                held_later = True
+                self._background.add(t := asyncio.create_task(self._release_after(hold_s)))
+                t.add_done_callback(self._background.discard)
+            raise
+        finally:
+            if not held_later:
+                await self.limiter.release()
         self.quota.update(profile.provider, reply.headers)
         return reply
+
+    async def _release_after(self, seconds: float) -> None:
+        try:
+            await self._sleep(seconds)
+        finally:
+            await self.limiter.release()
 
     # --- the contract -----------------------------------------------------------------------------
     async def run(self, task: Task) -> Result:
