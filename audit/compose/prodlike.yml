@@ -33,6 +33,7 @@ services:
       OFFLINE_DEMO_MODE: ${AUDIT_OFFLINE:-auto}
       ADMIN_TOKEN: ${AUDIT_ADMIN_TOKEN:-}
       LOG_PROMPTS: "false"
+      SESSION_COOKIE_SECURE: ""   # a developer .env may say false; production default is auto
       UPLOAD_DIR: /data/uploads
       CORS_ORIGINS: http://localhost:8080
     depends_on: [llmlog]
