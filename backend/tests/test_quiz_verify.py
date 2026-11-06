@@ -186,3 +186,31 @@ async def test_full_path_on_the_mock_marks_items_verified(api, sm, pptx):  # noq
 def test_quiz_verify_prompt_is_versioned():
     assert prompts.render("quiz_verify", context="x", course="c", chapter="ch", language="fr",
                           questions="1. q")[0]  # fmt: skip
+
+
+async def test_an_unusable_verifier_reply_is_not_cached(sm, monkeypatch, gw):  # noqa: F811
+    """Found in the end-of-batch run: the first (unusable) reply was cached by content, so every
+    retry of the background pool replayed it and the set could never be published."""
+    from app.jobs.registry import JobContext
+
+    replies = [{"oops": True}, truthful_solver(ITEMS[:2])]
+    keys = []
+
+    async def run(task):
+        keys.append(task.cache_key)
+        return Result(content=replies.pop(0), model_tier="mid", model="x", provider="mock",
+                      pattern="t")  # fmt: skip
+
+    monkeypatch.setattr(gateway_module, "run", run)
+
+    async def no_stage(_s):
+        return None
+
+    import uuid
+
+    ctx = JobContext(uuid.uuid4(), "QUIZ_POOL", "background", {}, no_stage)
+    qs = [it["question"] for it in ITEMS[:2]]
+    where = {"context": FIX["context"], "course": "c", "chapter": "ch", "language": "en"}
+    assert await verify.check(ctx, qs, lane="background", **where) is None
+    assert await verify.check(ctx, qs, lane="background", **where) == [True, False]
+    assert keys == [None, None]

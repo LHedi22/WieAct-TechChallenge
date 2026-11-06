@@ -8,8 +8,6 @@ and never handed to classmates), background work waits for mid instead."""
 
 from __future__ import annotations
 
-import hashlib
-import json
 from typing import Any
 
 from app import gateway, prompts
@@ -83,9 +81,6 @@ async def check(
     version, messages = render(
         questions, context=context, course=course, chapter=chapter, language=language
     )
-    digest = hashlib.sha256(
-        json.dumps([questions, context], ensure_ascii=False, sort_keys=True).encode()
-    ).hexdigest()[:32]
     try:
         result = ctx.note(
             await gateway.run(
@@ -96,7 +91,9 @@ async def check(
                     language=language,
                     tier="mid",
                     allow_fallback=False,
-                    cache_key=f"quiz-verify:{digest}",
+                    # Not cached: an unusable reply would otherwise be replayed on every retry,
+                    # and a set is verified once anyway (the verified set is the class cache).
+                    cache_key=None,
                     prompt_version=version,
                 )
             )
