@@ -9,4 +9,4 @@ from app.features.studio import pack  # noqa: F401
 from app.features.tutor import service as tutor  # noqa: F401
 from app.features.wisdom import service as wisdom  # noqa: F401
 from app.jobs import demo  # noqa: F401
-from app.rag import indexing, search  # noqa: F401
+from app.rag import indexing, refresh, search  # noqa: F401

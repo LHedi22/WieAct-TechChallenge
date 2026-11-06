@@ -193,7 +193,16 @@
       "mock": "Mock",
       "local": "Local",
       "cloud": "Cloud",
-      "auto": "auto"
+      "auto": "auto",
+      "choose": "AI models",
+      "cloudLong": "Competition cloud models",
+      "localLong": "My local models (Ollama)",
+      "pausedNoKey": "Cloud key not set in .env: AI is paused.",
+      "pausedSlot": "Cloud models only answer in our time slot: AI is paused until then.",
+      "pausedBlocked": "The cloud key was refused: AI is paused.",
+      "refreshing": "Updating the course material with these models…",
+      "refreshed": "Course material updated.",
+      "switchFailed": "Couldn't switch the AI models. Try again."
     },
     "buildings": {
       "quiz_hall": "Quiz Hall",

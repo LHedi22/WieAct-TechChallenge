@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import provider_choice
 from app.core.config import Settings, get_settings
 from app.core.db import get_session
 from app.jobs import heartbeat
@@ -58,7 +59,8 @@ async def probe_embeddings(
 ) -> EmbedCheck:
     """Our own embeddings model (Ollama bge-m3, or the mock) answers GET {base}/models. The
     platform is never probed: every request there uses a unit of the metered quota."""
-    profile = settings.embed_profile() or settings.llm
+    fixed = provider_choice.embed_provider()
+    profile = settings.profile_for(fixed) if fixed else settings.llm
     if profile.provider == "cloud":
         return "skipped"
     try:

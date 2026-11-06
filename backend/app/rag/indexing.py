@@ -197,8 +197,10 @@ async def _tag(ctx: JobContext, doc: Document, course: str, chapter: str, rows: 
                     .values(tags=r.tags, level=r.level, lang=r.lang)
                 )
             await s.commit()
-        progress = P_PARSE + int((P_TAG - P_PARSE) * (b + 1) / len(batches))
-        await _update_doc(doc.id, progress=progress, detail={"key": "ideas", "n": b + 1})
+        await _update_doc(doc.id, tagged_by=result.provider)
+        if doc.status != "ready":  # a re-tag of a ready document (rag/refresh.py) shows no progress
+            progress = P_PARSE + int((P_TAG - P_PARSE) * (b + 1) / len(batches))
+            await _update_doc(doc.id, progress=progress, detail={"key": "ideas", "n": b + 1})
 
 
 async def embed_document(doc: Document, course: str, chapter: str, rows: list[Chunk]) -> str:

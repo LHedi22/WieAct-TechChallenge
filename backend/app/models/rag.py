@@ -32,6 +32,8 @@ class Document(Base):
     detail: Mapped[dict[str, Any] | None] = mapped_column(JSONB)  # {"key", "n", "of"}
     page_count: Mapped[int | None] = mapped_column(Integer)
     error: Mapped[str | None] = mapped_column(String(64))  # i18n key
+    # Provider whose model tagged the chunks (NULL = unknown); a better one re-tags (rag/refresh.py)
+    tagged_by: Mapped[str | None] = mapped_column(String(8))
     created_at: Mapped[datetime] = created_at()
 
 

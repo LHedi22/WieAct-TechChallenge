@@ -193,7 +193,16 @@
       "mock": "Simulée",
       "local": "Locale",
       "cloud": "Cloud",
-      "auto": "auto"
+      "auto": "auto",
+      "choose": "Modèles d'IA",
+      "cloudLong": "Modèles cloud de la compétition",
+      "localLong": "Mes modèles locaux (Ollama)",
+      "pausedNoKey": "Clé cloud absente du .env : l'IA est en pause.",
+      "pausedSlot": "Les modèles cloud ne répondent que pendant notre créneau : l'IA est en pause d'ici là.",
+      "pausedBlocked": "La clé cloud a été refusée : l'IA est en pause.",
+      "refreshing": "Mise à jour du contenu du cours avec ces modèles…",
+      "refreshed": "Contenu du cours mis à jour.",
+      "switchFailed": "Impossible de changer de modèles d'IA. Réessaie."
     },
     "buildings": {
       "quiz_hall": "Salle des quiz",

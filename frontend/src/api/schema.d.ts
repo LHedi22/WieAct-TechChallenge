@@ -4,6 +4,28 @@
  */
 
 export interface paths {
+  "/api/health/ready": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Ready
+     * @description Readiness (audit N-8): 503 while anything an AI start needs is out (database, Qdrant,
+     *     embeddings, worker). For load balancers and monitoring, never for restarts: an outage of a
+     *     dependency is not fixed by restarting the app.
+     */
+    get: operations["ready_api_health_ready_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/health": {
     parameters: {
       query?: never;
@@ -13,9 +35,11 @@ export interface paths {
     };
     /**
      * Health
-     * @description 200 unless Postgres is down, so compose's backend healthcheck (which the worker waits on)
-     *     never depends on the worker. `?strict=1` also answers 503 when the worker isn't alive: the
-     *     production watchdog in start-prod.sh uses it to restart a frozen worker.
+     * @description Liveness: 200 unless Postgres is down, so compose's backend healthcheck (which the worker
+     *     waits on) and Railway's never depend on the worker, Qdrant or embeddings; the body still says
+     *     "degraded" when one of them is out (audit N-8). `?strict=1` also answers 503 when the worker
+     *     isn't alive: the production watchdog in start-prod.sh uses it to restart a frozen worker.
+     *     It deliberately ignores Qdrant and embeddings, so their outage never causes a restart loop.
      */
     get: operations["health_api_health_get"];
     put?: never;
@@ -36,6 +60,23 @@ export interface paths {
     /** Status */
     get: operations["status_api_system_status_get"];
     put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/system/provider": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Choose Provider */
+    put: operations["choose_provider_api_system_provider_put"];
     post?: never;
     delete?: never;
     options?: never;
@@ -1721,6 +1762,8 @@ export interface components {
        * @enum {string}
        */
       status: "ok" | "degraded" | "error";
+      /** Ready */
+      ready: boolean;
       /**
        * Db
        * @enum {string}
@@ -1731,6 +1774,11 @@ export interface components {
        * @enum {string}
        */
       qdrant: "ok" | "error";
+      /**
+       * Embeddings
+       * @enum {string}
+       */
+      embeddings: "ok" | "error" | "skipped";
       /**
        * Worker
        * @enum {string}
@@ -2187,6 +2235,21 @@ export interface components {
       /** Onboarded */
       onboarded: boolean;
     };
+    /** ProviderIn */
+    ProviderIn: {
+      /**
+       * Provider
+       * @enum {string}
+       */
+      provider: "cloud" | "local";
+    };
+    /** ProviderOut */
+    ProviderOut: {
+      /** Provider Choice */
+      provider_choice: string;
+      /** Refresh Job Id */
+      refresh_job_id: string | null;
+    };
     /** PurchaseIn */
     PurchaseIn: {
       /**
@@ -2564,6 +2627,12 @@ export interface components {
       configured_provider: string;
       /** Provider */
       provider: string;
+      /** Provider Choice */
+      provider_choice: string | null;
+      /** Can Choose Provider */
+      can_choose_provider: boolean;
+      /** Cloud Configured */
+      cloud_configured: boolean;
       /** Slot Live */
       slot_live: boolean;
       /** Next Slot */
@@ -2793,6 +2862,26 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+  ready_api_health_ready_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Health"];
+        };
+      };
+    };
+  };
   health_api_health_get: {
     parameters: {
       query?: {
@@ -2840,6 +2929,44 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["SystemStatus"];
+        };
+      };
+    };
+  };
+  choose_provider_api_system_provider_put: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ProviderIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProviderOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };

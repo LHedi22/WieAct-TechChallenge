@@ -33,7 +33,7 @@ from app.gateway.errors import (
 )
 from app.gateway.jsonfix import REPAIR_SYSTEM, extract_json
 from app.gateway.limiter import Limiter
-from app.gateway.providers import Resolution, resolve
+from app.gateway.providers import Resolution, embed_profile, resolve
 from app.gateway.quota import QuotaTracker
 from app.gateway.router import route_for
 from app.gateway.types import EmbedResult, Lane, Result, Task, TaskKind, Tier
@@ -431,7 +431,7 @@ class Gateway:
         quota / 503 / network → Defer (the job resumes later), 400 ceiling → split the batch once,
         401 under auto → re-resolve and restart every batch on the new provider, so one
         document's vectors never mix providers. `cache_query` caches a single search query."""
-        fixed = self.settings.embed_profile()
+        fixed = embed_profile(self.settings)
         if fixed is not None and fixed.provider != "cloud":
             # Self-hosted embeddings (EMBED_PROVIDER=local): no slot, no platform quota.
             profile = fixed
