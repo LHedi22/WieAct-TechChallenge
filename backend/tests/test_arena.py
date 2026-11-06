@@ -96,7 +96,8 @@ def test_review_when_unsure_high_or_near_the_threshold():
     assert needs_review(Grade(score=20, confidence="low"), peer=True)
     assert not needs_review(Grade(score=t, confidence="high"), peer=False)  # solo: no coins
     assert needs_review(Grade(score=t, confidence="low"), peer=False)
-    assert not needs_review(Grade(score=t, confidence="low", flag="abusive"), peer=True)
+    assert not needs_review(Grade(score=t, confidence="high", flag="abusive"), peer=True)
+    assert needs_review(Grade(score=0, confidence="low", flag="abusive"), peer=True)  # unsure
 
 
 def test_parse_grade_is_tolerant():

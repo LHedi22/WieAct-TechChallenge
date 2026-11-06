@@ -133,8 +133,20 @@ def test_review_reasons():
     assert review_reasons(low, peer=False, injected=False, evidence_ok=True) == []
     assert review_reasons(low, peer=False, injected=True, evidence_ok=True) == ["injection"]
     assert review_reasons(low, peer=False, injected=False, evidence_ok=False) == ["evidence"]
-    off = parse_grade({"flag": "off_topic"})
+    off = parse_grade({"flag": "off_topic", "confidence": "high"})
     assert review_reasons(off, peer=True, injected=True, evidence_ok=False) == []  # pays nothing
+
+
+def test_an_unsure_or_contradictory_off_topic_flag_is_reviewed():
+    """Phase 6 rerun (local llama3.2:3b): "A stack is a LIFO structure: push adds… pop removes…"
+    came back flagged off_topic with low confidence and accuracy level 1. Final, it would have
+    cost the student the reward; it now goes to mid."""
+    unsure = parse_grade({"flag": "off_topic", "confidence": "low"})
+    contradictory = parse_grade(
+        {"flag": "off_topic", "confidence": "high", "criteria": {"accuracy": {"level": 1}}}
+    )
+    for g in (unsure, contradictory):
+        assert review_reasons(g, peer=False, injected=False, evidence_ok=True) == ["unsure_flag"]
 
 
 # --- through the jobs ----------------------------------------------------------------------------

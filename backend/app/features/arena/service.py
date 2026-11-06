@@ -123,9 +123,12 @@ REVIEW_RETRY_S = 0.0  # least wait before the background review after mid was bu
 
 def review_reasons(g: Grade, *, peer: bool, injected: bool, evidence_ok: bool) -> list[str]:
     """Why a compact draft must be checked by mid before anything is awarded (audit N-1). An
-    off-topic or abusive draft pays nothing anyway, so it needs no review."""
+    off-topic or abusive draft pays nothing, so it is reviewed only when the draft is unsure or
+    contradicts itself (levels above 0): the compact model over-flags real answers as off-topic
+    (Phase 6 rerun), and a wrong flag would cost a student the reward."""
     if g.flag != "ok":
-        return []
+        unsure = g.confidence == "low" or any(c.level > 0 for c in g.criteria.values())
+        return ["unsure_flag"] if unsure else []
     reasons = []
     if injected:
         reasons.append("injection")
