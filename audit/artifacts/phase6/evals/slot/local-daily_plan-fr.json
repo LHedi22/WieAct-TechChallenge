@@ -1,0 +1,60 @@
+{
+  "provider": "local",
+  "level": "advanced",
+  "generated_at": "2026-11-05T16:52:01.836451+00:00",
+  "chapter": "Stacks and queues",
+  "task": "daily_plan",
+  "language": "fr",
+  "output": {
+    "job": {
+      "status": "failed",
+      "error": "errors.job_interrupted",
+      "quick_mode": false,
+      "result": null,
+      "wait_s": 0.0
+    },
+    "planned_by": "rule",
+    "challenges": [
+      {
+        "type": "quiz_questions",
+        "target": 10,
+        "progress": 0,
+        "done": false,
+        "why": null,
+        "world_id": "d084645a-ab39-455a-9d75-1061254fd1e3",
+        "course_id": "406490cf-1ce3-4ac3-bb8f-87c50192865a",
+        "chapter_id": "a062cdf1-57db-4e5e-9e76-3809ba1d1b25",
+        "course": "Calculus I",
+        "chapter": "Integrals"
+      },
+      {
+        "type": "quiz_score",
+        "target": 70,
+        "progress": 0,
+        "done": false,
+        "why": null,
+        "world_id": "d084645a-ab39-455a-9d75-1061254fd1e3",
+        "course_id": "406490cf-1ce3-4ac3-bb8f-87c50192865a",
+        "chapter_id": "a062cdf1-57db-4e5e-9e76-3809ba1d1b25",
+        "course": "Calculus I",
+        "chapter": "Integrals"
+      },
+      {
+        "type": "teachback",
+        "target": 1,
+        "progress": 0,
+        "done": false,
+        "why": null,
+        "world_id": "d084645a-ab39-455a-9d75-1061254fd1e3",
+        "course_id": "406490cf-1ce3-4ac3-bb8f-87c50192865a",
+        "chapter_id": "a062cdf1-57db-4e5e-9e76-3809ba1d1b25",
+        "course": "Calculus I",
+        "chapter": "Integrals"
+      }
+    ]
+  },
+  "review": {
+    "verdict": null,
+    "notes": ""
+  }
+}

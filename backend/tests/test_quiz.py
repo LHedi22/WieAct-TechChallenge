@@ -75,13 +75,14 @@ async def test_all_seen_generates_a_new_set_as_a_job(api, sm, pptx):  # noqa: F8
     start = (await api.post("/api/quiz/start", json=body, headers=OWL_FR)).json()
     assert start["job_id"] and start["attempt_id"] is None and start["cost"] == 5
     await Worker(sm).drain(timeout_s=60)
-    job = (await api.get(f"/api/jobs/{start['job_id']}")).json()
+    job = (await api.get(f"/api/jobs/{start['job_id']}", headers=OWL_FR)).json()
     assert job["status"] == "done" and "answer_index" not in json.dumps(job)
     assert job["stages"] == [
         "reading_chapter",
         "matching_level",
         "writing_questions",
         "writing_hints",
+        "checking_answers",  # the answer keys are verified before the set is published (N-3)
     ]
     attempt = (
         await api.post(f"/api/quiz/attempts/from-job/{start['job_id']}", headers=OWL_FR)

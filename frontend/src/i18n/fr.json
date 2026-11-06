@@ -73,7 +73,8 @@
         "writing_notes": "Rédaction des fiches",
         "making_flashcards": "Création des cartes",
         "drawing_map": "Dessin de la carte mentale",
-        "writing_script": "Écriture de l'épisode"
+        "writing_script": "Écriture de l'épisode",
+        "checking_answers": "Vérification des réponses"
       }
     },
     "wisdom": {
@@ -101,6 +102,7 @@
       "offline": "Mode démo hors ligne : les nouvelles actions IA reprennent à notre prochain créneau.",
       "job_not_found": "Cette activité n'existe plus.",
       "job_not_cancellable": "Trop tard pour annuler : l'IA y travaille déjà.",
+      "job_interrupted": "Cette activité a été interrompue par un redémarrage du serveur. Tes pièces ont été remboursées : réessaie.",
       "network": "Impossible de joindre le serveur. Vérifie ta connexion.",
       "unexpected": "Un problème est survenu. Réessaie.",
       "forbidden": "Tu n'as pas accès à cette page.",
@@ -110,6 +112,7 @@
       "file_too_large": "Ce fichier dépasse la taille maximale.",
       "document_empty": "Nous n'avons trouvé aucun texte dans ce fichier.",
       "document_unreadable": "Ce fichier semble abîmé ou protégé. Essaie de l'exporter à nouveau.",
+      "document_too_complex": "Ce fichier est trop lourd ou trop complexe à lire sans risque. Découpe-le ou exporte-le à nouveau en PDF.",
       "document_not_found": "Ce fichier n'existe plus.",
       "indexing_failed": "Nous n'avons pas pu lire ce fichier. Essaie de le téléverser à nouveau.",
       "nickname_invalid": "Un pseudo contient 3 à 32 lettres, chiffres, - ou _.",
@@ -117,6 +120,7 @@
       "try_again": "Un problème est survenu. Réessaie.",
       "nickname_taken": "Ce pseudo est déjà pris. Ajoute un chiffre.",
       "login_failed": "Pseudo ou mot de passe incorrect.",
+      "too_many_attempts": "Trop de tentatives de connexion. Attends quelques minutes puis réessaie.",
       "password_short": "Utilise au moins 8 caractères pour ton mot de passe.",
       "avatar_invalid": "Cette option d'avatar n'existe pas.",
       "cosmetic_locked": "Gagne plus de points pour débloquer ceci.",
@@ -189,7 +193,16 @@
       "mock": "Simulée",
       "local": "Locale",
       "cloud": "Cloud",
-      "auto": "auto"
+      "auto": "auto",
+      "choose": "Modèles d'IA",
+      "cloudLong": "Modèles cloud de la compétition",
+      "localLong": "Mes modèles locaux (Ollama)",
+      "pausedNoKey": "Clé cloud absente du .env : l'IA est en pause.",
+      "pausedSlot": "Les modèles cloud ne répondent que pendant notre créneau : l'IA est en pause d'ici là.",
+      "pausedBlocked": "La clé cloud a été refusée : l'IA est en pause.",
+      "refreshing": "Mise à jour du contenu du cours avec ces modèles…",
+      "refreshed": "Contenu du cours mis à jour.",
+      "switchFailed": "Impossible de changer de modèles d'IA. Réessaie."
     },
     "buildings": {
       "quiz_hall": "Salle des quiz",
@@ -197,7 +210,13 @@
       "study_studio": "Studio d'étude",
       "audio_studio": "Studio audio",
       "teachback_arena": "Arène Teach-Back"
-    }
+    },
+    "quickCopy": {
+      "body": "Écrit par le modèle rapide pendant que la plateforme était occupée.",
+      "upgrade": "Faire la version complète · Gratuit"
+    },
+    "testData": "Données de test ({provider})",
+    "unverifiedKeys": "Réponses pas encore vérifiées"
   },
   "styleguide": {
     "title": "Learning World · guide de style",
@@ -974,9 +993,9 @@
     },
     "retry": "Réessayer",
     "pending": {
-      "title": "En attente de vérification",
-      "body": "L'IA n'était pas sûre de la note de cette réponse : aucune pièce ni aucun point n'est attribué automatiquement, et la classe ne la voit pas encore. Tu peux l'améliorer pour qu'elle soit notée à nouveau.",
-      "solo": "L'IA n'était pas sûre de la note de cette explication : aucun point n'est attribué automatiquement. Réessaie avec un peu plus de détails."
+      "title": "Vérification en cours",
+      "body": "Cette note est vérifiée par le plus grand modèle d'IA. Aucune pièce ni aucun point n'est attribué avant la fin de la vérification, et la classe ne voit pas encore la réponse. Tu peux toujours l'améliorer.",
+      "solo": "Cette note est vérifiée par le plus grand modèle d'IA. Les points arrivent une fois la vérification terminée ; rien à faire de ton côté."
     }
   },
   "daily": {

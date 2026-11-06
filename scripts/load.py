@@ -86,7 +86,9 @@ async def main() -> int:
         await mock.patch("/_mock/config", json=changes)
         await mock.delete("/_mock/stats")
         try:
-            async with httpx.AsyncClient(base_url=a.api, timeout=30) as api:
+            # a dev student owns the demo jobs and polls them (jobs are owner-only, audit F-ACL-2)
+            dev = {"X-Dev-User": "load-tester"}
+            async with httpx.AsyncClient(base_url=a.api, timeout=30, headers=dev) as api:
                 before = (await api.get("/api/admin/stats", params={"provider": "mock"})).json()
                 lanes = ["interactive" if i % 3 == 0 else "background" for i in range(a.jobs)]
                 print(

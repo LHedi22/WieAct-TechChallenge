@@ -32,6 +32,8 @@ class Document(Base):
     detail: Mapped[dict[str, Any] | None] = mapped_column(JSONB)  # {"key", "n", "of"}
     page_count: Mapped[int | None] = mapped_column(Integer)
     error: Mapped[str | None] = mapped_column(String(64))  # i18n key
+    # Provider whose model tagged the chunks (NULL = unknown); a better one re-tags (rag/refresh.py)
+    tagged_by: Mapped[str | None] = mapped_column(String(8))
     created_at: Mapped[datetime] = created_at()
 
 
@@ -68,6 +70,8 @@ class QuizSet(Base):
     __table_args__ = (UniqueConstraint("chapter_id", "level", "language", "seed"),)
 
     id: Mapped[uuid.UUID] = uuid_pk()
+    # who made it (cloud | local | mock); production serves cloud only (audit F-OFF-1)
+    provider: Mapped[str | None] = mapped_column(String(8))
     world_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("worlds.id", ondelete="CASCADE"))
     chapter_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("chapters.id", ondelete="CASCADE"))
     level: Mapped[str] = mapped_column(String(12))

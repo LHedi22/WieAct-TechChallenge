@@ -102,6 +102,7 @@ and on failure do ONE compact "fix this JSON" repair call. Small models break JS
 | CHUNK_TAG (batch of chunks → concepts, chapter) | compact | batch at upload (burst) | background | doc hash |
 | QUIZ_GENERATE (10 Q, one call) | compact | narrow-before-generating | interactive / background pool | world+chapter+level+lang+seed |
 | QUIZ_GRADE_TAG (wrong answers → concept + mistake type) | compact | extraction | background | lang + missed items hash |
+| QUIZ_VERIFY (mid solves each new quiz / placement item blind; only items whose key it confirms are published; one regeneration if fewer than 5 survive; mid unavailable → a student's quiz is published marked unverified and never shared, background and placement wait) | mid | draft-then-revise | same as the set | questions + context hash |
 | TUTOR_TURN | compact → mid when stuck ≥ 2 turns or "complex" flag | escalation | interactive | plan: chapter+level+lang+style; turns: none |
 | TUTOR_GUARD (rewrite a reply that leaks the answer as a guiding question; only flagged replies) | compact | guard | interactive | none |
 | TUTOR_SUMMARY | compact | summary | interactive | session id |
@@ -195,6 +196,11 @@ See `.env.example`. Backend reads via `pydantic-settings`; frontend only gets `V
   single `settings.llm`; nothing else reads the profile variables. Switch with `python scripts/llm.py use …`.
 - **auto:** cloud when our slot is live (`app/core/slot.py`) and no 401 "Key is blocked" has been seen
   since the slot started; otherwise local. Evaluated per job, so slot boundaries need no restart.
+- **UI switch (dev):** the top bar's "Competition cloud models / My local models (Ollama)" control
+  (`PUT /api/system/provider`, `core/provider_choice.py`) overrides `LLM_PROVIDER` at runtime. Cloud
+  pauses (never falls back) without the key, outside the slot or when blocked; embeddings use our
+  bge-m3. Shared content is served only from the active provider or a better one (cloud > local >
+  mock, `core/provenance.py`), and a `REFRESH_CONTENT` job re-tags and re-indexes the material.
 - **Production guard:** `APP_ENV=production` allows only cloud and refuses to start with local or mock.
   Outside the slot or on 401 → Offline demo mode serving cached cloud results only.
 - **Kept apart:** Qdrant collection `{prefix}-{provider}-{embedding model slug}` with that provider's dim

@@ -238,9 +238,15 @@ function ClassPanel({ data }: { data: MapOut }) {
           {copied ? t("class.copied") : t("class.copy")}
         </PixelButton>
       </PixelPanel>
-      <Link to={`/worlds/${data.world_id}/upload`} className="font-semibold text-primary underline">
-        {t("class.addMaterial")}
-      </Link>
+      {/* only the creator manages course material (the API refuses others: audit F-ACL-1) */}
+      {data.is_creator && (
+        <Link
+          to={`/worlds/${data.world_id}/upload`}
+          className="font-semibold text-primary underline"
+        >
+          {t("class.addMaterial")}
+        </Link>
+      )}
       <PoolCard worldId={data.world_id} />
       <LeaderboardCard worldId={data.world_id} />
     </aside>
@@ -271,12 +277,14 @@ function EmptyWorld({ data }: { data: MapOut }) {
             </li>
           ))}
         </ol>
-        <PixelButton
-          variant="spend"
-          onClick={() => void navigate(`/worlds/${data.world_id}/upload`)}
-        >
-          {t("empty.upload")}
-        </PixelButton>
+        {data.is_creator && (
+          <PixelButton
+            variant="spend"
+            onClick={() => void navigate(`/worlds/${data.world_id}/upload`)}
+          >
+            {t("empty.upload")}
+          </PixelButton>
+        )}
         <p className="flex flex-wrap items-center justify-center gap-2 text-small text-ink/70">
           {others.slice(0, 4).map((m) => (
             <Avatar key={m.nickname} look={m.avatar as AvatarLook | null} size={28} />

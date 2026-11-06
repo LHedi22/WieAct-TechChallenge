@@ -20,6 +20,7 @@ ROUTES: dict[TaskKind, Route] = {
     K.CHUNK_TAG: Route("compact", "batch", 400),
     K.QUIZ_GENERATE: Route("compact", "narrow-before-generating", 1400),
     K.QUIZ_GRADE_TAG: Route("compact", "extraction", 120),
+    K.QUIZ_VERIFY: Route("mid", "draft-then-revise", 400),  # checks compact answer keys (N-3)
     K.TUTOR_TURN: Route("compact", "escalation", 220),
     K.TUTOR_SUMMARY: Route("compact", "summary", 200),
     K.TUTOR_GUARD: Route("compact", "guard", 160),
@@ -30,7 +31,7 @@ ROUTES: dict[TaskKind, Route] = {
     K.DAILY_PLAN: Route("mid", "plan-once", 400),
     K.CHALLENGE_ITEMS: Route("compact", "execute-compact", 400),
     K.WISDOM_TIP: Route("mid", "generate-once", 160),
-    K.TEACHBACK_GRADE: Route("compact", "draft-then-revise", 300),
+    K.TEACHBACK_GRADE: Route("compact", "draft-then-revise", 450),
     K.MODERATE_POST: Route("compact", "classification", 40),
     K.TRANSLATE_SHORT: Route("compact", "rewriting", 200),
     K.PLACEMENT_QUIZ: Route("compact", "narrow-before-generating", 1100),

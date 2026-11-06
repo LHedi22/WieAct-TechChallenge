@@ -60,7 +60,11 @@ async def test_cached_quiz_still_starts_offline(api, sm, pptx, gw, monkeypatch):
 
 async def test_background_job_waits_for_the_next_slot(sm, api, monkeypatch):  # noqa: F811
     go_offline(monkeypatch)
-    r = await api.post("/api/dev/demo-jobs", json={"lane": "background", "cache_key": "x"})
+    r = await api.post(
+        "/api/dev/demo-jobs",
+        headers={"X-Dev-User": "OfflineTester"},
+        json={"lane": "background", "cache_key": "x"},
+    )
     assert r.status_code == 202
     async with sm() as s:
         job = await s.get(Job, r.json()["job_id"])
@@ -74,7 +78,11 @@ async def offline_run(*_a, **_k):
 
 @pytest.mark.parametrize("lane", ["interactive", "background"])
 async def test_job_caught_by_the_switch(sm, api, gw, monkeypatch, lane):  # noqa: F811
-    r = await api.post("/api/dev/demo-jobs", json={"lane": lane, "cache_key": "y"})
+    r = await api.post(
+        "/api/dev/demo-jobs",
+        headers={"X-Dev-User": "OfflineTester"},
+        json={"lane": lane, "cache_key": "y"},
+    )
     monkeypatch.setattr(gateway_module, "run", offline_run)
     await Worker(sm).drain(timeout_s=10)
     async with sm() as s:

@@ -14,11 +14,13 @@ import uuid
 from typing import Any
 
 from pydantic import BaseModel, Field, ValidationError, field_validator
-from sqlalchemy import func, select
+from sqlalchemy import func, literal_column, select
 from sqlalchemy.dialects.postgresql import insert
 
 from app import gateway, prompts
 from app.core import db
+from app.core.provenance import replaces, servable
+from app.features.quiz import verify
 from app.gateway import BadOutput, Task, TaskKind
 from app.jobs.registry import JobContext, job
 from app.jobs.service import create_job
@@ -120,6 +122,7 @@ async def maybe_precompute(chapter_id: uuid.UUID) -> uuid.UUID | None:
                 QuizSet.chapter_id == chapter_id,
                 QuizSet.level == POOL_LEVEL,
                 QuizSet.language == language,
+                servable(QuizSet.provider),
             )
         )
         if exists or await pending_generation(s, chapter_id, POOL_LEVEL, language):
@@ -166,7 +169,24 @@ async def chapter_context(
     return pick_context(rows, CONTEXT_CHUNKS, offset=seed - 1)
 
 
-@job(KIND, stages=("reading_chapter", "matching_level", "writing_questions", "writing_hints"))
+STAGES = (
+    "reading_chapter",
+    "matching_level",
+    "writing_questions",
+    "writing_hints",
+    "checking_answers",
+)
+VERIFY_RETRY_S = 120.0  # background: wait this long for mid before checking the keys again
+
+
+def shareable(questions_column):
+    """SQL: every item of the set was verified (audit N-3). Unverified or legacy sets stay with
+    the student who asked for them and are never handed to classmates."""
+    path = literal_column("'$[*] ? (!exists(@.verified) || @.verified != true)'::jsonpath")
+    return ~func.jsonb_path_exists(questions_column, path)
+
+
+@job(KIND, stages=STAGES)
 async def quiz_pool(ctx: JobContext) -> dict[str, Any]:
     chapter_id = uuid.UUID(ctx.payload["chapter_id"])
     level, language = ctx.payload["level"], ctx.payload["language"]
@@ -181,6 +201,7 @@ async def quiz_pool(ctx: JobContext) -> dict[str, Any]:
                 QuizSet.level == level,
                 QuizSet.language == language,
                 QuizSet.seed == seed,
+                servable(QuizSet.provider),
             )
         )
     if existing:
@@ -189,44 +210,73 @@ async def quiz_pool(ctx: JobContext) -> dict[str, Any]:
     rows = await chapter_context(ctx, chapter, course, level, seed)
     context = "\n\n".join(f"[{c.page_ref}] {c.text}" for c in rows)
     await ctx.set_stage("writing_questions")
-    version, messages = prompts.render(
-        "quiz_generate",
-        count=POOL_SIZE,
-        level=level,
-        language=language,
-        course=course.name,
-        chapter=chapter.title,
-        context=context,
-    )
-    result = ctx.note(
-        await gateway.run(
-            Task(
-                kind=TaskKind.QUIZ_GENERATE,
-                lane=ctx.lane,
-                messages=messages,
-                language=language,
-                cache_key=f"quiz:{chapter_id}:{level}:{language}:{seed}",
-                prompt_version=version,
+
+    async def write(salt: str = "") -> tuple[list[dict[str, Any]], Any]:
+        version, messages = prompts.render(
+            "quiz_generate",
+            count=POOL_SIZE,
+            level=level,
+            language=language,
+            course=course.name,
+            chapter=chapter.title,
+            context=context,
+        )
+        result = ctx.note(
+            await gateway.run(
+                Task(
+                    kind=TaskKind.QUIZ_GENERATE,
+                    lane=ctx.lane,
+                    messages=messages,
+                    language=language,
+                    cache_key=f"quiz:{chapter_id}:{level}:{language}:{seed}{salt}",
+                    prompt_version=version,
+                )
             )
         )
-    )
+        return valid_questions(result.content), result
+
+    questions, result = await write()
     await ctx.set_stage("writing_hints")
-    questions = valid_questions(result.content)
     if len(questions) < MIN_VALID:
         raise BadOutput(f"only {len(questions)} valid questions", refusal="bad_quiz")
-    async with db.get_sessionmaker()() as s:
-        await s.execute(
-            insert(QuizSet)
-            .values(
-                id=uuid.uuid4(),
-                world_id=course.world_id,
-                chapter_id=chapter_id,
-                level=level,
-                language=language,
-                seed=seed,
-                questions=questions,
+    # Audit N-3: no answer key reaches students unchecked (draft-then-revise).
+    await ctx.set_stage("checking_answers")
+    where = {"context": context, "course": course.name, "chapter": chapter.title}
+    ok = await verify.check(ctx, questions, language=language, lane=ctx.lane, **where)
+    if ok is None:  # mid unavailable
+        if ctx.lane == "background":
+            raise gateway.Defer(VERIFY_RETRY_S, "verify_unavailable")  # wait, don't publish
+        questions = verify.mark_unverified(questions)  # this student only, labelled
+    else:
+        kept = verify.keep_verified(questions, ok)
+        if len(kept) < MIN_VALID:  # regenerate once
+            more, _ = await write(":regen")
+            ok2 = (
+                await verify.check(ctx, more, language=language, lane=ctx.lane, **where)
+                if more
+                else None
             )
-            .on_conflict_do_nothing(index_elements=["chapter_id", "level", "language", "seed"])
+            kept += verify.keep_verified(more, ok2) if ok2 is not None else []
+        if len(kept) < MIN_VALID:
+            raise BadOutput(f"only {len(kept)} answer keys verified", refusal="bad_key")
+        questions = kept[:POOL_SIZE]
+    async with db.get_sessionmaker()() as s:
+        stmt = insert(QuizSet).values(
+            id=uuid.uuid4(),
+            world_id=course.world_id,
+            chapter_id=chapter_id,
+            level=level,
+            language=language,
+            seed=seed,
+            questions=questions,
+            provider=result.provider,
+        )
+        await s.execute(
+            stmt.on_conflict_do_update(  # a platform-made set replaces a test one (F-OFF-1)
+                index_elements=["chapter_id", "level", "language", "seed"],
+                set_={"questions": stmt.excluded.questions, "provider": stmt.excluded.provider},
+                where=replaces(QuizSet.provider, stmt.excluded.provider),
+            )
         )
         await s.commit()
         set_id = await s.scalar(
@@ -238,4 +288,9 @@ async def quiz_pool(ctx: JobContext) -> dict[str, Any]:
             )
         )
     # Public job result (GET /api/jobs/{id}): ids only, never questions or answers.
-    return {"quiz_set_id": str(set_id), "questions": len(questions), "cached": result.cached}
+    return {
+        "quiz_set_id": str(set_id),
+        "questions": len(questions),
+        "cached": result.cached,
+        "verified": ok is not None,
+    }

@@ -11,7 +11,15 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, PrivateAttr, SecretStr, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    PrivateAttr,
+    SecretStr,
+    field_validator,
+    model_validator,
+)
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -76,6 +84,14 @@ class Settings(BaseSettings):
     # --- shared by every provider ---
     LLM_DISABLE_THINKING: bool = True
     LLM_TIMEOUT_S: float = 90
+    # Interactive mid calls (a student is waiting): shorter budget, then compact (audit F-RES-2)
+    LLM_INTERACTIVE_MID_TIMEOUT_S: float = 45
+    # Teach-Back review routing (audit N-1): a compact draft at or above this score is checked by
+    # mid before anything is awarded; mid reviews per Tunis day are capped for everyone and per
+    # student (beyond the cap, attempts stay pending until the next day's budget).
+    TEACHBACK_REVIEW_HIGH_SCORE: int = Field(80, ge=10, le=100)
+    TEACHBACK_REVIEW_DAILY_CAP: int = Field(150, ge=0)
+    TEACHBACK_REVIEW_USER_DAILY_CAP: int = Field(6, ge=0)
     LLM_MAX_RPM: int = 18
     LLM_MAX_CONCURRENCY: int = 2
     # Embeddings are metered separately (own quota); they share the per-key concurrency limit
@@ -86,6 +102,10 @@ class Settings(BaseSettings):
     LLM_JSON_MODE: Literal["auto", "on", "off"] = "auto"
     # Dev/test only, ignored in production: pretend our slot is live/off (tests LLM_PROVIDER=auto)
     LLM_SLOT_FORCE: Literal["", "live", "off"] = ""
+    # Demo switch (audit F-VID-1): "on" forces Quick mode for interactive mid tasks for the whole
+    # session. Development only: production refuses to start with it; there an admin switches it
+    # on for up to 30 minutes at runtime (POST /api/admin/force-quick).
+    FORCE_QUICK_MODE: Literal["off", "on"] = "off"
 
     # --- vector store ---
     QDRANT_URL: str = "http://127.0.0.1:6333"
@@ -98,7 +118,8 @@ class Settings(BaseSettings):
     SECRET_KEY: SecretStr = SecretStr("change-me-in-.env")
     # Session cookie: lax for same-site dev; a cross-site deploy needs none + secure
     SESSION_COOKIE_SAMESITE: Literal["lax", "strict", "none"] = "lax"
-    SESSION_COOKIE_SECURE: bool = False
+    # Empty or "auto" = Secure whenever APP_ENV=production (audit F-SEC-1), plain in development
+    SESSION_COOKIE_SECURE: bool | None = None
     APP_TIMEZONE: str = "Africa/Tunis"
     CORS_ORIGINS: str = "http://localhost:5173"
     OFFLINE_DEMO_MODE: Literal["auto", "on", "off"] = "auto"
@@ -108,10 +129,26 @@ class Settings(BaseSettings):
     TESSERACT_LANGS: str = "ara+fra+eng"
     # Empty = find `tesseract` on PATH (or the default Windows install folder)
     TESSERACT_CMD: str = ""
+    # Upload parsing runs in a child process (audit F-DOS-1): killed after this long without
+    # progress, after PARSE_MAX_S in total, or above PARSE_MEM_MB of address space.
+    PARSE_IDLE_TIMEOUT_S: float = 120
+    PARSE_MAX_S: float = 900
+    PARSE_MEM_MB: int = 1536
     # If set, /api/admin/stats requires the X-Admin-Token header
     ADMIN_TOKEN: SecretStr = SecretStr("")
 
     _llm: LLMProfile = PrivateAttr()
+
+    @field_validator("SESSION_COOKIE_SECURE", mode="before")
+    @classmethod
+    def _auto_secure(cls, v: object) -> object:
+        return None if isinstance(v, str) and v.strip().lower() in ("", "auto") else v
+
+    @property
+    def session_cookie_secure(self) -> bool:
+        if self.SESSION_COOKIE_SECURE is None:
+            return self.APP_ENV == "production"
+        return self.SESSION_COOKIE_SECURE
 
     @model_validator(mode="after")
     def _check_and_resolve(self) -> Settings:
@@ -125,6 +162,11 @@ class Settings(BaseSettings):
                 raise ValueError("APP_ENV=production refuses EMBED_PROVIDER=mock (fake vectors)")
             if self.SECRET_KEY.get_secret_value() in ("", "change-me-in-.env"):
                 raise ValueError("APP_ENV=production requires a real SECRET_KEY")
+            if self.FORCE_QUICK_MODE != "off":
+                raise ValueError(
+                    "APP_ENV=production refuses FORCE_QUICK_MODE=on; switch Quick mode on at "
+                    "runtime with POST /api/admin/force-quick (it turns itself off)"
+                )
         # auto: this is only the fallback profile; app/gateway/providers.py picks cloud per job
         # while our slot is live and the key works.
         default: Provider = "local" if self.LLM_PROVIDER == "auto" else self.LLM_PROVIDER

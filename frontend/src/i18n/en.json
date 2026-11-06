@@ -73,7 +73,8 @@
         "writing_notes": "Writing the notes",
         "making_flashcards": "Making flashcards",
         "drawing_map": "Drawing the mind map",
-        "writing_script": "Writing the episode"
+        "writing_script": "Writing the episode",
+        "checking_answers": "Checking the answers"
       }
     },
     "wisdom": {
@@ -101,6 +102,7 @@
       "offline": "Offline demo mode: new AI actions are paused until our next time slot.",
       "job_not_found": "This activity no longer exists.",
       "job_not_cancellable": "Too late to cancel: the AI is already working on it.",
+      "job_interrupted": "This activity was interrupted by a server restart. Your coins were refunded: please try again.",
       "network": "Can't reach the server. Check your connection.",
       "unexpected": "Something went wrong. Please try again.",
       "forbidden": "You don't have access to this.",
@@ -110,6 +112,7 @@
       "file_too_large": "This file is over the size limit.",
       "document_empty": "We couldn't find any text in this file.",
       "document_unreadable": "This file looks damaged or protected. Try exporting it again.",
+      "document_too_complex": "This file is too large or too complex to read safely. Split it, or export it again as PDF.",
       "document_not_found": "This file no longer exists.",
       "indexing_failed": "We couldn't read this file. Try uploading it again.",
       "nickname_invalid": "Nicknames use 3 to 32 letters, digits, - or _.",
@@ -117,6 +120,7 @@
       "try_again": "Something went wrong. Please try again.",
       "nickname_taken": "That nickname is taken. Try adding a number.",
       "login_failed": "Nickname or password doesn't match.",
+      "too_many_attempts": "Too many sign-in attempts. Wait a few minutes, then try again.",
       "password_short": "Use at least 8 characters for your password.",
       "avatar_invalid": "That avatar option doesn't exist.",
       "cosmetic_locked": "Earn more points to unlock this.",
@@ -189,7 +193,16 @@
       "mock": "Mock",
       "local": "Local",
       "cloud": "Cloud",
-      "auto": "auto"
+      "auto": "auto",
+      "choose": "AI models",
+      "cloudLong": "Competition cloud models",
+      "localLong": "My local models (Ollama)",
+      "pausedNoKey": "Cloud key not set in .env: AI is paused.",
+      "pausedSlot": "Cloud models only answer in our time slot: AI is paused until then.",
+      "pausedBlocked": "The cloud key was refused: AI is paused.",
+      "refreshing": "Updating the course material with these models…",
+      "refreshed": "Course material updated.",
+      "switchFailed": "Couldn't switch the AI models. Try again."
     },
     "buildings": {
       "quiz_hall": "Quiz Hall",
@@ -197,7 +210,13 @@
       "study_studio": "Study Studio",
       "audio_studio": "Audio Studio",
       "teachback_arena": "Teach-Back Arena"
-    }
+    },
+    "quickCopy": {
+      "body": "Written by the faster model while the platform was busy.",
+      "upgrade": "Make the full version · Free"
+    },
+    "testData": "Test data ({provider})",
+    "unverifiedKeys": "Answers not double-checked yet"
   },
   "styleguide": {
     "title": "Learning World · style guide",
@@ -974,9 +993,9 @@
     },
     "retry": "Try again",
     "pending": {
-      "title": "Waiting for a check",
-      "body": "The AI wasn't sure how to grade this answer, so no coins or points are given automatically and classmates don't see it yet. You can improve it and it will be graded again.",
-      "solo": "The AI wasn't sure how to grade this explanation, so no points are given automatically. Try again with a bit more detail."
+      "title": "Being double-checked",
+      "body": "This grade is being double-checked by the larger AI model. No coins or points are given until the check is done, and classmates don't see the answer yet. You can still improve it.",
+      "solo": "This grade is being double-checked by the larger AI model. Your points arrive once the check is done; you don't need to do anything."
     }
   },
   "daily": {

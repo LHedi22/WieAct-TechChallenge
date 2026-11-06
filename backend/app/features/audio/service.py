@@ -43,8 +43,8 @@ async def _pending(s: AsyncSession, chapter_id: uuid.UUID, level: str, language:
 
 async def price(s: AsyncSession, chapter_id: uuid.UUID, level: str, language: str) -> dict:
     found = await pack.assets(s, chapter_id, level, language)
-    if ASSET in found:
-        return {"cost": economy.COST["cached_content"], "cached": True}
+    if ASSET in found:  # free, and the full version of a Quick-mode script is free too
+        return {"cost": economy.COST["cached_content"], "cached": not pack.is_quick(found[ASSET])}
     if await _pending(s, chapter_id, level, language):
         return {"cost": economy.COST["cached_content"], "cached": False}
     return {"cost": economy.COST["generate_shared_asset"], "cached": False}
@@ -61,6 +61,8 @@ async def status(s: AsyncSession, user: User, chapter: Chapter, level: str) -> d
         "level": level,
         "language": language,
         "script": found[ASSET].content if ASSET in found else None,
+        "quick_mode": pack.is_quick(found.get(ASSET)),
+        "made_by": found[ASSET].provider if ASSET in found else None,
         "pending_job_id": await _pending(s, chapter.id, level, language),
         "pool_balance": await pool.balance(s, course.world_id),
         **await price(s, chapter.id, level, language),
@@ -74,13 +76,15 @@ async def generate(
     if level not in LEVELS:
         raise Rejected("errors.level_invalid")
     language = user.ui_language
-    if ASSET in await pack.assets(s, chapter.id, level, language):
+    existing = (await pack.assets(s, chapter.id, level, language)).get(ASSET)
+    if existing is not None and not pack.is_quick(existing):
         return {"job_id": None, "cost": 0, "cached": True}
     job_id = await _pending(s, chapter.id, level, language)
     if job_id:
         return {"job_id": job_id, "cost": 0, "cached": False}
     course = await s.get(Course, chapter.course_id)
-    cost = economy.COST["generate_shared_asset"]
+    # the full version of a Quick-mode script is free: the class already paid for the episode
+    cost = 0 if existing is not None else economy.COST["generate_shared_asset"]
     created = await create_job(  # reserves from the wallet or the pool (LedgerCoins.reserve)
         s,
         kind=KIND,
@@ -106,7 +110,8 @@ async def audio_episode(ctx: JobContext) -> dict[str, Any]:
     async with db.get_sessionmaker()() as s:
         chapter = await s.get(Chapter, chapter_id)
         course = await s.get(Course, chapter.course_id)
-        if ASSET in await pack.assets(s, chapter_id, level, language):
+        existing = (await pack.assets(s, chapter_id, level, language)).get(ASSET)
+        if existing is not None and not pack.is_quick(existing):
             return {"chapter_id": str(chapter_id), "cached": True}
     rows = await chapter_context(ctx, chapter, course, level)
     await ctx.set_stage("writing_script")
@@ -135,5 +140,16 @@ async def audio_episode(ctx: JobContext) -> dict[str, Any]:
     script = valid_script(result.content)
     if script is None:
         raise BadOutput("no usable audio script", refusal="bad_audio")
-    await pack.save_asset(course.world_id, chapter_id, level, language, ASSET, script)
+    if result.quick_mode:  # compact fallback: the class can get the mid version later, free
+        script = {**script, "quick_mode": True}
+    await pack.save_asset(
+        course.world_id,
+        chapter_id,
+        level,
+        language,
+        ASSET,
+        script,
+        provider=result.provider,
+        replace=existing is not None,
+    )
     return {"chapter_id": str(chapter_id), "segments": len(script["segments"])}

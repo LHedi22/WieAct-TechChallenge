@@ -1,0 +1,14 @@
+{
+  "provider": "local",
+  "level": "advanced",
+  "generated_at": "2026-11-05T16:52:01.836451+00:00",
+  "task": "wisdom_tip",
+  "language": "all",
+  "output": {
+    "skipped": "the class quiz set isn't ready yet"
+  },
+  "review": {
+    "verdict": null,
+    "notes": ""
+  }
+}

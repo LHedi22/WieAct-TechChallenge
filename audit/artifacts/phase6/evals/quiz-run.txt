@@ -1,0 +1,5 @@
+app.gateway.errors.BadOutput: invalid JSON after one repair call
+ar: 4 questions in 4 calls → local-ar.json (valid 3/4, four_distinct_options 3/4, answer_in_range 4/4, language_script 4/4, concept_in_context 0/4, hint_hides_answer 4/4)
+fr: 4 questions in 4 calls → local-fr.json (valid 4/4, four_distinct_options 4/4, answer_in_range 4/4, language_script 3/4, concept_in_context 0/4, hint_hides_answer 4/4)
+en: 7 questions in 4 calls → local-en.json (valid 5/7, four_distinct_options 5/7, answer_in_range 7/7, language_script 7/7, concept_in_context 5/7, hint_hides_answer 7/7)
+app.gateway.errors.BadOutput: invalid JSON after one repair call

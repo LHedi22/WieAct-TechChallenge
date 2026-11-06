@@ -1,0 +1,47 @@
+[
+ {
+  "scenario": "postgres restart mid-job",
+  "start": [
+   200,
+   {
+    "job_id": "90593f8f-e653-4ad9-9e2a-66fe53800918",
+    "cost": 15,
+    "cached": false
+   }
+  ],
+  "states": [
+   [
+    "running",
+    null,
+    null
+   ]
+  ],
+  "seconds": 242,
+  "coins": [
+   70,
+   55
+  ]
+ },
+ {
+  "scenario": "API restart mid-job",
+  "start": [
+   200,
+   {
+    "session_id": "b5cde51c-747b-4e73-be7e-05fbc287ed1f",
+    "job_id": "52f55aa1-0a86-4990-b865-054cf3e722c3"
+   }
+  ],
+  "states": [
+   [
+    "queued",
+    null,
+    null
+   ]
+  ],
+  "seconds": 202,
+  "coins": [
+   70,
+   62
+  ]
+ }
+]

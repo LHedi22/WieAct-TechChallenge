@@ -1,0 +1,137 @@
+{
+  "provider": "local",
+  "model": "llama3.2:3b",
+  "prompt": "quiz_generate v3",
+  "language": "ar",
+  "generated_at": "2026-11-06T11:44:04.675689+00:00",
+  "calls": 4,
+  "failed_calls": [],
+  "count": 4,
+  "checks_passed": {
+    "valid": 3,
+    "four_distinct_options": 3,
+    "answer_in_range": 4,
+    "language_script": 4,
+    "concept_in_context": 0,
+    "hint_hides_answer": 4,
+    "key_verified": 2
+  },
+  "questions": [
+    {
+      "chapter": "Limits and derivatives",
+      "question": {
+        "hint": "try direct substitution",
+        "concept": "الجبر",
+        "options": [
+          "4x^3 - 2x + 7",
+          "x^2 cos(x)",
+          "(2x - 5)^6",
+          "النهاية (limite)"
+        ],
+        "question": "من هو المبتدئ؟",
+        "explanation": "الجواب الصحيح هو 4x^3 - 2x + 7",
+        "answer_index": 0
+      },
+      "checks": {
+        "valid": true,
+        "four_distinct_options": true,
+        "answer_in_range": true,
+        "language_script": true,
+        "concept_in_context": false,
+        "hint_hides_answer": true,
+        "key_verified": true
+      },
+      "review": {
+        "correct": null,
+        "notes": ""
+      }
+    },
+    {
+      "chapter": "Integrals",
+      "question": {
+        "hint": "نظر إلى تعريف الحد من $f(x)$",
+        "concept": "حد من $f(x)$ إلى $a$ إلى $b$",
+        "options": [
+          "$\frac{x^3}{3}$",
+          "$\frac{x^2}{2}$",
+          "$\frac{x}{2}$",
+          "$\frac{1}{2}$"
+        ],
+        "question": "كيفية tính Integral من $x^2$ إلى $x$؟",
+        "explanation": "الحد هو $f(x) = x^2$ و $f(x)$ من $x$ إلى $x^2$ هو $\frac{x^3}{3}$",
+        "answer_index": 0
+      },
+      "checks": {
+        "valid": true,
+        "four_distinct_options": true,
+        "answer_in_range": true,
+        "language_script": true,
+        "concept_in_context": false,
+        "hint_hides_answer": true,
+        "key_verified": true
+      },
+      "review": {
+        "correct": null,
+        "notes": ""
+      }
+    },
+    {
+      "chapter": "Stacks and queues",
+      "question": {
+        "hint": "الوضع",
+        "concept": "الوضع",
+        "options": [
+          "تستخدم القائمة المزدوجة عادةً",
+          "تستخدم القائمة المزدوجة عادةً",
+          "لا تستخدم القائمة المزدوجة عادةً",
+          "لا تستخدم القائمة المزدوجة عادةً"
+        ],
+        "question": "كيفية تحديد الحجم المحدد للقائمة المزدوجة؟",
+        "explanation": "الوضع",
+        "answer_index": 2
+      },
+      "checks": {
+        "valid": false,
+        "four_distinct_options": false,
+        "answer_in_range": true,
+        "language_script": true,
+        "concept_in_context": false,
+        "hint_hides_answer": true,
+        "key_verified": false
+      },
+      "review": {
+        "correct": null,
+        "notes": ""
+      }
+    },
+    {
+      "chapter": "Limits and derivatives",
+      "question": {
+        "hint": "try direct substitution",
+        "concept": "قيمة الحدية",
+        "options": [
+          "2",
+          "8",
+          "4",
+          "16"
+        ],
+        "question": "مقدار القيمة الحدية ل y = x^3 عند x = 2 ",
+        "explanation": "Direct substitution gives the correct result. The limit as x approaches 2 of x^3 is 2^3 = 8.",
+        "answer_index": 0
+      },
+      "checks": {
+        "valid": true,
+        "four_distinct_options": true,
+        "answer_in_range": true,
+        "language_script": true,
+        "concept_in_context": false,
+        "hint_hides_answer": true,
+        "key_verified": false
+      },
+      "review": {
+        "correct": null,
+        "notes": ""
+      }
+    }
+  ]
+}

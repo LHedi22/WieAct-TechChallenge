@@ -1,0 +1,91 @@
+{
+  "provider": "local",
+  "level": "advanced",
+  "generated_at": "2026-11-05T16:52:01.836451+00:00",
+  "chapter": "Stacks and queues",
+  "task": "teachback_solo",
+  "language": "ar",
+  "output": {
+    "concept": "Stacks vs queues",
+    "answers": [
+      {
+        "kind": "solid",
+        "text": "المكدس يعمل بمبدأ الداخل أخيرًا يخرج أولًا: عملية push تضع عنصرًا في القمة وعملية pop تأخذ العنصر الذي في القمة، مثل كومة الصحون. أما الطابور فالداخل أولًا يخرج أولًا: نضيف من الخلف ونحذف من الأمام، مثل صف الانتظار.",
+        "started": {
+          "job_id": "3694e51e-16ea-4154-b9f3-f293586c3eaa",
+          "cost": 8,
+          "question_id": null,
+          "answer_id": null
+        },
+        "job": {
+          "status": "done",
+          "error": null,
+          "quick_mode": false,
+          "result": {
+            "flag": "ok",
+            "good": "استخدمت مثالًا ملموسًا مثل كومة الصحون لشرح المكدس",
+            "score": 74,
+            "errors": [
+              {
+                "fix": "المكدس يعمل بمبدأ الداخل أولًا يخرج أخيرًا",
+                "quote": "المكدس يعمل بمبدأ الداخل أخيرًا يخرج أولًا"
+              },
+              {
+                "fix": "نضيف في الخلف ونحذف من الأمام",
+                "quote": "نضيف من الخلف ونحذف من الأمام"
+              }
+            ],
+            "points": 21,
+            "missing": [
+              "لم يذكر أن جميع العمليات في المكدس (push, pop, peek) هي O(1)",
+              "لم يذكر أن المكدس يحتوي على نهاية واحدة فقط"
+            ],
+            "confidence": "medium",
+            "pending_review": false,
+            "reviewed_by_mid": true
+          },
+          "wait_s": 162.2
+        }
+      },
+      {
+        "kind": "partial",
+        "text": "المكدس هو قائمة نضع فيها أشياء ثم نأخذها.",
+        "started": {
+          "job_id": "8500943e-2d2a-4bf9-803f-17f371f48292",
+          "cost": 8,
+          "question_id": null,
+          "answer_id": null
+        },
+        "job": {
+          "status": "done",
+          "error": null,
+          "quick_mode": false,
+          "result": {
+            "flag": "ok",
+            "good": "أشار إلى أن المكدس هو Structure LIFO",
+            "score": 74,
+            "errors": [
+              {
+                "fix": "لم يذكر أن المكدس هو Structure LIFO",
+                "quote": "المكدس هو قائمة نضع فيها أشياء ثم نأخذها"
+              }
+            ],
+            "points": 21,
+            "missing": [
+              "يجب أن يذكر أن المكدس يحتوي على أشياء واحدة من نهاية واحدة"
+            ],
+            "confidence": "medium",
+            "pending_review": false,
+            "reviewed_by_mid": true
+          },
+          "wait_s": 98.5
+        }
+      }
+    ],
+    "reused": true
+  },
+  "review": {
+    "verdict": null,
+    "notes": ""
+  }
+}

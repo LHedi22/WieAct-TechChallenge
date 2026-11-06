@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import gateway, prompts
 from app.core import db, economy
+from app.core.provenance import servable
 from app.gateway import Task, TaskKind
 from app.jobs.registry import JobContext, job
 from app.jobs.service import create_job
@@ -68,7 +69,7 @@ async def check_patterns(
             WisdomTip.concept == concept,
             WisdomTip.mistake_type == kind,
         )
-        if await s.scalar(select(WisdomTip.id).where(*same).limit(1)):
+        if await s.scalar(select(WisdomTip.id).where(*same, servable(WisdomTip.provider)).limit(1)):
             await s.execute(update(WisdomTip).where(*same).values(student_count=n))
             continue
         pending = await s.scalar(
@@ -245,11 +246,19 @@ async def write_tip(ctx: JobContext) -> dict[str, Any]:
                 language=lang,
                 text=tip.model_dump(),
                 student_count=count,
+                provider=result.provider,
             )
             await s.execute(
                 stmt.on_conflict_do_update(
                     index_elements=["world_id", "concept", "mistake_type", "language"],
-                    set_={"text": tip.model_dump(), "student_count": count},
+                    set_={
+                        "text": tip.model_dump(),
+                        "student_count": count,
+                        "provider": stmt.excluded.provider,
+                    },
+                    # never let test content overwrite a platform-made tip (F-OFF-1)
+                    where=WisdomTip.provider.is_distinct_from("cloud")
+                    | (stmt.excluded.provider == "cloud"),
                 )
             )
         await s.commit()
@@ -264,7 +273,7 @@ async def tips_for(
     limit: int = 10,
 ) -> list[WisdomTip]:
     """Tips in the student's language; a pattern without one falls back to its English tip."""
-    q = select(WisdomTip).where(WisdomTip.world_id == world_id)
+    q = select(WisdomTip).where(WisdomTip.world_id == world_id, servable(WisdomTip.provider))
     if course_id:
         q = q.where(WisdomTip.course_id == course_id)
     rows = list(await s.scalars(q.order_by(WisdomTip.student_count.desc(), WisdomTip.created_at)))

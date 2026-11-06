@@ -81,6 +81,9 @@ Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
       pixel art for each building (amphitheatre, blue-door café, domed library, music house,
       columns), the explorer standing in the middle; on phones the placement banner sits above
       the scene and the scene opens centred.
+- [x] **Cloud / Local model switch** in the top bar (6/11, user request; dev only): picks the
+      competition models or our Ollama at runtime, hides the mock's placeholder quizzes/notes and
+      re-tags + re-indexes the material with the picked models (DECISIONS.md 2026-11-06).
 - [ ] Optional: the KaTeX swap for `MathText` if the npm registry allows it.
 - [ ] Optional: "ask the AI after 10 min without a peer answer" (deferred, DECISIONS.md).
 

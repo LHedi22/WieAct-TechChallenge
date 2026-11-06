@@ -1,0 +1,48 @@
+# Audit profile `prodlike`: APP_ENV=production, cloud provider pointed at the MOCK through the logger.
+# docker compose -p lw-audit -f docker-compose.yml -f audit/compose/prodlike.yml up -d
+services:
+  llmlog:
+    image: python:3.12-slim
+    command: python /tools/llm_logger.py
+    volumes: ["./audit/tools:/tools:ro", "./audit/logs:/logs"]
+    environment:
+      LOG_FILE: /logs/llm-calls-prodlike.jsonl
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    ports: ["9100:9100"]
+  backend:
+    command: sh start-prod.sh
+    volumes: !override ["uploads:/data/uploads"]
+    environment:
+      APP_ENV: production
+      LLM_PROVIDER: cloud
+      CLOUD_BASE_URL: http://llmlog:9100/mock/v1
+      CLOUD_API_KEY: audit-dummy
+      CLOUD_MODEL_COMPACT: mock-compact
+      CLOUD_MODEL_MID: mock-mid
+      CLOUD_EMBEDDING_MODEL: mock-embed
+      EMBED_PROVIDER: local
+      LOCAL_BASE_URL: http://llmlog:9100/ollama/v1
+      LOCAL_EMBEDDING_MODEL: bge-m3
+      LOCAL_EMBEDDING_DIM: "1024"
+      MOCK_BASE_URL: http://llmlog:9100/mock/v1
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_API_KEY: ""
+      QDRANT_COLLECTION_PREFIX: lw-audit
+      SECRET_KEY: ${AUDIT_SECRET_KEY:-audit-prodlike-dummy-not-a-secret}
+      LLM_SLOT_FORCE: ""
+      OFFLINE_DEMO_MODE: ${AUDIT_OFFLINE:-auto}
+      ADMIN_TOKEN: ${AUDIT_ADMIN_TOKEN:-}
+      LOG_PROMPTS: "false"
+      SESSION_COOKIE_SECURE: ""   # a developer .env may say false; production default is auto
+      UPLOAD_DIR: /data/uploads
+      CORS_ORIGINS: http://localhost:8080
+    depends_on: [llmlog]
+  worker:
+    profiles: ["never"]
+  frontend:
+    profiles: ["never"]
+  web:
+    image: nginx:1.27-alpine
+    ports: ["8080:80"]
+    volumes: ["./audit/artifacts/dist-prod:/usr/share/nginx/html:ro", "./audit/compose/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro"]
+    depends_on: [backend]

@@ -1,7 +1,9 @@
-"""Passwords (argon2) and the session cookie (user id + issued-at, HMAC-SHA256 with SECRET_KEY).
+"""Passwords (argon2) and the session cookie (user id + issued-at + session epoch, HMAC-SHA256
+with SECRET_KEY).
 
 No sessions table: the cookie is self-contained and expires after SESSION_MAX_AGE_S. Signing out
-deletes the cookie on the client."""
+bumps `users.session_epoch`, so every cookie signed for an older epoch is refused on the server
+(audit F-SEC-4). Cookies from before the epoch existed (`id.issued.sig`) count as epoch 0."""
 
 from __future__ import annotations
 
@@ -40,21 +42,29 @@ def _sig(payload: str) -> str:
     return base64.urlsafe_b64encode(mac).rstrip(b"=").decode("ascii")
 
 
-def sign_session(user_id: uuid.UUID, now: float | None = None) -> str:
-    payload = f"{user_id.hex}.{int(now if now is not None else time.time())}"
+def sign_session(user_id: uuid.UUID, epoch: int = 0, now: float | None = None) -> str:
+    payload = f"{user_id.hex}.{int(now if now is not None else time.time())}.{int(epoch)}"
     return f"{payload}.{_sig(payload)}"
 
 
-def read_session(token: str | None, now: float | None = None) -> uuid.UUID | None:
-    """The user id if the cookie is authentic and not expired, else None."""
-    if not token or token.count(".") != 2:
+def read_claims(token: str | None, now: float | None = None) -> tuple[uuid.UUID, int] | None:
+    """(user id, session epoch) if the cookie is authentic and not expired, else None."""
+    if not token or token.count(".") not in (2, 3):
         return None
-    uid, issued, sig = token.split(".")
-    if not hmac.compare_digest(sig, _sig(f"{uid}.{issued}")):
+    *fields, sig = token.split(".")
+    if not hmac.compare_digest(sig, _sig(".".join(fields))):
         return None
+    uid, issued, *rest = fields
     try:
         age = (now if now is not None else time.time()) - int(issued)
         user_id = uuid.UUID(hex=uid)
+        epoch = int(rest[0]) if rest else 0  # pre-epoch cookies count as epoch 0
     except ValueError:
         return None
-    return user_id if 0 <= age <= SESSION_MAX_AGE_S else None
+    return (user_id, epoch) if 0 <= age <= SESSION_MAX_AGE_S else None
+
+
+def read_session(token: str | None, now: float | None = None) -> uuid.UUID | None:
+    """The user id if the cookie is authentic and not expired (epoch not checked), else None."""
+    claims = read_claims(token, now)
+    return claims[0] if claims else None

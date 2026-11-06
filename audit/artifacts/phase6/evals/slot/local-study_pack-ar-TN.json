@@ -1,0 +1,30 @@
+{
+  "provider": "local",
+  "level": "advanced",
+  "generated_at": "2026-11-05T16:52:01.836451+00:00",
+  "chapter": "Stacks and queues",
+  "task": "study_pack",
+  "language": "ar-TN",
+  "output": {
+    "started": {
+      "job_id": "0b47ea35-a83e-46d2-95f5-dcc447278c56",
+      "cost": 15,
+      "cached": false
+    },
+    "job": {
+      "status": "failed",
+      "error": "errors.ai_failed",
+      "quick_mode": false,
+      "result": null,
+      "wait_s": 477.5
+    },
+    "cached": false,
+    "notes": null,
+    "map": null,
+    "cards": []
+  },
+  "review": {
+    "verdict": null,
+    "notes": ""
+  }
+}

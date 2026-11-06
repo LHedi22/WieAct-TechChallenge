@@ -4,6 +4,28 @@
  */
 
 export interface paths {
+  "/api/health/ready": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Ready
+     * @description Readiness (audit N-8): 503 while anything an AI start needs is out (database, Qdrant,
+     *     embeddings, worker). For load balancers and monitoring, never for restarts: an outage of a
+     *     dependency is not fixed by restarting the app.
+     */
+    get: operations["ready_api_health_ready_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/health": {
     parameters: {
       query?: never;
@@ -11,7 +33,14 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Health */
+    /**
+     * Health
+     * @description Liveness: 200 unless Postgres is down, so compose's backend healthcheck (which the worker
+     *     waits on) and Railway's never depend on the worker, Qdrant or embeddings; the body still says
+     *     "degraded" when one of them is out (audit N-8). `?strict=1` also answers 503 when the worker
+     *     isn't alive: the production watchdog in start-prod.sh uses it to restart a frozen worker.
+     *     It deliberately ignores Qdrant and embeddings, so their outage never causes a restart loop.
+     */
     get: operations["health_api_health_get"];
     put?: never;
     post?: never;
@@ -31,6 +60,23 @@ export interface paths {
     /** Status */
     get: operations["status_api_system_status_get"];
     put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/system/provider": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Choose Provider */
+    put: operations["choose_provider_api_system_provider_put"];
     post?: never;
     delete?: never;
     options?: never;
@@ -69,10 +115,32 @@ export interface paths {
     put?: never;
     /**
      * Cancel Job
-     * @description "Cancel and keep my coins" — only while the job is still in the queue.
+     * @description "Cancel and keep my coins" — only while the job is still in the queue, only by its owner.
      */
     post: operations["cancel_job_api_jobs__job_id__cancel_post"];
     delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/force-quick": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Force Quick State */
+    get: operations["force_quick_state_api_admin_force_quick_get"];
+    put?: never;
+    /**
+     * Force Quick On
+     * @description Demo switch (audit F-VID-1): interactive mid tasks answer as Quick mode for `minutes`.
+     */
+    post: operations["force_quick_on_api_admin_force_quick_post"];
+    /** Force Quick Off */
+    delete: operations["force_quick_off_api_admin_force_quick_delete"];
     options?: never;
     head?: never;
     patch?: never;
@@ -138,7 +206,10 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Logout */
+    /**
+     * Logout
+     * @description Ends the session on the server too: every cookie issued before now stops working.
+     */
     post: operations["logout_api_auth_logout_post"];
     delete?: never;
     options?: never;
@@ -1186,6 +1257,13 @@ export interface components {
       points: number;
       /** Questions */
       questions: components["schemas"]["QuestionView"][];
+      /** Made By */
+      made_by?: string | null;
+      /**
+       * Verified
+       * @default true
+       */
+      verified: boolean;
     };
     /** Author */
     Author: {
@@ -1536,6 +1614,13 @@ export interface components {
       /** Language */
       language: string;
       script: components["schemas"]["Script"] | null;
+      /**
+       * Quick Mode
+       * @default false
+       */
+      quick_mode: boolean;
+      /** Made By */
+      made_by?: string | null;
       /** Pending Job Id */
       pending_job_id: string | null;
       /** Pool Balance */
@@ -1595,6 +1680,18 @@ export interface components {
       course_id: string;
       /** Answers */
       answers: (number | null)[];
+    };
+    /** ForceQuickIn */
+    ForceQuickIn: {
+      /** Minutes */
+      minutes: number;
+    };
+    /** ForceQuickOut */
+    ForceQuickOut: {
+      /** Active */
+      active: boolean;
+      /** Until */
+      until: string | null;
     };
     /** FromQuizOut */
     FromQuizOut: {
@@ -1664,7 +1761,9 @@ export interface components {
        * Status
        * @enum {string}
        */
-      status: "ok" | "error";
+      status: "ok" | "degraded" | "error";
+      /** Ready */
+      ready: boolean;
       /**
        * Db
        * @enum {string}
@@ -1675,6 +1774,18 @@ export interface components {
        * @enum {string}
        */
       qdrant: "ok" | "error";
+      /**
+       * Embeddings
+       * @enum {string}
+       */
+      embeddings: "ok" | "error" | "skipped";
+      /**
+       * Worker
+       * @enum {string}
+       */
+      worker: "ok" | "stale" | "down" | "unknown";
+      /** Worker Age S */
+      worker_age_s?: number | null;
       /** Provider */
       provider: string;
       /** App Env */
@@ -2041,6 +2152,8 @@ export interface components {
       job_id: string | null;
       /** Questions */
       questions: components["schemas"]["AskedQuestion"][] | null;
+      /** Made By */
+      made_by?: string | null;
     };
     /** PoolOut */
     PoolOut: {
@@ -2121,6 +2234,21 @@ export interface components {
       } | null;
       /** Onboarded */
       onboarded: boolean;
+    };
+    /** ProviderIn */
+    ProviderIn: {
+      /**
+       * Provider
+       * @enum {string}
+       */
+      provider: "cloud" | "local";
+    };
+    /** ProviderOut */
+    ProviderOut: {
+      /** Provider Choice */
+      provider_choice: string;
+      /** Refresh Job Id */
+      refresh_job_id: string | null;
     };
     /** PurchaseIn */
     PurchaseIn: {
@@ -2210,6 +2338,8 @@ export interface components {
       course_id: string;
       /** Questions */
       questions: components["schemas"]["AskedQuestion"][];
+      /** Made By */
+      made_by?: string | null;
     };
     /** Queue */
     Queue: {
@@ -2456,6 +2586,13 @@ export interface components {
       map: components["schemas"]["MindMap"] | null;
       /** Missing */
       missing: string[];
+      /**
+       * Quick Mode
+       * @default false
+       */
+      quick_mode: boolean;
+      /** Made By */
+      made_by?: string | null;
       /** Pending Job Id */
       pending_job_id: string | null;
       cards: components["schemas"]["CardCounts"];
@@ -2490,6 +2627,12 @@ export interface components {
       configured_provider: string;
       /** Provider */
       provider: string;
+      /** Provider Choice */
+      provider_choice: string | null;
+      /** Can Choose Provider */
+      can_choose_provider: boolean;
+      /** Cloud Configured */
+      cloud_configured: boolean;
       /** Slot Live */
       slot_live: boolean;
       /** Next Slot */
@@ -2540,6 +2683,8 @@ export interface components {
       right: string;
       /** Student Count */
       student_count: number;
+      /** Made By */
+      made_by?: string | null;
     };
     /** Tips */
     Tips: {
@@ -2717,7 +2862,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  health_api_health_get: {
+  ready_api_health_ready_get: {
     parameters: {
       query?: never;
       header?: never;
@@ -2733,6 +2878,37 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Health"];
+        };
+      };
+    };
+  };
+  health_api_health_get: {
+    parameters: {
+      query?: {
+        strict?: boolean;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Health"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
@@ -2757,14 +2933,57 @@ export interface operations {
       };
     };
   };
+  choose_provider_api_system_provider_put: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ProviderIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProviderOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   get_job_api_jobs__job_id__get: {
     parameters: {
       query?: never;
-      header?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
       path: {
         job_id: string;
       };
-      cookie?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
     };
     requestBody?: never;
     responses: {
@@ -2791,11 +3010,16 @@ export interface operations {
   cancel_job_api_jobs__job_id__cancel_post: {
     parameters: {
       query?: never;
-      header?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
       path: {
         job_id: string;
       };
-      cookie?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
     };
     requestBody?: never;
     responses: {
@@ -2806,6 +3030,103 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["JobView"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  force_quick_state_api_admin_force_quick_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ForceQuickOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  force_quick_on_api_admin_force_quick_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ForceQuickIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ForceQuickOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  force_quick_off_api_admin_force_quick_delete: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ForceQuickOut"];
         };
       };
       /** @description Validation Error */
@@ -2921,9 +3242,14 @@ export interface operations {
   logout_api_auth_logout_post: {
     parameters: {
       query?: never;
-      header?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
       path?: never;
-      cookie?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
     };
     requestBody?: never;
     responses: {
@@ -2933,6 +3259,15 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
       };
     };
   };
@@ -5111,9 +5446,14 @@ export interface operations {
   create_demo_job_api_dev_demo_jobs_post: {
     parameters: {
       query?: never;
-      header?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
       path?: never;
-      cookie?: never;
+      cookie?: {
+        lw_session?: string | null;
+      };
     };
     requestBody: {
       content: {

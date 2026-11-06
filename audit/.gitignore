@@ -1,0 +1,13 @@
+.venv/
+node_modules/
+artifacts/dist-prod/
+artifacts/**/*.webm
+artifacts/**/*.zip
+test-results/
+playwright-report/
+logs/llm-calls-*.jsonl
+artifacts/e2e/
+artifacts/screenshots/*
+!artifacts/screenshots/0?-*-en-chromium-*.png
+!artifacts/screenshots/0?-*-ar-chromium-*.png
+logs/backend-reqs.txt

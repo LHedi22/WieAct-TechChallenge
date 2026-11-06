@@ -1,0 +1,27 @@
+{
+ "screen": "socratic_tutor",
+ "lang": "fr",
+ "project": "chromium-desktop",
+ "violations": [
+  {
+   "id": "color-contrast",
+   "impact": "serious",
+   "nodes": 3,
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "targets": [
+    ".items-start:nth-child(1) > .text-ink\\/60[dir=\"auto\"] > span",
+    ".items-start:nth-child(2) > .text-ink\\/60[dir=\"auto\"] > span",
+    ".items-start:nth-child(3) > .text-ink\\/60[dir=\"auto\"] > span"
+   ]
+  },
+  {
+   "id": "list",
+   "impact": "serious",
+   "nodes": 1,
+   "help": "<ul> and <ol> must only directly contain <li>, <script> or <template> elements",
+   "targets": [
+    ".gap-4"
+   ]
+  }
+ ]
+}

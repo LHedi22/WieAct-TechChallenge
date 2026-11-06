@@ -98,6 +98,7 @@ const attempt = (qs: QuizQuestion[]): QuizAttempt => ({
   current: 0,
   points: 0,
   questions: qs,
+  verified: true,
 });
 
 describe("Quiz attempt", () => {
@@ -232,6 +233,27 @@ const session = (over: Partial<TutorSession> = {}): TutorSession => ({
   pending_job_id: null,
   summary: null,
   ...over,
+});
+
+describe("Unverified answer keys (audit N-3)", () => {
+  it("labels a quiz whose answers weren't double-checked, and not a verified one", async () => {
+    serve({ [`GET /api/quiz/attempts/${A}`]: { ...attempt([q(0)]), verified: false } });
+    const page = show(
+      <QuizAttemptPage />,
+      "/worlds/:worldId/courses/:courseId/quiz/:attemptId",
+      `/worlds/${W}/courses/${C}/quiz/${A}`,
+    );
+    expect(await screen.findByText("Answers not double-checked yet")).toBeInTheDocument();
+    page.unmount();
+    serve({ [`GET /api/quiz/attempts/${A}`]: attempt([q(0)]) });
+    show(
+      <QuizAttemptPage />,
+      "/worlds/:worldId/courses/:courseId/quiz/:attemptId",
+      `/worlds/${W}/courses/${C}/quiz/${A}`,
+    );
+    await screen.findByText("Question 1?");
+    expect(screen.queryByText("Answers not double-checked yet")).not.toBeInTheDocument();
+  });
 });
 
 describe("Socratic Tutor", () => {

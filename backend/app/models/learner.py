@@ -69,6 +69,8 @@ class PlacementSet(Base):
     __table_args__ = (UniqueConstraint("course_id", "language"),)
 
     id: Mapped[uuid.UUID] = uuid_pk()
+    # who made it (cloud | local | mock); production serves cloud only (audit F-OFF-1)
+    provider: Mapped[str | None] = mapped_column(String(8))
     course_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("courses.id", ondelete="CASCADE"))
     language: Mapped[str] = mapped_column(String(8))
     questions: Mapped[list[dict[str, Any]]] = mapped_column(JSONB)

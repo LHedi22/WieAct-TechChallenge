@@ -1,0 +1,104 @@
+[
+ {
+  "scenario": "embeddings 503 (chat up)",
+  "start": [
+   200,
+   {
+    "session_id": "3c39112b-29d9-4a26-92b9-3cea43917d6b",
+    "job_id": "d9ddb24d-5874-4343-9a40-0e3b08507943"
+   }
+  ],
+  "states": [
+   [
+    "queued",
+    null,
+    null
+   ],
+   [
+    "running",
+    null,
+    null
+   ],
+   [
+    "queued",
+    "saturated",
+    null
+   ],
+   [
+    "running",
+    null,
+    null
+   ],
+   [
+    "queued",
+    "saturated",
+    null
+   ],
+   [
+    "running",
+    null,
+    null
+   ],
+   [
+    "queued",
+    "saturated",
+    null
+   ],
+   [
+    "running",
+    null,
+    null
+   ],
+   [
+    "queued",
+    "saturated",
+    null
+   ],
+   [
+    "running",
+    null,
+    null
+   ],
+   [
+    "queued",
+    "saturated",
+    null
+   ],
+   [
+    "running",
+    null,
+    null
+   ],
+   [
+    "queued",
+    "saturated",
+    null
+   ],
+   [
+    "running",
+    null,
+    null
+   ],
+   [
+    "queued",
+    "saturated",
+    null
+   ],
+   [
+    "running",
+    null,
+    null
+   ],
+   [
+    "failed",
+    null,
+    "errors.quota_queue"
+   ]
+  ],
+  "seconds": 48,
+  "coins": [
+   70,
+   70
+  ]
+ }
+]

@@ -1,0 +1,8 @@
+
+== postgres restart mid-job: start=(200, {'job_id': '2d9b4cc0-1833-440e-b4e5-fb16d102564d', 'cost': 15, 'cached': False}) after 2s coins 70->55
+     ('running', None, None)
+     ('done', None, None)
+health after db restart: 200 {'status': 'degraded', 'ready': False, 'db': 'ok', 'qdrant': 'ok', 'embeddings': 'ok', 'worker': 'down', 'worker_age_s': None, 'provider': 'mock', 'app_env': 'development'}
+
+== API restart mid-job: start=(200, {'session_id': 'be64261c-970f-4b65-bec6-0871c19cfa1c', 'job_id': '1612f720-bab3-49e5-b602-95f8f0221f1f'}) after 0s coins 70->62
+     ('done', None, None)

@@ -1,15 +1,17 @@
 """Call-log aggregates — the numbers the organisers compute on our key (docs/PLATFORM.md), for the
 report and the demo. Defaults to provider=cloud so local/mock traffic never inflates them."""
 
+from datetime import UTC, datetime
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Header, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import Integer, case, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.health import SettingsDep
 from app.core.db import get_session
+from app.gateway import forcequick
 from app.gateway.quota import seen_header_names
 from app.models import AICallLog
 
@@ -43,6 +45,49 @@ def require_admin(
     token = settings.ADMIN_TOKEN.get_secret_value()
     if token and x_admin_token != token:
         raise HTTPException(403, "errors.forbidden")
+
+
+class ForceQuickIn(BaseModel):
+    minutes: int = Field(ge=1, le=forcequick.MAX_MINUTES)
+
+
+class ForceQuickOut(BaseModel):
+    active: bool
+    until: datetime | None
+
+
+def require_admin_token(settings: SettingsDep) -> None:
+    """The demo switch changes behaviour for every student: in production it needs a configured
+    ADMIN_TOKEN (checked by require_admin), never an open endpoint."""
+    if settings.APP_ENV == "production" and not settings.ADMIN_TOKEN.get_secret_value():
+        raise HTTPException(403, "errors.forbidden")
+
+
+def _force_quick_state() -> ForceQuickOut:
+    end = forcequick.until()
+    on = forcequick.active()
+    return ForceQuickOut(active=on, until=datetime.fromtimestamp(end, UTC) if on and end else None)
+
+
+ADMIN_ONLY = [Depends(require_admin_token), Depends(require_admin)]
+
+
+@router.get("/force-quick", response_model=ForceQuickOut, dependencies=ADMIN_ONLY)
+async def force_quick_state() -> ForceQuickOut:
+    return _force_quick_state()
+
+
+@router.post("/force-quick", response_model=ForceQuickOut, dependencies=ADMIN_ONLY)
+async def force_quick_on(body: ForceQuickIn) -> ForceQuickOut:
+    """Demo switch (audit F-VID-1): interactive mid tasks answer as Quick mode for `minutes`."""
+    forcequick.switch_on(body.minutes)
+    return _force_quick_state()
+
+
+@router.delete("/force-quick", response_model=ForceQuickOut, dependencies=ADMIN_ONLY)
+async def force_quick_off() -> ForceQuickOut:
+    forcequick.switch_off()
+    return _force_quick_state()
 
 
 @router.get("/stats", response_model=Stats, dependencies=[Depends(require_admin)])

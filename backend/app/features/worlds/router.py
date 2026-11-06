@@ -23,16 +23,18 @@ from app.features.worlds.schemas import (
     WorldOut,
     WorldSummary,
 )
-from app.features.worlds.service import NotFound, Rejected
+from app.features.worlds.service import Forbidden, NotFound, Rejected
 from app.models import Chapter, Course, Document, World, WorldMember
 
 router = APIRouter(prefix="/api", tags=["worlds"])
 READ_CHUNK = 1024 * 1024
 
 
-def _http(e: NotFound | Rejected) -> HTTPException:
+def _http(e: NotFound | Rejected | Forbidden) -> HTTPException:
     if isinstance(e, NotFound):
         return HTTPException(404, e.key)
+    if isinstance(e, Forbidden):
+        return HTTPException(403, e.key)
     return HTTPException(413 if e.key == "errors.file_too_large" else 400, e.key)
 
 
@@ -65,13 +67,15 @@ async def _world_out(s, user, world: World) -> WorldOut:
     )
 
 
-async def _course(s, user, course_id: uuid.UUID) -> Course:
+async def _course(s, user, course_id: uuid.UUID, *, creator: bool = False) -> Course:
+    """The course if the user is a member (with creator=True: the world's creator)."""
     course = await s.get(Course, course_id)
     if course is None:
         raise HTTPException(404, "errors.world_not_found")
+    check = service.creator_world if creator else service.member_world
     try:
-        await service.member_world(s, user, course.world_id)
-    except NotFound as e:
+        await check(s, user, course.world_id)
+    except (NotFound, Forbidden) as e:
         raise _http(e) from e
     return course
 
@@ -117,8 +121,8 @@ async def get_world(world_id: uuid.UUID, s: Session, user: CurrentUser) -> World
 @router.post("/worlds/{world_id}/courses", response_model=CourseOut, status_code=201)
 async def add_course(world_id: uuid.UUID, body: CourseIn, s: Session, user: CurrentUser):
     try:
-        world = await service.member_world(s, user, world_id)
-    except NotFound as e:
+        world = await service.creator_world(s, user, world_id)
+    except (NotFound, Forbidden) as e:
         raise _http(e) from e
     course = await service.add_course(s, world, body.name, body.chapters, body.exam_date)
     tree = await service.world_tree(s, world)
@@ -137,7 +141,7 @@ async def add_course(world_id: uuid.UUID, body: CourseIn, s: Session, user: Curr
 
 @router.delete("/courses/{course_id}", status_code=204)
 async def delete_course(course_id: uuid.UUID, s: Session, user: CurrentUser) -> Response:
-    course = await _course(s, user, course_id)
+    course = await _course(s, user, course_id, creator=True)
     docs = await s.scalars(
         select(Document)
         .join(Chapter, Chapter.id == Document.chapter_id)
@@ -152,7 +156,7 @@ async def delete_course(course_id: uuid.UUID, s: Session, user: CurrentUser) -> 
 
 @router.post("/courses/{course_id}/chapters", response_model=ChapterOut, status_code=201)
 async def add_chapter(course_id: uuid.UUID, body: ChapterIn, s: Session, user: CurrentUser):
-    course = await _course(s, user, course_id)
+    course = await _course(s, user, course_id, creator=True)
     chapter = await service.add_chapter(s, course, body.title)
     return ChapterOut(id=chapter.id, idx=chapter.idx, title=chapter.title)
 
@@ -164,8 +168,8 @@ async def upload_document(
     """One file per request (the UI uploads several in parallel and shows each one's state).
     Indexing runs as a background job; poll GET /api/worlds/{id}/indexing."""
     try:
-        chapter = await service.member_chapter(s, user, chapter_id)
-    except NotFound as e:
+        chapter = await service.creator_chapter(s, user, chapter_id)
+    except (NotFound, Forbidden) as e:
         raise _http(e) from e
 
     async def parts() -> AsyncIterator[bytes]:
@@ -187,8 +191,8 @@ async def delete_document(document_id: uuid.UUID, s: Session, user: CurrentUser)
     if doc is None:
         raise HTTPException(404, "errors.document_not_found")
     try:
-        await service.member_world(s, user, doc.world_id)
-    except NotFound as e:
+        await service.creator_world(s, user, doc.world_id)
+    except (NotFound, Forbidden) as e:
         raise _http(e) from e
     await service.remove_document(s, doc)
     return Response(status_code=204)

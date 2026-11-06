@@ -49,17 +49,27 @@ TABLES = (
 
 
 @pytest.fixture(autouse=True)
-def isolated_settings(monkeypatch):
+def isolated_settings(monkeypatch, tmp_path):
     """Tests never read the developer's .env or shell env, and always default to the mock."""
     monkeypatch.setitem(config.Settings.model_config, "env_file", None)
     for name in list(os.environ):
         if name.startswith(_PREFIXES):
             monkeypatch.delenv(name)
     monkeypatch.setenv("LLM_PROVIDER", "mock")
+    # Runtime switches live in UPLOAD_DIR (provider choice, force-Quick): never the developer's
+    monkeypatch.setenv("UPLOAD_DIR", str(tmp_path / "uploads"))
     monkeypatch.setenv("MOCK_BASE_URL", "http://mock/v1")
     config.get_settings.cache_clear()
     yield
     config.get_settings.cache_clear()
+
+
+@pytest.fixture(autouse=True)
+def fresh_login_limiter(monkeypatch):
+    """Sign-in attempt counts are process-wide (audit F-SEC-5): start every test from zero."""
+    from app.features.auth import ratelimit  # noqa: PLC0415
+
+    monkeypatch.setattr(ratelimit, "limiter", ratelimit.LoginLimiter())
 
 
 @pytest.fixture(scope="session")

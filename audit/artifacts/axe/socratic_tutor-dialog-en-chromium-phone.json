@@ -1,0 +1,18 @@
+{
+ "screen": "socratic_tutor-dialog",
+ "lang": "en",
+ "project": "chromium-phone",
+ "violations": [
+  {
+   "id": "color-contrast",
+   "impact": "serious",
+   "nodes": 3,
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "targets": [
+    ".bg-olive-light\\/30",
+    ".bg-terracotta-light\\/30",
+    ".bg-terracotta-light\\/25"
+   ]
+  }
+ ]
+}

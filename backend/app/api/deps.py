@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.core.db import get_session
-from app.core.security import COOKIE_NAME, read_session
+from app.core.security import COOKIE_NAME, read_claims
 from app.models import User
 
 NICKNAME = re.compile(r"^[A-Za-z0-9_\-]{3,32}$")
@@ -46,8 +46,10 @@ async def optional_user(
     x_ui_language: Annotated[str | None, Header()] = None,
 ) -> User | None:
     user: User | None = None
-    if (user_id := read_session(lw_session)) is not None:
-        user = await s.get(User, user_id)
+    if (claims := read_claims(lw_session)) is not None:
+        user = await s.get(User, claims[0])
+        if user is not None and claims[1] != user.session_epoch:
+            user = None  # signed out since this cookie was issued (audit F-SEC-4)
     elif x_dev_user and get_settings().APP_ENV != "production":
         user = await _dev_user(s, x_dev_user)
     if user is not None and x_ui_language in UI_LANGUAGES and user.ui_language != x_ui_language:

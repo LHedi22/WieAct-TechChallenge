@@ -7,6 +7,7 @@ from app.core.db import get_sessionmaker
 from app.gateway.errors import (
     BadOutput,
     Defer,
+    EmbeddingsDown,
     GatewayError,
     KeyBlocked,
     OfflineMode,
@@ -18,6 +19,7 @@ from app.gateway.types import EmbedResult, Lane, Result, Task, TaskKind, Tier
 __all__ = [
     "BadOutput",
     "Defer",
+    "EmbeddingsDown",
     "EmbedResult",
     "Gateway",
     "GatewayError",

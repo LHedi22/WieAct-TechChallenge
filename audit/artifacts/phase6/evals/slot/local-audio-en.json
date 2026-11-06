@@ -1,0 +1,40 @@
+{
+  "provider": "local",
+  "level": "advanced",
+  "generated_at": "2026-11-05T16:52:01.836451+00:00",
+  "chapter": "Stacks and queues",
+  "task": "audio",
+  "language": "en",
+  "output": {
+    "started": {
+      "job_id": "8de1183a-4c62-4098-bf65-9603d08501be",
+      "cost": 15,
+      "cached": false
+    },
+    "job": {
+      "status": "done",
+      "error": null,
+      "quick_mode": false,
+      "result": null,
+      "wait_s": 0.0
+    },
+    "cached": false,
+    "script": {
+      "title": "Understanding Stacks and Their Operations",
+      "segments": [
+        "Today, we'll be reviewing the key concepts of stacks and their operations, including array-based and linked stacks, as well as their uses in various applications.",
+        "A stack is a Last-In-First-Out (LIFO) data structure, meaning that the last element added is the first one to be removed, similar to a pile of plates.",
+        "The stack operations include push, pop, and peek, all of which have a time complexity of O(1), making them efficient for handling large amounts of data.",
+        "An array-based stack uses an array and a top index to store and retrieve elements, with push operations writing elements at the top and incrementing the top index.",
+        "Alternatively, a linked stack uses nodes to store elements, with each push operation creating a new node pointing to the previous top element, allowing for dynamic memory allocation and no fixed capacity.",
+        "Stacks have numerous applications, including maintaining undo history, implementing the call stack in programming languages, checking balanced brackets in parsing, and performing Depth-First Search (DFS) in graph traversal.",
+        "For example, when checking balanced brackets, we can push every opening bracket onto the stack and then pop and compare with the corresponding closing bracket.",
+        "Recap: A stack is a LIFO data structure with O(1) time complexity operations, and it has various applications in programming, including undo history, call stack, and balanced brackets checking."
+      ]
+    }
+  },
+  "review": {
+    "verdict": null,
+    "notes": ""
+  }
+}

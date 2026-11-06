@@ -1,0 +1,67 @@
+{
+  "provider": "local",
+  "level": "advanced",
+  "generated_at": "2026-11-05T16:52:01.836451+00:00",
+  "chapter": "Stacks and queues",
+  "task": "daily_plan",
+  "language": "ar-TN",
+  "output": {
+    "job": {
+      "status": "done",
+      "error": null,
+      "quick_mode": false,
+      "result": {
+        "types": [
+          "quiz_questions",
+          "teachback",
+          "quiz_score"
+        ],
+        "applied": true
+      },
+      "wait_s": 0.0
+    },
+    "planned_by": "ai",
+    "challenges": [
+      {
+        "type": "quiz_questions",
+        "target": 5,
+        "progress": 0,
+        "done": false,
+        "why": "شوفو برشة أسئلة ليتحسّنو",
+        "world_id": null,
+        "course_id": null,
+        "chapter_id": null,
+        "course": null,
+        "chapter": null
+      },
+      {
+        "type": "teachback",
+        "target": 1,
+        "progress": 0,
+        "done": false,
+        "why": "شرحو فكرة واحدة في النهاية (limite)",
+        "world_id": "d084645a-ab39-455a-9d75-1061254fd1e3",
+        "course_id": "406490cf-1ce3-4ac3-bb8f-87c50192865a",
+        "chapter_id": "bfdd89a9-c294-4443-98e1-20af2d5b3a51",
+        "course": "Calculus I",
+        "chapter": "Limits and derivatives"
+      },
+      {
+        "type": "quiz_score",
+        "target": 60,
+        "progress": 0,
+        "done": false,
+        "why": "حاولو تخطّو 60% في الحزم والمواقف (stacks and queues)",
+        "world_id": "d084645a-ab39-455a-9d75-1061254fd1e3",
+        "course_id": "aa665c21-ad54-4644-acd0-3aab74a4055a",
+        "chapter_id": "71bb496a-7f61-4819-9ce0-5c1b5908ee6e",
+        "course": "Data Structures",
+        "chapter": "Stacks and queues"
+      }
+    ]
+  },
+  "review": {
+    "verdict": null,
+    "notes": ""
+  }
+}

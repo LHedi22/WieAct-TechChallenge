@@ -1,0 +1,20 @@
+
+Running 16 tests using 2 workers
+
+[1A[2K[1/16] [chromium-desktop] › tests\main.spec.ts:10:7 › @main first journey fr
+[1A[2K[2/16] [chromium-desktop] › tests\main.spec.ts:10:7 › @main first journey en
+[1A[2K[3/16] [chromium-desktop] › tests\main.spec.ts:10:7 › @main first journey ar
+[1A[2K[4/16] [chromium-desktop] › tests\main.spec.ts:10:7 › @main first journey ar-TN
+[1A[2K[5/16] [chromium-phone] › tests\main.spec.ts:10:7 › @main first journey en
+[1A[2K[6/16] [chromium-phone] › tests\main.spec.ts:10:7 › @main first journey fr
+[1A[2K[7/16] [chromium-phone] › tests\main.spec.ts:10:7 › @main first journey ar
+[1A[2K[8/16] [chromium-phone] › tests\main.spec.ts:10:7 › @main first journey ar-TN
+[1A[2K[9/16] [firefox-desktop] › tests\main.spec.ts:10:7 › @main first journey en
+[1A[2K[10/16] [firefox-desktop] › tests\main.spec.ts:10:7 › @main first journey fr
+[1A[2K[11/16] [firefox-desktop] › tests\main.spec.ts:10:7 › @main first journey ar
+[1A[2K[12/16] [firefox-desktop] › tests\main.spec.ts:10:7 › @main first journey ar-TN
+[1A[2K[13/16] [webkit-desktop] › tests\main.spec.ts:10:7 › @main first journey en
+[1A[2K[14/16] [webkit-desktop] › tests\main.spec.ts:10:7 › @main first journey fr
+[1A[2K[15/16] [webkit-desktop] › tests\main.spec.ts:10:7 › @main first journey ar
+[1A[2K[16/16] [webkit-desktop] › tests\main.spec.ts:10:7 › @main first journey ar-TN
+[1A[2K  16 passed (3.7m)

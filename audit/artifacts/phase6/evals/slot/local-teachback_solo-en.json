@@ -1,0 +1,88 @@
+{
+  "provider": "local",
+  "level": "advanced",
+  "generated_at": "2026-11-05T16:52:01.836451+00:00",
+  "chapter": "Stacks and queues",
+  "task": "teachback_solo",
+  "language": "en",
+  "output": {
+    "concept": "Stacks vs queues",
+    "answers": [
+      {
+        "kind": "solid",
+        "text": "A stack is last in, first out: push puts an item on top and pop takes the top one back, like a pile of plates. A queue is first in, first out: you enqueue at the back and dequeue at the front, like people waiting in line.",
+        "started": {
+          "job_id": "5e278dfa-0c36-442a-90c6-f985434a90ff",
+          "cost": 8,
+          "question_id": null,
+          "answer_id": null
+        },
+        "job": {
+          "status": "done",
+          "error": null,
+          "quick_mode": false,
+          "result": {
+            "flag": "ok",
+            "good": "The explanation correctly describes the stack as LIFO and the queue as FIFO.",
+            "score": 74,
+            "errors": [
+              {
+                "fix": "A stack is LIFO, not last in, first out.",
+                "quote": "A stack is last in, first out: push puts an item on top and pop takes the top one back, like a pile of plates."
+              }
+            ],
+            "points": 21,
+            "missing": [
+              "The explanation does not explicitly mention the difference in operations (enqueue vs push, dequeue vs pop) or the time complexity of these operations.",
+              "The explanation does not mention the concept of a deque."
+            ],
+            "confidence": "medium",
+            "pending_review": false,
+            "reviewed_by_mid": false
+          },
+          "wait_s": 452.4
+        }
+      },
+      {
+        "kind": "partial",
+        "text": "A stack is a list where you put things and take them out again.",
+        "started": {
+          "job_id": "7bfb48c7-02bf-46f1-bb24-c7e8d629fa3d",
+          "cost": 8,
+          "question_id": null,
+          "answer_id": null
+        },
+        "job": {
+          "status": "done",
+          "error": null,
+          "quick_mode": false,
+          "result": {
+            "flag": "off_topic",
+            "good": "The explanation mentions that a stack is a list.",
+            "score": null,
+            "errors": [
+              {
+                "fix": "The explanation does not accurately describe a stack as a LIFO structure.",
+                "quote": "A stack is a list where you put things and take them out again."
+              }
+            ],
+            "points": 0,
+            "missing": [
+              "A stack is a LIFO structure",
+              "The concept of a stack vs queue is not fully explained"
+            ],
+            "confidence": "low",
+            "pending_review": false,
+            "reviewed_by_mid": false
+          },
+          "wait_s": 96.9
+        }
+      }
+    ],
+    "reused": true
+  },
+  "review": {
+    "verdict": null,
+    "notes": ""
+  }
+}

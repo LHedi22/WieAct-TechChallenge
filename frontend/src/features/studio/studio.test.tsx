@@ -78,6 +78,7 @@ function studio(over: Partial<Studio> = {}): Studio {
     },
     missing: [],
     pending_job_id: null,
+    quick_mode: false,
     cards: { new: 2, learning: 0, review: 0, total: 2 },
     pool_balance: 20,
     cost: 0,

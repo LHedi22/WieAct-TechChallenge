@@ -35,6 +35,7 @@ class AskedQuestion(BaseModel):
 class QuestionsOut(BaseModel):
     course_id: uuid.UUID
     questions: list[AskedQuestion]
+    made_by: str | None = None  # provider that wrote it; the UI labels non-platform test data
 
 
 class PlacementStartOut(BaseModel):
@@ -43,6 +44,7 @@ class PlacementStartOut(BaseModel):
     cost: int
     job_id: uuid.UUID | None  # set when the questions still have to be written
     questions: list[AskedQuestion] | None  # set when they are ready (no answers inside)
+    made_by: str | None = None  # provider that wrote it; the UI labels non-platform test data
 
 
 class FinishIn(BaseModel):
@@ -70,6 +72,7 @@ async def start(body: PlacementStartIn, s: Session, user: CurrentUser) -> Placem
             cost=0,
             job_id=None,
             questions=service.redact(existing.questions),
+            made_by=existing.provider,
         )
     has_material = await s.scalar(
         select(Chunk.id)
@@ -110,7 +113,11 @@ async def questions(course_id: uuid.UUID, s: Session, user: CurrentUser) -> dict
     placement = await service.find_set(course.id, user.ui_language)
     if placement is None:
         raise HTTPException(404, "errors.placement_not_ready")
-    return {"course_id": str(course.id), "questions": service.redact(placement.questions)}
+    return {
+        "course_id": str(course.id),
+        "questions": service.redact(placement.questions),
+        "made_by": placement.provider,
+    }
 
 
 @router.post("/finish", response_model=service.Graded)

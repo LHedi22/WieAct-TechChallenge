@@ -20,18 +20,20 @@ from typing import Any
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core.config import LLMProfile, Settings
-from app.gateway import cache, log
+from app.gateway import cache, forcequick, log
+from app.gateway.breaker import Breaker
 from app.gateway.client import CallFailed, LLMClient, Reply
 from app.gateway.errors import (
     BadOutput,
     Defer,
+    EmbeddingsDown,
     KeyBlocked,
     OfflineMode,
     RequestRejected,
 )
 from app.gateway.jsonfix import REPAIR_SYSTEM, extract_json
 from app.gateway.limiter import Limiter
-from app.gateway.providers import Resolution, resolve
+from app.gateway.providers import Resolution, embed_profile, resolve
 from app.gateway.quota import QuotaTracker
 from app.gateway.router import route_for
 from app.gateway.types import EmbedResult, Lane, Result, Task, TaskKind, Tier
@@ -80,7 +82,9 @@ class Gateway:
         self._clients: dict[str, LLMClient] = {}
         self._ceilings: dict[str, int] = {}  # learned max_tokens ceiling per provider
         self._embed_ceilings: dict[str, int] = {}  # learned inputs-per-call ceiling per provider
+        self._embed_breakers: dict[str, Breaker] = {}  # per provider (audit N-9)
         self._inflight: dict[tuple[str, str, str], asyncio.Future[None]] = {}
+        self._background: set[asyncio.Task] = set()  # slot holds after timeouts
         self._sleep = sleep
         self._now = now or (lambda: datetime.now(UTC))
 
@@ -127,22 +131,42 @@ class Gateway:
         json_mode: bool,
         messages: list[dict[str, Any]],
         kind: TaskKind | None = None,
+        timeout_s: float | None = None,
     ) -> Reply:
-        async with self.limiter.slot(task.lane):
-            try:
-                reply = await self.client(profile).chat(
-                    model,
-                    messages,
-                    max_tokens=max_tokens,
-                    json_mode=json_mode,
-                    kind=(kind or task.kind).value,
-                    language=task.language,
-                )
-            except CallFailed as failed:
-                self.quota.update(profile.provider, failed.headers)
-                raise
+        await self.limiter.acquire(task.lane)
+        held_later = False
+        try:
+            reply = await self.client(profile).chat(
+                model,
+                messages,
+                max_tokens=max_tokens,
+                json_mode=json_mode,
+                kind=(kind or task.kind).value,
+                language=task.language,
+                timeout_s=timeout_s,
+            )
+        except CallFailed as failed:
+            self.quota.update(profile.provider, failed.headers)
+            hold_s = self.settings.LLM_TIMEOUT_S - (timeout_s or self.settings.LLM_TIMEOUT_S)
+            if failed.timed_out and hold_s > 0:
+                # We stopped waiting, but the platform may still be working on this request, so
+                # it still counts against the in-flight limit: keep its slot until the long
+                # budget has passed (no new quota unit). Found while re-measuring audit F-RES-2.
+                held_later = True
+                self._background.add(t := asyncio.create_task(self._release_after(hold_s)))
+                t.add_done_callback(self._background.discard)
+            raise
+        finally:
+            if not held_later:
+                await self.limiter.release()
         self.quota.update(profile.provider, reply.headers)
         return reply
+
+    async def _release_after(self, seconds: float) -> None:
+        try:
+            await self._sleep(seconds)
+        finally:
+            await self.limiter.release()
 
     # --- the contract -----------------------------------------------------------------------------
     async def run(self, task: Task) -> Result:
@@ -195,14 +219,35 @@ class Gateway:
         messages = task.messages
         quick_mode = shrunk = retried_503 = retried_net = rerouted = False
         notes: list[str] = []
+        if (
+            tier == "mid"
+            and task.lane == "interactive"
+            and task.allow_fallback
+            and forcequick.active()
+        ):  # admin demo switch (audit F-VID-1): a real compact call, shown as Quick mode
+            tier, model, quick_mode, pattern = (
+                "compact",
+                self._model(profile, "compact"),
+                True,
+                "forced-fallback",
+            )
+            notes.append("forced quick mode (admin demo switch)")
 
         for _ in range(MAX_ATTEMPTS):
             rhash = cache.request_hash(
                 profile.provider, model, messages, max_tokens=max_tokens, json=json_mode
             )
             failed: CallFailed | None = None
+            # A student waiting on an interactive mid call gets a shorter budget (audit F-RES-2)
+            budget = (
+                self.settings.LLM_INTERACTIVE_MID_TIMEOUT_S
+                if task.lane == "interactive" and tier == "mid"
+                else None
+            )
             try:
-                reply = await self._call(task, profile, model, max_tokens, json_mode, messages)
+                reply = await self._call(
+                    task, profile, model, max_tokens, json_mode, messages, timeout_s=budget
+                )
             except CallFailed as e:
                 failed = e
             if failed is not None:  # handled outside `except` so raises below aren't chained
@@ -260,6 +305,22 @@ class Gateway:
                     if self.settings.APP_ENV == "production":
                         raise OfflineMode("blocked")
                     raise KeyBlocked(err.message)
+                if (
+                    failed.timed_out
+                    and task.lane == "interactive"
+                    and tier == "mid"
+                    and task.allow_fallback
+                ):
+                    # Too slow for a waiting student: answer with compact now (Quick mode) rather
+                    # than resending the identical mid request (the platform may still be on it).
+                    tier, model, quick_mode, pattern = (
+                        "compact",
+                        self._model(profile, "compact"),
+                        True,
+                        "fallback",
+                    )
+                    notes.append("mid timed out: compact fallback")
+                    continue
                 if err.kind == "transient":
                     if not retried_net:
                         retried_net = True
@@ -370,7 +431,7 @@ class Gateway:
         quota / 503 / network → Defer (the job resumes later), 400 ceiling → split the batch once,
         401 under auto → re-resolve and restart every batch on the new provider, so one
         document's vectors never mix providers. `cache_query` caches a single search query."""
-        fixed = self.settings.embed_profile()
+        fixed = embed_profile(self.settings)
         if fixed is not None and fixed.provider != "cloud":
             # Self-hosted embeddings (EMBED_PROVIDER=local): no slot, no platform quota.
             profile = fixed
@@ -444,7 +505,13 @@ class Gateway:
         while pending:
             batch, pending = pending[:size], pending[size:]
             retried = False
+            breaker = self._embed_breakers.setdefault(profile.provider, Breaker())
             while True:
+                if (wait := breaker.remaining(self._now())) > 0:
+                    # Open: the endpoint is down and every call is metered. No call; the
+                    # worker fails an interactive job at once (refund), background work waits.
+                    raise EmbeddingsDown(wait)
+                breaker.before_call(self._now())
                 failed: CallFailed | None = None
                 try:
                     async with self.limiter.slot(lane, "embed"):
@@ -454,8 +521,11 @@ class Gateway:
                     failed = e
                     self.quota.update(profile.provider, e.headers)
                 if failed is None:
+                    breaker.success()
                     break
                 err = failed.error
+                if err.kind in ("saturated", "transient"):
+                    breaker.failure(self._now())
                 await self._log_embed(
                     lane,
                     profile,

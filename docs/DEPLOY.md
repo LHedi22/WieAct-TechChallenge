@@ -58,10 +58,14 @@ the key). The app creates the collection
    | `OFFLINE_DEMO_MODE` | `auto` |
 
    Leave `SESSION_COOKIE_SAMESITE=lax` and `CORS_ORIGINS` at their defaults: the browser only
-   ever talks to the Vercel domain.
+   ever talks to the Vercel domain. Leave `SESSION_COOKIE_SECURE` unset (or `auto`): the cookie is
+   then `Secure` because `APP_ENV=production`; never set it to `false` on Railway.
 5. **Settings → Networking → Generate domain.** Check `https://<domain>/api/health` →
    `"status": "ok"`, `"app_env": "production"`. Outside our slot, `/api/system/status` shows
-   `"offline_demo_mode": true`, which is expected.
+   `"offline_demo_mode": true`, which is expected. `"status": "degraded"` names what is out
+   (`qdrant`, `embeddings`, `worker`); `/api/health/ready` answers 503 until all of them are up.
+   Keep Railway's healthcheck on `/api/health` (liveness): pointing it at `/ready` would restart
+   the app for an outage a restart can't fix (audit N-8).
 
 ## 3. Vercel
 1. New project → this repo → **Root directory** `frontend` (framework: Vite). Keep "Include files

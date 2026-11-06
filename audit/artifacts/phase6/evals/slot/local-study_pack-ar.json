@@ -1,0 +1,78 @@
+{
+  "provider": "local",
+  "level": "advanced",
+  "generated_at": "2026-11-05T16:52:01.836451+00:00",
+  "chapter": "Stacks and queues",
+  "task": "study_pack",
+  "language": "ar",
+  "output": {
+    "started": {
+      "job_id": "acc0e246-2d58-4da2-b413-7cf411c685a8",
+      "cost": 0,
+      "cached": false
+    },
+    "job": {
+      "status": "done",
+      "error": null,
+      "quick_mode": false,
+      "result": null,
+      "wait_s": 523.0
+    },
+    "cached": false,
+    "notes": {
+      "title": "Stacks and Queues",
+      "sections": [
+        {
+          "heading": "تعريف المصفوفة (Stack Definition)",
+          "points": [
+            "المصفوفة هي بنية LIFO: آخر في أول. (A stack is a LIFO structure: last in, first out.)",
+            "مثلاً، انظروا إلى حاوية الأطباق. (Think of a pile of plates.)",
+            "refs: [slide:1]"
+          ],
+          "refs": []
+        },
+        {
+          "heading": "عمليات المصفوفة (Stack Operations)",
+          "points": [
+            "push(x) يضيف على أعلى الطبقة، pop() يزيل أعلى الطبقة، peek() يقرأها. (push(x) adds on top, pop() removes the top, peek() reads it.)",
+            "الجميع O(1). (All O(1).)",
+            "refs: [slide:2]"
+          ],
+          "refs": []
+        },
+        {
+          "heading": "مImplementation المصفوفة (Stack Implementation)",
+          "points": [
+            "Array-based stack: يستخدم مصفوفة و مؤشر أعلى. (Array-based stack: Keep an array and a top index.)",
+            "Linked stack: كل push يخلق عقدة pointing إلى أعلى السابق. (Linked stack: Each push creates a node pointing to the previous top.)",
+            "refs: [slide:3, slide:4]"
+          ],
+          "refs": []
+        },
+        {
+          "heading": "تطبيقات المصفوفة (Stack Applications)",
+          "points": [
+            "تاريخ الundo، call stack، checking balanced brackets، DFS. (Undo history, the call stack, checking balanced brackets, DFS.)",
+            "refs: [slide:5]"
+          ],
+          "refs": []
+        },
+        {
+          "heading": "توازن الأقواس (Balanced Brackets)",
+          "points": [
+            "push كل فتح، على إغلاق pop و compare. (Push every opening bracket; on a closing one pop and compare.)",
+            "refs: [slide:6]"
+          ],
+          "refs": []
+        }
+      ],
+      "key_terms": []
+    },
+    "map": null,
+    "cards": []
+  },
+  "review": {
+    "verdict": null,
+    "notes": ""
+  }
+}

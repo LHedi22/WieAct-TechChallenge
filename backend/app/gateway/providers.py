@@ -1,6 +1,9 @@
 """Which provider serves this job (ARCHITECTURE.md §Providers). Evaluated per job, so slot
 boundaries need no restart.
 
+- A provider picked in the UI (development, `core/provider_choice.py`) wins over LLM_PROVIDER:
+  local = Ollama; cloud = the platform, paused (never silently local) while the key is missing, our
+  slot is off or the key is blocked, so content always comes from the provider that was picked.
 - cloud / local / mock: as configured.
 - auto: cloud while our slot is live, the cloud profile is configured and no 401 "Key is blocked"
   has been logged since the slot started; otherwise local.
@@ -16,7 +19,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import exists, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from app.core import slot
+from app.core import provider_choice, slot
 from app.core.config import LLMProfile, Settings
 from app.models import AICallLog
 
@@ -56,6 +59,11 @@ async def resolve(
     configured = settings.LLM_PROVIDER
     if settings.OFFLINE_DEMO_MODE == "on":  # forced (demo rehearsal, or a pause by the team)
         return Resolution(settings.llm, offline=True, reason="forced")
+    chosen = provider_choice.get()
+    if chosen == "local":
+        return Resolution(settings.profile_for("local"))
+    if chosen == "cloud":
+        return await _chosen_cloud(settings, sm, now)
     if configured in ("local", "mock"):
         return Resolution(settings.profile_for(configured))
 
@@ -73,6 +81,27 @@ async def resolve(
         return Resolution(cloud)
     reason = "blocked" if blocked else ("outside_slot" if not live else "cloud_not_configured")
     return Resolution(settings.profile_for("local"), reason=reason)
+
+
+async def _chosen_cloud(
+    settings: Settings, sm: async_sessionmaker[AsyncSession], now: datetime | None
+) -> Resolution:
+    cloud = settings.profile_for("cloud")
+    if not settings.cloud_configured:
+        return Resolution(cloud, offline=True, reason="cloud_not_configured")
+    live, start = slot_live(settings, now)
+    if not live:
+        return Resolution(cloud, offline=True, reason="outside_slot")
+    if await cloud_blocked_since(sm, start):
+        return Resolution(cloud, offline=True, reason="blocked")
+    return Resolution(cloud)
+
+
+def embed_profile(settings: Settings) -> LLMProfile | None:
+    """The fixed embeddings profile (EMBED_PROVIDER, or our Ollama once a provider is picked in the
+    UI), or None when embeddings follow the chat provider."""
+    fixed = provider_choice.embed_provider()
+    return settings.profile_for(fixed) if fixed else None
 
 
 async def paused_until(

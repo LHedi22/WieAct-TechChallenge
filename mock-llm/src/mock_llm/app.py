@@ -207,6 +207,26 @@ def _quiz(user: str, lang: str, system: str = "") -> dict[str, Any]:
     return {"questions": questions}
 
 
+QUESTION_LINE = re.compile(r"^(\d+)\. ", re.MULTILINE)
+OPTION_LINE = re.compile(r"^\s+(\d)\) (.*)$", re.MULTILINE)
+DISTRACTOR = re.compile(r"\(\d\)\s*$")
+
+
+def _verify(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    """QUIZ_VERIFY: "solve" the mock's own quizzes: the right option is the one without the
+    distractor suffix " (k)". Anything else is unsure."""
+    block = user.split("QUESTIONS", 1)[-1]
+    starts = [(int(m.group(1)), m.start()) for m in QUESTION_LINE.finditer(block)]
+    answers = []
+    for k, (n, at) in enumerate(starts):
+        end = starts[k + 1][1] if k + 1 < len(starts) else len(block)
+        options = OPTION_LINE.findall(block[at:end])
+        plain = [int(i) for i, text in options if not DISTRACTOR.search(text)]
+        one = plain[0] if len(plain) == 1 else None
+        answers.append({"n": n, "answer": one, "sure": one is not None})
+    return {"answers": answers}
+
+
 CHAPTER_MARK = re.compile(r"\[chapter (\d+) [^\]]*\]")
 DIFFICULTY = ("beginner", "beginner", "intermediate", "intermediate", "intermediate", "advanced")
 
@@ -353,25 +373,33 @@ def _sections(user: str) -> dict[str, str]:
 
 
 def _teachback(user: str, lang: str, system: str = "") -> dict[str, Any]:
-    """Score = how much of the explanation's vocabulary appears in the excerpts (40-95)."""
+    """Rubric levels from how much of the explanation's vocabulary appears in the excerpts. Like
+    the real prompt (audit N-2) it writes no total score: the backend adds the levels up."""
     sec = _sections(user)
     answer = sec.get("STUDENT EXPLANATION", "")
+    answer = answer.replace("<<<STUDENT_TEXT", "").replace("STUDENT_TEXT>>>", "").strip()
     excerpts = sec.get("COURSE EXCERPTS", "")
     if ABUSE.search(answer):
-        return {"flag": "abusive", "score": 0, "confidence": "high", "errors": [], "good": "",
+        return {"flag": "abusive", "criteria": {}, "confidence": "high", "errors": [], "good": "",
                 "missing": []}  # fmt: skip
     words = set(_concepts(answer, 40))
     known = set(_concepts(excerpts, 400))
     ratio = len(words & known) / len(words) if words else 0.0
-    score = 40 + round(55 * ratio)
-    short = len(answer.split()) < 8
+    n_words = len(answer.split())
+    levels = {
+        "accuracy": 1 + round(3 * ratio),
+        "coverage": round(3 * ratio),
+        "reasoning": 1 if n_words >= 12 else 0,
+        "example": 1 if ratio > 0.8 and n_words >= 12 else 0,
+    }
+    short = n_words < 8
     fix, good = GRADE_TEXT.get(lang, GRADE_TEXT["en"])
     first = " ".join(answer.split()[:4])
     return {
         "flag": "ok",
-        "score": score,
+        "criteria": {k: {"level": v, "evidence": first} for k, v in levels.items()},
         "confidence": "low" if short else "high" if ratio > 0.5 else "medium",
-        "errors": [{"quote": first, "fix": fix}] if score < 85 and first else [],
+        "errors": [{"quote": first, "fix": fix}] if sum(levels.values()) < 9 and first else [],
         "good": good,
         "missing": [c for c in _concepts(excerpts, 6) if c not in words][:2],
     }
@@ -523,6 +551,7 @@ GENERATORS = {
     "TUTOR_SUMMARY": _summary,
     "CHUNK_TAG": _chunk_tags,
     "QUIZ_GENERATE": _quiz,
+    "QUIZ_VERIFY": _verify,
     "PLACEMENT_QUIZ": _placement,
     "QUIZ_GRADE_TAG": _grade_tag,
     "WISDOM_TIP": _wisdom,

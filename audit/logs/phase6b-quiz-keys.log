@@ -1,0 +1,13 @@
+  en    key right → kept: Which principle does a queue follow?
+  en    key wrong → rejected: Which statement about a queue is true?
+  en    key right → kept: What is lim(x→2) x^3?
+  en    key wrong → rejected: What is the limit of x^3 as x approaches 2?
+  en    key right → kept: What is the derivative of x^2 cos x?
+  en    key wrong → rejected: Differentiate x^2 cos x.
+  fr    key right → kept: Quelle opération retire l'élément le plus récent d'une pile ?
+  fr    key wrong → rejected: Quel principe suit une file ?
+  ar    key right → kept: ما قيمة نهاية x^3 عندما يقترب x من 2؟
+  ar    key wrong → rejected: أي عملية تحذف آخر عنصر أضيف إلى المكدس (stack)؟
+  ar-TN key right → kept: الـ queue شنوّة المبدأ متاعها؟
+  ar-TN key wrong → rejected: قدّاش تجي نهاية x^3 كي x يقرب من 2؟
+right kept 6/6 · wrong rejected 6/6 → /app/tests/evals/quiz/outputs/local-keys-1793965320.json

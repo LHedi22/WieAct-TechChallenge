@@ -1,0 +1,138 @@
+[
+ {
+  "check": "6 parallel tutor starts with 20 coins: <= 2 succeed",
+  "status": 500,
+  "expected": [
+   200
+  ],
+  "pass": false
+ },
+ {
+  "check": "the rest get 402 insufficient_coins",
+  "status": 200,
+  "expected": [
+   200
+  ],
+  "pass": true
+ },
+ {
+  "check": "tutor burst: wallet coins == ledger sum (4 vs 4)",
+  "status": 200,
+  "expected": [
+   200
+  ],
+  "pass": true
+ },
+ {
+  "check": "tutor burst: never negative",
+  "status": 200,
+  "expected": [
+   200
+  ],
+  "pass": true
+ },
+ {
+  "check": "5 parallel pool gifts of 10 with 20 coins: <= 2 succeed",
+  "status": 200,
+  "expected": [
+   200
+  ],
+  "pass": true
+ },
+ {
+  "check": "pool burst: wallet coins == ledger sum (0 vs 0)",
+  "status": 200,
+  "expected": [
+   200
+  ],
+  "pass": true
+ },
+ {
+  "check": "pool burst: never negative",
+  "status": 200,
+  "expected": [
+   200
+  ],
+  "pass": true
+ },
+ {
+  "check": "pool balance == pool ledger sum",
+  "status": 200,
+  "expected": [
+   200
+  ],
+  "pass": true
+ },
+ {
+  "check": "purchase burst: wallet coins == ledger sum (220 vs 220)",
+  "status": 200,
+  "expected": [
+   200
+  ],
+  "pass": true
+ },
+ {
+  "check": "purchase burst: never negative",
+  "status": 200,
+  "expected": [
+   200
+  ],
+  "pass": true
+ },
+ {
+  "check": "4 parallel coin packs add 4 \u00d7 pack",
+  "status": 200,
+  "expected": [
+   200
+  ],
+  "pass": true
+ },
+ {
+  "check": "exam pass shows 15 left today",
+  "status": 200,
+  "expected": [
+   200
+  ],
+  "pass": true
+ },
+ {
+  "check": "6 parallel finishes \u2192 no 5xx",
+  "status": 200,
+  "expected": [
+   200
+  ],
+  "pass": true
+ },
+ {
+  "check": "points in wallet == points ledger sum",
+  "status": 200,
+  "expected": [
+   200
+  ],
+  "pass": true
+ },
+ {
+  "check": "no user has a negative coin ledger sum",
+  "status": 200,
+  "expected": [
+   200
+  ],
+  "pass": true
+ },
+ {
+  "check": "no double refund",
+  "status": 200,
+  "expected": [
+   200
+  ],
+  "pass": true
+ },
+ {
+  "check": "every failed/cancelled paid job was refunded",
+  "status": 200,
+  "expected": [
+   200
+  ],
+  "pass": true
+ }
+]

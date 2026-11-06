@@ -1,0 +1,10 @@
+Bytecode compiled 5680 files in 596ms
+provider local · world OLIVE-7Q2 · Data Structures · level advanced · en, fr, ar, ar-TN
+en: study_pack done · audio done · teachback_solo reused · daily_plan failed
+fr: study_pack done · audio cached · teachback_solo reused · daily_plan failed
+ar: study_pack done · audio done · teachback_solo reused · daily_plan done
+ar-TN: study_pack failed · audio cached · teachback_solo reused · daily_plan done
+wisdom: the class quiz set isn't ready yet
+done in 536s → /app/tests/evals/slot/outputs
+this run: calls 15, compact 9, mid 6, cache hits 6, repeated identical 1, fallbacks 0, refusals 0
+stats: on the host run `python3 scripts/export_stats.py --provider local`

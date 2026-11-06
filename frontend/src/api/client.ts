@@ -6,6 +6,8 @@ export type JobView = S["JobView"];
 export type JobCreated = S["JobCreated"];
 export type DemoJobIn = S["DemoJobIn"];
 export type SystemStatus = S["SystemStatus"];
+export type ProviderIn = S["ProviderIn"];
+export type ProviderOut = S["ProviderOut"];
 export type WorldOut = S["WorldOut"];
 export type WorldSummary = S["WorldSummary"];
 export type CourseOut = S["CourseOut"];
@@ -115,6 +117,8 @@ export const api = {
   cancelJob: (id: string) => request<JobView>(`/api/jobs/${id}/cancel`, { method: "POST" }),
   startDemoJob: (body: Partial<DemoJobIn>) => post<JobCreated>("/api/dev/demo-jobs", body),
   systemStatus: () => request<SystemStatus>("/api/system/status"),
+  chooseProvider: (body: ProviderIn) =>
+    request<ProviderOut>("/api/system/provider", { method: "PUT", body: JSON.stringify(body) }),
 
   myWorlds: () => request<WorldSummary[]>("/api/worlds"),
   createWorld: (name: string) => post<WorldOut>("/api/worlds", { name }),

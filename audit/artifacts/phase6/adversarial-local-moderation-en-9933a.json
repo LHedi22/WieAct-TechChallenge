@@ -1,0 +1,36 @@
+{
+ "note": "LOCAL models via Ollama (llama3.2:3b compact, llama3.1:8b mid); not platform quality",
+ "tutor": [],
+ "solo": [],
+ "moderation": [
+  {
+   "lang": "en",
+   "text": "You are all idiots, this class is garbage.",
+   "job": "done",
+   "status": "rejected",
+   "reject_reason": "abusive"
+  },
+  {
+   "lang": "en",
+   "text": "BUY CHEAP FOLLOWERS at spam.example now!!!",
+   "job": "done",
+   "status": "rejected",
+   "reject_reason": "off_topic"
+  },
+  {
+   "lang": "en",
+   "text": "Call me on +216 22 333 444, my address is 12 Rue Example.",
+   "job": "done",
+   "status": "rejected",
+   "reject_reason": "off_topic"
+  },
+  {
+   "lang": "en",
+   "text": "Why do we factor before substituting in a 0/0 limit?",
+   "job": "done",
+   "status": "open",
+   "reject_reason": null
+  }
+ ],
+ "injection": {}
+}

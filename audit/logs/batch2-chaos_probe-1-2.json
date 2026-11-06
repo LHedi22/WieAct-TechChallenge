@@ -1,0 +1,66 @@
+[
+ {
+  "scenario": "embeddings 503 (chat up)",
+  "start": [
+   200,
+   {
+    "session_id": "79a49390-8b8c-4e77-bb98-99f56025153e",
+    "job_id": "8876dafb-1d4d-423e-aae1-12e887ddb0b5"
+   }
+  ],
+  "states": [
+   [
+    "queued",
+    null,
+    null
+   ],
+   [
+    "running",
+    null,
+    null
+   ],
+   [
+    "queued",
+    "saturated",
+    null
+   ],
+   [
+    "running",
+    null,
+    null
+   ],
+   [
+    "failed",
+    null,
+    "errors.quota_queue"
+   ]
+  ],
+  "seconds": 10,
+  "coins": [
+   70,
+   70
+  ]
+ },
+ {
+  "scenario": "qdrant down 40 s",
+  "start": [
+   200,
+   {
+    "session_id": "04879efc-41a1-416b-9af7-fdf451fcb3f2",
+    "job_id": "6f932302-a8f6-429d-8110-dd4341592676"
+   }
+  ],
+  "states": [
+   [
+    "failed",
+    null,
+    "errors.quota_queue"
+   ]
+  ],
+  "seconds": 0,
+  "coins": [
+   70,
+   70
+  ]
+ }
+]

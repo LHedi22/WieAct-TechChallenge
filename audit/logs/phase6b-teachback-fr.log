@@ -1,0 +1,7 @@
+  fr    weak       → off_topic None final []
+  fr    acceptable → ok 60 final ['evidence', 'low_confidence']
+  fr    strong     → ok 70 final ['low_confidence']
+  fr    off_topic  → off_topic None final []
+  fr    injected   → off_topic None final []
+calls {'compact': 5, 'mid': 2} · scores_vary FAIL · ranks_weak_acceptable_strong FAIL · same_answer_same_band_across_languages FAIL · off_topic_gets_nothing PASS · injection_not_rewarded PASS
+→ /app/tests/evals/teachback/outputs/local-1793962235.json

@@ -1,0 +1,178 @@
+{
+  "provider": "local",
+  "level": "advanced",
+  "generated_at": "2026-11-05T16:52:01.836451+00:00",
+  "chapter": "Stacks and queues",
+  "task": "study_pack",
+  "language": "en",
+  "output": {
+    "started": {
+      "job_id": "874356af-84d7-4583-ae5d-10eeb3294a4f",
+      "cost": 0,
+      "cached": false
+    },
+    "job": {
+      "status": "done",
+      "error": null,
+      "quick_mode": false,
+      "result": null,
+      "wait_s": 533.5
+    },
+    "cached": false,
+    "notes": {
+      "title": "Stacks and Queues",
+      "sections": [
+        {
+          "heading": "Stack Definition",
+          "points": [
+            "A stack is a LIFO (last in, first out) data structure.",
+            "It can be thought of as a pile of plates.",
+            "Elements are added and removed from the top.",
+            "All stack operations have an average time complexity of O(1)."
+          ],
+          "refs": [
+            "slide:1"
+          ]
+        },
+        {
+          "heading": "Stack Operations",
+          "points": [
+            "push(x) adds an element to the top of the stack.",
+            "pop() removes the top element from the stack.",
+            "peek() reads the top element without removing it.",
+            "All stack operations have an average time complexity of O(1)."
+          ],
+          "refs": [
+            "slide:2"
+          ]
+        },
+        {
+          "heading": "Stack Implementations",
+          "points": [
+            "Array-based stack: uses an array and a top index.",
+            "Linked stack: uses dynamic memory allocation and a pointer to the top node.",
+            "Array-based stack has a fixed capacity, while linked stack has no fixed capacity.",
+            "push operation increments the top index in array-based stack."
+          ],
+          "refs": [
+            "slide:3",
+            "slide:4"
+          ]
+        },
+        {
+          "heading": "Uses of Stacks",
+          "points": [
+            "Undo history: stacks can be used to implement undo functionality.",
+            "Call stack: stacks are used to manage function calls in a program.",
+            "Balanced brackets: stacks can be used to check if brackets in an expression are balanced.",
+            "DFS: stacks can be used to implement depth-first search in a graph."
+          ],
+          "refs": [
+            "slide:5"
+          ]
+        },
+        {
+          "heading": "Balanced Brackets",
+          "points": [
+            "Push every opening bracket onto the stack.",
+            "When a closing bracket is encountered, pop the corresponding opening bracket from the stack.",
+            "Compare the popped opening bracket with the closing bracket.",
+            "If they match, the brackets are balanced."
+          ],
+          "refs": [
+            "slide:6"
+          ]
+        }
+      ],
+      "key_terms": [
+        {
+          "term": "LIFO",
+          "meaning": "Last in, first out data structure."
+        },
+        {
+          "term": "push(x)",
+          "meaning": "Adds an element to the top of the stack."
+        },
+        {
+          "term": "pop()",
+          "meaning": "Removes the top element from the stack."
+        },
+        {
+          "term": "peek()",
+          "meaning": "Reads the top element without removing it."
+        },
+        {
+          "term": "DFS",
+          "meaning": "Depth-first search algorithm."
+        }
+      ]
+    },
+    "map": null,
+    "cards": [
+      {
+        "front": "What operation removes the top element from the stack?",
+        "back": "pop() removes the top element from the stack.",
+        "concept": "pop"
+      },
+      {
+        "front": "What is the purpose of the call stack?",
+        "back": "To manage function calls in a program.",
+        "concept": "Call stack"
+      },
+      {
+        "front": "What operation reads the top element without removing it?",
+        "back": "peek() reads the top element without removing it.",
+        "concept": "peek"
+      },
+      {
+        "front": "What is the purpose of a stack?",
+        "back": "To store elements in a Last in, first out order.",
+        "concept": "Stack"
+      },
+      {
+        "front": "What is the capacity of a linked stack?",
+        "back": "No fixed capacity.",
+        "concept": "Linked stack"
+      },
+      {
+        "front": "What operation adds an element to the top of the stack?",
+        "back": "push(x) adds an element to the top of the stack.",
+        "concept": "push"
+      },
+      {
+        "front": "What is the capacity of an array-based stack?",
+        "back": "Fixed capacity.",
+        "concept": "Array-based stack"
+      },
+      {
+        "front": "What is the purpose of undo history?",
+        "back": "To implement undo functionality.",
+        "concept": "Undo history"
+      },
+      {
+        "front": "What is the purpose of DFS?",
+        "back": "To implement depth-first search in a graph.",
+        "concept": "DFS"
+      },
+      {
+        "front": "What is a LIFO data structure?",
+        "back": "Last in, first out data structure.",
+        "concept": "LIFO"
+      },
+      {
+        "front": "What is the average time complexity of stack operations?",
+        "back": "O(1)",
+        "concept": "Time complexity"
+      },
+      {
+        "front": "What is the purpose of balanced brackets?",
+        "back": "To check if brackets in an expression are balanced.",
+        "concept": "Balanced brackets"
+      }
+    ]
+  },
+  "review": {
+    "verdict": null,
+    "notes": ""
+  }
+}

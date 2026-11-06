@@ -14,6 +14,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import economy
+from app.core.provenance import servable
 from app.features.daily import service as daily
 from app.features.quiz import pool
 from app.features.wallet import service as wallet
@@ -53,6 +54,8 @@ async def unseen_set(
             QuizSet.level == level,
             QuizSet.language == language,
             QuizSet.id.not_in(seen),
+            servable(QuizSet.provider),
+            pool.shareable(QuizSet.questions),  # answer keys verified (audit N-3)
         )
         .order_by(QuizSet.seed)
         .limit(1)
@@ -178,6 +181,8 @@ class AttemptView(BaseModel):
     current: int
     points: int
     questions: list[QuestionView]
+    made_by: str | None = None  # provider that wrote it; the UI labels non-platform test data
+    verified: bool = True  # every answer key was checked (audit N-3); False → labelled in the UI
 
 
 def question_view(i: int, q: dict[str, Any], a: dict[str, Any]) -> QuestionView:
@@ -216,6 +221,8 @@ async def view(s: AsyncSession, attempt: QuizAttempt) -> AttemptView:
             question_view(i, q, a)
             for i, (q, a) in enumerate(zip(qs.questions, attempt.answers, strict=True))
         ],
+        made_by=qs.provider,
+        verified=all(q.get("verified") is True for q in qs.questions),
     )
 
 
