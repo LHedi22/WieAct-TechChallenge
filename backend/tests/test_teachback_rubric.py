@@ -98,3 +98,17 @@ def test_eval_checks_catch_a_language_gap():
         return {"flag": "ok" if s else "off_topic", "score": s, "finalised": True}
 
     assert not teachback.checks(outcomes(score_of))["same_answer_same_band_across_languages"]
+
+
+def test_criteria_written_as_a_list_are_read_in_rubric_order_or_by_name():
+    """Seen on llama3.1:8b (Phase 6 rerun): "criteria" came back as a list, and every Arabic
+    grade was dropped as unusable."""
+    by_order = parse_grade({"flag": "ok", "criteria": [{"level": 4}, {"level": 2}, {"level": 1}]})
+    assert by_order.score == 70  # accuracy 4, coverage 2, reasoning 1, example missing → 0
+    by_name = parse_grade(
+        {
+            "flag": "ok",
+            "criteria": [{"name": "example", "level": 1}, {"name": "accuracy", "level": 3}],
+        }
+    )
+    assert by_name.score == 40

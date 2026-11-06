@@ -93,6 +93,13 @@ def total(criteria: dict[str, Criterion]) -> int:
 
 
 def _criteria(raw: Any) -> dict[str, Criterion] | None:
+    if isinstance(raw, list):  # small models write a list: by name if given, else rubric order
+        named = {
+            str(i.get("name") or i.get("criterion") or i.get("key")).lower(): i
+            for i in raw
+            if isinstance(i, dict) and (i.get("name") or i.get("criterion") or i.get("key"))
+        }
+        raw = named if named else dict(zip(CRITERIA, raw, strict=False))
     if not isinstance(raw, dict):
         return None
     out: dict[str, Criterion] = {}
