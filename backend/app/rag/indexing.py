@@ -48,6 +48,7 @@ BACKEND_DIR = Path(__file__).resolve().parents[2]
 LINE_LIMIT = 32 * 1024 * 1024  # one page of text per JSON line
 # Fewer threads and malloc arenas in the parse child: keeps its memory use predictable
 CHILD_ENV = {
+    "PYTHONIOENCODING": "utf-8",  # JSON lines are UTF-8; Windows pipes default to cp1252
     "MALLOC_ARENA_MAX": "2",
     "OMP_NUM_THREADS": "1",
     "OMP_THREAD_LIMIT": "1",
