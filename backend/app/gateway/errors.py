@@ -72,6 +72,16 @@ class BadOutput(GatewayError):
     """The model's JSON stayed invalid after one repair call."""
 
 
+class EmbeddingsDown(Defer):
+    """The embeddings breaker is open (audit N-9): no call is made. It is a Defer, so features
+    that would otherwise carry on without search results re-raise it (never ungrounded output);
+    the worker fails an interactive job at once (coins refunded) and requeues background work
+    after the cooldown."""
+
+    def __init__(self, delay_s: float) -> None:
+        super().__init__(delay_s, "embeddings_down")
+
+
 # --- parsing --------------------------------------------------------------------------------------
 def _header(headers: dict[str, str], name: str) -> str | None:
     name = name.lower()

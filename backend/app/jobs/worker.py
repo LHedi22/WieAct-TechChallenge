@@ -29,7 +29,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core import slot
 from app.core.config import get_settings
-from app.gateway import Defer, GatewayError, OfflineMode
+from app.gateway import Defer, EmbeddingsDown, GatewayError, OfflineMode
 from app.jobs.coins import coins
 from app.jobs.registry import JobContext, spec_for
 from app.models import Document, Job
@@ -178,7 +178,12 @@ class Worker:
             status = "done"
             values = {"result": result, "error": None, "quick_mode": ctx.quick_mode}
         except Defer as d:
-            if job.attempts < MAX_ATTEMPTS:
+            if isinstance(d, EmbeddingsDown) and job.lane == "interactive":
+                # audit N-9: the embeddings endpoint is down; a student isn't kept waiting
+                # through cooldowns, and no call is spent: fail now, coins refunded.
+                values = {"error": d.user_key}
+                log.info("job %s failed fast: embeddings breaker open", job.id)
+            elif job.attempts < MAX_ATTEMPTS:
                 status = "queued"
                 values = {
                     "not_before": datetime.now(UTC) + timedelta(seconds=d.delay_s),

@@ -1,0 +1,44 @@
+[
+ {
+  "scenario": "embeddings 503 (chat up)",
+  "start": [
+   200,
+   {
+    "session_id": "6d9d5a1f-6bc3-4851-a422-2cccaf63124a",
+    "job_id": "fc979ba5-420f-419f-a083-64cd82c80019"
+   }
+  ],
+  "states": [
+   [
+    "queued",
+    null,
+    null
+   ],
+   [
+    "running",
+    null,
+    null
+   ],
+   [
+    "queued",
+    "saturated",
+    null
+   ],
+   [
+    "running",
+    null,
+    null
+   ],
+   [
+    "failed",
+    null,
+    "errors.quota_queue"
+   ]
+  ],
+  "seconds": 14,
+  "coins": [
+   70,
+   70
+  ]
+ }
+]

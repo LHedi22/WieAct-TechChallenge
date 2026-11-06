@@ -21,10 +21,12 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core.config import LLMProfile, Settings
 from app.gateway import cache, forcequick, log
+from app.gateway.breaker import Breaker
 from app.gateway.client import CallFailed, LLMClient, Reply
 from app.gateway.errors import (
     BadOutput,
     Defer,
+    EmbeddingsDown,
     KeyBlocked,
     OfflineMode,
     RequestRejected,
@@ -80,6 +82,7 @@ class Gateway:
         self._clients: dict[str, LLMClient] = {}
         self._ceilings: dict[str, int] = {}  # learned max_tokens ceiling per provider
         self._embed_ceilings: dict[str, int] = {}  # learned inputs-per-call ceiling per provider
+        self._embed_breakers: dict[str, Breaker] = {}  # per provider (audit N-9)
         self._inflight: dict[tuple[str, str, str], asyncio.Future[None]] = {}
         self._background: set[asyncio.Task] = set()  # slot holds after timeouts
         self._sleep = sleep
@@ -502,7 +505,13 @@ class Gateway:
         while pending:
             batch, pending = pending[:size], pending[size:]
             retried = False
+            breaker = self._embed_breakers.setdefault(profile.provider, Breaker())
             while True:
+                if (wait := breaker.remaining(self._now())) > 0:
+                    # Open: the endpoint is down and every call is metered. No call; the
+                    # worker fails an interactive job at once (refund), background work waits.
+                    raise EmbeddingsDown(wait)
+                breaker.before_call(self._now())
                 failed: CallFailed | None = None
                 try:
                     async with self.limiter.slot(lane, "embed"):
@@ -512,8 +521,11 @@ class Gateway:
                     failed = e
                     self.quota.update(profile.provider, e.headers)
                 if failed is None:
+                    breaker.success()
                     break
                 err = failed.error
+                if err.kind in ("saturated", "transient"):
+                    breaker.failure(self._now())
                 await self._log_embed(
                     lane,
                     profile,
