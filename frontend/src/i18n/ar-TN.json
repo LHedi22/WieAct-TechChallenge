@@ -74,7 +74,8 @@
         "writing_notes": "قاعد نكتب في الملخّصات",
         "making_flashcards": "قاعد نحضّر في البطاقات",
         "drawing_map": "قاعد نرسم في الخريطة الذهنية",
-        "writing_script": "قاعد نكتب في الحلقة"
+        "writing_script": "قاعد نكتب في الحلقة",
+        "checking_answers": "نثبتو في الأجوبة"
       }
     },
     "wisdom": {
@@ -206,7 +207,8 @@
       "body": "كتبو الموديل الخفيف وقتلّي البلاتفورم كانت مشغولة.",
       "upgrade": "اعمل النسخة الكاملة · بلاش"
     },
-    "testData": "داتا تجريبية ({provider})"
+    "testData": "داتا تجريبية ({provider})",
+    "unverifiedKeys": "الأجوبة مازالت ما تثبّتتش"
   },
   "styleguide": {
     "title": "Learning World · دليل الستيل",

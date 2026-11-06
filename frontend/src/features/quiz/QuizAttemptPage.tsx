@@ -136,6 +136,11 @@ function QuizHeader({
         </p>
       </div>
       <TestDataChip madeBy={attempt.made_by} />
+      {attempt.verified === false && (
+        <Chip kind="cost" className="self-start">
+          {t("common:unverifiedKeys")}
+        </Chip>
+      )}
       {n !== undefined && (
         <p className="mx-auto text-small font-semibold">
           {t("common:progress.questionOf", { n, total: attempt.questions.length })}

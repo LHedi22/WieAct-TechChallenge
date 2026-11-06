@@ -12,6 +12,7 @@ class TaskKind(StrEnum):
     CHUNK_TAG = "CHUNK_TAG"
     QUIZ_GENERATE = "QUIZ_GENERATE"
     QUIZ_GRADE_TAG = "QUIZ_GRADE_TAG"
+    QUIZ_VERIFY = "QUIZ_VERIFY"  # mid solves each question blind; keys it confirms survive
     TUTOR_TURN = "TUTOR_TURN"
     TUTOR_SUMMARY = "TUTOR_SUMMARY"
     TUTOR_GUARD = "TUTOR_GUARD"  # rewrite a tutor reply that leaked the final answer

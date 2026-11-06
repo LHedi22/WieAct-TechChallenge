@@ -73,7 +73,8 @@
         "writing_notes": "Rédaction des fiches",
         "making_flashcards": "Création des cartes",
         "drawing_map": "Dessin de la carte mentale",
-        "writing_script": "Écriture de l'épisode"
+        "writing_script": "Écriture de l'épisode",
+        "checking_answers": "Vérification des réponses"
       }
     },
     "wisdom": {
@@ -205,7 +206,8 @@
       "body": "Écrit par le modèle rapide pendant que la plateforme était occupée.",
       "upgrade": "Faire la version complète · Gratuit"
     },
-    "testData": "Données de test ({provider})"
+    "testData": "Données de test ({provider})",
+    "unverifiedKeys": "Réponses pas encore vérifiées"
   },
   "styleguide": {
     "title": "Learning World · guide de style",

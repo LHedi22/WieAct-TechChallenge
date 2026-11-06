@@ -83,6 +83,28 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/admin/force-quick": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Force Quick State */
+    get: operations["force_quick_state_api_admin_force_quick_get"];
+    put?: never;
+    /**
+     * Force Quick On
+     * @description Demo switch (audit F-VID-1): interactive mid tasks answer as Quick mode for `minutes`.
+     */
+    post: operations["force_quick_on_api_admin_force_quick_post"];
+    /** Force Quick Off */
+    delete: operations["force_quick_off_api_admin_force_quick_delete"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/admin/stats": {
     parameters: {
       query?: never;
@@ -1196,6 +1218,11 @@ export interface components {
       questions: components["schemas"]["QuestionView"][];
       /** Made By */
       made_by?: string | null;
+      /**
+       * Verified
+       * @default true
+       */
+      verified: boolean;
     };
     /** Author */
     Author: {
@@ -1612,6 +1639,18 @@ export interface components {
       course_id: string;
       /** Answers */
       answers: (number | null)[];
+    };
+    /** ForceQuickIn */
+    ForceQuickIn: {
+      /** Minutes */
+      minutes: number;
+    };
+    /** ForceQuickOut */
+    ForceQuickOut: {
+      /** Active */
+      active: boolean;
+      /** Until */
+      until: string | null;
     };
     /** FromQuizOut */
     FromQuizOut: {
@@ -2864,6 +2903,103 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["JobView"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  force_quick_state_api_admin_force_quick_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ForceQuickOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  force_quick_on_api_admin_force_quick_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ForceQuickIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ForceQuickOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  force_quick_off_api_admin_force_quick_delete: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ForceQuickOut"];
         };
       };
       /** @description Validation Error */

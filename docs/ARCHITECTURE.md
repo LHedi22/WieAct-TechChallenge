@@ -102,6 +102,7 @@ and on failure do ONE compact "fix this JSON" repair call. Small models break JS
 | CHUNK_TAG (batch of chunks → concepts, chapter) | compact | batch at upload (burst) | background | doc hash |
 | QUIZ_GENERATE (10 Q, one call) | compact | narrow-before-generating | interactive / background pool | world+chapter+level+lang+seed |
 | QUIZ_GRADE_TAG (wrong answers → concept + mistake type) | compact | extraction | background | lang + missed items hash |
+| QUIZ_VERIFY (mid solves each new quiz / placement item blind; only items whose key it confirms are published; one regeneration if fewer than 5 survive; mid unavailable → a student's quiz is published marked unverified and never shared, background and placement wait) | mid | draft-then-revise | same as the set | questions + context hash |
 | TUTOR_TURN | compact → mid when stuck ≥ 2 turns or "complex" flag | escalation | interactive | plan: chapter+level+lang+style; turns: none |
 | TUTOR_GUARD (rewrite a reply that leaks the answer as a guiding question; only flagged replies) | compact | guard | interactive | none |
 | TUTOR_SUMMARY | compact | summary | interactive | session id |

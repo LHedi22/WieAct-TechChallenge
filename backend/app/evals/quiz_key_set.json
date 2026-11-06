@@ -1,0 +1,18 @@
+{
+  "_about": "Answer-key fixtures (audit N-3): quiz items whose key is known RIGHT and items whose key is known WRONG, as a small model wrote them in the local eval. `true_index` is the real answer (null = no option is right). The verifier must keep every right item and reject every wrong one. Synthetic, public-domain content.",
+  "context": "[slide:1] A stack is LIFO (last in, first out): push adds on top, pop removes the most recent item. [slide:7] A queue is FIFO (first in, first out): enqueue adds at the back, dequeue removes the oldest item. [page:4] The limit of a polynomial at a point is its value there: lim(x→2) x^3 = 8. [page:9] Product rule: (uv)' = u'v + uv'. So (x^2 cos x)' = 2x cos x − x^2 sin x.",
+  "items": [
+    {"lang": "en", "key": "right", "true_index": 1, "question": {"question": "Which principle does a queue follow?", "options": ["Last in, first out", "First in, first out", "Random order", "Sorted order"], "answer_index": 1, "concept": "queue"}},
+    {"lang": "en", "key": "wrong", "true_index": 1, "question": {"question": "Which statement about a queue is true?", "options": ["A queue is last-in-first-out (FIFO)", "A queue removes the oldest item first", "A queue only allows access to the newest item", "A queue keeps its items sorted"], "answer_index": 0, "concept": "queue"}},
+    {"lang": "en", "key": "right", "true_index": 2, "question": {"question": "What is lim(x→2) x^3?", "options": ["2", "6", "8", "It does not exist"], "answer_index": 2, "concept": "limit"}},
+    {"lang": "en", "key": "wrong", "true_index": 2, "question": {"question": "What is the limit of x^3 as x approaches 2?", "options": ["2", "4", "8", "16"], "answer_index": 0, "concept": "limit"}},
+    {"lang": "en", "key": "right", "true_index": 0, "question": {"question": "What is the derivative of x^2 cos x?", "options": ["2x cos x − x^2 sin x", "x cos x − x^2 sin x", "2x cos x + x^2 sin x", "−2x sin x"], "answer_index": 0, "concept": "product rule"}},
+    {"lang": "en", "key": "wrong", "true_index": 0, "question": {"question": "Differentiate x^2 cos x.", "options": ["2x cos x − x^2 sin x", "x cos x − x^2 sin x", "2x cos x + x^2 sin x", "−2x sin x"], "answer_index": 1, "concept": "product rule"}},
+    {"lang": "fr", "key": "right", "true_index": 0, "question": {"question": "Quelle opération retire l'élément le plus récent d'une pile ?", "options": ["pop", "enqueue", "push", "dequeue"], "answer_index": 0, "concept": "pile"}},
+    {"lang": "fr", "key": "wrong", "true_index": 3, "question": {"question": "Quel principe suit une file ?", "options": ["Dernier entré, premier sorti", "Ordre aléatoire", "Ordre trié", "Premier entré, premier sorti"], "answer_index": 0, "concept": "file"}},
+    {"lang": "ar", "key": "right", "true_index": 1, "question": {"question": "ما قيمة نهاية x^3 عندما يقترب x من 2؟", "options": ["2", "8", "6", "غير موجودة"], "answer_index": 1, "concept": "النهاية (limite)"}},
+    {"lang": "ar", "key": "wrong", "true_index": 0, "question": {"question": "أي عملية تحذف آخر عنصر أضيف إلى المكدس (stack)؟", "options": ["pop", "push", "enqueue", "peek"], "answer_index": 1, "concept": "المكدس (stack)"}},
+    {"lang": "ar-TN", "key": "right", "true_index": 2, "question": {"question": "الـ queue شنوّة المبدأ متاعها؟", "options": ["آخر واحد يدخل أوّل واحد يخرج", "بالصدفة", "أوّل واحد يدخل أوّل واحد يخرج", "مرتّبة"], "answer_index": 2, "concept": "queue"}},
+    {"lang": "ar-TN", "key": "wrong", "true_index": 2, "question": {"question": "قدّاش تجي نهاية x^3 كي x يقرب من 2؟", "options": ["2", "6", "8", "مافماش"], "answer_index": 0, "concept": "النهاية (limite)"}}
+  ]
+}

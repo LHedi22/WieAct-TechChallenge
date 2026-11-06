@@ -82,6 +82,7 @@ async def test_all_seen_generates_a_new_set_as_a_job(api, sm, pptx):  # noqa: F8
         "matching_level",
         "writing_questions",
         "writing_hints",
+        "checking_answers",  # the answer keys are verified before the set is published (N-3)
     ]
     attempt = (
         await api.post(f"/api/quiz/attempts/from-job/{start['job_id']}", headers=OWL_FR)

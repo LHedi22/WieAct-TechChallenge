@@ -73,7 +73,8 @@
         "writing_notes": "Writing the notes",
         "making_flashcards": "Making flashcards",
         "drawing_map": "Drawing the mind map",
-        "writing_script": "Writing the episode"
+        "writing_script": "Writing the episode",
+        "checking_answers": "Checking the answers"
       }
     },
     "wisdom": {
@@ -205,7 +206,8 @@
       "body": "Written by the faster model while the platform was busy.",
       "upgrade": "Make the full version · Free"
     },
-    "testData": "Test data ({provider})"
+    "testData": "Test data ({provider})",
+    "unverifiedKeys": "Answers not double-checked yet"
   },
   "styleguide": {
     "title": "Learning World · style guide",

@@ -73,7 +73,8 @@
         "writing_notes": "كتابة الملخّصات",
         "making_flashcards": "إعداد البطاقات",
         "drawing_map": "رسم الخريطة الذهنية",
-        "writing_script": "كتابة الحلقة"
+        "writing_script": "كتابة الحلقة",
+        "checking_answers": "التحقق من الإجابات"
       }
     },
     "wisdom": {
@@ -205,7 +206,8 @@
       "body": "كتبه النموذج الأسرع بينما كانت المنصّة مشغولة.",
       "upgrade": "اصنع النسخة الكاملة · مجانًا"
     },
-    "testData": "بيانات تجريبية ({provider})"
+    "testData": "بيانات تجريبية ({provider})",
+    "unverifiedKeys": "لم يتم التحقق من الإجابات بعد"
   },
   "styleguide": {
     "title": "Learning World · دليل الأسلوب",

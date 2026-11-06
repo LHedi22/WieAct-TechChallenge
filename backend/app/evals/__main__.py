@@ -4,6 +4,7 @@
     uv run python -m app.evals quiz --world OLIVE-7Q2 --fresh      # bypass the cache
     uv run python -m app.evals slot [--cloud]                      # every feature, 4 languages
     uv run python -m app.evals teachback [--langs …] [--cloud]     # Teach-Back graded set (N-1/N-2)
+    uv run python -m app.evals quiz-keys [--cloud]                 # answer-key verifier (N-3)
 
 `slot` is documented in app/evals/slot.py.
 
@@ -63,6 +64,49 @@ def check(q: dict[str, Any], lang: str, context: str) -> dict[str, bool]:
     }
 
 
+def valid_or_raw(content: Any) -> list[Any]:
+    raw = content.get("questions", []) if isinstance(content, dict) else []
+    return raw if isinstance(raw, list) else []
+
+
+async def key_check(raw: list[Any], lang: str, course, chapter, context: str) -> list[bool]:
+    """Per raw question: the answer-key verifier (one mid call) confirms its key. Invalid
+    questions, or a verifier that can't run, count as not verified."""
+    import uuid
+
+    from app.features.quiz import verify
+    from app.features.quiz.pool import Question
+    from app.jobs.registry import JobContext
+
+    idx = []
+    for i, q in enumerate(raw):
+        try:
+            Question.model_validate(q)
+            idx.append(i)
+        except Exception:  # noqa: BLE001 - invalid questions aren't sent to the verifier
+            continue
+    out = [False] * len(raw)
+    if not idx:
+        return out
+
+    async def no_stage(_stage: str) -> None:
+        return None
+
+    ctx = JobContext(uuid.uuid4(), "EVAL", "background", {}, no_stage)
+    ok = await verify.check(
+        ctx,
+        [raw[i] for i in idx],
+        context=context,
+        course=course.name,
+        chapter=chapter.title,
+        language=lang,
+        lane="background",
+    )
+    for i, good in zip(idx, ok or [False] * len(idx), strict=True):
+        out[i] = good
+    return out
+
+
 async def quiz_eval(langs: list[str], n: int, world_code: str, fresh: bool, out: Path) -> int:
     from app import gateway, prompts
     from app.core import db
@@ -98,6 +142,7 @@ async def quiz_eval(langs: list[str], n: int, world_code: str, fresh: bool, out:
     provider = get_settings().llm.provider
     for lang in langs:
         questions: list[dict[str, Any]] = []
+        failures: list[str] = []
         calls = 0
         while len(questions) < n and calls < max(2, n // 5):
             chapter, course = chapters[calls % len(chapters)]
@@ -120,6 +165,7 @@ async def quiz_eval(langs: list[str], n: int, world_code: str, fresh: bool, out:
                 cache_key=f"{stamp}:{chapter.id}:{lang}:{calls}",
                 prompt_version=version,
             )
+            result = None
             while True:  # the platform's quota: wait the stated delay, then continue
                 try:
                     result = await gateway.run(task)
@@ -127,15 +173,23 @@ async def quiz_eval(langs: list[str], n: int, world_code: str, fresh: bool, out:
                 except gateway.Defer as d:
                     print(f"  {d.reason}: waiting {d.delay_s:.0f}s")
                     await asyncio.sleep(d.delay_s)
+                except gateway.GatewayError as e:  # e.g. invalid JSON after the repair call
+                    print(f"  call {calls + 1}: {type(e).__name__} (recorded, continuing)")
+                    failures.append(type(e).__name__)
+                    break
             calls += 1
-            raw = result.content.get("questions", []) if isinstance(result.content, dict) else []
-            for q in raw if isinstance(raw, list) else []:
+            if result is None:
+                continue
+            raw_qs = valid_or_raw(result.content)
+            ok = await key_check(raw_qs, lang, course, chapter, context)
+            for q, key_ok in zip(raw_qs, ok, strict=True):
                 if len(questions) < n:
                     questions.append(
                         {
                             "chapter": chapter.title,
                             "question": q,
-                            "checks": check(q, lang, context),
+                            # key_verified: the mid solver, blind to the key, picked it (N-3)
+                            "checks": check(q, lang, context) | {"key_verified": key_ok},
                             "review": {"correct": None, "notes": ""},  # filled by the reviewer
                         }
                     )
@@ -145,11 +199,12 @@ async def quiz_eval(langs: list[str], n: int, world_code: str, fresh: bool, out:
         }
         report = {
             "provider": provider,
-            "model": result.model,
+            "model": result.model if result else None,
             "prompt": f"quiz_generate v{version}",
             "language": lang,
             "generated_at": datetime.now(UTC).isoformat(),
             "calls": calls,
+            "failed_calls": failures,
             "count": len(questions),
             "checks_passed": totals,
             "questions": questions,
@@ -165,7 +220,7 @@ async def quiz_eval(langs: list[str], n: int, world_code: str, fresh: bool, out:
 def main(argv: list[str] | None = None) -> int:
     sys.stdout.reconfigure(errors="replace")
     p = argparse.ArgumentParser(prog="python -m app.evals")
-    p.add_argument("task", choices=["quiz", "slot", "teachback"])
+    p.add_argument("task", choices=["quiz", "slot", "teachback", "quiz-keys"])
     p.add_argument("--langs", default="en,fr,ar")
     p.add_argument("--n", type=int, default=20)
     p.add_argument("--world", default="OLIVE-7Q2")
@@ -178,6 +233,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--regrade", action="store_true", help="slot: send Teach-Back answers again")
     args = p.parse_args(argv)
     langs = [x.strip() for x in args.langs.split(",") if x.strip()]
+    if args.task == "quiz-keys":
+        from app.evals import quiz_keys
+
+        return asyncio.run(quiz_keys.run(args.cloud))
     if args.task == "teachback":
         from app.evals import teachback
 

@@ -55,6 +55,7 @@ async def unseen_set(
             QuizSet.language == language,
             QuizSet.id.not_in(seen),
             servable(QuizSet.provider),
+            pool.shareable(QuizSet.questions),  # answer keys verified (audit N-3)
         )
         .order_by(QuizSet.seed)
         .limit(1)
@@ -181,6 +182,7 @@ class AttemptView(BaseModel):
     points: int
     questions: list[QuestionView]
     made_by: str | None = None  # provider that wrote it; the UI labels non-platform test data
+    verified: bool = True  # every answer key was checked (audit N-3); False → labelled in the UI
 
 
 def question_view(i: int, q: dict[str, Any], a: dict[str, Any]) -> QuestionView:
@@ -220,6 +222,7 @@ async def view(s: AsyncSession, attempt: QuizAttempt) -> AttemptView:
             for i, (q, a) in enumerate(zip(qs.questions, attempt.answers, strict=True))
         ],
         made_by=qs.provider,
+        verified=all(q.get("verified") is True for q in qs.questions),
     )
 
 

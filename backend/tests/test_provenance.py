@@ -26,6 +26,7 @@ QUESTION = {
     "hint": "h",
     "explanation": "e",
     "concept": "limit",
+    "verified": True,  # answer key checked (audit N-3): only such sets are shared
 }
 
 

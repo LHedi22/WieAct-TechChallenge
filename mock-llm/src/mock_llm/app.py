@@ -207,6 +207,26 @@ def _quiz(user: str, lang: str, system: str = "") -> dict[str, Any]:
     return {"questions": questions}
 
 
+QUESTION_LINE = re.compile(r"^(\d+)\. ", re.MULTILINE)
+OPTION_LINE = re.compile(r"^\s+(\d)\) (.*)$", re.MULTILINE)
+DISTRACTOR = re.compile(r"\(\d\)\s*$")
+
+
+def _verify(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    """QUIZ_VERIFY: "solve" the mock's own quizzes: the right option is the one without the
+    distractor suffix " (k)". Anything else is unsure."""
+    block = user.split("QUESTIONS", 1)[-1]
+    starts = [(int(m.group(1)), m.start()) for m in QUESTION_LINE.finditer(block)]
+    answers = []
+    for k, (n, at) in enumerate(starts):
+        end = starts[k + 1][1] if k + 1 < len(starts) else len(block)
+        options = OPTION_LINE.findall(block[at:end])
+        plain = [int(i) for i, text in options if not DISTRACTOR.search(text)]
+        one = plain[0] if len(plain) == 1 else None
+        answers.append({"n": n, "answer": one, "sure": one is not None})
+    return {"answers": answers}
+
+
 CHAPTER_MARK = re.compile(r"\[chapter (\d+) [^\]]*\]")
 DIFFICULTY = ("beginner", "beginner", "intermediate", "intermediate", "intermediate", "advanced")
 
@@ -531,6 +551,7 @@ GENERATORS = {
     "TUTOR_SUMMARY": _summary,
     "CHUNK_TAG": _chunk_tags,
     "QUIZ_GENERATE": _quiz,
+    "QUIZ_VERIFY": _verify,
     "PLACEMENT_QUIZ": _placement,
     "QUIZ_GRADE_TAG": _grade_tag,
     "WISDOM_TIP": _wisdom,

@@ -194,5 +194,8 @@ async def test_compact_share_ignores_embedding_calls(api, sm, pptx):
     )
     await Worker(sm).drain(timeout_s=60)
     stats = (await api.get("/api/admin/stats", params={"provider": "mock"})).json()
-    assert stats["by_tier"]["embed"]["calls"] >= 1 and "mid" not in stats["by_tier"]
-    assert stats["compact_share"] == 1.0  # only compact chat calls: embeddings don't dilute it
+    tiers = stats["by_tier"]
+    assert tiers["embed"]["calls"] >= 1
+    # the precomputed quiz's answer-key check is the one mid call (audit N-3)
+    compact, mid = tiers["compact"]["calls"], tiers.get("mid", {}).get("calls", 0)
+    assert stats["compact_share"] == round(compact / (compact + mid), 3)  # embeddings excluded
