@@ -18,10 +18,13 @@ import asyncio
 import logging
 import os
 import socket
+import time
 import uuid
 from datetime import UTC, datetime, timedelta
 
+import asyncpg
 from sqlalchemy import and_, or_, select, update
+from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core import slot
@@ -38,6 +41,11 @@ LEASE_S = 60.0  # a running job's lease; renewed every RENEW_S by the worker tha
 RENEW_S = 15.0
 SWEEP_S = 30.0  # how often expired leases are looked for while the worker runs
 INTERRUPTED = "errors.job_interrupted"
+# A database restart (audit N-7): the loop backs off and reconnects instead of exiting; after
+# DB_OUTAGE_LIMIT_S without the database it exits, so the supervisor (Railway, compose) restarts it.
+DB_RETRY_S = (1, 2, 4, 8, 15, 30)
+DB_OUTAGE_LIMIT_S = 300.0
+DB_ERRORS = (DBAPIError, OSError, asyncpg.PostgresError, asyncpg.InterfaceError)
 
 
 class Worker:
@@ -234,13 +242,38 @@ class Worker:
         return started
 
     async def run_forever(self) -> None:
-        swept = await self.sweep()
-        if swept:
-            log.info("failed and refunded %d jobs left by a dead worker", swept)
-        self._swept_at = asyncio.get_running_loop().time()
+        sleep = getattr(self, "_sleep", asyncio.sleep)
+        clock = getattr(self, "_clock", time.monotonic)
+        booted = False
+        down_since: float | None = None
+        retries = 0
         while True:
-            if not await self.tick():
-                await asyncio.sleep(self.poll_s)
+            try:
+                if not booted:
+                    swept = await self.sweep()
+                    if swept:
+                        log.info("failed and refunded %d jobs left by a dead worker", swept)
+                    self._swept_at = asyncio.get_running_loop().time()
+                    booted = True
+                started = await self.tick()
+            except DB_ERRORS as e:
+                now = clock()
+                down_since = now if down_since is None else down_since
+                if now - down_since >= DB_OUTAGE_LIMIT_S:
+                    log.error(
+                        "database unreachable for %.0fs; exiting to be restarted", now - down_since
+                    )
+                    raise
+                wait = DB_RETRY_S[min(retries, len(DB_RETRY_S) - 1)]
+                retries += 1
+                log.warning("database unavailable (%s); retrying in %ss", type(e).__name__, wait)
+                await sleep(wait)
+                continue
+            if down_since is not None:
+                log.info("database back after %.0fs", clock() - down_since)
+                down_since, retries = None, 0
+            if not started:
+                await sleep(self.poll_s)
 
     async def drain(self, timeout_s: float = 30) -> None:
         """Tests: run until no queued-and-ready job is left and nothing is running."""
