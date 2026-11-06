@@ -1,0 +1,4 @@
+health while qdrant down: 200 {'status': 'degraded', 'ready': False, 'db': 'ok', 'qdrant': 'error', 'embeddings': 'ok', 'worker': 'ok', 'worker_age_s': 6, 'provider': 'mock', 'app_env': 'development'}
+
+== qdrant down 40 s: start=(200, {'session_id': '13ca5bfa-2ece-43ef-85fb-c5d14f4ec497', 'job_id': '0eca2f45-fead-4c50-b69b-77becd44218d'}) after 0s coins 70->70
+     ('failed', None, 'errors.ai_failed')

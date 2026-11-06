@@ -1,0 +1,26 @@
+tutor x6: [200, 200, 402, 402, 402, 200]
+FAIL  500  6 parallel tutor starts with 20 coins: <= 2 succeed  3
+PASS  200  the rest get 402 insufficient_coins  [{'detail': 'errors.insufficient_coins'}, {'detail': 'errors.insufficient_coins'}]
+PASS  200  tutor burst: wallet coins == ledger sum (4 vs 4)  
+PASS  200  tutor burst: never negative  {"coins": 4, "free_today": 4, "earned": 0, "purchased": 0, "earned_today": 0, "points": 0, "streak": 0, "refill_at": "20
+pool x5: [200, 402, 402, 200, 402] pool before {'balance': 40, 'max_contribution': 50, 'recent': [{'nickname': 'm2_191ea', 'coins': 10}, {'nickname': 'm2_191ea', 'coins': 10}, {'nickname': 'm2_3eb8b', 'coins': 10}, {'nickname': 'm2_3eb8b', 'coins': 10}]}
+PASS  200  5 parallel pool gifts of 10 with 20 coins: <= 2 succeed  2
+PASS  200  pool burst: wallet coins == ledger sum (0 vs 0)  
+PASS  200  pool burst: never negative  {"coins": 0, "free_today": 0, "earned": 0, "purchased": 0, "earned_today": 0, "points": 0, "streak": 0, "refill_at": "20
+PASS  200  pool balance == pool ledger sum  
+PASS  200  purchase burst: wallet coins == ledger sum (220 vs 220)  
+PASS  200  purchase burst: never negative  {"coins": 220, "free_today": 20, "earned": 0, "purchased": 200, "earned_today": 0, "points": 0, "streak": 0, "refill_at"
+purchase x4: [200, 200, 200, 200] 20 -> 220
+PASS  200  4 parallel coin packs add 4 × pack  20->220
+exam pass wallet: {"coins": 20, "free_today": 20, "earned": 0, "purchased": 0, "earned_today": 0, "points": 0, "streak": 0, "refill_at": "2026-11-06T23:00:00Z", "exam_pass_until": "2026-11-20T10:31:19.648177Z", "exam_p
+PASS  200  exam pass shows 15 left today  15
+finish x6: [200, 200, 200, 200, 200, 200]
+points rows/sum: 2|50
+PASS  200  6 parallel finishes → no 5xx  [200, 200, 200, 200, 200, 200]
+PASS  200  points in wallet == points ledger sum  50 vs 2|50
+PASS  200  no user has a negative coin ledger sum  0
+PASS  200  no double refund  0
+jobs stuck running >15 min: 0
+PASS  200  every failed/cancelled paid job was refunded  0
+
+1 fail / 17

@@ -1,0 +1,11 @@
+PASS valid production config starts  (cookie secure=True)
+PASS LLM_PROVIDER=mock refused 
+PASS LLM_PROVIDER=local refused 
+PASS LLM_PROVIDER=auto refused 
+PASS missing CLOUD_API_KEY refused 
+PASS default SECRET_KEY refused 
+PASS EMBED_PROVIDER=mock refused 
+PASS FORCE_QUICK_MODE=on refused 
+PASS TEACHBACK_REVIEW_HIGH_SCORE=0 refused (N-1) 
+PASS negative review cap refused (N-1) 
+10/10

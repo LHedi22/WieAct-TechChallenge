@@ -1,0 +1,7 @@
+  ar    weak       → None None pending 
+  ar    acceptable → None None pending 
+  ar    strong     → None None pending 
+  ar    off_topic  → off_topic None final []
+  ar    injected   → off_topic None final []
+calls {'mid': 5} · scores_vary FAIL · ranks_weak_acceptable_strong FAIL · same_answer_same_band_across_languages FAIL · off_topic_gets_nothing PASS · injection_not_rewarded PASS
+→ /app/tests/evals/teachback/outputs/local-1793962541.json

@@ -1,0 +1,34 @@
+   solo 202 {'job_id': '83e1ac91-e472-45bb-849c-69bcb6e8703c', 'cost': 8, 'question_id': None, 'answer_id': None}
+
+== quota: {'status': 'done', 'quick_mode': False, 'error': None} coins 70->62
+    {'status': 'queued', 'stage': 'scoring_answer', 'queue_position': 1, 'eta_s': 11, 'waiting_reason': 'quota', 'quick_mode': False, 'error': None}
+    {'status': 'queued', 'stage': 'scoring_answer', 'queue_position': 1, 'eta_s': 10, 'waiting_reason': 'quota', 'quick_mode': False, 'error': None}
+    {'status': 'queued', 'stage': 'scoring_answer', 'queue_position': 1, 'eta_s': 9, 'waiting_reason': 'quota', 'quick_mode': False, 'error': None}
+    {'status': 'queued', 'stage': 'scoring_answer', 'queue_position': 1, 'eta_s': 8, 'waiting_reason': 'quota', 'quick_mode': False, 'error': None}
+    {'status': 'queued', 'stage': 'scoring_answer', 'queue_position': 1, 'eta_s': 7, 'waiting_reason': 'quota', 'quick_mode': False, 'error': None}
+    {'status': 'running', 'stage': 'scoring_answer', 'queue_position': None, 'eta_s': None, 'waiting_reason': None, 'quick_mode': False, 'error': None}
+    {'status': 'done', 'stage': 'scoring_answer', 'queue_position': None, 'eta_s': None, 'waiting_reason': None, 'quick_mode': False, 'error': None}
+   studio generate 200 {'job_id': '458fd368-49e0-4a45-8a47-aea5125f739b', 'cost': 0, 'cached': False}
+
+== mid503: {'status': 'done', 'quick_mode': True, 'error': None} coins 70->70
+    {'status': 'running', 'stage': 'writing_notes', 'queue_position': None, 'eta_s': None, 'waiting_reason': None, 'quick_mode': False, 'error': None}
+    {'status': 'done', 'stage': 'drawing_map', 'queue_position': None, 'eta_s': None, 'waiting_reason': None, 'quick_mode': True, 'error': None}
+   tutor turn 200 {'session_id': '9b1cf7ec-690f-4c40-b834-a69c03e8bb85', 'job_id': 'bac8959b-8397-45ad-986f-1b7e3db4dc77'}
+
+== ceiling400: {'status': 'done', 'quick_mode': False, 'error': None} coins 70->62
+    {'status': 'done', 'stage': 'thinking', 'queue_position': None, 'eta_s': None, 'waiting_reason': None, 'quick_mode': False, 'error': None}
+   solo 202 {'job_id': 'ca5e798a-8d25-4e3d-8a62-a34edb4eecad', 'cost': 8, 'question_id': None, 'answer_id': None}
+
+== badjson: {'status': 'done', 'quick_mode': False, 'error': None} coins 70->62
+    {'status': 'done', 'stage': 'scoring_answer', 'queue_position': None, 'eta_s': None, 'waiting_reason': None, 'quick_mode': False, 'error': None}
+   studio generate 200 {'job_id': '3f259beb-ac76-4695-8e83-c3c63a457d13', 'cost': 0, 'cached': False}
+
+== blocked401: {'status': 'failed', 'quick_mode': False, 'error': 'errors.offline'} coins 70->70
+    {'status': 'failed', 'stage': 'writing_notes', 'queue_position': None, 'eta_s': None, 'waiting_reason': None, 'quick_mode': False, 'error': 'errors.offline'}
+   studio generate 200 {'job_id': '2f3ba077-e311-46e6-9392-89b69707b98a', 'cost': 0, 'cached': False}
+
+== timeout: {'status': 'done', 'quick_mode': True, 'error': None} coins 70->70
+    {'status': 'running', 'stage': 'writing_notes', 'queue_position': None, 'eta_s': None, 'waiting_reason': None, 'quick_mode': False, 'error': None}
+    {'status': 'done', 'stage': 'drawing_map', 'queue_position': None, 'eta_s': None, 'waiting_reason': None, 'quick_mode': True, 'error': None}
+
+saved audit/logs/contract_probe.json

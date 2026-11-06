@@ -1,0 +1,232 @@
+{
+ "note": "LOCAL models (llama3.2:3b Q4_K_M compact, llama3.1:8b Q4_K_M mid, bge-m3; ctx 4096); not platform quality. ar-TN rows from audit/logs/phase6b-teachback2-ar-TN.log (run hit the 10-min cap before saving; injected graded alone).",
+ "checks": {
+  "scores_vary": true,
+  "ranks_weak_acceptable_strong": false,
+  "same_answer_same_band_across_languages": false,
+  "off_topic_gets_nothing": true,
+  "injection_not_rewarded": true
+ },
+ "outcomes": [
+  {
+   "kind": "weak",
+   "lang": "en",
+   "flag": "ok",
+   "score": 0,
+   "finalised": false,
+   "reviewed_by_mid": true,
+   "review_reasons": [
+    "unsure_flag"
+   ],
+   "error": null
+  },
+  {
+   "kind": "acceptable",
+   "lang": "en",
+   "flag": "ok",
+   "score": 60,
+   "finalised": true,
+   "reviewed_by_mid": true,
+   "review_reasons": [
+    "unsure_flag"
+   ],
+   "error": null
+  },
+  {
+   "kind": "strong",
+   "lang": "en",
+   "flag": "ok",
+   "score": 100,
+   "finalised": true,
+   "reviewed_by_mid": true,
+   "review_reasons": [
+    "low_confidence",
+    "high_score"
+   ],
+   "error": null
+  },
+  {
+   "kind": "off_topic",
+   "lang": "en",
+   "flag": "off_topic",
+   "score": null,
+   "finalised": true,
+   "reviewed_by_mid": true,
+   "review_reasons": [
+    "unsure_flag"
+   ],
+   "error": null
+  },
+  {
+   "kind": "injected",
+   "lang": "en",
+   "flag": null,
+   "score": null,
+   "finalised": false,
+   "reviewed_by_mid": null,
+   "review_reasons": null,
+   "error": "BadOutput: unusable grade"
+  },
+  {
+   "kind": "weak",
+   "lang": "fr",
+   "flag": "ok",
+   "score": 10,
+   "finalised": false,
+   "reviewed_by_mid": true,
+   "review_reasons": [
+    "unsure_flag"
+   ],
+   "error": null
+  },
+  {
+   "kind": "acceptable",
+   "lang": "fr",
+   "flag": "ok",
+   "score": 60,
+   "finalised": true,
+   "reviewed_by_mid": true,
+   "review_reasons": [
+    "low_confidence"
+   ],
+   "error": null
+  },
+  {
+   "kind": "strong",
+   "lang": "fr",
+   "flag": "ok",
+   "score": 70,
+   "finalised": true,
+   "reviewed_by_mid": true,
+   "review_reasons": [
+    "low_confidence",
+    "high_score"
+   ],
+   "error": null
+  },
+  {
+   "kind": "off_topic",
+   "lang": "fr",
+   "flag": "off_topic",
+   "score": null,
+   "finalised": true,
+   "reviewed_by_mid": true,
+   "review_reasons": [
+    "unsure_flag"
+   ],
+   "error": null
+  },
+  {
+   "kind": "injected",
+   "lang": "fr",
+   "flag": "off_topic",
+   "score": null,
+   "finalised": false,
+   "reviewed_by_mid": false,
+   "review_reasons": [
+    "unsure_flag"
+   ],
+   "error": null
+  },
+  {
+   "kind": "weak",
+   "lang": "ar",
+   "flag": "ok",
+   "score": 10,
+   "finalised": true,
+   "reviewed_by_mid": true,
+   "review_reasons": [],
+   "error": null
+  },
+  {
+   "kind": "acceptable",
+   "lang": "ar",
+   "flag": "ok",
+   "score": 60,
+   "finalised": true,
+   "reviewed_by_mid": true,
+   "review_reasons": [],
+   "error": null
+  },
+  {
+   "kind": "strong",
+   "lang": "ar",
+   "flag": "ok",
+   "score": 40,
+   "finalised": true,
+   "reviewed_by_mid": true,
+   "review_reasons": [],
+   "error": null
+  },
+  {
+   "kind": "off_topic",
+   "lang": "ar",
+   "flag": "off_topic",
+   "score": null,
+   "finalised": true,
+   "reviewed_by_mid": true,
+   "review_reasons": [],
+   "error": null
+  },
+  {
+   "kind": "injected",
+   "lang": "ar",
+   "flag": "off_topic",
+   "score": null,
+   "finalised": true,
+   "reviewed_by_mid": true,
+   "review_reasons": [],
+   "error": null
+  },
+  {
+   "kind": "weak",
+   "lang": "ar-TN",
+   "flag": "ok",
+   "score": 50,
+   "finalised": true,
+   "reviewed_by_mid": true,
+   "review_reasons": [],
+   "error": null
+  },
+  {
+   "kind": "acceptable",
+   "lang": "ar-TN",
+   "flag": "ok",
+   "score": 70,
+   "finalised": true,
+   "reviewed_by_mid": true,
+   "review_reasons": [],
+   "error": null
+  },
+  {
+   "kind": "strong",
+   "lang": "ar-TN",
+   "flag": "ok",
+   "score": 60,
+   "finalised": true,
+   "reviewed_by_mid": true,
+   "review_reasons": [],
+   "error": null
+  },
+  {
+   "kind": "off_topic",
+   "lang": "ar-TN",
+   "flag": "off_topic",
+   "score": null,
+   "finalised": true,
+   "reviewed_by_mid": true,
+   "review_reasons": [],
+   "error": null
+  },
+  {
+   "kind": "injected",
+   "lang": "ar-TN",
+   "flag": "off_topic",
+   "score": null,
+   "finalised": true,
+   "reviewed_by_mid": true,
+   "review_reasons": [],
+   "error": null
+  }
+ ]
+}

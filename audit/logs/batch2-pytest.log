@@ -1,0 +1,26 @@
+ Container lw-measure2-backend-run-3aa8ebf13f38 Creating 
+ Container lw-measure2-backend-run-3aa8ebf13f38 Created 
+Bytecode compiled 5680 files in 796ms
+........................................................................ [ 16%]
+........................................................................ [ 33%]
+........................................................................ [ 50%]
+........................................................................ [ 67%]
+........................................................................ [ 83%]
+.....................................................................    [100%]
+=============================== warnings summary ===============================
+tests/test_logout_revokes.py::test_a_copied_cookie_stops_working_after_logout
+tests/test_logout_revokes.py::test_a_copied_cookie_stops_working_after_logout
+tests/test_logout_revokes.py::test_a_copied_cookie_stops_working_after_logout
+tests/test_logout_revokes.py::test_a_copied_cookie_stops_working_after_logout
+tests/test_logout_revokes.py::test_cookies_from_before_the_change_still_work_until_logout
+tests/test_logout_revokes.py::test_cookies_from_before_the_change_still_work_until_logout
+  /opt/venv/lib/python3.12/site-packages/httpx/_client.py:1768: DeprecationWarning: Setting per-request cookies=<...> is being deprecated, because the expected behaviour on cookie persistence is ambiguous. Set cookies directly on the client instance instead.
+    return await self.request(
+
+tests/test_logout_revokes.py::test_a_copied_cookie_stops_working_after_logout
+tests/test_logout_revokes.py::test_cookies_from_before_the_change_still_work_until_logout
+  /opt/venv/lib/python3.12/site-packages/httpx/_client.py:1859: DeprecationWarning: Setting per-request cookies=<...> is being deprecated, because the expected behaviour on cookie persistence is ambiguous. Set cookies directly on the client instance instead.
+    return await self.request(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+429 passed, 8 warnings in 315.33s (0:05:15)

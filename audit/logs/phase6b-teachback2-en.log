@@ -1,0 +1,7 @@
+  en    weak       → ok 0 pending ['unsure_flag']
+  en    acceptable → ok 60 final ['unsure_flag']
+  en    strong     → ok 100 final ['low_confidence', 'high_score']
+  en    off_topic  → off_topic None final ['unsure_flag']
+  en    injected   → None None pending 
+calls {'compact': 6, 'mid': 6} · scores_vary PASS · ranks_weak_acceptable_strong PASS · same_answer_same_band_across_languages PASS · off_topic_gets_nothing PASS · injection_not_rewarded PASS
+→ /app/tests/evals/teachback/outputs/local-1793963808.json
