@@ -237,7 +237,7 @@ describe("Teach-Back peer room", () => {
       "GET /api/arena/questions/q1": { ...detail, answers: [], my_answer: mine, can_pin: false },
     });
     show(<ArenaPage />, "/w/:worldId/c/:courseId/arena", "/w/w1/c/c1/arena?chapter=ch1", "ar");
-    expect(await screen.findByText("في انتظار التحقق")).toBeInTheDocument();
+    expect(await screen.findByText("قيد التحقق")).toBeInTheDocument();
     expect(screen.queryByText("92")).not.toBeInTheDocument();
     expect(screen.getByText(/You linked undo/)).toBeInTheDocument();
   });
