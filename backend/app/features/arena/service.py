@@ -205,8 +205,11 @@ def parse_grade(content: Any) -> Grade | None:
             return None  # no rubric, no score: never a silent number
         data["criteria"] = criteria or {}
         data["score"] = total(criteria) if criteria and data["flag"] == "ok" else 0
-        data["errors"] = [e for e in data.get("errors") or [] if isinstance(e, dict)][:3]
-        data["missing"] = [str(m) for m in data.get("missing") or []][:2]
+        errors, missing = data.get("errors"), data.get("missing")  # small models write e.g. 3
+        data["errors"] = (
+            [e for e in errors if isinstance(e, dict)][:3] if isinstance(errors, list) else []
+        )
+        data["missing"] = [str(m) for m in missing][:2] if isinstance(missing, list) else []
         if data.get("confidence") not in ("high", "medium", "low"):
             data["confidence"] = "medium"
         return Grade.model_validate(data)

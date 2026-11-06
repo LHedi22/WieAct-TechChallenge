@@ -112,3 +112,10 @@ def test_criteria_written_as_a_list_are_read_in_rubric_order_or_by_name():
         }
     )
     assert by_name.score == 40
+
+
+def test_a_count_instead_of_a_list_does_not_drop_the_grade():
+    """Phase 6 rerun: llama3.1:8b wrote "errors": 3 for an Arabic answer and the whole grade was
+    dropped (the job failed)."""
+    g = parse_grade({"flag": "off_topic", "criteria": [], "errors": 3, "missing": "x"})
+    assert g is not None and g.flag == "off_topic" and g.errors == [] and g.missing == []
