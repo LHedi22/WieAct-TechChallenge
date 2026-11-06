@@ -2,7 +2,7 @@ import httpx
 import pytest
 from pydantic import ValidationError
 
-from app.api.health import check_qdrant, check_worker
+from app.api.health import check_embeddings, check_qdrant, check_worker
 from app.core.db import get_session
 from app.main import create_app
 
@@ -24,6 +24,7 @@ def client_for(db_ok: bool, qdrant: str = "ok", worker=("ok", 3)) -> httpx.Async
 
     app.dependency_overrides[get_session] = session
     app.dependency_overrides[check_qdrant] = lambda: qdrant
+    app.dependency_overrides[check_embeddings] = lambda: "ok"
     app.dependency_overrides[check_worker] = lambda: worker
     return httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test")
 
@@ -34,8 +35,10 @@ async def test_health_green():
     assert r.status_code == 200
     assert r.json() == {
         "status": "ok",
+        "ready": True,
         "db": "ok",
         "qdrant": "ok",
+        "embeddings": "ok",
         "worker": "ok",
         "worker_age_s": 3,
         "provider": "mock",
@@ -47,7 +50,7 @@ async def test_health_qdrant_down_is_reported_not_fatal():
     async with client_for(db_ok=True, qdrant="error") as c:
         r = await c.get("/api/health")
     assert r.status_code == 200
-    assert r.json()["qdrant"] == "error"
+    assert r.json()["qdrant"] == "error" and r.json()["status"] == "degraded"  # audit N-8
 
 
 async def test_health_reports_a_dead_worker_as_degraded():
