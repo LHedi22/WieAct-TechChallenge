@@ -41,6 +41,10 @@ def check(q: dict[str, Any], lang: str, context: str) -> dict[str, bool]:
         valid = True
     except Exception:  # noqa: BLE001 - any validation error counts as invalid
         valid = False
+    if not isinstance(q, dict):  # e.g. a bare string (Darija, Phase 6 rerun): nothing passes
+        names = ("valid", "four_distinct_options", "answer_in_range", "language_script")
+        names += ("concept_in_context", "hint_hides_answer")
+        return dict.fromkeys(names, False)
     options = q.get("options") or []
     answer = q.get("answer_index")
     text = " ".join([str(q.get("question", "")), *map(str, options)])

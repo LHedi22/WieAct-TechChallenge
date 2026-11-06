@@ -214,3 +214,10 @@ async def test_an_unusable_verifier_reply_is_not_cached(sm, monkeypatch, gw):  #
     assert await verify.check(ctx, qs, lane="background", **where) is None
     assert await verify.check(ctx, qs, lane="background", **where) == [True, False]
     assert keys == [None, None]
+
+
+def test_the_quiz_eval_scores_a_bare_string_item_as_invalid():
+    """Phase 6 rerun: a Darija reply listed questions as strings and the eval crashed."""
+    from app.evals.__main__ import check
+
+    assert not any(check("شنوّة الـ stack؟", "ar-TN", "ctx").values())
