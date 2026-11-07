@@ -63,6 +63,12 @@ Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
       (drafted by Claude, flagged `_review`), plus real-model Darija outputs.
 
 ## 5. Code still to do (small)
+- [ ] **Admin side** (branch `admin`, 8/11): `/admin` behind `ADMIN_TOKEN`.
+  - [x] Phase A: admin sign-in (cookie, CSRF header, rate limit, `admin_actions` log), runtime
+        Switches (force Quick mode, offline demo mode, pause background lane, lower RPM) applied
+        by API + worker within ~3 s, Stats page (forced Quick mode counted apart from real
+        fallbacks). Use it for VIDEO.md's fallback shot. **Dev: set `ADMIN_TOKEN` in `.env`**
+        (any value) — `load.py`, `export_stats.py` and the slot eval need it now.
 - [x] Dev-only Local/Cloud/Mock badge in the top bar (31/10). M1 "Providers kept apart" is
       complete: per-provider collections, provider in cache keys and the call log, stats default
       to cloud, offline serves cloud cache only.

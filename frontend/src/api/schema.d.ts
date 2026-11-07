@@ -124,6 +124,75 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/admin/session": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Sign In */
+    post: operations["sign_in_api_admin_session_post"];
+    /** Sign Out */
+    delete: operations["sign_out_api_admin_session_delete"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/me": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Me */
+    get: operations["me_api_admin_me_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/switches": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Read Switches */
+    get: operations["read_switches_api_admin_switches_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/switches/{key}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Set Switch */
+    put: operations["set_switch_api_admin_switches__key__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/admin/force-quick": {
     parameters: {
       query?: never;
@@ -134,10 +203,7 @@ export interface paths {
     /** Force Quick State */
     get: operations["force_quick_state_api_admin_force_quick_get"];
     put?: never;
-    /**
-     * Force Quick On
-     * @description Demo switch (audit F-VID-1): interactive mid tasks answer as Quick mode for `minutes`.
-     */
+    /** Force Quick On */
     post: operations["force_quick_on_api_admin_force_quick_post"];
     /** Force Quick Off */
     delete: operations["force_quick_off_api_admin_force_quick_delete"];
@@ -1162,6 +1228,15 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** AdminMe */
+    AdminMe: {
+      /** Actor */
+      actor: string;
+      /** Via */
+      via: string;
+      /** Expires At */
+      expires_at: string | null;
+    };
     /** AnswerOut */
     AnswerOut: {
       /**
@@ -2444,6 +2519,16 @@ export interface components {
        */
       k: number;
     };
+    /** SessionIn */
+    SessionIn: {
+      /** Token */
+      token: string;
+      /**
+       * Label
+       * @default admin
+       */
+      label: string;
+    };
     /** SessionOut */
     SessionOut: {
       /**
@@ -2566,6 +2651,8 @@ export interface components {
       };
       /** Fallbacks */
       fallbacks: number;
+      /** Forced Fallbacks */
+      forced_fallbacks: number;
       /** Quota Headers Seen */
       quota_headers_seen: string[];
     };
@@ -2619,6 +2706,49 @@ export interface components {
       /** Suggested Buildings */
       suggested_buildings: string[];
     };
+    /** Switch */
+    Switch: {
+      /**
+       * Key
+       * @enum {string}
+       */
+      key:
+        "force_quick_mode" | "offline_demo_mode" | "pause_background_lane" | "llm_max_rpm_override";
+      /** Value */
+      value: unknown;
+      /** Effective */
+      effective: unknown;
+      /** Env Note */
+      env_note: string | null;
+      /** Updated At */
+      updated_at: string | null;
+      /** Updated By */
+      updated_by: string | null;
+    };
+    /** SwitchIn */
+    SwitchIn: {
+      /** Value */
+      value?: unknown;
+      /** Reason */
+      reason?: string | null;
+    };
+    /** Switches */
+    Switches: {
+      /** Switches */
+      switches: components["schemas"]["Switch"][];
+      /** App Env */
+      app_env: string;
+      /** Configured Provider */
+      configured_provider: string;
+      /** Provider */
+      provider: string;
+      /** Offline Now */
+      offline_now: boolean;
+      /** Llm Max Rpm */
+      llm_max_rpm: number;
+      /** Force Quick Max Minutes */
+      force_quick_max_minutes: number;
+    };
     /** SystemStatus */
     SystemStatus: {
       /** App Env */
@@ -2645,6 +2775,10 @@ export interface components {
       reason: string | null;
       /** Upload Max Mb */
       upload_max_mb: number;
+      /** Quick Mode Forced */
+      quick_mode_forced: boolean;
+      /** Background Paused */
+      background_paused: boolean;
     };
     /** TierStats */
     TierStats: {
@@ -3043,6 +3177,167 @@ export interface operations {
       };
     };
   };
+  sign_in_api_admin_session_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SessionIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AdminMe"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  sign_out_api_admin_session_delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  me_api_admin_me_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AdminMe"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  read_switches_api_admin_switches_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Switches"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  set_switch_api_admin_switches__key__put: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        key:
+          | "force_quick_mode"
+          | "offline_demo_mode"
+          | "pause_background_lane"
+          | "llm_max_rpm_override";
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SwitchIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Switches"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   force_quick_state_api_admin_force_quick_get: {
     parameters: {
       query?: never;
@@ -3050,7 +3345,9 @@ export interface operations {
         "x-admin-token"?: string | null;
       };
       path?: never;
-      cookie?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
     };
     requestBody?: never;
     responses: {
@@ -3078,10 +3375,13 @@ export interface operations {
     parameters: {
       query?: never;
       header?: {
+        "x-admin-action"?: string | null;
         "x-admin-token"?: string | null;
       };
       path?: never;
-      cookie?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
     };
     requestBody: {
       content: {
@@ -3113,10 +3413,13 @@ export interface operations {
     parameters: {
       query?: never;
       header?: {
+        "x-admin-action"?: string | null;
         "x-admin-token"?: string | null;
       };
       path?: never;
-      cookie?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
     };
     requestBody?: never;
     responses: {
@@ -3149,7 +3452,9 @@ export interface operations {
         "x-admin-token"?: string | null;
       };
       path?: never;
-      cookie?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
     };
     requestBody?: never;
     responses: {

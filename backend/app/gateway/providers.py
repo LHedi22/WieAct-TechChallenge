@@ -19,7 +19,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import exists, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from app.core import provider_choice, slot
+from app.core import flags, provider_choice, slot
 from app.core.config import LLMProfile, Settings
 from app.models import AICallLog
 
@@ -57,7 +57,9 @@ async def resolve(
     settings: Settings, sm: async_sessionmaker[AsyncSession], now: datetime | None = None
 ) -> Resolution:
     configured = settings.LLM_PROVIDER
-    if settings.OFFLINE_DEMO_MODE == "on":  # forced (demo rehearsal, or a pause by the team)
+    switches = await flags.load(sm)
+    # forced (demo rehearsal, or a pause by the team): OFFLINE_DEMO_MODE=on or the admin switch
+    if flags.offline_setting(settings, switches) == "on":
         return Resolution(settings.llm, offline=True, reason="forced")
     chosen = provider_choice.get()
     if chosen == "local":

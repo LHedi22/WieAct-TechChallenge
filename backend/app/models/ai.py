@@ -45,6 +45,8 @@ class AICallLog(Base):
     latency_ms: Mapped[int] = mapped_column(Integer, default=0)
     cache_hit: Mapped[bool] = mapped_column(Boolean, default=False)
     fallback: Mapped[bool] = mapped_column(Boolean, default=False)
+    # Quick mode switched on by an admin (core/flags.py): counted apart from real fallbacks
+    forced: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     refusal_reason: Mapped[str | None] = mapped_column(String(64))
     # Hash of (provider, model, messages, params): repeats are the organisers' cache indicator.
     request_hash: Mapped[str | None] = mapped_column(String(64), index=True)

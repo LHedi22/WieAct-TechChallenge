@@ -20,6 +20,7 @@ from app.jobs.service import create_job
 from app.jobs.worker import Worker
 from app.main import create_app
 from app.models import Job
+from tests.admin_helpers import READ, enable_admin
 from tests.conftest import mock_transport
 
 
@@ -189,25 +190,25 @@ async def test_background_jobs_are_capped_so_interactive_can_run(sm):
             t.cancel()
 
 
-async def test_admin_stats_and_system_status(sm, gw, api):
+async def test_admin_stats_and_system_status(sm, gw, api, monkeypatch):
+    enable_admin(monkeypatch)
     for _ in range(2):
         await api.post("/api/dev/demo-jobs", headers=DEV, json={"cache_key": "ch1:en"})
     await Worker(sm).drain()
-    stats = (await api.get("/api/admin/stats", params={"provider": "mock"})).json()
+    stats = (await api.get("/api/admin/stats", params={"provider": "mock"}, headers=READ)).json()
     assert stats["calls"] == 1 and stats["cache_hits"] == 1 and stats["repeated_identical"] == 0
     assert stats["by_tier"]["mid"]["calls"] == 1 and stats["compact_share"] == 0.0
-    assert (await api.get("/api/admin/stats")).json()["calls"] == 0  # defaults to cloud
+    assert (await api.get("/api/admin/stats", headers=READ)).json()["calls"] == 0  # cloud default
     status = (await api.get("/api/system/status")).json()
     assert status["provider"] == "mock" and status["offline_demo_mode"] is False
 
 
 async def test_admin_token_required_when_set(sm, api, monkeypatch):
-    monkeypatch.setenv("ADMIN_TOKEN", "t0ken")
-    from app.core.config import get_settings
-
-    get_settings.cache_clear()
-    assert (await api.get("/api/admin/stats")).status_code == 403
-    ok = await api.get("/api/admin/stats", headers={"X-Admin-Token": "t0ken"})
+    assert (await api.get("/api/admin/stats")).status_code == 404  # blank token: no admin side
+    enable_admin(monkeypatch)
+    assert (await api.get("/api/admin/stats")).status_code == 401
+    assert (await api.get("/api/admin/stats", headers={"X-Admin-Token": "nope"})).status_code == 401
+    ok = await api.get("/api/admin/stats", headers=READ)
     assert ok.status_code == 200
 
 

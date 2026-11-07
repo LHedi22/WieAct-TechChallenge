@@ -2,7 +2,7 @@
 "local" = our own Ollama. It overrides LLM_PROVIDER at runtime, with no restart.
 
 The choice is a one-word file in UPLOAD_DIR, which the API and the worker share (one volume in
-docker-compose), like the force-Quick switch (`gateway/forcequick.py`). No file = LLM_PROVIDER from
+docker-compose), next to the upload files. No file = LLM_PROVIDER from
 .env decides. Production always runs on the platform and ignores the file.
 
 With a choice set, embeddings come from our own Ollama (bge-m3) unless EMBED_PROVIDER names a real

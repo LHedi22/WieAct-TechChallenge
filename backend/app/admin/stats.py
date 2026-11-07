@@ -1,21 +1,22 @@
 """Call-log aggregates — the numbers the organisers compute on our key (docs/PLATFORM.md), for the
-report and the demo. Defaults to provider=cloud so local/mock traffic never inflates them."""
+report and the demo. Defaults to provider=cloud so local/mock traffic never inflates them.
 
-from datetime import UTC, datetime
+Quick-mode answers an admin forced (core/flags.py) are counted in `forced_fallbacks`, never in
+`fallbacks`: the report must only claim fallbacks the platform actually caused."""
+
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, Header, HTTPException
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from sqlalchemy import Integer, case, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.health import SettingsDep
+from app.admin.auth import AdminDep
 from app.core.db import get_session
-from app.gateway import forcequick
 from app.gateway.quota import seen_header_names
 from app.models import AICallLog
 
-router = APIRouter(prefix="/api/admin", tags=["admin"])
+router = APIRouter()
 
 
 class TierStats(BaseModel):
@@ -35,63 +36,14 @@ class Stats(BaseModel):
     by_tier: dict[str, TierStats]
     by_task: dict[str, int]
     refusals: dict[str, int]  # quota / saturated / ceiling / blocked / transient / bad_request
-    fallbacks: int  # mid → compact (quick mode) answers
+    fallbacks: int  # mid → compact (quick mode) answers the platform caused (503, timeout)
+    forced_fallbacks: int  # Quick-mode answers an admin switched on (never counted above)
     quota_headers_seen: list[str]
 
 
-def require_admin(
-    settings: SettingsDep, x_admin_token: Annotated[str | None, Header()] = None
-) -> None:
-    token = settings.ADMIN_TOKEN.get_secret_value()
-    if token and x_admin_token != token:
-        raise HTTPException(403, "errors.forbidden")
-
-
-class ForceQuickIn(BaseModel):
-    minutes: int = Field(ge=1, le=forcequick.MAX_MINUTES)
-
-
-class ForceQuickOut(BaseModel):
-    active: bool
-    until: datetime | None
-
-
-def require_admin_token(settings: SettingsDep) -> None:
-    """The demo switch changes behaviour for every student: in production it needs a configured
-    ADMIN_TOKEN (checked by require_admin), never an open endpoint."""
-    if settings.APP_ENV == "production" and not settings.ADMIN_TOKEN.get_secret_value():
-        raise HTTPException(403, "errors.forbidden")
-
-
-def _force_quick_state() -> ForceQuickOut:
-    end = forcequick.until()
-    on = forcequick.active()
-    return ForceQuickOut(active=on, until=datetime.fromtimestamp(end, UTC) if on and end else None)
-
-
-ADMIN_ONLY = [Depends(require_admin_token), Depends(require_admin)]
-
-
-@router.get("/force-quick", response_model=ForceQuickOut, dependencies=ADMIN_ONLY)
-async def force_quick_state() -> ForceQuickOut:
-    return _force_quick_state()
-
-
-@router.post("/force-quick", response_model=ForceQuickOut, dependencies=ADMIN_ONLY)
-async def force_quick_on(body: ForceQuickIn) -> ForceQuickOut:
-    """Demo switch (audit F-VID-1): interactive mid tasks answer as Quick mode for `minutes`."""
-    forcequick.switch_on(body.minutes)
-    return _force_quick_state()
-
-
-@router.delete("/force-quick", response_model=ForceQuickOut, dependencies=ADMIN_ONLY)
-async def force_quick_off() -> ForceQuickOut:
-    forcequick.switch_off()
-    return _force_quick_state()
-
-
-@router.get("/stats", response_model=Stats, dependencies=[Depends(require_admin)])
+@router.get("/stats", response_model=Stats)
 async def stats(
+    _: AdminDep,
     s: Annotated[AsyncSession, Depends(get_session)],
     provider: Literal["cloud", "local", "mock", "all"] = "cloud",
 ) -> Stats:
@@ -104,7 +56,16 @@ async def stats(
                 func.count(),
                 func.coalesce(func.sum(cast(calls_q.c.status_code == 200, Integer)), 0),
                 func.coalesce(
-                    func.sum(cast(calls_q.c.fallback & (calls_q.c.status_code == 200), Integer)), 0
+                    func.sum(
+                        cast(
+                            calls_q.c.fallback & ~calls_q.c.forced & (calls_q.c.status_code == 200),
+                            Integer,
+                        )
+                    ),
+                    0,
+                ),
+                func.coalesce(
+                    func.sum(cast(calls_q.c.forced & (calls_q.c.status_code == 200), Integer)), 0
                 ),
             ).select_from(calls_q)
         )
@@ -160,5 +121,6 @@ async def stats(
         by_task=dict(task_rows),
         refusals=dict(refusal_rows),
         fallbacks=totals[2],
+        forced_fallbacks=totals[3],
         quota_headers_seen=seen_header_names(),
     )

@@ -1,5 +1,7 @@
 // Fails when a locale is missing a key from en.json (or has keys en.json doesn't).
 // `_review` (Darija review notes) is metadata and ignored. Run: pnpm i18n:check
+// Excluded on purpose: src/features/admin (the admin side is English only and uses no keys;
+// DECISIONS.md 2026-11-08). Student-facing strings must still go through these files.
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";

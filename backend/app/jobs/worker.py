@@ -27,7 +27,7 @@ from sqlalchemy import and_, or_, select, update
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from app.core import slot
+from app.core import flags, slot
 from app.core.config import get_settings
 from app.gateway import Defer, EmbeddingsDown, GatewayError, OfflineMode
 from app.jobs.coins import coins
@@ -231,11 +231,17 @@ class Worker:
                 await coins.refund(s, fresh)
             await s.commit()
 
+    async def _lanes(self) -> tuple[str, ...]:
+        """The admin switch `pause_background_lane` (core/flags.py, read every ~3 s, no restart):
+        background jobs stay queued; jobs already running finish."""
+        paused = (await flags.load(self.sm)).pause_background_lane
+        return ("interactive",) if paused else ("interactive", "background")
+
     async def tick(self) -> int:
         """Claim as many jobs as lane limits allow; returns how many were started."""
         await self.maintain()
         started = 0
-        for lane in ("interactive", "background"):
+        for lane in await self._lanes():
             while len(self.running[lane]) < self.limits[lane]:
                 job = await self.claim(lane)
                 if job is None:
@@ -295,6 +301,7 @@ class Worker:
                     select(Job.id)
                     .where(
                         Job.status == "queued",
+                        Job.lane.in_(await self._lanes()),
                         or_(Job.not_before.is_(None), and_(Job.not_before <= now)),
                     )
                     .limit(1)

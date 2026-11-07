@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.api.deps import CurrentUser, Session
 from app.api.health import SettingsDep
-from app.core import provider_choice, slot
+from app.core import flags, provider_choice, slot
 from app.core.db import get_sessionmaker
 from app.core.provider_choice import Choice
 from app.gateway.providers import paused_until, resolve, slot_live
@@ -39,6 +39,8 @@ class SystemStatus(BaseModel):
     offline_demo_mode: bool
     reason: str | None
     upload_max_mb: int
+    quick_mode_forced: bool  # admin switch: interactive mid answers come as Quick mode
+    background_paused: bool  # admin switch: background work (tagging, tips, plans) waits
 
 
 class ProviderIn(BaseModel):
@@ -59,7 +61,8 @@ async def status(settings: SettingsDep, sm: Sessionmaker) -> SystemStatus:
     res = await resolve(settings, sm, now)
     live, _ = slot_live(settings, now)
     nxt = slot.next_slot(now, settings.LLM_SLOT_GROUP)
-    forced = settings.OFFLINE_DEMO_MODE
+    switches = await flags.load(sm)
+    forced = flags.offline_setting(settings, switches)
     chosen = provider_choice.get()
     # A provider picked in the UI is paused whenever it can't run, whatever OFFLINE_DEMO_MODE says
     offline = forced == "on" or ((forced == "auto" or chosen is not None) and res.offline)
@@ -76,6 +79,8 @@ async def status(settings: SettingsDep, sm: Sessionmaker) -> SystemStatus:
         offline_demo_mode=offline,
         reason=res.reason or None,
         upload_max_mb=settings.UPLOAD_MAX_MB,
+        quick_mode_forced=flags.force_quick(settings, switches),
+        background_paused=switches.pause_background_lane,
     )
 
 

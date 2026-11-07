@@ -2,7 +2,8 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api import admin, dev, economy, health, jobs, system
+from app import admin
+from app.api import dev, economy, health, jobs, system
 from app.core.config import get_settings
 from app.features.arena import router as arena
 from app.features.audio import router as audio
