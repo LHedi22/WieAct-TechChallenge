@@ -19,7 +19,12 @@ from app.admin.auth import AdminDep
 from app.api.deps import Session
 from app.core import economy
 from app.core.wallet_rules import tunis_day
-from app.features.wallet.service import _pass_until, current_streak
+from app.features.wallet.service import (
+    _pass_until,
+    current_streak,
+    pass_end_filter,
+    pass_rows_filter,
+)
 from app.models import (
     AdminAction,
     AICache,
@@ -107,14 +112,15 @@ async def wallets(s: AsyncSession, user_ids: list[uuid.UUID]) -> dict[uuid.UUID,
             )
         )
     )
+    mine = CoinLedger.user_id.in_(user_ids)
     passes = (
         await s.execute(
-            select(CoinLedger.user_id, CoinLedger.created_at).where(
-                CoinLedger.user_id.in_(user_ids),
-                CoinLedger.bucket == "pass",
-                CoinLedger.kind.in_(("purchased", "admin")),
-                CoinLedger.delta == 0,
-            )
+            select(CoinLedger.user_id, CoinLedger.created_at).where(*pass_rows_filter(mine))
+        )
+    ).all()
+    ends = (
+        await s.execute(
+            select(CoinLedger.user_id, CoinLedger.created_at).where(*pass_end_filter(mine))
         )
     ).all()
     out: dict[uuid.UUID, dict[str, Any]] = {
@@ -126,42 +132,18 @@ async def wallets(s: AsyncSession, user_ids: list[uuid.UUID]) -> dict[uuid.UUID,
     for uid in user_ids:
         if uid not in has_daily:
             out[uid]["free"] += economy.DAILY_FREE_COINS  # what their next visit will show
-    by_user: dict[uuid.UUID, list[datetime]] = {}
+    grants: dict[uuid.UUID, list[datetime]] = {}
+    stops: dict[uuid.UUID, list[datetime]] = {}
     for uid, ts in passes:
-        by_user.setdefault(uid, []).append(ts)
-    for uid, stamps in by_user.items():
-        out[uid]["pass_until"] = _pass_until(stamps)
+        grants.setdefault(uid, []).append(ts)
+    for uid, ts in ends:
+        stops.setdefault(uid, []).append(ts)
+    for uid in grants:
+        out[uid]["pass_until"] = _pass_until(grants[uid], stops.get(uid, []))
     for w in out.values():
         w["coins"] = w["free"] + w["earned"] + w["purchased"]
         w["pass_active"] = bool(w["pass_until"] and w["pass_until"] > datetime.now(UTC))
     return out
-
-
-async def pass_end_overrides(s: AsyncSession, user_ids: list[uuid.UUID]) -> dict:
-    """An admin may end an Exam Pass early (an `admin` row with ref `pass_end`)."""
-    rows = (
-        await s.execute(
-            select(CoinLedger.user_id, func.max(CoinLedger.created_at))
-            .where(
-                CoinLedger.user_id.in_(user_ids),
-                CoinLedger.kind == "admin",
-                CoinLedger.ref == "pass_end",
-            )
-            .group_by(CoinLedger.user_id)
-        )
-    ).all()
-    return dict(rows)
-
-
-async def wallet_view(s: AsyncSession, user_ids: list[uuid.UUID]) -> dict[uuid.UUID, dict]:
-    w = await wallets(s, user_ids)
-    ended = await pass_end_overrides(s, user_ids) if user_ids else {}
-    for uid, end in ended.items():
-        until = w[uid]["pass_until"]
-        if until and end and end < until:
-            w[uid]["pass_until"] = end
-            w[uid]["pass_active"] = end > datetime.now(UTC)
-    return w
 
 
 # --- users ---------------------------------------------------------------------------------------
@@ -205,7 +187,7 @@ async def users(
             User.id.in_(select(WorldMember.user_id).where(WorldMember.world_id == wid))
         )
     rows, total = await _fetch(s, stmt, page)
-    w = await wallet_view(s, [r[0].id for r in rows])
+    w = await wallets(s, [r[0].id for r in rows])
     items = []
     for user, n_worlds, pts, seen_at, dseen in rows:
         last = max((t for t in (seen_at, dseen) if t is not None), default=None)
@@ -231,7 +213,7 @@ async def user_detail(user_id: uuid.UUID, _: AdminDep, s: Session) -> dict[str, 
     user = await s.get(User, user_id)
     if user is None:
         raise HTTPException(404, "Not Found")
-    w = (await wallet_view(s, [user_id]))[user_id]
+    w = (await wallets(s, [user_id]))[user_id]
     worlds = (
         await s.execute(
             select(World.id, World.name, World.join_code, WorldMember.joined_at)

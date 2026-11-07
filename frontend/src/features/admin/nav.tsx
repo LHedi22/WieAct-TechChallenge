@@ -1,5 +1,6 @@
 // The admin side nav: only finished pages are listed.
 import type { ReactNode } from "react";
+import { EconomyPage } from "./actions";
 import {
   ArenaPage,
   CacheList,
@@ -25,6 +26,7 @@ export const NAV: NavItem[] = [
   { path: "stats", label: "Stats", element: <StatsPage /> },
   { path: "users", label: "Users", element: <UsersPage /> },
   { path: "worlds", label: "Worlds", element: <WorldsPage /> },
+  { path: "economy", label: "Economy", element: <EconomyPage /> },
   { path: "content", label: "Content", element: <ContentPage /> },
   { path: "arena", label: "Arena", element: <ArenaPage /> },
   { path: "jobs", label: "Jobs", element: <JobsList /> },

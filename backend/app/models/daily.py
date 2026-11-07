@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime
 from typing import Any
 
-from sqlalchemy import Date, DateTime, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -51,4 +51,6 @@ class WisdomTip(Base):
     language: Mapped[str] = mapped_column(String(8))
     text: Mapped[dict[str, Any]] = mapped_column(JSONB)  # {trap, why, right}
     student_count: Mapped[int] = mapped_column(Integer, default=0)
+    # Changed by an admin on /admin (never presented as pure AI output in the report)
+    edited_by_admin: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     created_at: Mapped[datetime] = created_at()

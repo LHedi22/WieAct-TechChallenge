@@ -27,7 +27,7 @@ from sqlalchemy import and_, or_, select, update
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from app.core import flags, slot
+from app.core import economy_live, flags, slot
 from app.core.config import get_settings
 from app.gateway import Defer, EmbeddingsDown, GatewayError, OfflineMode
 from app.jobs.coins import coins
@@ -240,6 +240,7 @@ class Worker:
     async def tick(self) -> int:
         """Claim as many jobs as lane limits allow; returns how many were started."""
         await self.maintain()
+        await economy_live.refresh(self.sm)  # admin overrides of economy.py, every ~3 s
         started = 0
         for lane in await self._lanes():
             while len(self.running[lane]) < self.limits[lane]:

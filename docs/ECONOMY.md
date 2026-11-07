@@ -73,3 +73,12 @@ SPENDING_ORDER = ["free", "earned", "purchased"]   # burn expiring coins first
 clearly labelled). Konnect / D17 integration is described in the business note, not built.
 
 Fairness: no ads; rank can't be bought; nothing free is ever moved behind payment.
+
+## Admin changes (`/admin`, 8 Nov)
+- Grants and removals are ledger rows like everything else: `coin_ledger` kind `admin` in the
+  bucket the admin picks (never below zero; the daily earn cap doesn't apply), `points_ledger`
+  reason `admin_adjust`, `class_pool_ledger` kind `admin`. An Exam Pass can be granted or ended
+  (0-coin `pass` rows). Every change needs a reason and is in `admin_actions`.
+- The numbers above can be overridden live (`economy_overrides`, `core/economy_live.py`): the
+  admin Economy page shows each effective value next to its default here. This file and
+  `economy.py` stay the defaults; jobs already started keep the price they reserved.

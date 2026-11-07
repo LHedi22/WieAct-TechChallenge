@@ -2,11 +2,25 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, Route, Routes, useNavigate, useParams } from "react-router-dom";
+import {
+  AnswerActions,
+  CachePurge,
+  ChapterActions,
+  ContentEditor,
+  CourseActions,
+  DocumentActions,
+  JobActions,
+  MemberRemove,
+  QuestionActions,
+  UserActions,
+  WorldActions,
+} from "./actions";
 import { adminCall } from "./adminApi";
 import { when } from "./format";
 import { ListView, DataTable, Json, type Column } from "./table";
 import type {
   ActionRow,
+  DocumentRow,
   AnswerRow,
   CacheRow,
   ContentKind,
@@ -107,7 +121,7 @@ function UserDetailPage() {
     <div className="flex flex-col gap-4">
       <Back to="/admin/users" label="Users" />
       <Loading q={q} />
-      {q.data && <UserView u={q.data} />}
+      {q.data && <UserView u={q.data} extra={<UserActions u={q.data} />} />}
     </div>
   );
 }
@@ -238,7 +252,7 @@ function WorldDetailPage() {
     <div className="flex flex-col gap-4">
       <Back to="/admin/worlds" label="Worlds" />
       <Loading q={q} />
-      {q.data && <WorldView w={q.data} />}
+      {q.data && <WorldView w={q.data} extra={<WorldActions w={q.data} />} />}
     </div>
   );
 }
@@ -260,11 +274,13 @@ export function WorldView({ w, extra }: { w: WorldDetail; extra?: React.ReactNod
           title={c.name}
           actions={c.exam_date ? <Pill>exam {c.exam_date}</Pill> : undefined}
         >
+          {extra && <CourseActions c={c} />}
           {c.chapters.map((ch) => (
             <div key={ch.id} className="mb-3">
               <h3 className="font-semibold">
                 {ch.idx + 1}. {ch.title}
               </h3>
+              {extra && <ChapterActions ch={ch} />}
               <DataTable
                 rows={ch.documents}
                 rowKey={(d) => d.id}
@@ -289,6 +305,16 @@ export function WorldView({ w, extra }: { w: WorldDetail; extra?: React.ReactNod
                   { label: "Error", render: (d) => d.error ?? "—" },
                   { label: "Pages", render: (d) => d.page_count ?? "—" },
                   { label: "Tagged by", render: (d) => d.tagged_by ?? "—" },
+                  ...(extra
+                    ? [
+                        {
+                          label: "Actions",
+                          render: (d: DocumentRow) => (
+                            <DocumentActions id={d.id} filename={d.filename} />
+                          ),
+                        },
+                      ]
+                    : []),
                 ]}
               />
             </div>
@@ -303,7 +329,8 @@ export function WorldView({ w, extra }: { w: WorldDetail; extra?: React.ReactNod
                 <Link className="text-primary underline" to={`/admin/users/${m.id}`}>
                   {m.nickname}
                 </Link>{" "}
-                · joined {when(m.joined_at)}
+                · joined {when(m.joined_at)}{" "}
+                {extra && <MemberRemove worldId={w.id} userId={m.id} nickname={m.nickname} />}
               </li>
             ))}
           </ul>
@@ -406,7 +433,13 @@ function ContentItemPage() {
     <div className="flex flex-col gap-4">
       <Back to="/admin/content" label="Content" />
       <Loading q={q} />
-      {q.data && <ContentView kind={kind as ContentKind} c={q.data} />}
+      {q.data && (
+        <ContentView
+          kind={kind as ContentKind}
+          c={q.data}
+          extra={<ContentEditor kind={kind as ContentKind} c={q.data} />}
+        />
+      )}
     </div>
   );
 }
@@ -494,7 +527,7 @@ function AnswerList({ columns = answerColumns }: { columns?: Column<AnswerRow>[]
         { key: "question_id", label: "Question id", placeholder: "uuid" },
       ]}
       rowKey={(a) => a.id}
-      columns={columns}
+      columns={[...columns, { label: "Actions", render: (a) => <AnswerActions a={a} /> }]}
     />
   );
 }
@@ -527,7 +560,7 @@ function QuestionList({ columns = questionColumns }: { columns?: Column<Question
         { key: "status", label: "Status", options: ["pending", "open", "rejected"] },
       ]}
       rowKey={(q) => q.id}
-      columns={columns}
+      columns={[...columns, { label: "Actions", render: (q) => <QuestionActions q={q} /> }]}
     />
   );
 }
@@ -569,7 +602,11 @@ export function JobsList({ columns = jobColumns }: { columns?: Column<JobRow>[] 
         { key: "kind", label: "Kind", placeholder: "e.g. QUIZ_GENERATE" },
       ]}
       rowKey={(j) => j.id}
-      columns={[...columns, { label: "User", render: (j) => j.user ?? "—" }]}
+      columns={[
+        ...columns,
+        { label: "User", render: (j) => j.user ?? "—" },
+        { label: "Actions", render: (j) => <JobActions j={j} /> },
+      ]}
       intro={
         summary.data && (
           <div className="flex flex-wrap gap-2 text-small">
@@ -616,18 +653,21 @@ export function CacheList({ columns = cacheColumns }: { columns?: Column<CacheRo
       columns={columns}
       intro={
         summary.data && (
-          <DataTable
-            rows={summary.data}
-            rowKey={(r) => `${r.task_kind}${r.provider}`}
-            empty="The cache is empty."
-            columns={[
-              { label: "Task", render: (r) => r.task_kind },
-              { label: "Provider", render: (r) => r.provider },
-              { label: "Entries", render: (r) => r.entries },
-              { label: "Hits", render: (r) => r.hits },
-              { label: "Size", render: (r) => kb(r.size_bytes) },
-            ]}
-          />
+          <>
+            <CachePurge />
+            <DataTable
+              rows={summary.data}
+              rowKey={(r) => `${r.task_kind}${r.provider}`}
+              empty="The cache is empty."
+              columns={[
+                { label: "Task", render: (r) => r.task_kind },
+                { label: "Provider", render: (r) => r.provider },
+                { label: "Entries", render: (r) => r.entries },
+                { label: "Hits", render: (r) => r.hits },
+                { label: "Size", render: (r) => kb(r.size_bytes) },
+              ]}
+            />
+          </>
         )
       }
     />

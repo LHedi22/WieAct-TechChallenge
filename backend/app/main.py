@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 
 from app import admin
 from app.api import dev, economy, health, jobs, system
+from app.core import db, economy_live
 from app.core.config import get_settings
 from app.features.arena import router as arena
 from app.features.audio import router as audio
@@ -54,6 +55,13 @@ def create_app() -> FastAPI:
     async def _no_coins(_: Request, e: InsufficientCoins) -> JSONResponse:
         # Any paid start without enough coins: the UI opens the out-of-coins screen.
         return JSONResponse(status_code=402, content={"detail": e.key})
+
+    @app.middleware("http")
+    async def _live_economy(request: Request, call_next):
+        # Admin overrides of economy.py (core/economy_live.py), re-read at most every 3 s
+        if request.url.path.startswith("/api/"):
+            await economy_live.refresh(db.get_sessionmaker())
+        return await call_next(request)
 
     app.include_router(health.router)
     app.include_router(system.router)
