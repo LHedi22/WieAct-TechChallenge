@@ -624,22 +624,15 @@ export function MemberRemove({
   userId: string;
   nickname: string;
 }) {
-  const a = useAction();
   return (
-    <SmallButton
+    <RowAction
+      label="Remove"
       tone="danger"
-      ariaLabel={`Remove ${nickname} from the world`}
-      disabled={a.isPending}
-      onClick={() => {
-        if (window.confirm(`Remove ${nickname} from this world?`))
-          a.mutate({
-            path: `/api/admin/worlds/${worldId}/members/${userId}?reason=admin`,
-            method: "DELETE",
-          });
-      }}
-    >
-      Remove
-    </SmallButton>
+      method="DELETE"
+      ask={`Reason to remove ${nickname} from this world`}
+      path={`/api/admin/worlds/${worldId}/members/${userId}`}
+      body={{}}
+    />
   );
 }
 
@@ -802,34 +795,77 @@ export function ContentEditor({ kind, c }: { kind: ContentKind; c: ContentRow })
 }
 
 // --- arena -----------------------------------------------------------------------------------------
+/** A row button that opens an inline confirm with a reason (and an optional score). */
 function RowAction({
   label,
   path,
   body,
   tone = "default",
   ask,
+  score = false,
+  method = "POST",
 }: {
   label: string;
   path: string;
   body: Record<string, unknown>;
   tone?: "default" | "danger" | "primary";
   ask?: string;
+  score?: boolean;
+  method?: Method;
 }) {
-  const a = useAction();
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const [value, setValue] = useState("");
+  const a = useAction(() => setOpen(false));
+  const n = Number(value);
+  const ready =
+    reason.trim().length >= 3 &&
+    (!score || (value !== "" && Number.isInteger(n) && n >= 0 && n <= 100));
+  if (!open)
+    return (
+      <span className="inline-flex flex-col gap-1">
+        <SmallButton tone={tone} onClick={() => setOpen(true)}>
+          {label}
+        </SmallButton>
+        {a.isSuccess && <span className="text-small text-olive-ink">Done</span>}
+      </span>
+    );
   return (
-    <span className="inline-flex flex-col gap-1">
-      <SmallButton
-        tone={tone}
-        disabled={a.isPending}
-        onClick={() => {
-          const reason = window.prompt(ask ?? `Reason to ${label.toLowerCase()}?`);
-          if (reason && reason.trim().length >= 3) a.mutate({ path, body: { ...body, reason } });
-        }}
-      >
-        {label}
-      </SmallButton>
-      {a.error && <span className="text-small text-danger">{(a.error as Error).message}</span>}
-    </span>
+    <form
+      className="flex w-full min-w-56 flex-col gap-2 rounded-soft border-2 border-sand bg-whitewash p-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (ready)
+          a.mutate({ path, method, body: { ...body, ...(score ? { score: n } : {}), reason } });
+      }}
+    >
+      {score && (
+        <Field label="Score 0–100" hint="Rewards are paid once if it reaches the threshold.">
+          <input
+            type="number"
+            min={0}
+            max={100}
+            className={inputClass}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+          />
+        </Field>
+      )}
+      <Field label={ask ?? `Reason to ${label.toLowerCase()}`}>
+        <input className={inputClass} value={reason} onChange={(e) => setReason(e.target.value)} />
+      </Field>
+      <ErrorNote error={a.error} />
+      <div className="flex gap-2">
+        <SmallButton
+          type="submit"
+          tone={tone === "default" ? "primary" : tone}
+          disabled={!ready || a.isPending}
+        >
+          {label}
+        </SmallButton>
+        <SmallButton onClick={() => setOpen(false)}>Cancel</SmallButton>
+      </div>
+    </form>
   );
 }
 
@@ -848,30 +884,14 @@ export function AnswerActions({ a }: { a: AnswerRow }) {
 }
 
 function ScoreAnswer({ id }: { id: string }) {
-  const a = useAction();
   return (
-    <span className="inline-flex flex-col gap-1">
-      <SmallButton
-        tone="primary"
-        disabled={a.isPending}
-        onClick={() => {
-          const raw = window.prompt(
-            "Score 0–100 (rewards are paid once if it reaches the threshold)",
-          );
-          if (raw === null) return;
-          const score = Number(raw);
-          const reason = window.prompt("Reason?");
-          if (Number.isInteger(score) && reason && reason.trim().length >= 3)
-            a.mutate({
-              path: `/api/admin/arena/answers/${id}`,
-              body: { action: "score", score, reason },
-            });
-        }}
-      >
-        Set score
-      </SmallButton>
-      {a.error && <span className="text-small text-danger">{(a.error as Error).message}</span>}
-    </span>
+    <RowAction
+      label="Set score"
+      tone="primary"
+      score
+      path={`/api/admin/arena/answers/${id}`}
+      body={{ action: "score" }}
+    />
   );
 }
 
@@ -923,6 +943,7 @@ interface PurgeOut {
   entries: number;
   cloud_entries: number;
   warning: string | null;
+  confirm_text?: string | null;
 }
 
 export function CachePurge() {
@@ -931,6 +952,7 @@ export function CachePurge() {
   const [provider, setProvider] = useState("");
   const [reason, setReason] = useState("");
   const [preview, setPreview] = useState<PurgeOut | null>(null);
+  const [typed, setTyped] = useState("");
   const dry = useAction<PurgeOut>((d) => setPreview(d));
   const run = useAction<PurgeOut>(() => setPreview(null));
   const body = { task_kind: taskKind || null, key: key || null, provider: provider || null };
@@ -942,7 +964,9 @@ export function CachePurge() {
       reason={reason}
       setReason={setReason}
       reasonRequired={Boolean(preview)}
-      disabled={!taskKind && !key}
+      disabled={
+        (!taskKind && !key) || Boolean(preview?.confirm_text && typed !== preview.confirm_text)
+      }
       pending={dry.isPending || run.isPending}
       error={dry.error ?? run.error}
       done={
@@ -955,6 +979,15 @@ export function CachePurge() {
               {preview.warning}
             </p>
           )}
+          {preview?.confirm_text && (
+            <Field label={`Type "${preview.confirm_text}" to purge platform entries`}>
+              <input
+                className={inputClass}
+                value={typed}
+                onChange={(e) => setTyped(e.target.value)}
+              />
+            </Field>
+          )}
           <Done show={run.isSuccess}>Purged {run.data?.entries} entries.</Done>
         </>
       }
@@ -962,7 +995,10 @@ export function CachePurge() {
         if (!preview)
           dry.mutate({ path: "/api/admin/cache/purge", body: { ...body, dry_run: true } });
         else
-          run.mutate({ path: "/api/admin/cache/purge", body: { ...body, dry_run: false, reason } });
+          run.mutate({
+            path: "/api/admin/cache/purge",
+            body: { ...body, dry_run: false, reason, confirm: typed || null },
+          });
       }}
     >
       <p className="text-small text-ink/80">

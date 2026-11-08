@@ -91,12 +91,16 @@ export function DataTable<T>({
         {rows.map((r) => (
           <li key={rowKey(r)} className="rounded-soft border-2 border-sand bg-white p-3 text-small">
             <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
-              {columns.map((c) => (
-                <div key={c.label} className="contents">
-                  <dt className="text-ink/70">{c.label}</dt>
-                  <dd className="min-w-0 break-words">{c.render(r)}</dd>
-                </div>
-              ))}
+              {columns.map((c) => {
+                const v = c.render(r);
+                if (v === "—" || v === null || v === undefined || v === "") return null;
+                return (
+                  <div key={c.label} className="contents">
+                    <dt className="text-ink/80">{c.label}</dt>
+                    <dd className="min-w-0 break-words">{v}</dd>
+                  </div>
+                );
+              })}
             </dl>
             {onOpen && (
               <div className="mt-2">
@@ -111,7 +115,11 @@ export function DataTable<T>({
           <thead>
             <tr className="border-b-2 border-sand">
               {columns.map((c) => (
-                <th key={c.label} scope="col" className="px-2 py-1.5 text-start font-semibold">
+                <th
+                  key={c.label}
+                  scope="col"
+                  className="whitespace-nowrap px-2 py-1.5 text-start font-semibold"
+                >
                   {c.label}
                 </th>
               ))}

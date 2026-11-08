@@ -105,7 +105,7 @@ async def _view(s: AsyncSession, settings, sm) -> Switches:
         if settings.OFFLINE_DEMO_MODE == "on"
         else f"auto = environment ({settings.OFFLINE_DEMO_MODE})",
         "pause_background_lane": None,
-        "llm_max_rpm_override": f"configured LLM_MAX_RPM = {settings.LLM_MAX_RPM}",
+        "llm_max_rpm_override": f"configured rate: {settings.LLM_MAX_RPM} per minute",
     }
     out = []
     for key, flag in STORED.items():

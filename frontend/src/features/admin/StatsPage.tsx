@@ -61,7 +61,11 @@ function Table({ head, rows }: { head: string[]; rows: (string | number)[][] }) 
         <thead>
           <tr className="border-b-2 border-sand">
             {head.map((h) => (
-              <th key={h} scope="col" className="px-2 py-1 text-start font-semibold">
+              <th
+                key={h}
+                scope="col"
+                className="whitespace-nowrap px-2 py-1 text-start font-semibold"
+              >
                 {h}
               </th>
             ))}

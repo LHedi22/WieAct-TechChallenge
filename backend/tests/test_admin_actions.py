@@ -399,6 +399,11 @@ async def test_cancel_refunds_once_retry_and_run_now(api, sm, seeded):  # noqa: 
     assert retry.json()["status"] == "queued"
     now = await api.post(f"/api/admin/jobs/{jid}/run-now", json=R, headers=ACT)
     assert now.status_code == 200
+    async with sm() as s:
+        (await s.get(Job, jid)).error = "deferred:quota"
+        await s.commit()
+    quota = await api.post(f"/api/admin/jobs/{jid}/run-now", json=R, headers=ACT)
+    assert quota.status_code == 409  # the platform's stated quota delay is respected
 
 
 async def test_cache_purge_warns_for_cloud_entries(api, sm, seeded):  # noqa: F811
@@ -422,6 +427,13 @@ async def test_cache_purge_warns_for_cloud_entries(api, sm, seeded):  # noqa: F8
     )
     async with sm() as s:
         assert await s.scalar(select(func.count()).select_from(AICache)) == 2
+    assert dry["confirm_text"] == "purge cloud entries"
+    no_confirm = await api.post(
+        "/api/admin/cache/purge",
+        json={"task_kind": "NOTES_WRITE", "dry_run": False, **R},
+        headers=ACT,
+    )
+    assert no_confirm.status_code == 422  # platform entries need the typed confirm
     done = await api.post(
         "/api/admin/cache/purge",
         json={"task_kind": "NOTES_WRITE", "provider": "mock", "dry_run": False, **R},

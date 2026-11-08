@@ -102,11 +102,11 @@ function Shell({ me }: { me: AdminMe }) {
       <aside className="border-b-2 border-sand bg-white md:w-56 md:shrink-0 md:border-b-0 md:border-e-2">
         <div className="flex items-center justify-between gap-2 px-4 py-3">
           <span className="font-heading text-h3">LW admin</span>
-          <span className="text-small text-ink/70 md:hidden">{me.actor}</span>
+          <span className="text-small text-ink/80 md:hidden">Signed in as {me.actor}</span>
         </div>
         <nav
           aria-label="Admin sections"
-          className="flex gap-1 overflow-x-auto px-2 pb-2 md:flex-col md:overflow-visible"
+          className="flex flex-wrap gap-1 px-2 pb-2 md:flex-col md:flex-nowrap"
         >
           {NAV.map((item) => (
             <NavLink

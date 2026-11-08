@@ -16,7 +16,7 @@ import {
   WorldActions,
 } from "./actions";
 import { adminCall } from "./adminApi";
-import { when } from "./format";
+import { plainError, when } from "./format";
 import { ListView, DataTable, Json, type Column } from "./table";
 import type {
   ActionRow,
@@ -302,7 +302,7 @@ export function WorldView({ w, extra }: { w: WorldDetail; extra?: React.ReactNod
                       </Pill>
                     ),
                   },
-                  { label: "Error", render: (d) => d.error ?? "—" },
+                  { label: "Error", render: (d) => plainError(d.error) },
                   { label: "Pages", render: (d) => d.page_count ?? "—" },
                   { label: "Tagged by", render: (d) => d.tagged_by ?? "—" },
                   ...(extra
@@ -581,7 +581,11 @@ const jobColumns: Column<JobRow>[] = [
   { label: "Not before", render: (j) => (j.not_before ? when(j.not_before) : "—") },
   { label: "Cost", render: (j) => j.cost },
   { label: "Quick", render: (j) => (j.quick_mode ? "yes" : "—") },
-  { label: "Error", render: (j) => j.error ?? "—" },
+  {
+    label: "Error",
+    render: (j) =>
+      j.error?.startsWith("deferred:") ? `waiting (${j.error.slice(9)})` : plainError(j.error),
+  },
   { label: "Created", render: (j) => when(j.created_at) },
 ];
 

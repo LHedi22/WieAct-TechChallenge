@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi import APIRouter, Header, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 
 from app.admin import audit
@@ -70,8 +71,10 @@ def _samesite(settings) -> str:
 
 
 @router.delete("/session", status_code=204)
-async def sign_out(response: Response) -> Response:
+async def sign_out(response: Response, x_admin_action: Annotated[str | None, Header()] = None):
     settings = require_enabled()
+    if x_admin_action != "1":  # like every other admin mutation (no cross-site sign-out)
+        raise HTTPException(403, "errors.admin_action_header")
     response.delete_cookie(
         ADMIN_COOKIE,
         path="/",

@@ -53,7 +53,9 @@ export function SmallButton({
       className={cx(
         "min-h-11 rounded-soft border-2 px-3 py-1.5 text-small font-semibold",
         "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sea",
-        disabled ? "cursor-not-allowed border-ink/20 bg-sand/30 text-ink/50" : tones[tone],
+        disabled
+          ? "cursor-not-allowed border-dashed border-ink/40 bg-sand/30 text-ink/70"
+          : tones[tone],
       )}
     >
       {children}
@@ -81,7 +83,7 @@ export function Toggle({
       disabled={disabled}
       onClick={() => onChange(!checked)}
       className={cx(
-        "relative inline-flex h-8 w-14 shrink-0 items-center rounded-full border-2 border-ink transition-colors",
+        "relative inline-flex h-11 w-20 shrink-0 items-center rounded-full border-2 border-ink transition-colors",
         "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sea",
         checked ? "bg-olive-ink" : "bg-sand/60",
         disabled && "opacity-50",
@@ -90,8 +92,8 @@ export function Toggle({
       <span
         aria-hidden
         className={cx(
-          "inline-block h-5 w-5 rounded-full border-2 border-ink bg-white transition-transform",
-          checked ? "translate-x-7 rtl:-translate-x-7" : "translate-x-1 rtl:-translate-x-1",
+          "inline-block h-8 w-8 rounded-full border-2 border-ink bg-white transition-transform",
+          checked ? "translate-x-10" : "translate-x-1",
         )}
       />
     </button>

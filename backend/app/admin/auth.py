@@ -29,6 +29,7 @@ from app.core.config import Settings, get_settings
 ADMIN_COOKIE = "lw_admin"
 ADMIN_MAX_AGE_S = 8 * 3600
 SESSION_ATTEMPTS_PER_MIN = 5
+PEER_ATTEMPTS_PER_MIN = 30
 
 
 @dataclass(frozen=True)
@@ -90,32 +91,51 @@ def token_matches(given: str, settings: Settings) -> bool:
 
 
 class AttemptLimiter:
-    """At most SESSION_ATTEMPTS_PER_MIN sign-in attempts per IP in any 60 s window."""
+    """Sign-in attempts and wrong `X-Admin-Token` headers, in any 60 s window: at most
+    SESSION_ATTEMPTS_PER_MIN per client IP, and PEER_ATTEMPTS_PER_MIN per direct peer. The client
+    IP comes from X-Forwarded-For, which a client can rotate; the peer cap bounds that (behind
+    Railway's proxy every request shares one peer, so it is also a global cap)."""
 
     def __init__(self, clock: Callable[[], float] = time.monotonic) -> None:
         self.clock = clock
         self.seen: dict[str, deque[float]] = defaultdict(deque)
 
-    def hit(self, ip: str) -> int:
-        """Record an attempt; returns seconds to wait (0 = allowed)."""
-        now = self.clock()
-        q = self.seen[ip]
+    def _window(self, key: str, now: float) -> deque[float]:
+        q = self.seen[key]
         while q and now - q[0] >= 60:
             q.popleft()
-        if len(q) >= SESSION_ATTEMPTS_PER_MIN:
-            return max(1, int(60 - (now - q[0])) + 1)
-        q.append(now)
-        return 0
+        return q
+
+    def hit(self, client: tuple[str, str]) -> int:
+        """Record an attempt from (ip, peer); returns seconds to wait (0 = allowed)."""
+        ip, peer = client
+        now = self.clock()
+        waits = []
+        for key, cap in (
+            (f"ip:{ip}", SESSION_ATTEMPTS_PER_MIN),
+            (f"peer:{peer}", PEER_ATTEMPTS_PER_MIN),
+        ):
+            q = self._window(key, now)
+            if len(q) >= cap:
+                waits.append(max(1, int(60 - (now - q[0])) + 1))
+        if not waits:
+            for key in (f"ip:{ip}", f"peer:{peer}"):
+                self.seen[key].append(now)
+        if len(self.seen) > 10_000:  # evict idle windows
+            for key in [k for k, q in self.seen.items() if not q or now - q[-1] >= 60]:
+                del self.seen[key]
+        return max(waits, default=0)
 
 
 attempts = AttemptLimiter()
 
 
-def client_ip(request: Request) -> str:
-    forwarded = request.headers.get("x-forwarded-for", "")
-    if forwarded:
-        return forwarded.split(",")[0].strip() or "unknown"
-    return request.client.host if request.client else "unknown"
+def client_ip(request: Request) -> tuple[str, str]:
+    """(client IP, direct peer). The proxy appends the real client as the last X-Forwarded-For
+    entry, so the last entry is used, not the first (which the client writes)."""
+    peer = request.client.host if request.client else "unknown"
+    forwarded = [p.strip() for p in request.headers.get("x-forwarded-for", "").split(",")]
+    return (forwarded[-1] or peer), peer
 
 
 def require_enabled() -> Settings:
@@ -126,6 +146,7 @@ def require_enabled() -> Settings:
 
 
 async def current_admin(
+    request: Request,
     settings: Annotated[Settings, Depends(require_enabled)],
     lw_admin: Annotated[str | None, Cookie(alias=ADMIN_COOKIE)] = None,
     x_admin_token: Annotated[str | None, Header()] = None,
@@ -133,6 +154,9 @@ async def current_admin(
     if x_admin_token is not None:
         if token_matches(x_admin_token, settings):
             return Admin(actor="script", via="token")
+        # a wrong token counts like a failed sign-in, so no admin route is an unthrottled oracle
+        if wait := attempts.hit(client_ip(request)):
+            raise HTTPException(429, "errors.too_many_attempts", headers={"Retry-After": str(wait)})
         raise HTTPException(401, "errors.admin_required")
     if (label := read_admin(lw_admin)) is not None:
         return Admin(actor=label, via="cookie")

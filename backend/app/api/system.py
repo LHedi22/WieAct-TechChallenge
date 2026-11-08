@@ -65,7 +65,9 @@ async def status(settings: SettingsDep, sm: Sessionmaker) -> SystemStatus:
     forced = flags.offline_setting(settings, switches)
     chosen = provider_choice.get()
     # A provider picked in the UI is paused whenever it can't run, whatever OFFLINE_DEMO_MODE says
-    offline = forced == "on" or ((forced == "auto" or chosen is not None) and res.offline)
+    # "off" (environment or admin switch) never hides a pause the guards impose: production
+    # outside the slot or a blocked key still shows the banner and disables AI actions
+    offline = forced == "on" or res.offline
     return SystemStatus(
         app_env=settings.APP_ENV,
         configured_provider=settings.LLM_PROVIDER,

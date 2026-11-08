@@ -32,7 +32,7 @@ class Stats(BaseModel):
     ok: int
     cache_hits: int
     repeated_identical: int  # successful calls whose exact request was already answered
-    compact_share: float  # 0-1, the orchestration indicator
+    compact_share: float  # 0-1, the orchestration indicator (forced Quick-mode calls left out)
     by_tier: dict[str, TierStats]
     by_task: dict[str, int]
     refusals: dict[str, int]  # quota / saturated / ceiling / blocked / transient / bad_request
@@ -109,6 +109,12 @@ async def stats(
     total_calls = totals[0]
     compact = by_tier["compact"].calls if "compact" in by_tier else 0
     mid = by_tier["mid"].calls if "mid" in by_tier else 0
+    # Forced Quick-mode calls (always compact) are an admin's choice, not orchestration: the split
+    # leaves them out so the switch can't make the compact share look better than it is.
+    forced_calls = int(
+        await s.scalar(select(func.count()).select_from(calls_q).where(calls_q.c.forced)) or 0
+    )
+    compact -= forced_calls
     chat_calls = compact + mid  # the compact/mid split ignores embeddings (own endpoint + quota)
     return Stats(
         provider=provider,

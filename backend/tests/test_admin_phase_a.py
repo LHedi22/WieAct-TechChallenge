@@ -130,7 +130,9 @@ async def test_session_cookie(api, sm, monkeypatch):
     enable_admin(monkeypatch)
     api.cookies.clear()
     await sign_in(api)
-    assert (await api.delete("/api/admin/session")).status_code == 204
+    assert (await api.delete("/api/admin/session")).status_code == 403  # the CSRF header too
+    r = await api.delete("/api/admin/session", headers={"X-Admin-Action": "1"})
+    assert r.status_code == 204
     assert (await api.get("/api/admin/me")).status_code == 401
 
 
@@ -164,10 +166,31 @@ async def test_sign_in_is_rate_limited_per_ip(api, monkeypatch):
 def test_attempt_window_slides():
     clock = [0.0]
     lim = auth.AttemptLimiter(clock=lambda: clock[0])
-    assert all(lim.hit("ip") == 0 for _ in range(5))
-    assert lim.hit("ip") > 0
+    assert all(lim.hit(("ip", "peer")) == 0 for _ in range(5))
+    assert lim.hit(("ip", "peer")) > 0
     clock[0] = 61.0
-    assert lim.hit("ip") == 0
+    assert lim.hit(("ip", "peer")) == 0
+
+
+def test_rotating_forwarded_for_is_capped_per_peer():
+    lim = auth.AttemptLimiter(clock=lambda: 0.0)
+    allowed = sum(lim.hit((f"10.0.0.{i}", "proxy")) == 0 for i in range(100))
+    assert allowed == auth.PEER_ATTEMPTS_PER_MIN
+
+
+async def test_wrong_header_tokens_are_throttled(api, monkeypatch):
+    enable_admin(monkeypatch)
+    codes = [
+        (await api.get("/api/admin/me", headers={"X-Admin-Token": f"guess-{i}"})).status_code
+        for i in range(6)
+    ]
+    assert codes == [401] * 5 + [429]
+    # the client-written first X-Forwarded-For entry doesn't give a fresh bucket
+    r = await api.get(
+        "/api/admin/me", headers={"X-Admin-Token": "guess", "X-Forwarded-For": "1.2.3.4, 127.0.0.1"}
+    )
+    assert r.status_code in (401, 429)
+    assert (await api.get("/api/admin/me", headers=READ)).status_code == 200  # right token: ok
 
 
 def test_production_refuses_a_short_token(monkeypatch):
@@ -276,6 +299,12 @@ async def test_forced_quick_mode_is_counted_apart(api, sm, mock_llm, monkeypatch
     assert real.quick_mode and real.pattern == "fallback"
     stats = (await api.get("/api/admin/stats", params={"provider": "mock"}, headers=READ)).json()
     assert stats["fallbacks"] == 1 and stats["forced_fallbacks"] == 1
+    # the forced compact call is left out of the compact/mid split
+    tiers = stats["by_tier"]
+    split_compact = tiers["compact"]["calls"] - 1
+    assert stats["compact_share"] == round(
+        split_compact / (split_compact + tiers["mid"]["calls"]), 3
+    )
     async with sm() as s:
         forced = list(await s.scalars(select(AICallLog).where(AICallLog.forced.is_(True))))
     assert [(r.model_tier, r.pattern, r.fallback) for r in forced] == [
@@ -344,6 +373,19 @@ async def test_offline_switch(api, sm, gw, monkeypatch):  # noqa: F811
     await api.put("/api/admin/switches/offline_demo_mode", json={"value": "auto"}, headers=ACT)
     assert (await api.get("/api/system/status")).json()["offline_demo_mode"] is False
     assert (await api.post("/api/dev/demo-jobs", headers=DEV, json={})).status_code == 202
+    # "off" never hides a pause the guards impose
+    from app.api import system  # noqa: PLC0415
+    from app.gateway.providers import Resolution  # noqa: PLC0415
+
+    async def paused(settings, sm, now=None):
+        return Resolution(settings.llm, offline=True, reason="outside_slot")
+
+    monkeypatch.setattr(system, "resolve", paused)
+    await api.put("/api/admin/switches/offline_demo_mode", json={"value": "off"}, headers=ACT)
+    assert (await api.get("/api/system/status")).json()["offline_demo_mode"] is True
+    from app.gateway import providers  # noqa: PLC0415
+
+    monkeypatch.setattr(system, "resolve", providers.resolve)
     # OFFLINE_DEMO_MODE=on in the environment wins over the switch
     monkeypatch.setenv("OFFLINE_DEMO_MODE", "on")
     get_settings.cache_clear()

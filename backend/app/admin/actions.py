@@ -265,8 +265,9 @@ async def remove_member(
     user_id: uuid.UUID,
     admin: AdminActionDep,
     s: Session,
-    reason: str = "",
+    body: ReasonIn | None = None,
 ):
+    reason = body.reason if body else None
     world = await _get(s, World, world_id)
     if world.creator_id == user_id:
         raise HTTPException(409, "The creator can't be removed; delete the world instead")
@@ -640,6 +641,9 @@ async def run_now(job_id: uuid.UUID, body: ReasonIn, admin: AdminActionDep, s: S
     job = await _get(s, Job, job_id, lock=True)
     if job.status != "queued":
         raise HTTPException(409, f"The job is {job.status}")
+    if (job.error or "") in ("deferred:quota", "deferred:offline"):
+        # the error contract: wait the delay the platform stated (or the next slot)
+        raise HTTPException(409, "This job waits for the platform's quota delay or the next slot")
     before = job.not_before
     job.not_before = None
     audit.record(
@@ -657,12 +661,16 @@ async def run_now(job_id: uuid.UUID, body: ReasonIn, admin: AdminActionDep, s: S
 
 
 # --- cache ---------------------------------------------------------------------------------------
+CLOUD_PURGE_CONFIRM = "purge cloud entries"
+
+
 class PurgeIn(BaseModel):
     key: str | None = None
     task_kind: str | None = None
     provider: Literal["cloud", "local", "mock"] | None = None
     dry_run: bool = True
     reason: str | None = OptionalReason
+    confirm: str | None = None  # CLOUD_PURGE_CONFIRM, required when platform entries would go
 
 
 @router.post("/cache/purge")
@@ -687,9 +695,17 @@ async def purge_cache(body: PurgeIn, admin: AdminActionDep, s: Session):
         else None
     )
     if body.dry_run:
-        return {"dry_run": True, "entries": n, "cloud_entries": cloud, "warning": warning}
+        return {
+            "dry_run": True,
+            "entries": n,
+            "cloud_entries": cloud,
+            "warning": warning,
+            "confirm_text": CLOUD_PURGE_CONFIRM if cloud else None,
+        }
     if not (body.reason or "").strip():
         raise HTTPException(422, "A reason is required")
+    if cloud and body.confirm != CLOUD_PURGE_CONFIRM:
+        raise HTTPException(422, f'Type "{CLOUD_PURGE_CONFIRM}" to purge platform entries')
     await s.execute(delete(AICache).where(*where))
     audit.record(
         s,
