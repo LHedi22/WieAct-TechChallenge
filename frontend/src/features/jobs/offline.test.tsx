@@ -24,6 +24,8 @@ function status(offline: boolean): SystemStatus {
     offline_demo_mode: offline,
     reason: offline ? "outside_slot" : null,
     upload_max_mb: 50,
+    quick_mode_forced: false,
+    background_paused: false,
   };
 }
 

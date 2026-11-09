@@ -83,6 +83,7 @@ async def test_job_caught_by_the_switch(sm, api, gw, monkeypatch, lane):  # noqa
         headers={"X-Dev-User": "OfflineTester"},
         json={"lane": lane, "cache_key": "y"},
     )
+    go_offline(monkeypatch)
     monkeypatch.setattr(gateway_module, "run", offline_run)
     await Worker(sm).drain(timeout_s=10)
     async with sm() as s:
@@ -110,3 +111,26 @@ async def test_tutor_ends_without_a_summary_while_paused(api, sm, pptx, gw, monk
             Job.kind == "TUTOR", Job.payload["mode"].astext == "summary"
         )
         assert await db.scalar(summary_jobs) is None
+
+
+async def test_job_caught_just_after_the_switch_ended_runs_now(sm, api, gw, monkeypatch):  # noqa: F811
+    """A worker's switch cache lags up to 3 s: a job it catches as offline after the admin switched
+    offline off is requeued at once, not parked until the next slot (8 Nov stack check)."""
+    r = await api.post(
+        "/api/dev/demo-jobs",
+        headers={"X-Dev-User": "OfflineTester"},
+        json={"lane": "background", "cache_key": "z"},
+    )
+    real_run, calls = gateway_module.run, []
+
+    async def stale_once(*a, **k):
+        calls.append(1)
+        if len(calls) == 1:
+            raise OfflineMode("forced")
+        return await real_run(*a, **k)
+
+    monkeypatch.setattr(gateway_module, "run", stale_once)
+    await Worker(sm).drain(timeout_s=10)
+    async with sm() as s:
+        job = await s.get(Job, r.json()["job_id"])
+    assert job.status == "done" and job.not_before is None and len(calls) >= 2

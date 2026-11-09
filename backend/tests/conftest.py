@@ -7,7 +7,7 @@ import pytest
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from app.core import config, db
+from app.core import config, db, economy_live, flags
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "mock-llm" / "src"))  # the mock runs in-process (ASGI transport)
@@ -41,6 +41,7 @@ DEV_DB_URL = os.environ.get("DATABASE_URL", config.Settings().DATABASE_URL)
 TABLES = (
     "daily_state, wisdom_tips, class_pool_ledger, flashcard_reviews, flashcards, study_assets, "
     "coin_ledger, points_ledger, peer_votes, peer_answers, peer_questions, "
+    "admin_actions, runtime_flags, economy_overrides, "
     "ai_call_log, ai_cache, jobs, mistakes, quiz_attempts, tutor_sessions, presence, "
     "placement_sets, chapter_mastery, course_levels, "
     "profiles, quiz_sets, chunks, documents, chapters, courses, "
@@ -60,8 +61,12 @@ def isolated_settings(monkeypatch, tmp_path):
     monkeypatch.setenv("UPLOAD_DIR", str(tmp_path / "uploads"))
     monkeypatch.setenv("MOCK_BASE_URL", "http://mock/v1")
     config.get_settings.cache_clear()
+    flags.invalidate()  # runtime switches are cached per process for ~3 s
+    economy_live.reset()  # admin economy overrides are applied to the economy module
     yield
     config.get_settings.cache_clear()
+    flags.invalidate()
+    economy_live.reset()
 
 
 @pytest.fixture(autouse=True)

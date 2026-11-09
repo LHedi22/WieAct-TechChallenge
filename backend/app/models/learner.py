@@ -74,6 +74,8 @@ class PlacementSet(Base):
     course_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("courses.id", ondelete="CASCADE"))
     language: Mapped[str] = mapped_column(String(8))
     questions: Mapped[list[dict[str, Any]]] = mapped_column(JSONB)
+    # Changed by an admin on /admin (never presented as pure AI output in the report)
+    edited_by_admin: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     created_at: Mapped[datetime] = created_at()
 
 

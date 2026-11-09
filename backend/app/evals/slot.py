@@ -245,6 +245,10 @@ async def run(
     timeout_s: float,
     regrade: bool = False,
 ) -> int:
+    from app.core.config import get_settings  # noqa: PLC0415
+
+    # /api/admin/stats needs the admin token (blank ADMIN_TOKEN = no admin side)
+    admin = {"X-Admin-Token": get_settings().ADMIN_TOKEN.get_secret_value()}
     async with httpx.AsyncClient(base_url=api, timeout=60) as c:
         status = await _ok(await c.get("/api/system/status"))
         provider = status["provider"]
@@ -259,7 +263,11 @@ async def run(
         if status.get("offline_demo_mode"):
             print(f"AI is paused (offline demo mode); next slot: {status.get('next_slot')}")
             return 1
-        stats0 = (await c.get("/api/admin/stats", params={"provider": provider})).json()
+        r0 = await c.get("/api/admin/stats", params={"provider": provider}, headers=admin)
+        if r0.status_code != 200:
+            print("/api/admin/stats refused: set ADMIN_TOKEN in .env (and restart the backend)")
+            return 1
+        stats0 = r0.json()
         print(f"provider {provider} · world {code} · {course} · level {level} · {', '.join(langs)}")
         t0 = time.monotonic()
         results = await asyncio.gather(
@@ -296,7 +304,9 @@ async def run(
             print(
                 f"wisdom: {tip.get('skipped') or states or 'no job (tip pending or failed before)'}"
             )
-        stats1 = (await c.get("/api/admin/stats", params={"provider": provider})).json()
+        stats1 = (
+            await c.get("/api/admin/stats", params={"provider": provider}, headers=admin)
+        ).json()
     print(f"done in {time.monotonic() - t0:.0f}s → {OUT}")
     print(_delta(stats0, stats1))
     _export_stats(api, provider)

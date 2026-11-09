@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Any
 
 from sqlalchemy import (
+    Boolean,
     DateTime,
     Float,
     ForeignKey,
@@ -36,6 +37,8 @@ class StudyAsset(Base):
     language: Mapped[str] = mapped_column(String(8))
     kind: Mapped[str] = mapped_column(String(16))
     content: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    # Changed by an admin on /admin (never presented as pure AI output in the report)
+    edited_by_admin: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     created_at: Mapped[datetime] = created_at()
 
 
@@ -57,6 +60,8 @@ class Flashcard(Base):
     concept: Mapped[str | None] = mapped_column(String(80))
     source: Mapped[str] = mapped_column(String(8))  # deck | quiz
     ref: Mapped[str | None] = mapped_column(String(64))  # quiz: "{attempt}:{question}"
+    # Changed by an admin on /admin (never presented as pure AI output in the report)
+    edited_by_admin: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     created_at: Mapped[datetime] = created_at()
 
 

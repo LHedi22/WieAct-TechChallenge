@@ -27,9 +27,10 @@ from sqlalchemy import and_, or_, select, update
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from app.core import slot
+from app.core import economy_live, flags, slot
 from app.core.config import get_settings
 from app.gateway import Defer, EmbeddingsDown, GatewayError, OfflineMode
+from app.gateway.providers import paused_until
 from app.jobs.coins import coins
 from app.jobs.registry import JobContext, spec_for
 from app.models import Document, Job
@@ -196,7 +197,12 @@ class Worker:
             # Offline demo mode began after the job was queued. A student waiting on a loading
             # screen gets the offline message and a refund; background work waits for the slot.
             nxt = slot.next_slot(datetime.now(UTC), get_settings().LLM_SLOT_GROUP)
-            if job.lane == "background" and nxt is not None:
+            await flags.load(self.sm, fresh=True)  # the admin switch may have ended it < 3 s ago
+            if job.attempts < MAX_ATTEMPTS and not (await paused_until(get_settings(), self.sm))[0]:
+                status = "queued"
+                values = {"not_before": None, "error": None}
+                log.info("job %s requeued: offline demo mode just ended", job.id)
+            elif job.lane == "background" and nxt is not None:
                 status = "queued"
                 values = {"not_before": nxt.start, "error": "deferred:offline"}
                 log.info("job %s waits for the next slot (%s)", job.id, nxt.label())
@@ -231,11 +237,18 @@ class Worker:
                 await coins.refund(s, fresh)
             await s.commit()
 
+    async def _lanes(self) -> tuple[str, ...]:
+        """The admin switch `pause_background_lane` (core/flags.py, read every ~3 s, no restart):
+        background jobs stay queued; jobs already running finish."""
+        paused = (await flags.load(self.sm)).pause_background_lane
+        return ("interactive",) if paused else ("interactive", "background")
+
     async def tick(self) -> int:
         """Claim as many jobs as lane limits allow; returns how many were started."""
         await self.maintain()
+        await economy_live.refresh(self.sm)  # admin overrides of economy.py, every ~3 s
         started = 0
-        for lane in ("interactive", "background"):
+        for lane in await self._lanes():
             while len(self.running[lane]) < self.limits[lane]:
                 job = await self.claim(lane)
                 if job is None:
@@ -295,6 +308,7 @@ class Worker:
                     select(Job.id)
                     .where(
                         Job.status == "queued",
+                        Job.lane.in_(await self._lanes()),
                         or_(Job.not_before.is_(None), and_(Job.not_before <= now)),
                     )
                     .limit(1)

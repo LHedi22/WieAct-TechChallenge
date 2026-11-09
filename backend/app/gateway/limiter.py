@@ -54,6 +54,7 @@ class Limiter:
             "chat": _Bucket(rpm, burst),
             "embed": _Bucket(embed_rpm if embed_rpm is not None else rpm, burst),
         }
+        self.base_rpm = rpm
         self.concurrency = concurrency
         self.active = 0
         self.max_active = 0
@@ -61,6 +62,15 @@ class Limiter:
         # Returns seconds the background lane should keep waiting (0 = go).
         self.background_pause = background_pause or (lambda: 0.0)
         self._cond = asyncio.Condition()
+
+    def cap_rpm(self, override: float | None) -> None:
+        """Admin switch (core/flags.py): lower the chat rate to `override`; it never raises it above
+        the configured LLM_MAX_RPM. None restores the configured rate."""
+        rpm = self.base_rpm if override is None else max(1.0, min(self.base_rpm, override))
+        bucket = self.buckets["chat"]
+        if bucket.rate != rpm / 60:
+            bucket.refill()
+            bucket.rate = rpm / 60
 
     @property
     def tokens(self) -> float:

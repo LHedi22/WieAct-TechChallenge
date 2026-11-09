@@ -9,13 +9,15 @@ position seen, max concurrency at the mock, fallbacks and refusals from /api/adm
 With 503 faults on, one last interactive job runs while every mid call answers 503, so the
 compact fallback (Quick mode) is checked every time, not only when two 503s happen to line up.
 Exits non-zero if any job did not finish, more than 2 calls were ever in flight, or that forced
-job did not fall back.
+job did not fall back. Reads the stats with `X-Admin-Token: $ADMIN_TOKEN` (the backend's own
+ADMIN_TOKEN must be set too: a blank one hides every admin route).
 """
 
 from __future__ import annotations
 
 import argparse
 import asyncio
+import os
 import sys
 import time
 import uuid
@@ -27,6 +29,19 @@ FAULTS = {"503": {"p_503_mid": 0.35}, "quota": {"p_quota": 0.15, "quota_delay_s"
 
 
 RUN = uuid.uuid4().hex[:6]  # every job's prompt differs: no repeated identical requests on our key
+
+
+async def admin_stats(api: httpx.AsyncClient) -> dict:
+    """/api/admin/stats needs the admin token (blank ADMIN_TOKEN = no admin side, 404)."""
+    token = os.environ.get("ADMIN_TOKEN", "")
+    r = await api.get(
+        "/api/admin/stats", params={"provider": "mock"}, headers={"X-Admin-Token": token}
+    )
+    if r.status_code in (401, 404):
+        sys.exit(
+            "/api/admin/stats refused: set the same ADMIN_TOKEN in this shell and for the backend"
+        )
+    return r.json()
 
 
 async def run_job(client: httpx.AsyncClient, lane: str, poll_s: float, timeout_s: float) -> dict:
@@ -89,7 +104,7 @@ async def main() -> int:
             # a dev student owns the demo jobs and polls them (jobs are owner-only, audit F-ACL-2)
             dev = {"X-Dev-User": "load-tester"}
             async with httpx.AsyncClient(base_url=a.api, timeout=30, headers=dev) as api:
-                before = (await api.get("/api/admin/stats", params={"provider": "mock"})).json()
+                before = await admin_stats(api)
                 lanes = ["interactive" if i % 3 == 0 else "background" for i in range(a.jobs)]
                 print(
                     f"firing {a.jobs} jobs ({lanes.count('interactive')} interactive), "
@@ -104,7 +119,7 @@ async def main() -> int:
                 if "503" in a.faults:  # mid saturated → interactive: one retry, then compact
                     await mock.patch("/_mock/config", json={"p_503_mid": 1.0, "p_quota": 0.0})
                     forced = await run_job(api, "interactive", a.poll, a.timeout)
-                after = (await api.get("/api/admin/stats", params={"provider": "mock"})).json()
+                after = await admin_stats(api)
             mock_stats = (await mock.get("/_mock/stats")).json()
         finally:
             await mock.patch("/_mock/config", json={k: original[k] for k in changes})

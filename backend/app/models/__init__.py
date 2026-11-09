@@ -1,3 +1,4 @@
+from app.models.admin import AdminAction, EconomyOverride, RuntimeFlag
 from app.models.ai import AICache, AICallLog
 from app.models.arena import PeerAnswer, PeerQuestion, PeerVote
 from app.models.base import Base
@@ -13,6 +14,9 @@ from app.models.user import User
 from app.models.world import World, WorldMember
 
 __all__ = [
+    "AdminAction",
+    "EconomyOverride",
+    "RuntimeFlag",
     "ClassPoolLedger",
     "Flashcard",
     "FlashcardReview",

@@ -12,6 +12,7 @@ from app.jobs.worker import Worker
 from app.main import create_app
 from app.rag import store
 from app.seed import samples
+from tests.admin_helpers import READ, enable_admin
 from tests.test_rag_indexing import gw, rag_env  # noqa: F401  (fixtures)
 
 
@@ -184,7 +185,8 @@ async def test_bad_nickname_header(api):
     assert r.status_code == 400 and r.json()["detail"] == "errors.nickname_invalid"
 
 
-async def test_compact_share_ignores_embedding_calls(api, sm, pptx):
+async def test_compact_share_ignores_embedding_calls(api, sm, pptx, monkeypatch):
+    enable_admin(monkeypatch)
     world = await make_world(api)
     chapter = world["course"]["chapters"][0]["id"]
     await api.post(
@@ -193,7 +195,7 @@ async def test_compact_share_ignores_embedding_calls(api, sm, pptx):
         headers=SEA,
     )
     await Worker(sm).drain(timeout_s=60)
-    stats = (await api.get("/api/admin/stats", params={"provider": "mock"})).json()
+    stats = (await api.get("/api/admin/stats", params={"provider": "mock"}, headers=READ)).json()
     tiers = stats["by_tier"]
     assert tiers["embed"]["calls"] >= 1
     # the precomputed quiz's answer-key check is the one mid call (audit N-3)

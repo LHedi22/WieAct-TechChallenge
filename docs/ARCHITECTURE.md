@@ -169,9 +169,10 @@ others read the cache when it lands.
 `flashcard_reviews(user_id, card_id, due_at, interval_s, ease, reps, updated_at)`
 `tutor_sessions(id, user_id, world_id, course_id, chapter_id, level, language, goal, ideas jsonb, hints_used, stuck_count, escalate_next, turns jsonb, pending_job_id, status, summary jsonb, ended_at)`
 `peer_questions(id, world_id, chapter_id, author_id, text, language, status[pending|open|rejected], reject_reason, pinned_answer_id)` · `peer_answers(id, question_id, author_id, text, status[grading|graded|rejected|failed], ai_score, ai_confidence, ai_feedback jsonb, reviewed_by_mid, rewarded)` — one per student per question · `peer_votes(answer_id, user_id)`
-`coin_ledger(id, user_id, day, bucket[free|earned|purchased|pass], kind[daily|earned|purchased|spend|refund|pass], delta, ref, created_at)` — `day` = Tunis day; one `daily` row per user-day, one refund per (ref, bucket) · `points_ledger(id, user_id, world_id, delta, reason, ref, created_at)` — unique (user, reason, ref)
+`coin_ledger(id, user_id, day, bucket[free|earned|purchased|pass], kind[daily|earned|purchased|spend|refund|pass|admin], delta, ref, created_at)` — `day` = Tunis day; one `daily` row per user-day, one refund per (ref, bucket) · `points_ledger(id, user_id, world_id, delta, reason, ref, created_at)` — unique (user, reason, ref)
 `daily_state(user_id, date, challenges jsonb, plan jsonb, planned_by[rule|ai], plan_job_id, seen_at)` — 3 challenges `{type[quiz_questions|quiz_score|teachback|tutor_session|flashcards], target, progress, done, why, world/course/chapter}`; free coins, earned-today and streak are derived from the ledgers
-`class_pool_ledger(id, world_id, user_id, kind[contribute|spend|refund], delta, ref)` — balance = sum; one refund per ref · `cosmetics_owned(user_id, item_key)`
+`class_pool_ledger(id, world_id, user_id, kind[contribute|spend|refund|admin], delta, ref)` — balance = sum; one refund per ref · `cosmetics_owned(user_id, item_key)`
+`runtime_flags(key, value jsonb, updated_at, updated_by)` — admin switches read by API + worker (`core/flags.py`, 3 s cache) · `admin_actions(id, ts, actor, action, target_kind, target_id, before jsonb, after jsonb, reason)` — one row per admin mutation, same transaction · `economy_overrides(key, value, updated_at, updated_by)` — live numbers merged over economy.py (`core/economy_live.py`) · `ai_call_log.forced` — Quick mode forced by an admin · `edited_by_admin` on quiz_sets, study_assets, wisdom_tips, placement_sets, flashcards · coin_ledger kind `admin` (grants/removals; `pass_grant:`/`pass_end:` refs for Exam Passes) · points reason `admin_adjust`
 
 Balances are derived from ledgers (with a cached balance column if needed). Every coin change is
 a ledger row — never mutate a balance without one.
@@ -185,7 +186,23 @@ a ledger row — never mutate a balance without one.
 `/api/studio/{chapter}?level` (notes, map, card counts, missing parts, pending job, price, pool balance) · `/api/studio/{chapter}/price` · `/api/studio/{chapter}/generate {level, pay: me|pool}` · `/api/studio/{chapter}/cards?level` (due queue) · `/api/studio/cards/{id}/review {grade}` · `/api/quiz/attempts/{id}/flashcards` · `/api/worlds/{id}/pool` (GET/POST) · `/api/audio/{chapter}?level` (script, pending job, price, pool) · `/api/audio/{chapter}/price` · `/api/audio/{chapter}/generate {level, pay}`
 `/api/arena/questions?chapter_id` (feed, polled) · `/api/arena/questions/{id}` (+ `/answers`) · `/api/arena/answers/{id}/pin` · `/api/arena/answers/{id}/helpful` (POST/DELETE) · `/api/arena/solo`
 `/api/leaderboard?scope=world|global&period=week|all&world_id` · `/api/wisdom?world_id&course_id` (tips in the user's language, English fallback)
-`/api/admin/stats` (call log aggregates; dev/demo only) · `/api/system/status` (slot live? offline demo mode?)
+`/api/system/status` (slot live? offline demo mode? `quick_mode_forced`, `background_paused`)
+
+**Admin** (`app/admin/`, English-only UI at `/admin`; every route 404 while `ADMIN_TOKEN` is blank;
+`lw_admin` cookie from `POST /api/admin/session {token, label}` or `X-Admin-Token` for scripts;
+every mutation needs `X-Admin-Action: 1` and writes `admin_actions`):
+`/api/admin/{session,me}` · `/api/admin/switches` (+ `PUT /{key}`: `force_quick_mode`,
+`offline_demo_mode`, `pause_background_lane`, `llm_max_rpm_override`) · `/api/admin/force-quick` (alias)
+· `/api/admin/stats` (call-log aggregates; `forced_fallbacks` apart from `fallbacks`) ·
+reads, 50 per page: `/api/admin/users` (+`/{id}`), `/worlds` (+`/{id}`), `/content?kind=` (+`/{kind}/{id}`),
+`/arena/questions`, `/arena/answers`, `/jobs` (+`/summary`, `/{id}`), `/cache` (+`/summary`), `/actions` ·
+changes: `PATCH /users/{id}`, `POST /users/{id}/{password,sign-out,reset-course,coins,points,exam-pass}`,
+`PATCH /worlds/{id}` (name, new join code), `DELETE /worlds/{id}/members/{user}`, `POST /worlds/{id}/pool`,
+`PATCH /courses/{id}`, `PATCH /chapters/{id}`, `POST /{documents|chapters}/{id}/reindex`,
+`POST /delete/{user|world|course|chapter|document}/{id}/dry-run` then `DELETE /delete/{kind}/{id} {confirm, reason}`,
+`POST /jobs/{id}/{cancel,retry,run-now}`, `POST /cache/purge` (dry run first), `PUT /content/{kind}/{id}`,
+`POST /arena/{questions,answers}/{id}` (reject / restore / unpin / score), `GET /economy` +
+`PUT /economy/{key}` (live overrides), `GET /invariants` (reports, never fixes).
 
 ## Config (.env)
 See `.env.example`. Backend reads via `pydantic-settings`; frontend only gets `VITE_API_URL`.

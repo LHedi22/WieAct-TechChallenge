@@ -19,8 +19,9 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from app.core import flags
 from app.core.config import LLMProfile, Settings
-from app.gateway import cache, forcequick, log
+from app.gateway import cache, log
 from app.gateway.breaker import Breaker
 from app.gateway.client import CallFailed, LLMClient, Reply
 from app.gateway.errors import (
@@ -217,21 +218,24 @@ class Gateway:
         if ceiling := self._ceilings.get(profile.provider):
             max_tokens = min(max_tokens, ceiling)
         messages = task.messages
-        quick_mode = shrunk = retried_503 = retried_net = rerouted = False
+        quick_mode = shrunk = retried_503 = retried_net = rerouted = forced = False
         notes: list[str] = []
+        switches = await flags.load(self.sm)
+        self.limiter.cap_rpm(switches.llm_max_rpm_override)  # an admin may only lower it
         if (
             tier == "mid"
             and task.lane == "interactive"
             and task.allow_fallback
-            and forcequick.active()
-        ):  # admin demo switch (audit F-VID-1): a real compact call, shown as Quick mode
+            and flags.force_quick(self.settings, switches)
+        ):  # admin switch (audit F-VID-1): a real compact call, shown as Quick mode, logged forced
+            forced = True
             tier, model, quick_mode, pattern = (
                 "compact",
                 self._model(profile, "compact"),
                 True,
                 "forced-fallback",
             )
-            notes.append("forced quick mode (admin demo switch)")
+            notes.append("forced quick mode (admin switch)")
 
         for _ in range(MAX_ATTEMPTS):
             rhash = cache.request_hash(
@@ -263,6 +267,7 @@ class Gateway:
                     refusal_reason=err.kind,
                     request_hash=rhash,
                     fallback=quick_mode,
+                    forced=forced,
                 )
                 if err.kind == "saturated":
                     if task.lane == "interactive" and not retried_503:
@@ -341,6 +346,7 @@ class Gateway:
                 latency_ms=reply.latency_ms,
                 request_hash=rhash,
                 fallback=quick_mode,
+                forced=forced,
             )
             content: Any = reply.text
             tokens_in, tokens_out, latency = reply.tokens_in, reply.tokens_out, reply.latency_ms

@@ -22,6 +22,8 @@ function status(over: Partial<SystemStatus> = {}): SystemStatus {
     offline_demo_mode: false,
     reason: null,
     upload_max_mb: 50,
+    quick_mode_forced: false,
+    background_paused: false,
     ...over,
   };
 }
@@ -105,9 +107,7 @@ describe("ProviderSwitch", () => {
     serve(status());
     show();
     await userEvent.click(await screen.findByRole("radio", { name: "Competition cloud models" }));
-    expect(
-      await screen.findByText("Cloud key not set in .env: AI is paused."),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Cloud key not set in .env: AI is paused.")).toBeInTheDocument();
   });
 
   it("is hidden in production", async () => {

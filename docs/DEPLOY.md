@@ -53,7 +53,7 @@ the key). The app creates the collection
    | `DATABASE_URL` | `postgresql+asyncpg://${{Postgres.PGUSER}}:${{Postgres.PGPASSWORD}}@${{Postgres.PGHOST}}:${{Postgres.PGPORT}}/${{Postgres.PGDATABASE}}` |
    | `QDRANT_URL`, `QDRANT_API_KEY` | from step 1 |
    | `SECRET_KEY` | a long random string (`python3 -c "import secrets; print(secrets.token_urlsafe(48))"`) |
-   | `ADMIN_TOKEN` | a random string; `/api/admin/stats` then needs `X-Admin-Token` |
+   | `ADMIN_TOKEN` | `python -c "import secrets; print(secrets.token_urlsafe(32))"` — set it **only here** (never in the repo, a chat or on screen); blank = no admin side, under 32 characters = refuses to start. **Rotate it after the demo** (change the value and redeploy: every admin session ends) |
    | `UPLOAD_DIR` | `/data/uploads` |
    | `OFFLINE_DEMO_MODE` | `auto` |
 
@@ -79,6 +79,15 @@ the key). The app creates the collection
 If uploads of several MB fail through the rewrite, point the frontend straight at Railway:
 `VITE_API_URL=https://<railway domain>`, and on Railway set `SESSION_COOKIE_SAMESITE=none`,
 `SESSION_COOKIE_SECURE=true`, `CORS_ORIGINS=https://<vercel domain>`.
+(The admin cookie follows: SameSite=strict normally, none in this cross-site setup.)
+
+## 6. Admin side
+`https://<site>/admin` → paste `ADMIN_TOKEN` once (optionally your name for the log). The cookie
+lasts 8 h on that browser; the token is never stored in the page. **Switches** (Quick mode for
+the video, offline demo mode, pause the background lane, lower the request rate) apply within
+~3 s without a restart; **Stats** is `/api/admin/stats` with the provider filter. Scripts
+(`export_stats.py`, `load.py`) send `X-Admin-Token: $ADMIN_TOKEN` from their own environment.
+Never record the token, the sign-in screen with the token typed, or Railway's variables page.
 
 ## 4. Seed and warm up (in our slot)
 Offline demo mode serves only results the platform already produced, so fill the class cache
