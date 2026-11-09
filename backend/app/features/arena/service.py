@@ -576,19 +576,23 @@ async def _settle_peer(
                 "quick_mode": quick_mode,
             }
             a.reviewed_by_mid = g.reviewed
-            if (
-                a.status == "graded"
-                and grade_.score >= economy.PEER_ANSWER_THRESHOLD
-                and not a.rewarded
-            ):
-                a.rewarded = True
-                ref = f"answer:{a.id}"
-                earned = await wallet.earn(s, a.author_id, economy.EARN["peer_answer_good"], ref)
-                await wallet.add_points(
-                    s, a.author_id, q.world_id, economy.POINTS["peer_answer_good"], "answer", ref
-                )
+            earned = await pay_good_answer(s, a, q)
         await s.commit()
         return a.status, earned, grade_.score
+
+
+async def pay_good_answer(s: AsyncSession, a: PeerAnswer, q: PeerQuestion) -> int:
+    """The reward for a final peer grade at or above the threshold, paid once per answer (the
+    `rewarded` flag plus unique ledger refs). Also used when an admin settles a pending review."""
+    if a.status != "graded" or (a.ai_score or 0) < economy.PEER_ANSWER_THRESHOLD or a.rewarded:
+        return 0
+    a.rewarded = True
+    ref = f"answer:{a.id}"
+    earned = await wallet.earn(s, a.author_id, economy.EARN["peer_answer_good"], ref)
+    await wallet.add_points(
+        s, a.author_id, q.world_id, economy.POINTS["peer_answer_good"], "answer", ref
+    )
+    return earned
 
 
 async def _settle_solo(

@@ -7,6 +7,10 @@ cache? → provider for this job → limiter (2 in flight, RPM, interactive firs
   401 blocked auto: re-resolve (→ local) and continue · otherwise KeyBlocked / OfflineMode
   network     one quick retry, then Defer
 → JSON parse (tolerant) → one compact repair call if needed → cache → call log
+  (+ ai_call_trace while the `trace_prompts_until` switch is on, gateway/trace.py)
+
+Replays from /admin/debug (gateway/context.py `debug_target`) run on mock or local only, never the
+cache, and are logged `debug`: a replay to the platform would be a repeated identical request.
 """
 
 from __future__ import annotations
@@ -19,10 +23,12 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from app.core import flags
 from app.core.config import LLMProfile, Settings
-from app.gateway import cache, forcequick, log
+from app.gateway import cache, log, trace
 from app.gateway.breaker import Breaker
 from app.gateway.client import CallFailed, LLMClient, Reply
+from app.gateway.context import debug_target
 from app.gateway.errors import (
     BadOutput,
     Defer,
@@ -111,8 +117,10 @@ class Gateway:
     def _model(profile: LLMProfile, tier: Tier) -> str:
         return profile.model_mid if tier == "mid" else profile.model_compact
 
-    async def _log(self, task: Task, profile: LLMProfile, tier: Tier, model: str, **f) -> None:
-        await log.write(
+    async def _log(
+        self, task: Task, profile: LLMProfile, tier: Tier, model: str, **f
+    ) -> int | None:
+        return await log.write(
             self.sm,
             task_kind=f.pop("kind", task.kind.value),
             lane=task.lane,
@@ -178,29 +186,47 @@ class Gateway:
         flight = (task.kind.value, task.prompt_version, task.cache_key)
         if (pending := self._inflight.get(flight)) is not None:
             await asyncio.shield(pending)
-            return await self._run(task)  # a cache hit now (or a fresh try if the first failed)
+            # a cache hit now (or a fresh try if the first failed)
+            return await self._run(task, follower=True)
         self._inflight[flight] = asyncio.get_running_loop().create_future()
         try:
             return await self._run(task)
         finally:
             self._inflight.pop(flight).set_result(None)
 
-    async def _run(self, task: Task) -> Result:
+    async def _run(self, task: Task, *, follower: bool = False) -> Result:
         route = route_for(task.kind)
         tier: Tier = task.tier or route.tier
         pattern = route.pattern
-        res: Resolution = await resolve(self.settings, self.sm, self._now())
+        replay = debug_target.get()
+        res: Resolution
+        if replay is not None:
+            # /admin/debug replay: never the platform (it would count against our key as a
+            # repeated identical request), never in production, never from or into the cache.
+            if replay not in ("mock", "local") or self.settings.APP_ENV == "production":
+                raise RequestRejected("replays run on mock or local only", refusal="debug_cloud")
+            res = Resolution(self.settings.profile_for(replay))  # type: ignore[arg-type]
+        else:
+            res = await resolve(self.settings, self.sm, self._now())
         profile = res.profile
         model = self._model(profile, tier)
 
         key = None
-        if task.cache_key:
+        if task.cache_key and replay is None:
             key = cache.cache_key(
                 profile.provider, model, task.kind.value, task.prompt_version, task.cache_key
             )
             hit = await cache.get(self.sm, key)
             if hit is not None:
-                await self._log(task, profile, tier, model, cache_hit=True, pattern=pattern)
+                await self._log(
+                    task,
+                    profile,
+                    tier,
+                    model,
+                    cache_hit=True,
+                    pattern=pattern,
+                    single_flight=follower,
+                )
                 return Result(
                     content=hit.content.get("value"),
                     model_tier=tier,
@@ -218,21 +244,25 @@ class Gateway:
         if ceiling := self._ceilings.get(profile.provider):
             max_tokens = min(max_tokens, ceiling)
         messages = task.messages
-        quick_mode = shrunk = retried_503 = retried_net = rerouted = False
+        quick_mode = shrunk = retried_503 = retried_net = rerouted = forced = False
         notes: list[str] = []
+        switches = await flags.load(self.sm)
+        self.limiter.cap_rpm(switches.llm_max_rpm_override)  # an admin may only lower it
+        tracing = switches.trace_active(self._now())
         if (
             tier == "mid"
             and task.lane == "interactive"
             and task.allow_fallback
-            and forcequick.active()
-        ):  # admin demo switch (audit F-VID-1): a real compact call, shown as Quick mode
+            and flags.force_quick(self.settings, switches)
+        ):  # admin switch (audit F-VID-1): a real compact call, shown as Quick mode, logged forced
+            forced = True
             tier, model, quick_mode, pattern = (
                 "compact",
                 self._model(profile, "compact"),
                 True,
                 "forced-fallback",
             )
-            notes.append("forced quick mode (admin demo switch)")
+            notes.append("forced quick mode (admin switch)")
 
         for _ in range(MAX_ATTEMPTS):
             rhash = cache.request_hash(
@@ -253,7 +283,7 @@ class Gateway:
                 failed = e
             if failed is not None:  # handled outside `except` so raises below aren't chained
                 err = failed.error
-                await self._log(
+                log_id = await self._log(
                     task,
                     profile,
                     tier,
@@ -264,7 +294,15 @@ class Gateway:
                     refusal_reason=err.kind,
                     request_hash=rhash,
                     fallback=quick_mode,
+                    forced=forced,
                 )
+                if tracing:
+                    await trace.write(
+                        self.sm,
+                        log_id,
+                        messages=messages,
+                        error=f"{err.kind} ({err.status}): {err.message}",
+                    )
                 if err.kind == "saturated":
                     if task.lane == "interactive" and not retried_503:
                         retried_503 = True
@@ -296,7 +334,8 @@ class Gateway:
                         notes.append(f"shrunk max_tokens to {max_tokens}")
                     continue
                 if err.kind == "blocked":
-                    if self.settings.LLM_PROVIDER == "auto" and not rerouted:
+                    # A replay never reroutes: under auto the re-resolved provider may be cloud.
+                    if self.settings.LLM_PROVIDER == "auto" and not rerouted and replay is None:
                         rerouted = True  # this 401 is now in the log: resolve() picks local
                         res = await resolve(self.settings, self.sm, self._now())
                         if res.profile.provider != profile.provider:
@@ -330,7 +369,7 @@ class Gateway:
                     raise Defer(err.retry_after_s or 10, "transient")
                 raise RequestRejected(err.message, refusal=err.kind)
 
-            await self._log(
+            log_id = await self._log(
                 task,
                 profile,
                 tier,
@@ -342,24 +381,39 @@ class Gateway:
                 latency_ms=reply.latency_ms,
                 request_hash=rhash,
                 fallback=quick_mode,
+                forced=forced,
             )
             content: Any = reply.text
             tokens_in, tokens_out, latency = reply.tokens_in, reply.tokens_out, reply.latency_ms
             if json_mode:
                 content = extract_json(reply.text)
-                if content is None and not reply.text.strip():
-                    # Nothing to repair (e.g. the budget went on hidden reasoning): a repair
-                    # call would invent JSON from nothing, and that would be cached.
-                    raise BadOutput("empty reply", refusal="bad_json")
+            empty = json_mode and content is None and not reply.text.strip()
+            if tracing:
+                await trace.write(
+                    self.sm,
+                    log_id,
+                    messages=messages,
+                    reply=reply.raw if reply.raw is not None else reply.text,
+                    parsed=content if json_mode else None,
+                    error="empty reply: no repair call"
+                    if empty
+                    else "no JSON found: one repair call follows"
+                    if json_mode and content is None
+                    else None,
+                )
+            if empty:
+                # Nothing to repair (e.g. the budget went on hidden reasoning): a repair
+                # call would invent JSON from nothing, and that would be cached.
+                raise BadOutput("empty reply", refusal="bad_json")
+            if json_mode and content is None:  # one compact repair call
+                fixed = await self._repair(task, profile, reply.text, max_tokens, tracing)
+                content = fixed.get("content")
+                tokens_in += fixed.get("tokens_in", 0)
+                tokens_out += fixed.get("tokens_out", 0)
+                latency += fixed.get("latency_ms", 0)
                 if content is None:
-                    fixed = await self._repair(task, profile, reply.text, max_tokens)
-                    content = fixed.get("content")
-                    tokens_in += fixed.get("tokens_in", 0)
-                    tokens_out += fixed.get("tokens_out", 0)
-                    latency += fixed.get("latency_ms", 0)
-                    if content is None:
-                        raise BadOutput("invalid JSON after one repair call", refusal="bad_json")
-                    notes.append("repaired JSON")
+                    raise BadOutput("invalid JSON after one repair call", refusal="bad_json")
+                notes.append("repaired JSON")
             if key and not quick_mode:  # a quick-mode answer must not become the class's copy
                 await cache.put(
                     self.sm,
@@ -392,7 +446,7 @@ class Gateway:
             await cache.drop(self.sm, result.cache_ref)
 
     async def _repair(
-        self, task: Task, profile: LLMProfile, broken: str, max_tokens: int
+        self, task: Task, profile: LLMProfile, broken: str, max_tokens: int, tracing: bool = False
     ) -> dict[str, Any]:
         """ONE compact call to fix the JSON (docs/ARCHITECTURE.md §JSON outputs)."""
         model = self._model(profile, "compact")
@@ -405,7 +459,7 @@ class Gateway:
                 task, profile, model, max_tokens, True, messages, kind=TaskKind.JSON_REPAIR
             )
         except CallFailed as failed:
-            await self._log(
+            log_id = await self._log(
                 task,
                 profile,
                 "compact",
@@ -415,8 +469,15 @@ class Gateway:
                 status_code=failed.error.status,
                 refusal_reason=failed.error.kind,
             )
+            if tracing:
+                await trace.write(
+                    self.sm,
+                    log_id,
+                    messages=messages,
+                    error=f"repair call failed: {failed.error.kind} ({failed.error.status})",
+                )
             return {}
-        await self._log(
+        log_id = await self._log(
             task,
             profile,
             "compact",
@@ -428,8 +489,18 @@ class Gateway:
             tokens_out=reply.tokens_out,
             latency_ms=reply.latency_ms,
         )
+        fixed = extract_json(reply.text)
+        if tracing:
+            await trace.write(
+                self.sm,
+                log_id,
+                messages=messages,
+                reply=reply.raw if reply.raw is not None else reply.text,
+                parsed=fixed,
+                error=None if fixed is not None else "repair reply is not JSON either",
+            )
         return {
-            "content": extract_json(reply.text),
+            "content": fixed,
             "tokens_in": reply.tokens_in,
             "tokens_out": reply.tokens_out,
             "latency_ms": reply.latency_ms,

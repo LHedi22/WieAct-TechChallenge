@@ -26,6 +26,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 
 Provider = Literal["cloud", "local", "mock"]
 ProviderSetting = Literal["cloud", "local", "mock", "auto"]
+ADMIN_TOKEN_MIN = 32
 
 
 class LLMProfile(BaseModel):
@@ -104,7 +105,7 @@ class Settings(BaseSettings):
     LLM_SLOT_FORCE: Literal["", "live", "off"] = ""
     # Demo switch (audit F-VID-1): "on" forces Quick mode for interactive mid tasks for the whole
     # session. Development only: production refuses to start with it; there an admin switches it
-    # on for up to 30 minutes at runtime (POST /api/admin/force-quick).
+    # on for a limited time at runtime (/admin, Switches; core/flags.py).
     FORCE_QUICK_MODE: Literal["off", "on"] = "off"
 
     # --- vector store ---
@@ -134,7 +135,8 @@ class Settings(BaseSettings):
     PARSE_IDLE_TIMEOUT_S: float = 120
     PARSE_MAX_S: float = 900
     PARSE_MEM_MB: int = 1536
-    # If set, /api/admin/stats requires the X-Admin-Token header
+    # The admin side (/admin, /api/admin/*). Blank = every admin route answers 404, in every
+    # environment. Production refuses a token shorter than 32 characters. Never shown anywhere.
     ADMIN_TOKEN: SecretStr = SecretStr("")
 
     _llm: LLMProfile = PrivateAttr()
@@ -165,7 +167,12 @@ class Settings(BaseSettings):
             if self.FORCE_QUICK_MODE != "off":
                 raise ValueError(
                     "APP_ENV=production refuses FORCE_QUICK_MODE=on; switch Quick mode on at "
-                    "runtime with POST /api/admin/force-quick (it turns itself off)"
+                    "runtime from /admin, Switches (it turns itself off)"
+                )
+            if 0 < len(self.ADMIN_TOKEN.get_secret_value()) < ADMIN_TOKEN_MIN:
+                raise ValueError(
+                    "APP_ENV=production requires ADMIN_TOKEN to be blank (admin off) or at "
+                    f"least {ADMIN_TOKEN_MIN} characters"
                 )
         # auto: this is only the fallback profile; app/gateway/providers.py picks cloud per job
         # while our slot is live and the key works.

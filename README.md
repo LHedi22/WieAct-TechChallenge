@@ -87,9 +87,16 @@ filters on world, course and chapter). Text stays in Postgres.
 **Prompts** live in `backend/app/prompts/*.md` (versioned, multilingual). The tutor's
 answer-leak guard rewrites a reply that gives the answer away into a guiding question.
 
-**Admin stats.** `/api/admin/stats` mirrors the organisers' metrics (calls per model, compact/mid
-split, tokens, cache hits, repeated identical requests, refusals, fallbacks).
-`python3 scripts/export_stats.py` writes them to `docs/report/`.
+**Admin side.** `/admin` (English, works on a phone) exists only when `ADMIN_TOKEN` is set: the
+token is exchanged once for an 8-hour HttpOnly cookie and is never stored in the page. It has
+**Switches** (force Quick mode for a few minutes, offline demo mode, pause the background lane,
+lower the request rate; applied by the API and the worker within ~3 s), **Stats** (the
+organisers' metrics: calls per model, compact/mid split, tokens, cache hits, repeated identical
+requests, refusals, real fallbacks and, apart, forced Quick mode), read-only pages for users,
+worlds, content, the arena, jobs, the AI cache and the admin log, and changes to all of them.
+Every coin or point change is a ledger row; every admin change is logged with a reason in
+`admin_actions`; deletes need a dry run and the name typed. `python3 scripts/export_stats.py`
+(with `ADMIN_TOKEN` in its environment) writes the stats to `docs/report/`. Set up: `docs/DEPLOY.md` §6.
 
 ## Setup
 

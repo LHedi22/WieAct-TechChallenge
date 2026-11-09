@@ -24,6 +24,7 @@ class Reply:
     tokens_out: int
     latency_ms: int
     status: int = 200
+    raw: str | None = None  # the reply before <think> stripping (shown on /admin/debug traces)
 
 
 @dataclass
@@ -184,6 +185,7 @@ class LLMClient:
             content = completion.choices[0].message.content if completion.choices else ""
             return Reply(
                 text=strip_think(content or ""),
+                raw=content or "",
                 headers=dict(raw.headers),
                 tokens_in=usage.prompt_tokens if usage else 0,
                 tokens_out=usage.completion_tokens if usage else 0,

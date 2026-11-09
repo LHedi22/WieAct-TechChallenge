@@ -81,13 +81,40 @@ async def ensure_daily(s: AsyncSession, user_id: uuid.UUID, today: date) -> None
     )
 
 
-def _pass_until(purchases: list[datetime]) -> datetime | None:
-    """Each Exam Pass lasts PRODUCTS days; buying one while active extends it."""
+PASS_GRANT, PASS_END = "pass_grant:", "pass_end:"  # admin rows (bucket pass, kind admin, 0 coins)
+
+
+def _pass_until(purchases: list[datetime], ends: list[datetime] = ()) -> datetime | None:
+    """Each Exam Pass lasts PRODUCTS days; buying one while active extends it. An admin end
+    (`pass_end:` row) stops the passes bought before it at that moment."""
     until: datetime | None = None
     days = timedelta(days=economy.PRODUCTS["exam_pass"]["days"])
-    for bought in sorted(purchases):
-        until = max(until or bought, bought) + days
+    events = sorted([(t, "grant") for t in purchases] + [(t, "end") for t in ends])
+    for at, what in events:
+        if what == "grant":
+            until = max(until or at, at) + days
+        elif until is not None and until > at:
+            until = at
     return until
+
+
+def pass_rows_filter(mine):
+    """Exam Pass starts: demo purchases and admin grants (both 0-coin `pass` rows)."""
+    return (
+        mine,
+        CoinLedger.bucket == "pass",
+        (CoinLedger.kind == "purchased")
+        | ((CoinLedger.kind == "admin") & CoinLedger.ref.like(f"{PASS_GRANT}%")),
+    )
+
+
+def pass_end_filter(mine):
+    return (
+        mine,
+        CoinLedger.bucket == "pass",
+        CoinLedger.kind == "admin",
+        CoinLedger.ref.like(f"{PASS_END}%"),
+    )
 
 
 async def balances(s: AsyncSession, user_id: uuid.UUID, now: datetime | None = None) -> Balances:
@@ -109,12 +136,9 @@ async def balances(s: AsyncSession, user_id: uuid.UUID, now: datetime | None = N
         )
     )
     purchases = (
-        await s.scalars(
-            select(CoinLedger.created_at).where(
-                mine, CoinLedger.kind == "purchased", CoinLedger.bucket == "pass"
-            )
-        )
+        await s.scalars(select(CoinLedger.created_at).where(*pass_rows_filter(mine)))
     ).all()
+    ends = (await s.scalars(select(CoinLedger.created_at).where(*pass_end_filter(mine)))).all()
     # Exam Pass uses today: 0-coin spend rows minus their refunds
     pass_uses = await s.scalar(
         select(
@@ -129,7 +153,7 @@ async def balances(s: AsyncSession, user_id: uuid.UUID, now: datetime | None = N
         earned=int(sums.get("earned") or 0),
         purchased=int(sums.get("purchased") or 0),
         earned_today=int(earned_today or 0),
-        pass_until=_pass_until(list(purchases)),
+        pass_until=_pass_until(list(purchases), list(ends)),
         pass_used_today=int(pass_uses or 0),
     )
 

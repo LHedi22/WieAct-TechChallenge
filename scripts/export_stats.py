@@ -48,7 +48,9 @@ def render(s: dict, load: str | None) -> str:
         f"| Compact share of chat calls | {s['compact_share']:.0%} |",
         f"| Served from cache (no call) | {s['cache_hits']} |",
         f"| Repeated identical requests | {s['repeated_identical']} |",
-        f"| Compact fallbacks (Quick mode) | {s['fallbacks']} |",
+        f"| Compact fallbacks (Quick mode, caused by the platform) | {s['fallbacks']} |",
+        f"| Quick mode forced by an admin (demo switch, not a fallback) | "
+        f"{s.get('forced_fallbacks', 0)} |",
         "",
         "| Tier | Calls | Share | Tokens in | Tokens out | Avg latency |",
         "| --- | --- | --- | --- | --- | --- |",

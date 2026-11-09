@@ -17,12 +17,14 @@ If the slot isn't live while recording, show the **offline demo mode** banner fo
 instead of the queue shot: saved results open and new AI actions are paused.
 
 **Quick mode on camera** (audit F-VID-1): the jury slot is the Widened tier, so the platform will
-rarely be saturated. Before the shot, switch Quick mode on for a few minutes from a terminal that is
-**not** recorded (the token must never appear on screen):
-`curl -X POST https://<site>/api/admin/force-quick -H "X-Admin-Token: $ADMIN_TOKEN" -H "Content-Type: application/json" -d '{"minutes": 10}'`
-(`DELETE` the same URL to stop early; it turns itself off). Pick a chapter/level whose Study pack
-does not exist yet, so the answer is a real compact call. These calls are logged as
-`forced-fallback`: say so in the report, and don't count them as platform saturation.
+rarely be saturated. Before the shot, on a phone or a window that is **not** recorded, open
+`https://<site>/admin` → **Switches** → *Force Quick mode* → pick 10 minutes → **Turn on** (type a
+reason such as "fallback shot"). It turns itself off; **Turn off** stops it early. From a terminal
+instead (never on screen): `curl -X POST https://<site>/api/admin/force-quick -H "X-Admin-Token: $ADMIN_TOKEN" -H "X-Admin-Action: 1" -H "Content-Type: application/json" -d '{"minutes": 10}'`.
+Pick a chapter/level whose Study pack does not exist yet, so the answer is a real compact call.
+These calls are logged as `forced` (pattern `forced-fallback`) and Stats shows them as **Forced
+Quick mode**, apart from real fallbacks: say so in the report, and don't count them as platform
+saturation.
 The queue shot (0:22) needs real concurrent students in the slot: `scripts/load.py` only drives the
 mock and the dev endpoint, and cannot create load on the deployed site.
 

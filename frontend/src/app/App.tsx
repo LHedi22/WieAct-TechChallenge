@@ -1,5 +1,5 @@
 import { MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState, type ReactNode } from "react";
+import { lazy, Suspense, useState, type ReactNode } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ApiError } from "@/api/client";
 import { ArenaPage } from "@/features/arena/ArenaPage";
@@ -29,6 +29,8 @@ import { useUiStore } from "./uiStore";
 import { useDocumentLanguage } from "./useDocumentLanguage";
 
 const signedIn = (element: ReactNode) => <RequireAuth>{element}</RequireAuth>;
+// The admin side is its own chunk: students never download it (English only, DECISIONS.md).
+const AdminApp = lazy(() => import("@/features/admin/AdminApp"));
 const W = "/worlds/:worldId";
 const C = `${W}/courses/:courseId`;
 
@@ -54,6 +56,14 @@ const router = createBrowserRouter([
   { path: `${C}/studio`, element: signedIn(<StudioPage />) },
   { path: `${C}/audio`, element: signedIn(<AudioPage />) },
   { path: "/styleguide", element: <StyleguidePage /> },
+  {
+    path: "/admin/*",
+    element: (
+      <Suspense fallback={null}>
+        <AdminApp />
+      </Suspense>
+    ),
+  },
   // Dev-only: the M1 demo job through useJob + LoadingStages + queue/quick-mode banners.
   ...(import.meta.env.DEV ? [{ path: "/dev/jobs", element: <DevJobsPage /> }] : []),
 ]);

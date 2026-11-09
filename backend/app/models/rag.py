@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import BigInteger, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import BigInteger, Boolean, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -78,4 +78,6 @@ class QuizSet(Base):
     language: Mapped[str] = mapped_column(String(8))
     seed: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
     questions: Mapped[list[dict[str, Any]]] = mapped_column(JSONB)
+    # Changed by an admin on /admin (never presented as pure AI output in the report)
+    edited_by_admin: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     created_at: Mapped[datetime] = created_at()

@@ -58,6 +58,9 @@ then compact (Quick mode), 400 → shrink once, cache-first shared outputs, sing
 precompute at upload on the background lane, offline demo mode outside our slot (cached results
 only, no coins move). Load test: 30 jobs with 503 + quota faults, 30/30 done, ≤ 2 in flight,
 interactive p50 38 s vs background 126 s (mock); against cloud: **[in-slot]**.
+The Quick mode shown in the demo video is switched on by an admin (a real compact call, logged
+`forced`): `/api/admin/stats` reports these as forced Quick mode, apart from the fallbacks the
+platform caused, and leaves them out of the compact/mid split.
 
 ## 8. Business model
 Target users: university students (first: engineering prep and bachelor's in Tunisia), then

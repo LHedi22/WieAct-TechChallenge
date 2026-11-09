@@ -124,6 +124,75 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/admin/session": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Sign In */
+    post: operations["sign_in_api_admin_session_post"];
+    /** Sign Out */
+    delete: operations["sign_out_api_admin_session_delete"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/me": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Me */
+    get: operations["me_api_admin_me_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/switches": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Read Switches */
+    get: operations["read_switches_api_admin_switches_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/switches/{key}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Set Switch */
+    put: operations["set_switch_api_admin_switches__key__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/admin/force-quick": {
     parameters: {
       query?: never;
@@ -134,10 +203,7 @@ export interface paths {
     /** Force Quick State */
     get: operations["force_quick_state_api_admin_force_quick_get"];
     put?: never;
-    /**
-     * Force Quick On
-     * @description Demo switch (audit F-VID-1): interactive mid tasks answer as Quick mode for `minutes`.
-     */
+    /** Force Quick On */
     post: operations["force_quick_on_api_admin_force_quick_post"];
     /** Force Quick Off */
     delete: operations["force_quick_off_api_admin_force_quick_delete"];
@@ -155,6 +221,834 @@ export interface paths {
     };
     /** Stats */
     get: operations["stats_api_admin_stats_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/users": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Users */
+    get: operations["users_api_admin_users_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/users/{user_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** User Detail */
+    get: operations["user_detail_api_admin_users__user_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Edit User */
+    patch: operations["edit_user_api_admin_users__user_id__patch"];
+    trace?: never;
+  };
+  "/api/admin/worlds": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Worlds */
+    get: operations["worlds_api_admin_worlds_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/worlds/{world_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** World Detail */
+    get: operations["world_detail_api_admin_worlds__world_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Edit World */
+    patch: operations["edit_world_api_admin_worlds__world_id__patch"];
+    trace?: never;
+  };
+  "/api/admin/content": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Content */
+    get: operations["content_api_admin_content_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/content/{kind}/{item_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Content Item */
+    get: operations["content_item_api_admin_content__kind___item_id__get"];
+    /** Edit Content */
+    put: operations["edit_content_api_admin_content__kind___item_id__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/arena/questions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Arena Questions */
+    get: operations["arena_questions_api_admin_arena_questions_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/arena/answers": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Arena Answers */
+    get: operations["arena_answers_api_admin_arena_answers_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/jobs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Jobs */
+    get: operations["jobs_api_admin_jobs_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/jobs/summary": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Jobs Summary */
+    get: operations["jobs_summary_api_admin_jobs_summary_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/jobs/{job_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Job Detail */
+    get: operations["job_detail_api_admin_jobs__job_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/cache": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Cache */
+    get: operations["cache_api_admin_cache_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/cache/summary": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Cache Summary */
+    get: operations["cache_summary_api_admin_cache_summary_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/actions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Actions */
+    get: operations["actions_api_admin_actions_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/users/{user_id}/password": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reset Password
+     * @description The admin sets a new password (the old hash is never shown); every session ends.
+     */
+    post: operations["reset_password_api_admin_users__user_id__password_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/users/{user_id}/sign-out": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Sign Out Everywhere */
+    post: operations["sign_out_everywhere_api_admin_users__user_id__sign_out_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/users/{user_id}/reset-course": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reset Course
+     * @description Level, chapter mastery and today's daily state for one course (quiz history, ledgers and
+     *     points stay: they are the record of what happened).
+     */
+    post: operations["reset_course_api_admin_users__user_id__reset_course_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/worlds/{world_id}/members/{user_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Remove Member */
+    delete: operations["remove_member_api_admin_worlds__world_id__members__user_id__delete"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/courses/{course_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Edit Course */
+    patch: operations["edit_course_api_admin_courses__course_id__patch"];
+    trace?: never;
+  };
+  "/api/admin/chapters/{chapter_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Edit Chapter */
+    patch: operations["edit_chapter_api_admin_chapters__chapter_id__patch"];
+    trace?: never;
+  };
+  "/api/admin/documents/{document_id}/reindex": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Reindex Document */
+    post: operations["reindex_document_api_admin_documents__document_id__reindex_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/chapters/{chapter_id}/reindex": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Reindex Chapter */
+    post: operations["reindex_chapter_api_admin_chapters__chapter_id__reindex_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/delete/{kind}/{item_id}/dry-run": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Delete Dry Run */
+    post: operations["delete_dry_run_api_admin_delete__kind___item_id__dry_run_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/delete/{kind}/{item_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete Item */
+    delete: operations["delete_item_api_admin_delete__kind___item_id__delete"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/jobs/{job_id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cancel Job
+     * @description Queued or running → cancelled, refunded exactly once (refunds are unique per job). A worker
+     *     still running it can't save a result afterwards (its final update needs the job running).
+     */
+    post: operations["cancel_job_api_admin_jobs__job_id__cancel_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/jobs/{job_id}/retry": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Retry Job
+     * @description A failed or cancelled job goes back in the queue. Its coins were refunded when it failed,
+     *     so the retry is free for the student (a later failure refunds nothing twice).
+     */
+    post: operations["retry_job_api_admin_jobs__job_id__retry_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/jobs/{job_id}/run-now": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Run Now */
+    post: operations["run_now_api_admin_jobs__job_id__run_now_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/cache/purge": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Purge Cache
+     * @description By key or by task kind (optionally one provider). Keys are hashes of the full request, so
+     *     there is no purge "by chapter"; a chapter's shared outputs are edited from Content instead.
+     */
+    post: operations["purge_cache_api_admin_cache_purge_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/arena/questions/{question_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Moderate Question */
+    post: operations["moderate_question_api_admin_arena_questions__question_id__post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/arena/answers/{answer_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Moderate Answer */
+    post: operations["moderate_answer_api_admin_arena_answers__answer_id__post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/users/{user_id}/coins": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Adjust Coins */
+    post: operations["adjust_coins_api_admin_users__user_id__coins_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/users/{user_id}/points": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Adjust Points */
+    post: operations["adjust_points_api_admin_users__user_id__points_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/users/{user_id}/exam-pass": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Exam Pass */
+    post: operations["exam_pass_api_admin_users__user_id__exam_pass_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/worlds/{world_id}/pool": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Adjust Pool */
+    post: operations["adjust_pool_api_admin_worlds__world_id__pool_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/economy": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Economy View */
+    get: operations["economy_view_api_admin_economy_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/economy/{key}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Set Override */
+    put: operations["set_override_api_admin_economy__key__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/invariants": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Invariants
+     * @description Every check of admin/invariants.py over the whole app (the student inspector runs the same
+     *     checks for one student).
+     */
+    get: operations["invariants_api_admin_invariants_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/debug/live": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Live */
+    get: operations["live_api_admin_debug_live_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/debug/jobs/{job_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Job Timeline */
+    get: operations["job_timeline_api_admin_debug_jobs__job_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/debug/calls": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Calls */
+    get: operations["calls_api_admin_debug_calls_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/debug/calls/{call_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Call Detail */
+    get: operations["call_detail_api_admin_debug_calls__call_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/debug/calls/{call_id}/replay": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Replay */
+    post: operations["replay_api_admin_debug_calls__call_id__replay_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/debug/replays/{job_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Replay Result */
+    get: operations["replay_result_api_admin_debug_replays__job_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/debug/routing": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Routing */
+    get: operations["routing_api_admin_debug_routing_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/debug/students/{user_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Student */
+    get: operations["student_api_admin_debug_students__user_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/debug/students/{user_id}/price": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Explain Price
+     * @description What the student would pay right now and why, with the app's own pricing functions.
+     */
+    get: operations["explain_price_api_admin_debug_students__user_id__price_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/debug/bundle": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Bundle */
+    get: operations["bundle_api_admin_debug_bundle_get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -1162,6 +2056,27 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** AdminMe */
+    AdminMe: {
+      /** Actor */
+      actor: string;
+      /** Via */
+      via: string;
+      /** Expires At */
+      expires_at: string | null;
+    };
+    /** AnswerModerateIn */
+    AnswerModerateIn: {
+      /**
+       * Action
+       * @enum {string}
+       */
+      action: "reject" | "restore" | "score";
+      /** Score */
+      score?: number | null;
+      /** Reason */
+      reason: string;
+    };
     /** AnswerOut */
     AnswerOut: {
       /**
@@ -1394,6 +2309,13 @@ export interface components {
       /** Chapter */
       chapter: string | null;
     };
+    /** ChapterEdit */
+    ChapterEdit: {
+      /** Title */
+      title: string;
+      /** Reason */
+      reason?: string | null;
+    };
     /** ChapterIn */
     ChapterIn: {
       /** Title */
@@ -1430,6 +2352,39 @@ export interface components {
       coins: number;
       /** Price Tnd */
       price_tnd: number;
+    };
+    /** CoinsIn */
+    CoinsIn: {
+      /**
+       * Bucket
+       * @enum {string}
+       */
+      bucket: "free" | "earned" | "purchased";
+      /** Delta */
+      delta: number;
+      /** Reason */
+      reason: string;
+    };
+    /** ContentEdit */
+    ContentEdit: {
+      /** Body */
+      body: unknown;
+      /** Reason */
+      reason: string;
+    };
+    /** CourseEdit */
+    CourseEdit: {
+      /** Name */
+      name?: string | null;
+      /** Exam Date */
+      exam_date?: string | null;
+      /**
+       * Clear Exam Date
+       * @default false
+       */
+      clear_exam_date: boolean;
+      /** Reason */
+      reason?: string | null;
     };
     /** CourseIn */
     CourseIn: {
@@ -1490,6 +2445,13 @@ export interface components {
        * Format: date-time
        */
       refill_at: string;
+    };
+    /** DeleteIn */
+    DeleteIn: {
+      /** Confirm */
+      confirm: string;
+      /** Reason */
+      reason: string;
     };
     /** DemoJobIn */
     DemoJobIn: {
@@ -2092,6 +3054,16 @@ export interface components {
       /** Concept */
       concept: string | null;
     };
+    /** ModerateIn */
+    ModerateIn: {
+      /**
+       * Action
+       * @enum {string}
+       */
+      action: "reject" | "restore" | "unpin";
+      /** Reason */
+      reason: string;
+    };
     /** NextStep */
     NextStep: {
       /**
@@ -2129,6 +3101,43 @@ export interface components {
       /** Key Terms */
       key_terms: components["schemas"]["KeyTerm"][];
     };
+    /** OverrideIn */
+    OverrideIn: {
+      /** Value */
+      value: number | null;
+      /** Reason */
+      reason: string;
+    };
+    /** Page */
+    Page: {
+      /** Items */
+      items: {
+        [key: string]: unknown;
+      }[];
+      /** Total */
+      total: number;
+      /** Page */
+      page: number;
+      /** Page Size */
+      page_size: number;
+    };
+    /** PassIn */
+    PassIn: {
+      /**
+       * Action
+       * @enum {string}
+       */
+      action: "grant" | "end";
+      /** Reason */
+      reason: string;
+    };
+    /** PasswordIn */
+    PasswordIn: {
+      /** Password */
+      password: string;
+      /** Reason */
+      reason?: string | null;
+    };
     /** PlacementStartIn */
     PlacementStartIn: {
       /**
@@ -2154,6 +3163,22 @@ export interface components {
       questions: components["schemas"]["AskedQuestion"][] | null;
       /** Made By */
       made_by?: string | null;
+    };
+    /** PointsIn */
+    PointsIn: {
+      /** World Id */
+      world_id?: string | null;
+      /** Delta */
+      delta: number;
+      /** Reason */
+      reason: string;
+    };
+    /** PoolIn */
+    PoolIn: {
+      /** Delta */
+      delta: number;
+      /** Reason */
+      reason: string;
     };
     /** PoolOut */
     PoolOut: {
@@ -2264,6 +3289,24 @@ export interface components {
       demo: boolean;
       wallet: components["schemas"]["Wallet"];
     };
+    /** PurgeIn */
+    PurgeIn: {
+      /** Key */
+      key?: string | null;
+      /** Task Kind */
+      task_kind?: string | null;
+      /** Provider */
+      provider?: ("cloud" | "local" | "mock") | null;
+      /**
+       * Dry Run
+       * @default true
+       */
+      dry_run: boolean;
+      /** Reason */
+      reason?: string | null;
+      /** Confirm */
+      confirm?: string | null;
+    };
     /** QuestionDetail */
     QuestionDetail: {
       question: components["schemas"]["QuestionItem"];
@@ -2370,6 +3413,43 @@ export interface components {
       /** Cached */
       cached: boolean;
     };
+    /** ReasonIn */
+    ReasonIn: {
+      /** Reason */
+      reason?: string | null;
+    };
+    /** ReplayIn */
+    ReplayIn: {
+      /**
+       * Target
+       * @default mock
+       * @enum {string}
+       */
+      target: "mock" | "local";
+      /** Messages */
+      messages?:
+        | {
+            [key: string]: string;
+          }[]
+        | null;
+      /** Response Format */
+      response_format?: ("json" | "text") | null;
+    };
+    /** ResetCourseIn */
+    ResetCourseIn: {
+      /**
+       * Course Id
+       * Format: uuid
+       */
+      course_id: string;
+      /**
+       * Dry Run
+       * @default true
+       */
+      dry_run: boolean;
+      /** Reason */
+      reason?: string | null;
+    };
     /** Results */
     Results: {
       /**
@@ -2443,6 +3523,16 @@ export interface components {
        * @default 8
        */
       k: number;
+    };
+    /** SessionIn */
+    SessionIn: {
+      /** Token */
+      token: string;
+      /**
+       * Label
+       * @default admin
+       */
+      label: string;
     };
     /** SessionOut */
     SessionOut: {
@@ -2566,6 +3656,8 @@ export interface components {
       };
       /** Fallbacks */
       fallbacks: number;
+      /** Forced Fallbacks */
+      forced_fallbacks: number;
       /** Quota Headers Seen */
       quota_headers_seen: string[];
     };
@@ -2619,6 +3711,55 @@ export interface components {
       /** Suggested Buildings */
       suggested_buildings: string[];
     };
+    /** Switch */
+    Switch: {
+      /**
+       * Key
+       * @enum {string}
+       */
+      key:
+        | "force_quick_mode"
+        | "offline_demo_mode"
+        | "pause_background_lane"
+        | "llm_max_rpm_override"
+        | "trace_prompts";
+      /** Value */
+      value: unknown;
+      /** Effective */
+      effective: unknown;
+      /** Env Note */
+      env_note: string | null;
+      /** Updated At */
+      updated_at: string | null;
+      /** Updated By */
+      updated_by: string | null;
+    };
+    /** SwitchIn */
+    SwitchIn: {
+      /** Value */
+      value?: unknown;
+      /** Reason */
+      reason?: string | null;
+    };
+    /** Switches */
+    Switches: {
+      /** Switches */
+      switches: components["schemas"]["Switch"][];
+      /** App Env */
+      app_env: string;
+      /** Configured Provider */
+      configured_provider: string;
+      /** Provider */
+      provider: string;
+      /** Offline Now */
+      offline_now: boolean;
+      /** Llm Max Rpm */
+      llm_max_rpm: number;
+      /** Force Quick Max Minutes */
+      force_quick_max_minutes: number;
+      /** Trace Max Minutes */
+      trace_max_minutes: number;
+    };
     /** SystemStatus */
     SystemStatus: {
       /** App Env */
@@ -2645,6 +3786,10 @@ export interface components {
       reason: string | null;
       /** Upload Max Mb */
       upload_max_mb: number;
+      /** Quick Mode Forced */
+      quick_mode_forced: boolean;
+      /** Background Paused */
+      background_paused: boolean;
     };
     /** TierStats */
     TierStats: {
@@ -2749,6 +3894,17 @@ export interface components {
       /** Reused */
       reused: boolean;
     };
+    /** UserEdit */
+    UserEdit: {
+      /** Nickname */
+      nickname?: string | null;
+      /** Ui Language */
+      ui_language?: ("en" | "fr" | "ar" | "ar-TN") | null;
+      /** Leaderboard Opt In */
+      leaderboard_opt_in?: boolean | null;
+      /** Reason */
+      reason?: string | null;
+    };
     /** ValidationError */
     ValidationError: {
       /** Location */
@@ -2805,6 +3961,18 @@ export interface components {
       exam_pass_until: string | null;
       /** Exam Pass Left Today */
       exam_pass_left_today: number | null;
+    };
+    /** WorldEdit */
+    WorldEdit: {
+      /** Name */
+      name?: string | null;
+      /**
+       * Regenerate Join Code
+       * @default false
+       */
+      regenerate_join_code: boolean;
+      /** Reason */
+      reason?: string | null;
     };
     /** WorldIn */
     WorldIn: {
@@ -3043,6 +4211,179 @@ export interface operations {
       };
     };
   };
+  sign_in_api_admin_session_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SessionIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AdminMe"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  sign_out_api_admin_session_delete: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  me_api_admin_me_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AdminMe"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  read_switches_api_admin_switches_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Switches"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  set_switch_api_admin_switches__key__put: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        key:
+          | "force_quick_mode"
+          | "offline_demo_mode"
+          | "pause_background_lane"
+          | "llm_max_rpm_override"
+          | "trace_prompts";
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SwitchIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Switches"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   force_quick_state_api_admin_force_quick_get: {
     parameters: {
       query?: never;
@@ -3050,7 +4391,9 @@ export interface operations {
         "x-admin-token"?: string | null;
       };
       path?: never;
-      cookie?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
     };
     requestBody?: never;
     responses: {
@@ -3078,10 +4421,13 @@ export interface operations {
     parameters: {
       query?: never;
       header?: {
+        "x-admin-action"?: string | null;
         "x-admin-token"?: string | null;
       };
       path?: never;
-      cookie?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
     };
     requestBody: {
       content: {
@@ -3113,10 +4459,13 @@ export interface operations {
     parameters: {
       query?: never;
       header?: {
+        "x-admin-action"?: string | null;
         "x-admin-token"?: string | null;
       };
       path?: never;
-      cookie?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
     };
     requestBody?: never;
     responses: {
@@ -3149,7 +4498,9 @@ export interface operations {
         "x-admin-token"?: string | null;
       };
       path?: never;
-      cookie?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
     };
     requestBody?: never;
     responses: {
@@ -3160,6 +4511,1948 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Stats"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  users_api_admin_users_get: {
+    parameters: {
+      query?: {
+        q?: string;
+        language?: string;
+        world_id?: string;
+        page?: number;
+      };
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Page"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  user_detail_api_admin_users__user_id__get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        user_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  edit_user_api_admin_users__user_id__patch: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        user_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserEdit"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  worlds_api_admin_worlds_get: {
+    parameters: {
+      query?: {
+        q?: string;
+        page?: number;
+      };
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Page"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  world_detail_api_admin_worlds__world_id__get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        world_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  edit_world_api_admin_worlds__world_id__patch: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        world_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WorldEdit"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  content_api_admin_content_get: {
+    parameters: {
+      query?: {
+        kind?: "quiz_sets" | "study_assets" | "wisdom_tips" | "placement_sets" | "flashcards";
+        world_id?: string;
+        chapter_id?: string;
+        level?: string;
+        language?: string;
+        asset_kind?: string;
+        page?: number;
+      };
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Page"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  content_item_api_admin_content__kind___item_id__get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        kind: "quiz_sets" | "study_assets" | "wisdom_tips" | "placement_sets" | "flashcards";
+        item_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  edit_content_api_admin_content__kind___item_id__put: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        kind: "quiz_sets" | "study_assets" | "wisdom_tips" | "placement_sets" | "flashcards";
+        item_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ContentEdit"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  arena_questions_api_admin_arena_questions_get: {
+    parameters: {
+      query?: {
+        status?: string;
+        world_id?: string;
+        q?: string;
+        page?: number;
+      };
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Page"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  arena_answers_api_admin_arena_answers_get: {
+    parameters: {
+      query?: {
+        status?: string;
+        question_id?: string;
+        page?: number;
+      };
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Page"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  jobs_api_admin_jobs_get: {
+    parameters: {
+      query?: {
+        lane?: string;
+        status?: string;
+        kind?: string;
+        user_id?: string;
+        page?: number;
+      };
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Page"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  jobs_summary_api_admin_jobs_summary_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          }[];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  job_detail_api_admin_jobs__job_id__get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        job_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  cache_api_admin_cache_get: {
+    parameters: {
+      query?: {
+        task_kind?: string;
+        provider?: string;
+        q?: string;
+        page?: number;
+      };
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Page"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  cache_summary_api_admin_cache_summary_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          }[];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  actions_api_admin_actions_get: {
+    parameters: {
+      query?: {
+        action?: string;
+        target_kind?: string;
+        target_id?: string;
+        actor?: string;
+        page?: number;
+      };
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Page"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  reset_password_api_admin_users__user_id__password_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        user_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PasswordIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  sign_out_everywhere_api_admin_users__user_id__sign_out_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        user_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReasonIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  reset_course_api_admin_users__user_id__reset_course_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        user_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ResetCourseIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  remove_member_api_admin_worlds__world_id__members__user_id__delete: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        world_id: string;
+        user_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["ReasonIn"] | null;
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  edit_course_api_admin_courses__course_id__patch: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        course_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CourseEdit"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  edit_chapter_api_admin_chapters__chapter_id__patch: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        chapter_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChapterEdit"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  reindex_document_api_admin_documents__document_id__reindex_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        document_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReasonIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  reindex_chapter_api_admin_chapters__chapter_id__reindex_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        chapter_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReasonIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  delete_dry_run_api_admin_delete__kind___item_id__dry_run_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        kind: "user" | "world" | "course" | "chapter" | "document";
+        item_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  delete_item_api_admin_delete__kind___item_id__delete: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        kind: "user" | "world" | "course" | "chapter" | "document";
+        item_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DeleteIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  cancel_job_api_admin_jobs__job_id__cancel_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        job_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReasonIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  retry_job_api_admin_jobs__job_id__retry_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        job_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReasonIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  run_now_api_admin_jobs__job_id__run_now_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        job_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReasonIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  purge_cache_api_admin_cache_purge_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PurgeIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  moderate_question_api_admin_arena_questions__question_id__post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        question_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ModerateIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  moderate_answer_api_admin_arena_answers__answer_id__post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        answer_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AnswerModerateIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  adjust_coins_api_admin_users__user_id__coins_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        user_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CoinsIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  adjust_points_api_admin_users__user_id__points_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        user_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PointsIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  exam_pass_api_admin_users__user_id__exam_pass_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        user_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PassIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  adjust_pool_api_admin_worlds__world_id__pool_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        world_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PoolIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  economy_view_api_admin_economy_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  set_override_api_admin_economy__key__put: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        key: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OverrideIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  invariants_api_admin_invariants_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  live_api_admin_debug_live_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  job_timeline_api_admin_debug_jobs__job_id__get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        job_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  calls_api_admin_debug_calls_get: {
+    parameters: {
+      query?: {
+        job_id?: string | null;
+        task_kind?: string;
+        limit?: number;
+      };
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          }[];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  call_detail_api_admin_debug_calls__call_id__get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        call_id: number;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  replay_api_admin_debug_calls__call_id__replay_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        call_id: number;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReplayIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  replay_result_api_admin_debug_replays__job_id__get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        job_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  routing_api_admin_debug_routing_get: {
+    parameters: {
+      query?: {
+        hours?: number;
+        provider?: "cloud" | "local" | "mock" | "all";
+      };
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  student_api_admin_debug_students__user_id__get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        user_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  explain_price_api_admin_debug_students__user_id__price_get: {
+    parameters: {
+      query: {
+        activity:
+          "quiz" | "study_pack" | "audio" | "tutor_session" | "teachback_solo" | "peer_question";
+        chapter_id?: string | null;
+        level?: string;
+      };
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        user_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  bundle_api_admin_debug_bundle_get: {
+    parameters: {
+      query?: {
+        job_id?: string | null;
+        user?: string | null;
+        since?: string | null;
+      };
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: string;
+          };
         };
       };
       /** @description Validation Error */

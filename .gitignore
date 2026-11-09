@@ -32,3 +32,6 @@ test-results/
 backend/tests/evals/*/outputs/raw_*
 scripts/out/
 *.tsbuildinfo
+
+# debug bundles (scripts/debug_bundle.py): redacted, but never committed
+/debug/
