@@ -10,15 +10,17 @@ from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+from sqlalchemy import and_, or_, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.admin import audit
 from app.admin.auth import AdminActionDep, AdminDep
 from app.api.deps import Session
 from app.api.health import SettingsDep
-from app.core import flags
+from app.core import flags, slot
 from app.core.db import get_sessionmaker
-from app.gateway.providers import resolve
+from app.gateway.providers import paused_until, resolve
+from app.models import Job
 
 router = APIRouter()
 Sessionmaker = Annotated[async_sessionmaker[AsyncSession], Depends(get_sessionmaker)]
@@ -161,7 +163,42 @@ async def set_switch(
     )
     await s.commit()
     flags.invalidate()
+    if key == "offline_demo_mode":
+        await _release_offline_waits(s, admin, settings, sm)
     return await _view(s, settings, sm)
+
+
+async def _release_offline_waits(s: AsyncSession, admin, settings, sm) -> None:
+    """Offline parks background jobs until the next slot (`not_before` = its start). When the
+    switch ends the pause, they run now instead of waiting for that slot. Quota and saturation
+    waits (error `deferred:quota` …) and other planned delays keep their `not_before`."""
+    offline, _ = await paused_until(settings, sm)
+    if offline:
+        return
+    now = datetime.now(UTC)
+    nxt = slot.next_slot(now, settings.LLM_SLOT_GROUP)
+    parked = Job.error == "deferred:offline"
+    if nxt is not None:  # queued while offline: create_job set not_before to the slot start
+        parked = or_(parked, and_(Job.error.is_(None), Job.not_before == nxt.start))
+    res = await s.execute(
+        update(Job)
+        .where(Job.status == "queued", Job.lane == "background", Job.not_before > now, parked)
+        .values(not_before=None, error=None)
+        .returning(Job.id)
+    )
+    released = [str(i) for i in res.scalars()]
+    if released:
+        audit.record(
+            s,
+            admin,
+            "jobs.release_offline",
+            target_kind="job",
+            target_id=None,
+            before={"waiting_for_slot": len(released)},
+            after={"released": len(released)},
+            reason="offline demo mode switched off",
+        )
+    await s.commit()
 
 
 # --- the force-Quick endpoints of VIDEO.md's curl (kept; now backed by the switch) ----------

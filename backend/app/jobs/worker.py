@@ -30,6 +30,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from app.core import economy_live, flags, slot
 from app.core.config import get_settings
 from app.gateway import Defer, EmbeddingsDown, GatewayError, OfflineMode
+from app.gateway.providers import paused_until
 from app.jobs.coins import coins
 from app.jobs.registry import JobContext, spec_for
 from app.models import Document, Job
@@ -196,7 +197,12 @@ class Worker:
             # Offline demo mode began after the job was queued. A student waiting on a loading
             # screen gets the offline message and a refund; background work waits for the slot.
             nxt = slot.next_slot(datetime.now(UTC), get_settings().LLM_SLOT_GROUP)
-            if job.lane == "background" and nxt is not None:
+            await flags.load(self.sm, fresh=True)  # the admin switch may have ended it < 3 s ago
+            if job.attempts < MAX_ATTEMPTS and not (await paused_until(get_settings(), self.sm))[0]:
+                status = "queued"
+                values = {"not_before": None, "error": None}
+                log.info("job %s requeued: offline demo mode just ended", job.id)
+            elif job.lane == "background" and nxt is not None:
                 status = "queued"
                 values = {"not_before": nxt.start, "error": "deferred:offline"}
                 log.info("job %s waits for the next slot (%s)", job.id, nxt.label())

@@ -393,6 +393,40 @@ async def test_offline_switch(api, sm, gw, monkeypatch):  # noqa: F811
     assert (await api.get("/api/system/status")).json()["offline_demo_mode"] is True
 
 
+async def test_offline_off_releases_jobs_parked_for_the_slot(api, sm, gw, monkeypatch):  # noqa: F811
+    """Offline parks background work until the next slot; switching it off runs it now. A quota
+    wait keeps its delay. Found by the 8 Nov stack check: parked jobs waited for the next slot."""
+    enable_admin(monkeypatch)
+    await api.put("/api/admin/switches/offline_demo_mode", json={"value": "on"}, headers=ACT)
+    r = await api.post("/api/dev/demo-jobs", headers=DEV, json={"lane": "background"})
+    assert r.status_code == 202
+    parked_id = r.json()["job_id"]
+    later = datetime.now(UTC) + timedelta(seconds=40)
+    async with sm() as s:
+        parked = await s.get(Job, parked_id)
+        assert parked.not_before is not None and parked.not_before > later
+        quota = Job(
+            kind=demo.KIND,
+            lane="background",
+            status="queued",
+            payload={},
+            stages=[],
+            not_before=later,
+            error="deferred:quota",
+        )
+        s.add(quota)
+        await s.commit()
+        quota_id = quota.id
+    await api.put("/api/admin/switches/offline_demo_mode", json={"value": "auto"}, headers=ACT)
+    async with sm() as s:
+        assert (await s.get(Job, parked_id)).not_before is None
+        assert (await s.get(Job, quota_id)).not_before == later
+        row = (
+            await s.execute(select(AdminAction).where(AdminAction.action == "jobs.release_offline"))
+        ).scalar_one()
+        assert row.after == {"released": 1}
+
+
 async def test_rpm_override_only_lowers_the_limiter(sm, mock_llm, monkeypatch):
     lim = Limiter(18, 2)
     lim.cap_rpm(6)
