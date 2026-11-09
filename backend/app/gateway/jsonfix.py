@@ -1,5 +1,6 @@
-"""Tolerant JSON extraction: small models wrap JSON in fences, add prose, trailing commas or drop
-the last brace. If this fails, the gateway makes ONE compact "fix this JSON" call."""
+"""Tolerant JSON extraction: small models wrap JSON in fences, add prose, trailing commas, drop
+the last brace or the commas between array items. If this fails, the gateway makes ONE compact
+"fix this JSON" call."""
 
 from __future__ import annotations
 
@@ -41,6 +42,34 @@ def _balanced(text: str, start: int) -> str:
     return text[start:].rstrip().rstrip(",") + "".join(reversed(stack))
 
 
+def _missing_commas(text: str) -> str:
+    """Insert the comma small models drop between array items: `} {`, `] [`, `} [`, `] {`
+    (outside strings). llama3.2-3b does this on quizzes, and the repair call echoes it back."""
+    out: list[str] = []
+    in_str = escape = False
+    closed = False  # the last non-space character outside a string was } or ]
+    for c in text:
+        if in_str:
+            if escape:
+                escape = False
+            elif c == "\\":
+                escape = True
+            elif c == '"':
+                in_str = False
+            out.append(c)
+            continue
+        if c.isspace():
+            out.append(c)
+            continue
+        if closed and c in "{[":
+            out.append(",")
+        closed = c in "}]"
+        if c == '"':
+            in_str = True
+        out.append(c)
+    return "".join(out)
+
+
 def extract_json(text: str) -> Any | None:
     """Parse the first JSON object/array in `text`, or None."""
     cleaned = _FENCE.sub("", strip_think(text)).strip()
@@ -54,6 +83,10 @@ def extract_json(text: str) -> Any | None:
     candidate = _TRAILING_COMMA.sub(r"\1", _balanced(cleaned, min(starts)))
     try:
         return json.loads(candidate)
+    except json.JSONDecodeError:
+        pass
+    try:
+        return json.loads(_missing_commas(candidate))
     except json.JSONDecodeError:
         return None
 

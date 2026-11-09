@@ -178,6 +178,18 @@ def test_extract_json_nested_and_unrecoverable():
     assert extract_json("no json here") is None
 
 
+def test_extract_json_missing_commas_between_items():
+    # llama3.2-3b on the platform (9/11 trace): a quiz array with no comma between the objects;
+    # the JSON_REPAIR call returned it unchanged, so the quiz failed after two paid calls.
+    text = '{"questions": [\n{"q": "a {b}", "n": 1}\n{"q": "c", "n": 2}\n{"q": "d", "n": 3}\n]}'
+    assert extract_json(text) == {
+        "questions": [{"q": "a {b}", "n": 1}, {"q": "c", "n": 2}, {"q": "d", "n": 3}]
+    }
+    assert extract_json("[[1, 2] [3]]") == [[1, 2], [3]]
+    # braces inside strings are left alone
+    assert extract_json('{"s": "} {"}') == {"s": "} {"}
+
+
 def test_strip_think():
     assert strip_think("<think>\nlong\n</think>\nAnswer") == "Answer"
 
