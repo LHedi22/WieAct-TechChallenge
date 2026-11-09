@@ -18,6 +18,7 @@ import app.gateway as gateway_module
 from app import prompts
 from app.evals import quiz_keys
 from app.features.quiz import verify
+from app.features.quiz.pool import spread_answers
 from app.gateway import Defer, Result, TaskKind
 from app.jobs.worker import Worker
 from app.models import QuizSet
@@ -77,6 +78,18 @@ def test_unsure_null_or_missing_answers_are_not_verified():
     assert verify.verdicts("not json", qs) is None
 
 
+def as_shown(items):
+    """The items as the verifier sees them: options spread by valid_questions (answer keys over
+    A-D), with true_index following the right option's text to its new position."""
+    out = []
+    for it in items:
+        q = dict(it["question"], options=list(it["question"]["options"]))
+        truth = None if it["true_index"] is None else q["options"][it["true_index"]]
+        spread_answers([q])
+        out.append(dict(it, true_index=None if truth is None else q["options"].index(truth)))
+    return out
+
+
 @pytest.fixture
 def scripted(gw, monkeypatch):  # noqa: F811
     """QUIZ_GENERATE returns the fixture items (5 right + 5 wrong keys); QUIZ_VERIFY answers like
@@ -95,7 +108,7 @@ def scripted(gw, monkeypatch):  # noqa: F811
                           pattern="t")  # fmt: skip
         if task.kind == TaskKind.QUIZ_VERIFY:
             script["calls"].append(f"verify:{task.lane}:{task.tier}")
-            item = script["verify"].pop(0) if script["verify"] else truthful_solver(pack)
+            item = script["verify"].pop(0) if script["verify"] else truthful_solver(as_shown(pack))
             if isinstance(item, Exception):
                 raise item
             return Result(content=item, model_tier="mid", model="x", provider="mock", pattern="t")
