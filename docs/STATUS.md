@@ -37,7 +37,7 @@ Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
 - [x] Record the real quota signal (9/11): quota headers on every 200 are `x-ratelimit-api_key-{remaining,limit}-{requests,max_parallel_requests}` and
       `x-litellm-key-rpm-limit` → DECISIONS.md 2026-11-09.
   - [ ] Still unseen: the status code for "team quota exhausted".
-  - [ ] `quota.py`: don't read `remaining-max_parallel_requests` as requests remaining (it can pause the background lane).
+  - [x] `quota.py` no longer reads `remaining-max_parallel_requests` as requests remaining (9/11; it could pause the background lane).
 - [ ] Warm up the deployed class cache (DEPLOY.md §4) so offline demo mode has real content.
 - [ ] User test with ~10 students at once; export stats for the report.
 - [ ] Record the demo video (`docs/report/VIDEO.md` shot list).

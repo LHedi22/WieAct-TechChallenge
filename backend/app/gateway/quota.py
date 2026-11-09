@@ -54,6 +54,8 @@ def parse(headers: dict[str, str]) -> QuotaState | None:
         n = _number(v)
         if n is None:
             continue
+        if "parallel" in kl:  # concurrency slots left (platform, 9/11), not requests
+            continue
         if "remaining" in kl and ("request" in kl or "token" not in kl):
             state.remaining = int(n)
             found = True
