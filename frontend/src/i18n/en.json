@@ -448,6 +448,8 @@
       "eta": "About {minutes, plural, one {# minute} other {# minutes}} left",
       "etaSoon": "Almost there",
       "done": "Your islands are ready!",
+      "failed": "We couldn't read your files",
+      "failedFiles": "{count, plural, one {# file couldn't be read. Upload it again from your world.} other {# files couldn't be read. Upload them again from your world.}}",
       "now": "Reading {title}…",
       "detail": {
         "page": "{file} · page {n} of {of}",
@@ -472,7 +474,8 @@
       "quizzesState": {
         "waiting": "Waiting",
         "in_progress": "In progress",
-        "done": "Done"
+        "done": "Done",
+        "failed": "Made when you open the Quiz Hall"
       },
       "tip": "While you wait: the first island you finish gets a free placement quiz, so every building starts at your level.",
       "tipLabel": "While you wait:",

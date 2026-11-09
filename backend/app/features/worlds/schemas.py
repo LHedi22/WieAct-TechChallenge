@@ -92,7 +92,7 @@ class IndexingChapter(BaseModel):
 
 
 class IndexingQuizzes(BaseModel):
-    state: Literal["waiting", "in_progress", "done"]
+    state: Literal["waiting", "in_progress", "done", "failed"]
     ready: int
 
 

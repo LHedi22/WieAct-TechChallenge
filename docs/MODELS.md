@@ -46,8 +46,11 @@ Qdrant collection is created with that size and changing it later means re-index
 - **Qwen3 models "think" by default**, which wastes CPU time and can break JSON. The gateway sends
   `chat_template_kwargs: {"enable_thinking": false}` when `LLM_DISABLE_THINKING=true` and
   always strips `<think>…</think>` from replies. The probe tells you whether a model thinks.
+  Ollama (local) ignores both that and the `/no_think` switch on its OpenAI endpoint, so local Qwen3
+  also gets `reasoning_effort: "none"`. Without it, qwen3:1.7b spent the whole tag budget on hidden
+  reasoning and returned no JSON (7 Nov).
 - Keep `max_tokens` tight per task, at or below the ceiling the probe finds. Suggested budgets:
-  tag 120 · tutor turn 220 · grade 300 · quiz (10 Q) 1,400, or two calls of 5 Q if the ceiling is lower · notes 700 · plan 400 · tip 160.
+  tag 800 per batch of 8 chunks (a full batch measured 498 tokens; 400 cut the JSON off) · tutor turn 220 · grade 300 · quiz (10 Q) 1,400, or two calls of 5 Q if the ceiling is lower · notes 700 · plan 400 · tip 160.
 - If the platform exposes only one model per class, the probe still confirms its JSON, language and speed
   behaviour and records the quota headers. That information matters as much as the pick itself.
 

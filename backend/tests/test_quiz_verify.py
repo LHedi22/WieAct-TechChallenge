@@ -221,3 +221,26 @@ def test_the_quiz_eval_scores_a_bare_string_item_as_invalid():
     from app.evals.__main__ import check
 
     assert not any(check("شنوّة الـ stack؟", "ar-TN", "ctx").values())
+
+
+async def test_an_unusable_quiz_reply_is_forgotten(api, sm, pptx, gw, monkeypatch):  # noqa: F811
+    """7 Nov, local models: a cut-off QUIZ_GENERATE reply (too few valid questions) was cached,
+    so every retry of the class pool replayed it and the pool could never be built."""
+    _, chapter = await indexed(api, sm, pptx)
+    forgotten = []
+
+    async def run(task):
+        if task.kind == TaskKind.QUIZ_GENERATE:
+            ref = f"ref:{task.cache_key}"
+            return Result(content={"questions": []}, model_tier="compact", model="x",
+                          provider="mock", pattern="t", cache_ref=ref)  # fmt: skip
+        return await gw.run(task)
+
+    async def forget(result):
+        forgotten.append(result.cache_ref)
+
+    monkeypatch.setattr(gateway_module, "run", run)
+    monkeypatch.setattr(gateway_module, "forget", forget)
+    job = await new_set(api, sm, chapter)
+    assert job["status"] == "failed"
+    assert forgotten and all(r.startswith("ref:quiz:") for r in forgotten)

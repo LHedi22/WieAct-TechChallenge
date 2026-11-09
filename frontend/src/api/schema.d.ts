@@ -1851,7 +1851,7 @@ export interface components {
        * State
        * @enum {string}
        */
-      state: "waiting" | "in_progress" | "done";
+      state: "waiting" | "in_progress" | "done" | "failed";
       /** Ready */
       ready: number;
     };

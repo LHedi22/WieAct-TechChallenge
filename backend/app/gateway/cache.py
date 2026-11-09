@@ -7,7 +7,7 @@ import hashlib
 import json
 from typing import Any
 
-from sqlalchemy import update
+from sqlalchemy import delete, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -41,6 +41,12 @@ async def get(sm: async_sessionmaker[AsyncSession], key: str) -> AICache | None:
             await s.execute(update(AICache).where(AICache.key == key).values(hits=AICache.hits + 1))
             await s.commit()
         return row
+
+
+async def drop(sm: async_sessionmaker[AsyncSession], key: str) -> None:
+    async with sm() as s:
+        await s.execute(delete(AICache).where(AICache.key == key))
+        await s.commit()
 
 
 async def put(

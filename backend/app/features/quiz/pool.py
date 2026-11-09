@@ -233,7 +233,10 @@ async def quiz_pool(ctx: JobContext) -> dict[str, Any]:
                 )
             )
         )
-        return valid_questions(result.content), result
+        questions = valid_questions(result.content)
+        if len(questions) < MIN_VALID:  # unusable: a retry must make a fresh call, not replay it
+            await gateway.forget(result)
+        return questions, result
 
     questions, result = await write()
     await ctx.set_stage("writing_hints")

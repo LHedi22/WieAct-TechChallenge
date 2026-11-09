@@ -208,6 +208,7 @@ class Gateway:
                     provider=profile.provider,
                     pattern=pattern,
                     cached=True,
+                    cache_ref=key,
                 )
         if res.offline:
             raise OfflineMode(res.reason)
@@ -346,6 +347,10 @@ class Gateway:
             tokens_in, tokens_out, latency = reply.tokens_in, reply.tokens_out, reply.latency_ms
             if json_mode:
                 content = extract_json(reply.text)
+                if content is None and not reply.text.strip():
+                    # Nothing to repair (e.g. the budget went on hidden reasoning): a repair
+                    # call would invent JSON from nothing, and that would be cached.
+                    raise BadOutput("empty reply", refusal="bad_json")
                 if content is None:
                     fixed = await self._repair(task, profile, reply.text, max_tokens)
                     content = fixed.get("content")
@@ -376,8 +381,15 @@ class Gateway:
                 tokens_out=tokens_out,
                 latency_ms=latency,
                 notes=notes,
+                cache_ref=key if key and not quick_mode else None,
             )
         raise Defer(10, "too_many_attempts")
+
+    async def forget(self, result: Result) -> None:
+        """Drop a reply the feature could not use from ai_cache, so a retry makes a fresh call
+        instead of replaying it (e.g. a quiz with too few valid questions)."""
+        if result.cache_ref:
+            await cache.drop(self.sm, result.cache_ref)
 
     async def _repair(
         self, task: Task, profile: LLMProfile, broken: str, max_tokens: int

@@ -26,7 +26,7 @@ from sqlalchemy import delete, select, update
 from app import gateway, prompts
 from app.core import db
 from app.core.config import get_settings
-from app.gateway import Defer, GatewayError, Task, TaskKind
+from app.gateway import BadOutput, Defer, GatewayError, Task, TaskKind
 from app.jobs.registry import JobContext, job
 from app.models import Chapter, Chunk, Course, Document
 from app.rag.chunking import chunk
@@ -170,23 +170,33 @@ async def _tag(ctx: JobContext, doc: Document, course: str, chapter: str, rows: 
             continue  # tagged before a Defer
         text = "\n\n".join(f"[[chunk:c{r.idx}]] {r.text[:TAG_CHARS]}" for r in batch)
         version, messages = prompts.render("chunk_tag", course=course, chapter=chapter, chunks=text)
-        result = ctx.note(
-            await gateway.run(
-                Task(
-                    kind=TaskKind.CHUNK_TAG,
-                    lane="background",
-                    messages=messages,
-                    language="en",
-                    # same file → same chunks → same tags, whichever world uploads it
-                    cache_key=f"{doc.sha256}:{TAG_BATCH}:{b}",
-                    prompt_version=version,
+        # Tags are enrichment: an unusable reply (JSON even the repair call couldn't fix, or the
+        # wrong shape) leaves this batch untagged instead of failing the whole file.
+        provider: str | None = None
+        try:
+            result = ctx.note(
+                await gateway.run(
+                    Task(
+                        kind=TaskKind.CHUNK_TAG,
+                        lane="background",
+                        messages=messages,
+                        language="en",
+                        # same file → same chunks → same tags, whichever world uploads it
+                        cache_key=f"{doc.sha256}:{TAG_BATCH}:{b}",
+                        prompt_version=version,
+                    )
                 )
             )
-        )
-        try:
-            tags = {t.id: t for t in TagReply.model_validate(result.content).chunks}
-        except ValidationError:
-            log.warning("CHUNK_TAG reply did not validate; chunks stay untagged")
+            provider = result.provider
+            try:
+                tags = {t.id: t for t in TagReply.model_validate(result.content).chunks}
+            except ValidationError:
+                await gateway.forget(result)  # a re-upload or re-tag must not replay it
+                raise
+        except (BadOutput, ValidationError) as e:
+            log.warning(
+                "CHUNK_TAG batch %d unusable (%s); chunks stay untagged", b, type(e).__name__
+            )
             tags = {}
         async with db.get_sessionmaker()() as s:
             for r in batch:
@@ -198,7 +208,8 @@ async def _tag(ctx: JobContext, doc: Document, course: str, chapter: str, rows: 
                     .values(tags=r.tags, level=r.level, lang=r.lang)
                 )
             await s.commit()
-        await _update_doc(doc.id, tagged_by=result.provider)
+        if provider:
+            await _update_doc(doc.id, tagged_by=provider)
         if doc.status != "ready":  # a re-tag of a ready document (rag/refresh.py) shows no progress
             progress = P_PARSE + int((P_TAG - P_PARSE) * (b + 1) / len(batches))
             await _update_doc(doc.id, progress=progress, detail={"key": "ideas", "n": b + 1})

@@ -112,6 +112,38 @@ async def test_json_mode_dropped_on_400_in_auto():
     assert all("chat_template_kwargs" not in b for b in bodies)  # cloud-only field
 
 
+async def test_local_qwen3_gets_reasoning_effort_none():
+    # Ollama ignores the /no_think text switch on its OpenAI endpoint: qwen3:1.7b spent the whole
+    # 400-token CHUNK_TAG budget on hidden reasoning and returned no JSON (probe, 7 Nov).
+    bodies = []
+
+    def handler(req):
+        bodies.append(json.loads(req.content))
+        return ok('{"a": 1}')
+
+    await chat(client(handler, provider="local"), json_mode=True)
+    assert bodies[0]["reasoning_effort"] == "none"
+    bodies.clear()
+    await chat(client(handler, provider="cloud"))  # cloud keeps chat_template_kwargs only
+    assert "reasoning_effort" not in bodies[0]
+
+
+async def test_reasoning_effort_dropped_on_400_and_remembered():
+    bodies = []
+
+    def handler(req):
+        body = json.loads(req.content)
+        bodies.append(body)
+        if "reasoning_effort" in body:
+            return httpx.Response(400, json={"error": {"message": "unknown reasoning_effort"}})
+        return ok("Hi")
+
+    c = client(handler, provider="local")
+    assert (await chat(c)).text == "Hi"
+    await chat(c)
+    assert ["reasoning_effort" in b for b in bodies] == [True, False, False]
+
+
 async def test_mock_gets_task_and_language_markers():
     bodies = []
 

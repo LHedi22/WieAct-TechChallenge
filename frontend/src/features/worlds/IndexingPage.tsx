@@ -30,6 +30,7 @@ export function IndexingPage() {
     refetchInterval: (q) => (isFinished(q.state.data) ? false : JOB_POLL_MS),
   });
   const data = query.data;
+  const outcome = data ? fileOutcome(data) : null;
 
   return (
     <main className="mx-auto flex max-w-screen-xl flex-col gap-6 px-4 py-6 sm:px-8">
@@ -50,15 +51,20 @@ export function IndexingPage() {
       </header>
       <ErrorBanner error={query.error} />
 
-      {data && (
+      {data && outcome && (
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
           <section className="flex min-w-0 flex-col gap-5">
-            <Scene data={data} />
+            <Scene data={data} heading={headingText(t, data, outcome)} />
             <div className="flex flex-wrap items-end justify-between gap-2">
-              <h1 className="text-h1">{data.done ? t("indexing.done") : t("indexing.title")}</h1>
+              <h1 className="text-h1">{headingText(t, data, outcome)}</h1>
               <p className="text-ink/70">{etaText(t, data)}</p>
             </div>
             <ProgressBar value={data.percent} max={100} label={t("indexing.progress")} />
+            {data.done && outcome.failed > 0 && (
+              <p role="status" className="text-danger">
+                {t("indexing.failedFiles", { count: outcome.failed })}
+              </p>
+            )}
             <ol className="flex flex-col gap-2">
               {data.chapters.map((ch) => (
                 <Row
@@ -68,11 +74,15 @@ export function IndexingPage() {
                   detail={rowDetail(t, ch)}
                 />
               ))}
-              <Row
-                state={data.quizzes.state === "done" ? "done" : data.quizzes.state}
-                title={t("indexing.quizzes")}
-                label={t(`indexing.quizzesState.${data.quizzes.state}`)}
-              />
+              {/* No file was read: no quiz pool will come, so don't show it as "Waiting". */}
+              {!(data.done && outcome.ready === 0) && (
+                <Row
+                  // A failed pool isn't a dead end: the Quiz Hall writes a quiz on first visit.
+                  state={data.quizzes.state === "failed" ? "waiting" : data.quizzes.state}
+                  title={t("indexing.quizzes")}
+                  label={t(`indexing.quizzesState.${data.quizzes.state}`)}
+                />
+              )}
             </ol>
           </section>
 
@@ -100,6 +110,21 @@ function isFinished(data: IndexingOut | undefined): boolean {
 }
 
 type T = ReturnType<typeof useTranslation>["t"];
+type Outcome = { ready: number; failed: number };
+
+/** `done` only means nothing is left to process; count how the files actually ended. */
+function fileOutcome(data: IndexingOut): Outcome {
+  const docs = data.chapters.flatMap((ch) => ch.documents);
+  return {
+    ready: docs.filter((d) => d.status === "ready").length,
+    failed: docs.filter((d) => d.status === "failed").length,
+  };
+}
+
+function headingText(t: T, data: IndexingOut, outcome: Outcome): string {
+  if (!data.done) return t("indexing.title");
+  return outcome.ready > 0 ? t("indexing.done") : t("indexing.failed");
+}
 
 function etaText(t: T, data: IndexingOut): string {
   if (data.done) return "";
@@ -125,18 +150,19 @@ function current(data: IndexingOut): { chapter: IndexingChapter; doc: DocumentOu
   return null;
 }
 
-function Scene({ data }: { data: IndexingOut }) {
+function Scene({ data, heading }: { data: IndexingOut; heading: string }) {
   const { t } = useTranslation("worlds");
   const now = current(data);
   const detail = now?.doc.detail as { key?: string; n?: number; of?: number } | null | undefined;
+  const allFailed = data.done && fileOutcome(data).ready === 0;
   return (
     <WaterTile className="flex min-h-56 items-center justify-center rounded-pixel-step border-2 border-ink p-6">
       <div className="flex max-w-md items-center gap-4 rounded-pixel-step border-2 border-ink bg-white p-4 shadow-panel">
-        <Mascot pose={data.done ? "celebrating" : "reading"} scale={3} />
+        <Mascot pose={data.done && !allFailed ? "celebrating" : "reading"} scale={3} />
         <div className="min-w-0" aria-live="polite">
           <p className="font-heading text-h3">
             {data.done
-              ? t("indexing.done")
+              ? heading
               : now
                 ? t("indexing.now", { title: now.chapter.title })
                 : t("indexing.title")}

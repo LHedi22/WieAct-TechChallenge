@@ -236,4 +236,51 @@ describe("Indexing screen", () => {
     expect(screen.getByText("ادعُ صفّك")).toBeInTheDocument();
     expect(screen.getByText("قراءة الفصل 1 · Limits").closest("li")).toHaveTextContent("تم");
   });
+
+  const finished = (statuses: DocumentOut["status"][]): IndexingOut =>
+    indexing({
+      done: true,
+      percent: 100,
+      eta_s: 0,
+      chapters: [
+        {
+          ...indexing().chapters[0]!,
+          state: statuses.includes("ready") ? "done" : "failed",
+          documents: statuses.map((status, i) =>
+            doc({ id: `4444444${i}-4444-4444-4444-444444444444`, status, page_count: 157 }),
+          ),
+        },
+      ],
+    });
+
+  it("never says the islands are ready when no file could be read", async () => {
+    serve({ [`GET /api/worlds/${W}/indexing`]: finished(["failed", "failed"]) });
+    show(<CreateOrJoinPage />, { route: `/worlds/${W}/indexing` });
+    expect(await screen.findAllByText("We couldn't read your files")).toHaveLength(2);
+    expect(screen.queryByText("Your islands are ready!")).not.toBeInTheDocument();
+    expect(
+      screen.getByText("2 files couldn't be read. Upload them again from your world."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Building practice quizzes")).not.toBeInTheDocument();
+  });
+
+  it("says when practice quizzes will come if the class pool couldn't be built", async () => {
+    serve({
+      [`GET /api/worlds/${W}/indexing`]: {
+        ...finished(["ready"]),
+        quizzes: { state: "failed", ready: 0 },
+      },
+    });
+    show(<CreateOrJoinPage />, { route: `/worlds/${W}/indexing` });
+    const row = (await screen.findByText("Building practice quizzes")).closest("li")!;
+    expect(within(row).getByText("Made when you open the Quiz Hall")).toBeInTheDocument();
+    expect(within(row).queryByText("Waiting")).not.toBeInTheDocument();
+  });
+
+  it("is ready when some files were read, and counts the ones that weren't", async () => {
+    serve({ [`GET /api/worlds/${W}/indexing`]: finished(["ready", "failed"]) });
+    show(<CreateOrJoinPage />, { lang: "ar", route: `/worlds/${W}/indexing` });
+    expect(await screen.findAllByText("جزرك جاهزة!")).toHaveLength(2);
+    expect(screen.getByText("تعذّرت قراءة ملف واحد. ارفعه من جديد من عالمك.")).toBeInTheDocument();
+  });
 });

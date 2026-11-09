@@ -11,12 +11,12 @@ from sqlalchemy import func, select
 
 from app.core.config import Settings
 from app.core.slot import TZ
-from app.gateway import Defer, KeyBlocked, OfflineMode, RequestRejected, Task, TaskKind
+from app.gateway import BadOutput, Defer, KeyBlocked, OfflineMode, RequestRejected, Task, TaskKind
 from app.gateway.client import LLMClient
 from app.gateway.limiter import Limiter
 from app.gateway.providers import resolve
 from app.gateway.service import Gateway
-from app.models import AICallLog
+from app.models import AICache, AICallLog
 from tests.conftest import FAST_MOCK, MockConfig, create_mock_app, mock_transport
 
 MESSAGES = [
@@ -100,6 +100,17 @@ async def test_identical_request_is_a_cache_hit_without_a_call(monkeypatch, sm, 
     assert mock_llm.state.stats.calls == 1
     rows = await log_rows(sm)
     assert [r.cache_hit for r in rows] == [False, True]
+
+
+async def test_a_forgotten_reply_is_never_replayed(monkeypatch, sm, mock_llm):
+    # A feature that rejects a cached reply (too few valid quiz questions) drops it, or every
+    # retry replays the same unusable reply and the class pool can never be built (7 Nov).
+    gw, _ = make_gateway(make_settings(monkeypatch), sm, {"mock": mock_llm})
+    first = await gw.run(task(cache_key="quiz:ch1"))
+    await gw.forget(first)
+    again = await gw.run(task(cache_key="quiz:ch1"))
+    assert not again.cached and mock_llm.state.stats.calls == 2
+    await gw.forget(await gw.run(task()))  # nothing cached: a no-op
 
 
 async def test_cache_is_kept_apart_per_provider(monkeypatch, sm, mock_llm):
@@ -250,6 +261,49 @@ async def test_broken_json_gets_one_compact_repair_call(monkeypatch, sm):
     assert seen_models == ["mock-mid", "mock-compact"]  # the repair runs on compact
     rows = await log_rows(sm)
     assert [r.task_kind for r in rows] == ["DEMO_SUMMARY", "JSON_REPAIR"]
+
+
+async def test_an_empty_reply_is_not_repaired_or_cached(monkeypatch, sm):
+    # 7 Nov, local qwen3: thinking used the whole budget and the answer was empty; the repair
+    # call "fixed" "" into {"name": "John", "age": 30, "city": "New York"}, which got cached.
+    calls: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(__import__("json").loads(request.content)["model"])
+        return httpx.Response(
+            200,
+            json={
+                "id": "x",
+                "object": "chat.completion",
+                "created": 0,
+                "model": "m",
+                "choices": [
+                    {
+                        "index": 0,
+                        "message": {"role": "assistant", "content": ""},
+                        "finish_reason": "length",
+                    }
+                ],
+                "usage": {"prompt_tokens": 5, "completion_tokens": 400, "total_tokens": 405},
+            },
+        )
+
+    gw = Gateway(
+        make_settings(monkeypatch),
+        sm,
+        limiter=Limiter(6000, 2, burst=50),
+        client_factory=lambda p: LLMClient(
+            p,
+            timeout_s=5,
+            disable_thinking=True,
+            http_client=httpx.AsyncClient(transport=httpx.MockTransport(handler)),
+        ),
+    )
+    with pytest.raises(BadOutput):
+        await gw.run(task(cache_key="tags:doc:0"))
+    assert calls == ["mock-mid"]  # no repair call
+    async with sm() as s:
+        assert await s.scalar(select(func.count()).select_from(AICache)) == 0
 
 
 # --- Network errors -----------------------------------------------------------------------------
