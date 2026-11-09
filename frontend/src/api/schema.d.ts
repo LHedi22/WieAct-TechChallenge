@@ -880,6 +880,125 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/admin/debug/live": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Live */
+    get: operations["live_api_admin_debug_live_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/debug/jobs/{job_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Job Timeline */
+    get: operations["job_timeline_api_admin_debug_jobs__job_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/debug/calls": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Calls */
+    get: operations["calls_api_admin_debug_calls_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/debug/calls/{call_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Call Detail */
+    get: operations["call_detail_api_admin_debug_calls__call_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/debug/calls/{call_id}/replay": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Replay */
+    post: operations["replay_api_admin_debug_calls__call_id__replay_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/debug/replays/{job_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Replay Result */
+    get: operations["replay_result_api_admin_debug_replays__job_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/debug/routing": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Routing */
+    get: operations["routing_api_admin_debug_routing_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/auth/signup": {
     parameters: {
       query?: never;
@@ -3127,6 +3246,8 @@ export interface components {
       dry_run: boolean;
       /** Reason */
       reason?: string | null;
+      /** Confirm */
+      confirm?: string | null;
     };
     /** QuestionDetail */
     QuestionDetail: {
@@ -3238,6 +3359,23 @@ export interface components {
     ReasonIn: {
       /** Reason */
       reason?: string | null;
+    };
+    /** ReplayIn */
+    ReplayIn: {
+      /**
+       * Target
+       * @default mock
+       * @enum {string}
+       */
+      target: "mock" | "local";
+      /** Messages */
+      messages?:
+        | {
+            [key: string]: string;
+          }[]
+        | null;
+      /** Response Format */
+      response_format?: ("json" | "text") | null;
     };
     /** ResetCourseIn */
     ResetCourseIn: {
@@ -3522,7 +3660,11 @@ export interface components {
        * @enum {string}
        */
       key:
-        "force_quick_mode" | "offline_demo_mode" | "pause_background_lane" | "llm_max_rpm_override";
+        | "force_quick_mode"
+        | "offline_demo_mode"
+        | "pause_background_lane"
+        | "llm_max_rpm_override"
+        | "trace_prompts";
       /** Value */
       value: unknown;
       /** Effective */
@@ -3557,6 +3699,8 @@ export interface components {
       llm_max_rpm: number;
       /** Force Quick Max Minutes */
       force_quick_max_minutes: number;
+      /** Trace Max Minutes */
+      trace_max_minutes: number;
     };
     /** SystemStatus */
     SystemStatus: {
@@ -4045,7 +4189,9 @@ export interface operations {
   sign_out_api_admin_session_delete: {
     parameters: {
       query?: never;
-      header?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+      };
       path?: never;
       cookie?: never;
     };
@@ -4057,6 +4203,15 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
       };
     };
   };
@@ -4138,7 +4293,8 @@ export interface operations {
           | "force_quick_mode"
           | "offline_demo_mode"
           | "pause_background_lane"
-          | "llm_max_rpm_override";
+          | "llm_max_rpm_override"
+          | "trace_prompts";
       };
       cookie?: {
         lw_admin?: string | null;
@@ -5076,9 +5232,7 @@ export interface operations {
   };
   remove_member_api_admin_worlds__world_id__members__user_id__delete: {
     parameters: {
-      query?: {
-        reason?: string;
-      };
+      query?: never;
       header?: {
         "x-admin-action"?: string | null;
         "x-admin-token"?: string | null;
@@ -5091,7 +5245,11 @@ export interface operations {
         lw_admin?: string | null;
       };
     };
-    requestBody?: never;
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["ReasonIn"] | null;
+      };
+    };
     responses: {
       /** @description Successful Response */
       200: {
@@ -5835,6 +5993,271 @@ export interface operations {
   invariants_api_admin_invariants_get: {
     parameters: {
       query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  live_api_admin_debug_live_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  job_timeline_api_admin_debug_jobs__job_id__get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        job_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  calls_api_admin_debug_calls_get: {
+    parameters: {
+      query?: {
+        job_id?: string | null;
+        task_kind?: string;
+        limit?: number;
+      };
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          }[];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  call_detail_api_admin_debug_calls__call_id__get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        call_id: number;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  replay_api_admin_debug_calls__call_id__replay_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-action"?: string | null;
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        call_id: number;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReplayIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  replay_result_api_admin_debug_replays__job_id__get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        job_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  routing_api_admin_debug_routing_get: {
+    parameters: {
+      query?: {
+        hours?: number;
+        provider?: "cloud" | "local" | "mock" | "all";
+      };
       header?: {
         "x-admin-token"?: string | null;
       };

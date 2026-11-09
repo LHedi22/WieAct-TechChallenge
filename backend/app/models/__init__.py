@@ -1,5 +1,5 @@
 from app.models.admin import AdminAction, EconomyOverride, RuntimeFlag
-from app.models.ai import AICache, AICallLog
+from app.models.ai import AICache, AICallLog, AICallTrace, WorkerHeartbeat, WorkerStatus
 from app.models.arena import PeerAnswer, PeerQuestion, PeerVote
 from app.models.base import Base
 from app.models.course import Chapter, Course
@@ -38,6 +38,9 @@ __all__ = [
     "ChapterMastery",
     "AICache",
     "AICallLog",
+    "AICallTrace",
+    "WorkerHeartbeat",
+    "WorkerStatus",
     "Base",
     "Chapter",
     "Chunk",

@@ -47,6 +47,7 @@ const switches = (over: Partial<Record<string, unknown>> = {}): Switches => ({
   offline_now: false,
   llm_max_rpm: 18,
   force_quick_max_minutes: 60,
+  trace_max_minutes: 120,
 });
 
 const stats: Stats = {

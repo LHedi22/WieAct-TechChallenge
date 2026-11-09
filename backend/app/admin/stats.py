@@ -47,7 +47,10 @@ async def stats(
     s: Annotated[AsyncSession, Depends(get_session)],
     provider: Literal["cloud", "local", "mock", "all"] = "cloud",
 ) -> Stats:
-    where = [] if provider == "all" else [AICallLog.provider == provider]
+    # replays from /admin/debug (mock or local only) are never part of the numbers
+    where = [AICallLog.debug.is_(False)]
+    if provider != "all":
+        where.append(AICallLog.provider == provider)
     calls_q = select(AICallLog).where(*where, AICallLog.cache_hit.is_(False)).subquery()
 
     totals = (

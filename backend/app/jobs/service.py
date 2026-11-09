@@ -82,7 +82,7 @@ async def create_job(
 async def _avg_call_s(s: AsyncSession) -> float:
     recent = (
         select(AICallLog.latency_ms)
-        .where(AICallLog.status_code == 200, AICallLog.latency_ms > 0)
+        .where(AICallLog.status_code == 200, AICallLog.latency_ms > 0, AICallLog.debug.is_(False))
         .order_by(AICallLog.id.desc())
         .limit(30)
         .subquery()
@@ -97,6 +97,7 @@ async def queue_position(s: AsyncSession, job: Job) -> int:
         select(func.count()).where(
             Job.status == "queued",
             Job.id != job.id,
+            Job.kind != "DEBUG_REPLAY",  # admin replays (dev only) aren't a student's wait
             or_(
                 and_(Job.lane == "interactive", job.lane == "background"),
                 and_(Job.lane == job.lane, Job.created_at < job.created_at),

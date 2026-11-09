@@ -11,6 +11,8 @@ The switches work inside the production guards, never around them:
   (production outside the slot stays offline).
 - `pause_background_lane`: the worker claims no background job; interactive jobs still run.
 - `llm_max_rpm_override`: may only lower LLM_MAX_RPM, never raise it.
+- `trace_prompts_until`: until then, the gateway stores capped, redacted prompts and replies in
+  `ai_call_trace` (gateway/trace.py) for /admin/debug. Off by default; it switches itself off.
 """
 
 from __future__ import annotations
@@ -32,6 +34,7 @@ log = logging.getLogger("flags")
 
 TTL_S = 3.0
 FORCE_QUICK_MAX_MINUTES = 60
+TRACE_MAX_MINUTES = 120
 OfflineSetting = Literal["auto", "on", "off"]
 
 
@@ -40,11 +43,17 @@ class Flags(BaseModel):
     offline_demo_mode: OfflineSetting = "auto"
     pause_background_lane: bool = False
     llm_max_rpm_override: int | None = Field(None, ge=1)
+    trace_prompts_until: datetime | None = None
 
     def force_quick_active(self, now: datetime | None = None) -> bool:
         if self.force_quick_until is None:
             return False
         return (now or datetime.now(UTC)) < self.force_quick_until
+
+    def trace_active(self, now: datetime | None = None) -> bool:
+        if self.trace_prompts_until is None:
+            return False
+        return (now or datetime.now(UTC)) < self.trace_prompts_until
 
 
 KEYS: tuple[str, ...] = tuple(Flags.model_fields)

@@ -25,13 +25,18 @@ from app.models import Job
 router = APIRouter()
 Sessionmaker = Annotated[async_sessionmaker[AsyncSession], Depends(get_sessionmaker)]
 SwitchKey = Literal[
-    "force_quick_mode", "offline_demo_mode", "pause_background_lane", "llm_max_rpm_override"
+    "force_quick_mode",
+    "offline_demo_mode",
+    "pause_background_lane",
+    "llm_max_rpm_override",
+    "trace_prompts",
 ]
 STORED = {  # API key → runtime_flags key
     "force_quick_mode": "force_quick_until",
     "offline_demo_mode": "offline_demo_mode",
     "pause_background_lane": "pause_background_lane",
     "llm_max_rpm_override": "llm_max_rpm_override",
+    "trace_prompts": "trace_prompts_until",
 }
 
 
@@ -52,6 +57,7 @@ class Switches(BaseModel):
     offline_now: bool
     llm_max_rpm: int  # the configured ceiling an override may only lower
     force_quick_max_minutes: int
+    trace_max_minutes: int
 
 
 class SwitchIn(BaseModel):
@@ -68,6 +74,12 @@ def _validate(key: SwitchKey, value: Any, settings) -> Any:
             raise HTTPException(422, "force_quick_mode takes minutes (0 = off)")
         if not 0 <= value <= flags.FORCE_QUICK_MAX_MINUTES:
             raise HTTPException(422, f"0 to {flags.FORCE_QUICK_MAX_MINUTES} minutes")
+        return (datetime.now(UTC) + timedelta(minutes=value)).isoformat() if value else None
+    if key == "trace_prompts":
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise HTTPException(422, "trace_prompts takes minutes (0 = off)")
+        if not 0 <= value <= flags.TRACE_MAX_MINUTES:
+            raise HTTPException(422, f"0 to {flags.TRACE_MAX_MINUTES} minutes")
         return (datetime.now(UTC) + timedelta(minutes=value)).isoformat() if value else None
     if key == "offline_demo_mode":
         if value not in ("auto", "on", "off"):
@@ -98,6 +110,7 @@ async def _view(s: AsyncSession, settings, sm) -> Switches:
         "offline_demo_mode": flags.offline_setting(settings, current),
         "pause_background_lane": current.pause_background_lane,
         "llm_max_rpm_override": flags.max_rpm(settings, current),
+        "trace_prompts": current.trace_active(),
     }
     notes: dict[str, str | None] = {
         "force_quick_mode": "FORCE_QUICK_MODE=on in the environment keeps it on"
@@ -108,6 +121,9 @@ async def _view(s: AsyncSession, settings, sm) -> Switches:
         else f"auto = environment ({settings.OFFLINE_DEMO_MODE})",
         "pause_background_lane": None,
         "llm_max_rpm_override": f"configured rate: {settings.LLM_MAX_RPM} per minute",
+        "trace_prompts": "stores course text and student answers for 24 h: production with care"
+        if settings.APP_ENV == "production"
+        else "capped, redacted, deleted after 24 h",
     }
     out = []
     for key, flag in STORED.items():
@@ -130,6 +146,7 @@ async def _view(s: AsyncSession, settings, sm) -> Switches:
         offline_now=res.offline,
         llm_max_rpm=settings.LLM_MAX_RPM,
         force_quick_max_minutes=flags.FORCE_QUICK_MAX_MINUTES,
+        trace_max_minutes=flags.TRACE_MAX_MINUTES,
     )
 
 
