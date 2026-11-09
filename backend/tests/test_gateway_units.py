@@ -190,6 +190,21 @@ def test_extract_json_missing_commas_between_items():
     assert extract_json('{"s": "} {"}') == {"s": "} {"}
 
 
+def test_extract_json_items_spilled_after_a_closed_array():
+    # llama3.2-3b on the platform (9/11 trace, call 155): the array is closed after the first
+    # question and the rest follow outside it, one with a stray extra brace.
+    text = (
+        '{"questions": [{"question": "q1", "n": 1}]}, {"question": "q2", "n": 2}}, '
+        '{"question": "q3 {x}", "n": 3}\n{"question": "q4", "n": 4}]}'
+    )
+    got = extract_json(text)
+    assert [q["question"] for q in got["questions"]] == ["q1", "q2", "q3 {x}", "q4"]
+    # unrelated trailing objects are not pulled in
+    assert extract_json('{"questions": [{"question": "a"}]} then {"other": 1}') == {
+        "questions": [{"question": "a"}]
+    }
+
+
 def test_strip_think():
     assert strip_think("<think>\nlong\n</think>\nAnswer") == "Answer"
 

@@ -70,6 +70,37 @@ def _missing_commas(text: str) -> str:
     return "".join(out)
 
 
+def _objects(text: str) -> list[dict[str, Any]]:
+    """Every complete JSON object in `text`, left to right, skipping stray `,` `}` `]`."""
+    found: list[dict[str, Any]] = []
+    i = 0
+    while (i := text.find("{", i)) != -1:
+        piece = _balanced(text, i)
+        try:
+            value = json.loads(_TRAILING_COMMA.sub(r"\1", piece))
+        except json.JSONDecodeError:
+            i += 1
+            continue
+        if isinstance(value, dict):
+            found.append(value)
+        i += len(piece)
+    return found
+
+
+def _spilled(value: Any, rest: str) -> Any:
+    """`{"items": [{...}]}, {...}, {...}`: the array was closed too early and the other items
+    follow it (llama3.2-3b on quizzes, 9 Nov). Append the trailing objects that look like the
+    list's items (same first key) to that list."""
+    if not (isinstance(value, dict) and len(value) == 1 and "{" in rest):
+        return value
+    ((key, items),) = value.items()
+    if not (isinstance(items, list) and items and isinstance(items[0], dict) and items[0]):
+        return value
+    marker = next(iter(items[0]))
+    extra = [o for o in _objects(rest) if marker in o]
+    return {key: items + extra} if extra else value
+
+
 def extract_json(text: str) -> Any | None:
     """Parse the first JSON object/array in `text`, or None."""
     cleaned = _FENCE.sub("", strip_think(text)).strip()
@@ -80,13 +111,15 @@ def extract_json(text: str) -> Any | None:
     starts = [i for i in (cleaned.find("{"), cleaned.find("[")) if i != -1]
     if not starts:
         return None
-    candidate = _TRAILING_COMMA.sub(r"\1", _balanced(cleaned, min(starts)))
+    piece = _balanced(cleaned, min(starts))
+    rest = cleaned[min(starts) + len(piece) :]
+    candidate = _TRAILING_COMMA.sub(r"\1", piece)
     try:
-        return json.loads(candidate)
+        return _spilled(json.loads(candidate), rest)
     except json.JSONDecodeError:
         pass
     try:
-        return json.loads(_missing_commas(candidate))
+        return _spilled(json.loads(_missing_commas(candidate)), rest)
     except json.JSONDecodeError:
         return None
 
