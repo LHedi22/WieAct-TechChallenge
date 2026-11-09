@@ -158,9 +158,11 @@ others read the cache when it lands.
 `documents(id, chapter_id, filename, kind, size, status, error)` · `chunks(id, document_id, chapter_id, text, page_ref, tags[], lang)` — vectors in Qdrant
 `course_levels(user_id, course_id, level, placed_at, goal)` · `chapter_mastery(user_id, chapter_id, mastery, weak)`
 `placement_sets(id, course_id, language, questions jsonb)` — answers never leave the server · `presence(user_id, course_id, chapter_id, seen_at)` — "on this island now", 2-minute window
-`jobs(id, user_id, world_id, kind, lane, status, stage, stages, not_before, attempts, cost, result jsonb, error, quick_mode, created_at, finished_at)`
+`jobs(id, user_id, world_id, kind, lane, status, stage, stages, not_before, attempts, cost, result jsonb, error, quick_mode, created_at, finished_at, events jsonb)` — `events`: the timeline (claimed, stage, deferred, done, failed, swept)
 `ai_cache(key PK, task_kind, content jsonb, model_tier, created_at, hits)`
-`ai_call_log(id, ts, task_kind, model_tier, pattern, status_code, tokens_in, tokens_out, latency_ms, cache_hit, fallback, refusal_reason)`
+`ai_call_log(id, ts, task_kind, model_tier, pattern, status_code, tokens_in, tokens_out, latency_ms, cache_hit, fallback, refusal_reason, job_id, attempt, debug, single_flight)` — `debug` rows (replays) are left out of every metric
+`ai_call_trace(call_log_id, created_at, messages, reply, parsed, error)` — only while the `trace_prompts_until` switch is on; capped, redacted, deleted after 24 h
+`worker_status(worker_id, updated_at, data)` (every 2 s) · `worker_heartbeats(id, worker_id, ts, data)` (every 30 s, kept 24 h)
 `quiz_sets(id, world_id, course_id, chapter_id, level, language, seed, questions jsonb)` · `quiz_attempts(id, user_id, quiz_set_id, world_id, course_id, chapter_id, level, language, answers jsonb, current, score, points, second_tries, status, finished_at)`
 `mistakes(id, user_id, world_id, chapter_id, attempt_id, question_idx, concept, mistake_type, created_at)`
 `wisdom_tips(id, world_id, course_id, chapter_id, concept, mistake_type, language, text jsonb{trap,why,right}, student_count)` — unique (world, concept, mistake_type, language); `mistakes.concept` is the shared quiz question's concept so classmates' mistakes match
@@ -192,7 +194,8 @@ a ledger row — never mutate a balance without one.
 `lw_admin` cookie from `POST /api/admin/session {token, label}` or `X-Admin-Token` for scripts;
 every mutation needs `X-Admin-Action: 1` and writes `admin_actions`):
 `/api/admin/{session,me}` · `/api/admin/switches` (+ `PUT /{key}`: `force_quick_mode`,
-`offline_demo_mode`, `pause_background_lane`, `llm_max_rpm_override`) · `/api/admin/force-quick` (alias)
+`offline_demo_mode`, `pause_background_lane`, `llm_max_rpm_override`, `trace_prompts` (minutes)) ·
+`/api/admin/force-quick` (alias)
 · `/api/admin/stats` (call-log aggregates; `forced_fallbacks` apart from `fallbacks`) ·
 reads, 50 per page: `/api/admin/users` (+`/{id}`), `/worlds` (+`/{id}`), `/content?kind=` (+`/{kind}/{id}`),
 `/arena/questions`, `/arena/answers`, `/jobs` (+`/summary`, `/{id}`), `/cache` (+`/summary`), `/actions` ·
@@ -202,7 +205,13 @@ changes: `PATCH /users/{id}`, `POST /users/{id}/{password,sign-out,reset-course,
 `POST /delete/{user|world|course|chapter|document}/{id}/dry-run` then `DELETE /delete/{kind}/{id} {confirm, reason}`,
 `POST /jobs/{id}/{cancel,retry,run-now}`, `POST /cache/purge` (dry run first), `PUT /content/{kind}/{id}`,
 `POST /arena/{questions,answers}/{id}` (reject / restore / unpin / score), `GET /economy` +
-`PUT /economy/{key}` (live overrides), `GET /invariants` (reports, never fixes).
+`PUT /economy/{key}` (live overrides), `GET /invariants` (reports, never fixes; `admin/invariants.py`).
+**Debug** (`/admin/debug`, read-only): `/api/admin/debug/live` (worker heartbeat, queues, calls per
+minute, last 50 calls) · `/debug/jobs/{id}` (timeline, calls, coins) · `/debug/calls` + `/debug/calls/{id}`
+(log row + trace + repair call) · `POST /debug/calls/{id}/replay {target: mock|local, messages?}` (a
+`DEBUG_REPLAY` job; refused on cloud and in production) + `/debug/replays/{job}` · `/debug/routing?hours&provider`
+(calls vs the routing table, repeated identical requests) · `/debug/students/{id}` (+ `/price?activity&chapter_id&level`)
+· `/debug/bundle?job_id|user|since` (redacted Markdown; `scripts/debug_bundle.py`).
 
 ## Config (.env)
 See `.env.example`. Backend reads via `pydantic-settings`; frontend only gets `VITE_API_URL`.

@@ -100,6 +100,12 @@ Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
 - [x] **Cloud / Local model switch** in the top bar (6/11, user request; dev only): picks the
       competition models or our Ollama at runtime, hides the mock's placeholder quizzes/notes and
       re-tags + re-indexes the material with the picked models (DECISIONS.md 2026-11-06).
+- [x] **Debugger** (9/11, branch `debugger`, not merged): `/admin/debug` Live (worker heartbeat,
+      queues, calls per minute, last 50 calls), Job timeline, call detail with prompt traces, replay on
+      mock/local (never cloud), routing check, student inspector with invariants and "explain price";
+      `scripts/debug_bundle.py`; `/fix-bug` + `bug-fixer` agent (CLAUDE.md §Fixing a bug).
+      Migration 0016. **Keep prompt traces off during the user test and the demo** (they store
+      course text and student answers for 24 h; the switch turns itself off after ≤ 120 min).
 - [ ] Optional: the KaTeX swap for `MathText` if the npm registry allows it.
 - [ ] Optional: "ask the AI after 10 min without a peer answer" (deferred, DECISIONS.md).
 

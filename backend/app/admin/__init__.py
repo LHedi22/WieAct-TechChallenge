@@ -6,6 +6,7 @@ from fastapi import APIRouter
 from app.admin import (
     actions,
     browse,
+    bundle,
     debug,
     economy_admin,
     inspect,
@@ -23,3 +24,4 @@ router.include_router(actions.router)
 router.include_router(economy_admin.router)
 router.include_router(debug.router)
 router.include_router(inspect.router)
+router.include_router(bundle.router)
