@@ -57,6 +57,7 @@ class Result(BaseModel):
     tokens_out: int = 0
     latency_ms: int = 0
     notes: list[str] = Field(default_factory=list)  # e.g. "shrunk max_tokens to 1024"
+    cache_ref: str | None = None  # the ai_cache row this came from / was stored in (for forget)
 
 
 class EmbedResult(BaseModel):

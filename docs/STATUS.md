@@ -34,8 +34,10 @@ Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
       `qwen2.5-3b` failed quiz JSON, ours passed).
 - [ ] Load test against cloud once: `scripts/load.py --jobs 10 --faults ""` with the backend on
       `LLM_PROVIDER=cloud`, then `scripts/export_stats.py --load <saved output>`.
-- [ ] Record the real quota signal: the status code for "team quota exhausted" and any quota
-      headers (none on 200 so far) → DECISIONS.md, `quota.py` if needed.
+- [x] Record the real quota signal (9/11): quota headers on every 200 are `x-ratelimit-api_key-{remaining,limit}-{requests,max_parallel_requests}` and
+      `x-litellm-key-rpm-limit` → DECISIONS.md 2026-11-09.
+  - [ ] Still unseen: the status code for "team quota exhausted".
+  - [x] `quota.py` no longer reads `remaining-max_parallel_requests` as requests remaining (9/11; it could pause the background lane).
 - [ ] Warm up the deployed class cache (DEPLOY.md §4) so offline demo mode has real content.
 - [ ] User test with ~10 students at once; export stats for the report.
 - [ ] Record the demo video (`docs/report/VIDEO.md` shot list).

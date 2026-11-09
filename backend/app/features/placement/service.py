@@ -135,6 +135,7 @@ async def generate(ctx: JobContext) -> dict[str, Any]:
     )
     questions = clean(result.content, chapters)
     if len(questions) < MIN_VALID:
+        await gateway.forget(result)  # shared by the course: a retry must not replay it
         raise BadOutput(f"only {len(questions)} valid questions", refusal="bad_quiz")
     # Audit N-3: a wrong key would mis-place the student, and the set is shared by the course:
     # only items the mid solver confirms are kept; mid unavailable → wait for it (free, queued).

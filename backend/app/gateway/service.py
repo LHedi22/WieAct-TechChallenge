@@ -234,6 +234,7 @@ class Gateway:
                     provider=profile.provider,
                     pattern=pattern,
                     cached=True,
+                    cache_ref=key,
                 )
         if res.offline:
             raise OfflineMode(res.reason)
@@ -386,6 +387,7 @@ class Gateway:
             tokens_in, tokens_out, latency = reply.tokens_in, reply.tokens_out, reply.latency_ms
             if json_mode:
                 content = extract_json(reply.text)
+            empty = json_mode and content is None and not reply.text.strip()
             if tracing:
                 await trace.write(
                     self.sm,
@@ -393,10 +395,16 @@ class Gateway:
                     messages=messages,
                     reply=reply.raw if reply.raw is not None else reply.text,
                     parsed=content if json_mode else None,
-                    error="no JSON found: one repair call follows"
+                    error="empty reply: no repair call"
+                    if empty
+                    else "no JSON found: one repair call follows"
                     if json_mode and content is None
                     else None,
                 )
+            if empty:
+                # Nothing to repair (e.g. the budget went on hidden reasoning): a repair
+                # call would invent JSON from nothing, and that would be cached.
+                raise BadOutput("empty reply", refusal="bad_json")
             if json_mode and content is None:  # one compact repair call
                 fixed = await self._repair(task, profile, reply.text, max_tokens, tracing)
                 content = fixed.get("content")
@@ -427,8 +435,15 @@ class Gateway:
                 tokens_out=tokens_out,
                 latency_ms=latency,
                 notes=notes,
+                cache_ref=key if key and not quick_mode else None,
             )
         raise Defer(10, "too_many_attempts")
+
+    async def forget(self, result: Result) -> None:
+        """Drop a reply the feature could not use from ai_cache, so a retry makes a fresh call
+        instead of replaying it (e.g. a quiz with too few valid questions)."""
+        if result.cache_ref:
+            await cache.drop(self.sm, result.cache_ref)
 
     async def _repair(
         self, task: Task, profile: LLMProfile, broken: str, max_tokens: int, tracing: bool = False

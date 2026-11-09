@@ -72,6 +72,22 @@ def test_quota_headers_other_names():
     assert s.remaining == 15 and s.reset_s == 20 and not s.low
 
 
+def test_platform_parallel_headers_are_not_requests_remaining():
+    # The real platform (9/11) sends both; the parallel slots left (0–2) must not be read as the
+    # requests left, or the background lane pauses at once (LOW_WATERMARK = 3).
+    s = parse(
+        {
+            "x-ratelimit-api_key-remaining-requests": "19",
+            "x-ratelimit-api_key-limit-requests": "20",
+            "x-ratelimit-api_key-remaining-max_parallel_requests": "1",
+            "x-ratelimit-api_key-limit-max_parallel_requests": "2",
+        }
+    )
+    assert s.remaining == 19 and not s.low
+    only_parallel = {"x-ratelimit-api_key-remaining-max_parallel_requests": "0"}
+    assert parse(only_parallel) is None
+
+
 def test_no_quota_headers():
     assert parse({"content-type": "application/json"}) is None
 

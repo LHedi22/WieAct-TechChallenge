@@ -126,6 +126,29 @@ async def test_upload_index_and_rollup(api, sm, pptx):
     assert tree["courses"][0]["chapters"][0]["documents"][0]["status"] == "ready"
 
 
+async def test_rollup_reports_a_failed_quiz_pool(api, sm, pptx):
+    # A pool whose job failed (e.g. a small local model writing unusable questions) must not
+    # sit on "Waiting" forever (user report, 7 Nov).
+    from sqlalchemy import delete, update
+
+    from app.models import Job, QuizSet
+
+    world = await make_world(api)
+    chapter = world["course"]["chapters"][0]["id"]
+    await api.post(
+        f"/api/chapters/{chapter}/documents",
+        files={"file": (pptx.name, pptx.read_bytes())},
+        headers=SEA,
+    )
+    await Worker(sm).drain(timeout_s=60)
+    async with sm() as s:
+        await s.execute(delete(QuizSet))
+        await s.execute(update(Job).where(Job.kind == "QUIZ_POOL").values(status="failed"))
+        await s.commit()
+    view = (await api.get(f"/api/worlds/{world['id']}/indexing", headers=SEA)).json()
+    assert view["done"] and view["quizzes"] == {"state": "failed", "ready": 0}
+
+
 async def test_upload_rejects_unknown_types(api):
     world = await make_world(api)
     chapter = world["course"]["chapters"][0]["id"]

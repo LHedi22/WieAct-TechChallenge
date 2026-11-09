@@ -345,6 +345,21 @@ async def indexing_view(s: AsyncSession, world: World) -> dict[str, Any]:
             Job.status.in_(("queued", "running")),
         )
     )
+    pool_failed = (
+        not pools
+        and not pool_jobs
+        and await s.scalar(
+            select(func.count())
+            .select_from(Job)
+            .where(Job.world_id == world.id, Job.kind == "QUIZ_POOL", Job.status == "failed")
+        )
+    )
+    if pool_jobs:
+        quiz_state = "in_progress"
+    elif pools:
+        quiz_state = "done"
+    else:
+        quiz_state = "failed" if pool_failed else "waiting"
     per_doc = 5 * await _avg_call_s(s) if remaining_docs else 0  # ~4 tag calls + 1 embed call
     return {
         "world_id": world.id,
@@ -354,7 +369,7 @@ async def indexing_view(s: AsyncSession, world: World) -> dict[str, Any]:
         "eta_s": int(per_doc * remaining_docs) if remaining_docs else 0,
         "chapters": chapters_out,
         "quizzes": {
-            "state": "in_progress" if pool_jobs else ("done" if pools else "waiting"),
+            "state": quiz_state,
             "ready": pools or 0,
         },
         "done": total > 0 and remaining_docs == 0,

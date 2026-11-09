@@ -448,6 +448,8 @@
       "eta": "Environ {minutes, plural, one {# minute} other {# minutes}} restantes",
       "etaSoon": "Presque fini",
       "done": "Tes îles sont prêtes !",
+      "failed": "Impossible de lire tes fichiers",
+      "failedFiles": "{count, plural, one {# fichier n'a pas pu être lu. Ajoute-le à nouveau depuis ton monde.} other {# fichiers n'ont pas pu être lus. Ajoute-les à nouveau depuis ton monde.}}",
       "now": "Lecture de {title}…",
       "detail": {
         "page": "{file} · page {n} sur {of}",
@@ -472,7 +474,8 @@
       "quizzesState": {
         "waiting": "En attente",
         "in_progress": "En cours",
-        "done": "Terminé"
+        "done": "Terminé",
+        "failed": "Créés quand tu ouvres la Salle des quiz"
       },
       "tip": "Pendant l'attente : la première île terminée t'offre un quiz de placement gratuit, pour que chaque bâtiment démarre à ton niveau.",
       "tipLabel": "Pendant l'attente :",

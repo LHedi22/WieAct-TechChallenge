@@ -870,7 +870,11 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Invariants */
+    /**
+     * Invariants
+     * @description Every check of admin/invariants.py over the whole app (the student inspector runs the same
+     *     checks for one student).
+     */
     get: operations["invariants_api_admin_invariants_get"];
     put?: never;
     post?: never;
@@ -991,6 +995,60 @@ export interface paths {
     };
     /** Routing */
     get: operations["routing_api_admin_debug_routing_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/debug/students/{user_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Student */
+    get: operations["student_api_admin_debug_students__user_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/debug/students/{user_id}/price": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Explain Price
+     * @description What the student would pay right now and why, with the app's own pricing functions.
+     */
+    get: operations["explain_price_api_admin_debug_students__user_id__price_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/admin/debug/bundle": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Bundle */
+    get: operations["bundle_api_admin_debug_bundle_get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -2755,7 +2813,7 @@ export interface components {
        * State
        * @enum {string}
        */
-      state: "waiting" | "in_progress" | "done";
+      state: "waiting" | "in_progress" | "done" | "failed";
       /** Ready */
       ready: number;
     };
@@ -6276,6 +6334,124 @@ export interface operations {
         content: {
           "application/json": {
             [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  student_api_admin_debug_students__user_id__get: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        user_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  explain_price_api_admin_debug_students__user_id__price_get: {
+    parameters: {
+      query: {
+        activity:
+          "quiz" | "study_pack" | "audio" | "tutor_session" | "teachback_solo" | "peer_question";
+        chapter_id?: string | null;
+        level?: string;
+      };
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path: {
+        user_id: string;
+      };
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  bundle_api_admin_debug_bundle_get: {
+    parameters: {
+      query?: {
+        job_id?: string | null;
+        user?: string | null;
+        since?: string | null;
+      };
+      header?: {
+        "x-admin-token"?: string | null;
+      };
+      path?: never;
+      cookie?: {
+        lw_admin?: string | null;
+      };
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: string;
           };
         };
       };

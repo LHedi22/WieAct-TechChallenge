@@ -190,6 +190,38 @@ async def test_unreadable_file_fails_with_a_user_key(sm, gw, tmp_path):
     assert j.status == "failed" and j.error == "errors.document_unreadable"
 
 
+async def test_unusable_tag_reply_leaves_its_chunks_untagged_not_the_file_failed(
+    sm, gw, files, monkeypatch
+):
+    # Small models sometimes write JSON that even the repair call can't fix (seen on the 1.7B
+    # local model with a 157-page PDF): tags are enrichment, so the file must still be indexed.
+    from app.gateway.errors import BadOutput
+    from app.gateway.router import TaskKind
+
+    real_run, broken = gw.run, []
+
+    async def run(task):
+        if task.kind == TaskKind.CHUNK_TAG and task.cache_key.endswith(":0"):
+            broken.append(task.cache_key)
+            raise BadOutput("invalid JSON after one repair call", refusal="bad_json")
+        return await real_run(task)
+
+    monkeypatch.setattr(gateway_module, "run", run)
+    user, world, chapters = await world_with_courses(sm)
+    pdf, _, _ = await upload(sm, user, chapters["Calculus I"], files["pdf"])
+    await Worker(sm).drain(timeout_s=120)
+
+    async with sm() as s:
+        doc = await s.get(Document, pdf.id)
+        rows = list(await s.scalars(select(Chunk).where(Chunk.document_id == pdf.id)))
+    assert broken and doc.status == "ready" and doc.progress == 100
+    first = [r for r in rows if r.idx < 8]
+    assert first and all(r.tags == ["-"] for r in first)  # the broken batch: untagged
+    assert any(r.tags != ["-"] for r in rows if r.idx >= 8)  # the others: tagged
+    hits = await search(world.id, "limit 0/0", k=5)
+    assert hits  # still searchable
+
+
 async def test_ready_chapter_precomputes_one_quiz_pool(sm, gw, files):
     user, _, chapters = await world_with_courses(sm)
     await upload(sm, user, chapters["Data Structures"], files["pptx"])

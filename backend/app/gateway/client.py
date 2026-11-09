@@ -82,6 +82,7 @@ class LLMClient:
         # Learned per model for this process: features the server rejected with a 400.
         self._no_json_mode: set[str] = set()
         self._no_template_kwargs: set[str] = set()
+        self._no_reasoning_effort: set[str] = set()
 
     def prepare(self, model: str, messages: list[dict[str, Any]], kind: str, language: str):
         msgs = [dict(m) for m in messages]
@@ -109,7 +110,7 @@ class LLMClient:
         timeout_s: float | None = None,
     ) -> Reply:
         msgs = self.prepare(model, messages, kind, language)
-        for _ in range(3):  # at most: drop response_format, drop chat_template_kwargs, real call
+        for _ in range(4):  # at most: drop each optional field once, then the real call
             use_json = (
                 json_mode
                 and self.json_mode != "off"
@@ -119,6 +120,14 @@ class LLMClient:
                 self.disable_thinking
                 and self.profile.provider == "cloud"
                 and model not in self._no_template_kwargs
+            )
+            # Ollama's OpenAI endpoint ignores /no_think; without this, local Qwen3 spends the
+            # whole max_tokens on hidden reasoning and returns no answer.
+            use_re = (
+                self.disable_thinking
+                and self.profile.provider == "local"
+                and "qwen3" in model.lower()
+                and model not in self._no_reasoning_effort
             )
             kwargs: dict[str, Any] = {
                 "model": model,
@@ -131,6 +140,8 @@ class LLMClient:
                 kwargs["response_format"] = {"type": "json_object"}
             if use_tk:
                 kwargs["extra_body"] = {"chat_template_kwargs": {"enable_thinking": False}}
+            if use_re:
+                kwargs["reasoning_effort"] = "none"
             if timeout_s is not None:  # per call (interactive mid has a shorter budget)
                 kwargs["timeout"] = timeout_s
             t0 = time.monotonic()
@@ -155,6 +166,9 @@ class LLMClient:
                     )
                 ):
                     self._no_template_kwargs.add(model)
+                    continue
+                if e.status_code == 400 and use_re and _mentions(text, "reasoning"):
+                    self._no_reasoning_effort.add(model)
                     continue
                 headers = dict(e.response.headers)
                 raise CallFailed(classify(e.status_code, headers, text), headers, ms) from e

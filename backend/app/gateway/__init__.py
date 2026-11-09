@@ -33,6 +33,7 @@ __all__ = [
     "Tier",
     "get_gateway",
     "embed",
+    "forget",
     "run",
 ]
 
@@ -45,6 +46,10 @@ def get_gateway() -> Gateway:
 
 async def run(task: Task) -> Result:
     return await get_gateway().run(task)
+
+
+async def forget(result: Result) -> None:
+    await get_gateway().forget(result)
 
 
 async def embed(texts: list[str], lane: Lane, *, cache_query: bool = False) -> EmbedResult:
