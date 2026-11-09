@@ -8,6 +8,7 @@ from app.admin import (
     browse,
     debug,
     economy_admin,
+    inspect,
     session,
     stats,
     switches,
@@ -21,3 +22,4 @@ router.include_router(browse.router)
 router.include_router(actions.router)
 router.include_router(economy_admin.router)
 router.include_router(debug.router)
+router.include_router(inspect.router)

@@ -20,6 +20,7 @@ import { inputClass, plainError, when } from "./format";
 import { DataTable, Json } from "./table";
 import { OUTCOME, callColumns, useDebug } from "./debugKit";
 import { KV, Loading } from "./debugUi";
+import { StudentInspector, StudentSearch } from "./inspect";
 import { ErrorNote, Field, Pill, Section, SmallButton } from "./ui";
 
 const TRACE_MINUTES = [10, 30, 60, 120];
@@ -28,6 +29,7 @@ const TABS = [
   { to: "live", label: "Live" },
   { to: "routing", label: "Routing check" },
   { to: "jobs", label: "Job timeline" },
+  { to: "students", label: "Student inspector" },
 ];
 
 export function DebugPage() {
@@ -61,6 +63,8 @@ export function DebugPage() {
         <Route path="jobs" element={<JobLookup />} />
         <Route path="jobs/:id" element={<JobTimelinePage />} />
         <Route path="calls/:id" element={<CallPage />} />
+        <Route path="students" element={<StudentSearch />} />
+        <Route path="students/:id" element={<StudentInspector />} />
       </Routes>
     </div>
   );
