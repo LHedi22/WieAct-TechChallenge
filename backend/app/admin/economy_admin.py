@@ -19,16 +19,17 @@ from typing import Any, Literal
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from sqlalchemy import Integer, and_, case, cast, func, select
+from sqlalchemy import func, select
 
 from app.admin import audit
+from app.admin import invariants as inv
 from app.admin.auth import AdminActionDep, AdminDep
 from app.admin.browse import wallets
 from app.api.deps import Session
-from app.core import db, economy, economy_live
+from app.core import db, economy_live
 from app.core.wallet_rules import tunis_day
 from app.features.wallet.service import PASS_END, PASS_GRANT, _lock, balances
-from app.models import ClassPoolLedger, CoinLedger, Job, PointsLedger, User, World
+from app.models import ClassPoolLedger, CoinLedger, PointsLedger, User, World
 
 router = APIRouter()
 Reason = Field(min_length=3, max_length=500)
@@ -290,123 +291,7 @@ async def set_override(key: str, body: OverrideIn, admin: AdminActionDep, s: Ses
 # --- invariant check (reports, never fixes) ------------------------------------------------------
 @router.get("/invariants")
 async def invariants(_: AdminDep, s: Session) -> dict[str, Any]:
-    today = tunis_day()
-    v: list[dict[str, Any]] = []
-
-    # buckets never negative: earned and purchased over all time, free per day
-    for bucket in ("earned", "purchased"):
-        rows = (
-            await s.execute(
-                select(CoinLedger.user_id, func.sum(CoinLedger.delta))
-                .where(CoinLedger.bucket == bucket)
-                .group_by(CoinLedger.user_id)
-                .having(func.sum(CoinLedger.delta) < 0)
-            )
-        ).all()
-        v += [
-            {"check": "negative_bucket", "user_id": u, "bucket": bucket, "balance": int(n)}
-            for u, n in rows
-        ]
-    rows = (
-        await s.execute(
-            select(CoinLedger.user_id, CoinLedger.day, func.sum(CoinLedger.delta))
-            .where(CoinLedger.bucket == "free")
-            .group_by(CoinLedger.user_id, CoinLedger.day)
-            .having(func.sum(CoinLedger.delta) < 0)
-        )
-    ).all()
-    v += [
-        {"check": "negative_bucket", "user_id": u, "bucket": "free", "day": d, "balance": int(n)}
-        for u, d, n in rows
-    ]
-    # duplicate reward refs (earned coins are paid once per ref)
-    rows = (
-        await s.execute(
-            select(CoinLedger.user_id, CoinLedger.ref, func.count())
-            .where(CoinLedger.kind == "earned", CoinLedger.ref.is_not(None))
-            .group_by(CoinLedger.user_id, CoinLedger.ref)
-            .having(func.count() > 1)
-        )
-    ).all()
-    v += [{"check": "duplicate_reward", "user_id": u, "ref": r, "rows": n} for u, r, n in rows]
-    rows = (
-        await s.execute(
-            select(PointsLedger.user_id, PointsLedger.reason, PointsLedger.ref, func.count())
-            .group_by(PointsLedger.user_id, PointsLedger.reason, PointsLedger.ref)
-            .having(func.count() > 1)
-        )
-    ).all()
-    v += [
-        {"check": "duplicate_points", "user_id": u, "reason": why, "ref": r, "rows": n}
-        for u, why, r, n in rows
-    ]
-    # double refunds: refunds of a ref (job) worth more than what was spent on it
-    spent = func.sum(case((CoinLedger.kind == "spend", -CoinLedger.delta), else_=0))
-    refunded = func.sum(case((CoinLedger.kind == "refund", CoinLedger.delta), else_=0))
-    rows = (
-        await s.execute(
-            select(CoinLedger.user_id, CoinLedger.ref, spent, refunded)
-            .where(CoinLedger.kind.in_(("spend", "refund")), CoinLedger.ref.is_not(None))
-            .group_by(CoinLedger.user_id, CoinLedger.ref)
-            .having(refunded > spent)
-        )
-    ).all()
-    v += [
-        {"check": "over_refund", "user_id": u, "ref": r, "spent": int(a), "refunded": int(b)}
-        for u, r, a, b in rows
-    ]
-    # failed or cancelled paid jobs whose coins were never given back
-    spend_rows = (
-        select(CoinLedger.ref)
-        .where(CoinLedger.kind == "spend", CoinLedger.bucket != "pass")
-        .subquery()
-    )
-    refund_rows = select(CoinLedger.ref).where(CoinLedger.kind == "refund").subquery()
-    rows = (
-        await s.execute(
-            select(Job.id, Job.user_id, Job.status, Job.cost)
-            .where(
-                Job.status.in_(("failed", "cancelled")),
-                Job.cost > 0,
-                cast(Job.id, CoinLedger.ref.type).in_(select(spend_rows.c.ref)),
-                ~cast(Job.id, CoinLedger.ref.type).in_(select(refund_rows.c.ref)),
-            )
-            .limit(200)
-        )
-    ).all()
-    v += [
-        {"check": "unrefunded_job", "job_id": j, "user_id": u, "status": st, "cost": c}
-        for j, u, st, c in rows
-    ]
-    # class pools never negative, refunds at most once per ref
-    rows = (
-        await s.execute(
-            select(ClassPoolLedger.world_id, func.sum(ClassPoolLedger.delta))
-            .group_by(ClassPoolLedger.world_id)
-            .having(func.sum(ClassPoolLedger.delta) < 0)
-        )
-    ).all()
-    v += [{"check": "negative_pool", "world_id": w, "balance": int(n)} for w, n in rows]
-    rows = (
-        await s.execute(
-            select(ClassPoolLedger.ref, func.count())
-            .where(ClassPoolLedger.kind == "refund")
-            .group_by(ClassPoolLedger.ref)
-            .having(func.count() > 1)
-        )
-    ).all()
-    v += [{"check": "pool_double_refund", "ref": r, "rows": n} for r, n in rows]
-    # Exam Pass uses today within the daily limit
-    uses = func.sum(
-        case((CoinLedger.kind == "spend", 1), (CoinLedger.kind == "refund", -1), else_=0)
-    )
-    rows = (
-        await s.execute(
-            select(CoinLedger.user_id, cast(uses, Integer))
-            .where(and_(CoinLedger.bucket == "pass", CoinLedger.day == today))
-            .group_by(CoinLedger.user_id)
-            .having(uses > economy.EXAM_PASS_DAILY_LIMIT)
-        )
-    ).all()
-    v += [{"check": "pass_over_limit", "user_id": u, "uses": n} for u, n in rows]
+    """Every check of admin/invariants.py over the whole app (the student inspector runs the same
+    checks for one student)."""
+    v = inv.flat(await inv.run(s))
     return {"ok": not v, "violations": v, "checked_at": datetime.now(UTC)}

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import time
+from collections import deque
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager, suppress
 from typing import Literal
@@ -62,6 +63,34 @@ class Limiter:
         # Returns seconds the background lane should keep waiting (0 = go).
         self.background_pause = background_pause or (lambda: 0.0)
         self._cond = asyncio.Condition()
+        self._recent: dict[Meter, deque[float]] = {"chat": deque(), "embed": deque()}
+
+    def calls_last_60s(self, meter: Meter = "chat") -> int:
+        """Calls started in the last 60 s (for the worker status heartbeat)."""
+        q, now = self._recent[meter], time.monotonic()
+        while q and now - q[0] > 60:
+            q.popleft()
+        return len(q)
+
+    def snapshot(self) -> dict[str, object]:
+        """The limiter's state as plain JSON for /admin/debug (worker_status)."""
+        for b in self.buckets.values():
+            b.refill()
+        return {
+            "active": self.active,
+            "concurrency": self.concurrency,
+            "max_active": self.max_active,
+            "waiting": dict(self.waiting),
+            "buckets": {
+                m: {
+                    "tokens": round(b.tokens, 2),
+                    "capacity": b.capacity,
+                    "rpm": round(b.rate * 60, 2),
+                }
+                for m, b in self.buckets.items()
+            },
+            "rpm_last_60s": {m: self.calls_last_60s(m) for m in self.buckets},  # type: ignore[misc]
+        }
 
     def cap_rpm(self, override: float | None) -> None:
         """Admin switch (core/flags.py): lower the chat rate to `override`; it never raises it above
@@ -96,6 +125,7 @@ class Limiter:
                     with suppress(TimeoutError):  # timed out = recheck the bucket
                         await asyncio.wait_for(self._cond.wait(), timeout=hint)
                 self.buckets[meter].tokens -= 1
+                self._recent[meter].append(time.monotonic())
                 self.active += 1
                 self.max_active = max(self.max_active, self.active)
             finally:

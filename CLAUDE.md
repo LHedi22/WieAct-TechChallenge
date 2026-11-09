@@ -99,6 +99,13 @@ Gotchas seen on the macOS dev machine:
 - Keep prompts in `backend/app/prompts/*.md` (versioned, multilingual), not inline in code.
 - Log decisions you had to make in `docs/DECISIONS.md` (one line each).
 
+## Fixing a bug
+- Evidence first: `/admin/debug` (Live, Job timeline, call traces, routing check, student inspector),
+  or `ADMIN_TOKEN=… python3 scripts/debug_bundle.py --job <id> [--logs compose]` → `debug/bundles/`.
+- Prompt traces are off by default; turn them on for a few minutes from the Live page, never left on.
+- `/fix-bug <AUDIT ID | bundle | description>` runs the `bug-fixer` agent: failing test first,
+  smallest fix, `/verify`, one commit `fix(<area>): <title> [<ID>]`, finding marked fixed. No cloud.
+
 ## Scope guard
 If time is short, cut in this order: Audio Studio → mind maps → Class Pool → global leaderboard
 → cosmetics. Never cut: gateway resilience, Quiz Hall, Socratic Tutor, Teach-Back peer room,

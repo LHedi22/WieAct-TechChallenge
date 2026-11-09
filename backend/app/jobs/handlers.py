@@ -8,5 +8,8 @@ from app.features.quiz import pool, tagging  # noqa: F401
 from app.features.studio import pack  # noqa: F401
 from app.features.tutor import service as tutor  # noqa: F401
 from app.features.wisdom import service as wisdom  # noqa: F401
-from app.jobs import demo  # noqa: F401
+from app.jobs import (
+    demo,  # noqa: F401
+    replay,  # noqa: F401  (DEBUG_REPLAY, /admin/debug)
+)
 from app.rag import indexing, refresh, search  # noqa: F401

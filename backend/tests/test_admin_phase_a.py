@@ -233,8 +233,10 @@ async def test_switches_page_shows_state_and_who_changed_it(api, sm, monkeypatch
         "offline_demo_mode",
         "pause_background_lane",
         "llm_max_rpm_override",
+        "trace_prompts",  # debugger: off by default
     }
     assert by_key["force_quick_mode"]["effective"] is False
+    assert by_key["trace_prompts"]["effective"] is False
     assert by_key["llm_max_rpm_override"]["effective"] == 18
     assert view["provider"] == "mock" and view["llm_max_rpm"] == 18
     r = await api.put(
