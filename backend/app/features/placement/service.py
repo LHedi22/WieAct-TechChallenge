@@ -16,7 +16,7 @@ from app import gateway, prompts
 from app.core import db
 from app.core.provenance import replaces, servable
 from app.features.quiz import verify
-from app.features.quiz.pool import Question, pick_context
+from app.features.quiz.pool import Question, pick_context, spread_answers
 from app.gateway import BadOutput, Defer, Task, TaskKind
 from app.jobs.registry import JobContext, job
 from app.models import Chapter, ChapterMastery, Chunk, Course, CourseLevel, PlacementSet
@@ -100,7 +100,7 @@ def clean(content: Any, chapters: list[Chapter]) -> list[dict[str, Any]]:
             continue
         chapter = by_idx.get(pq.chapter) or chapters[len(out) % len(chapters)]
         out.append(pq.model_dump() | {"chapter": chapter.idx, "chapter_id": str(chapter.id)})
-    return out[:COUNT]
+    return spread_answers(out[:COUNT])
 
 
 @job(KIND, stages=("reading_chapter", "matching_level", "writing_questions", "checking_answers"))

@@ -178,6 +178,53 @@ def test_extract_json_nested_and_unrecoverable():
     assert extract_json("no json here") is None
 
 
+def test_extract_json_missing_commas_between_items():
+    # llama3.2-3b on the platform (9/11 trace): a quiz array with no comma between the objects;
+    # the JSON_REPAIR call returned it unchanged, so the quiz failed after two paid calls.
+    text = '{"questions": [\n{"q": "a {b}", "n": 1}\n{"q": "c", "n": 2}\n{"q": "d", "n": 3}\n]}'
+    assert extract_json(text) == {
+        "questions": [{"q": "a {b}", "n": 1}, {"q": "c", "n": 2}, {"q": "d", "n": 3}]
+    }
+    assert extract_json("[[1, 2] [3]]") == [[1, 2], [3]]
+    # braces inside strings are left alone
+    assert extract_json('{"s": "} {"}') == {"s": "} {"}
+
+
+def test_extract_json_items_spilled_after_a_closed_array():
+    # llama3.2-3b on the platform (9/11 trace, call 155): the array is closed after the first
+    # question and the rest follow outside it, one with a stray extra brace.
+    text = (
+        '{"questions": [{"question": "q1", "n": 1}]}, {"question": "q2", "n": 2}}, '
+        '{"question": "q3 {x}", "n": 3}\n{"question": "q4", "n": 4}]}'
+    )
+    got = extract_json(text)
+    assert [q["question"] for q in got["questions"]] == ["q1", "q2", "q3 {x}", "q4"]
+    # unrelated trailing objects are not pulled in
+    assert extract_json('{"questions": [{"question": "a"}]} then {"other": 1}') == {
+        "questions": [{"question": "a"}]
+    }
+
+
+def test_extract_json_unquoted_keys():
+    # llama3.1-8b (mid) on QUIZ_VERIFY, 9/11 trace call 160; the repair call failed on it too
+    text = '{"answers": [\n{n: 1, answer: 4, sure: true},\n{n: 2, answer: null, sure: false}\n]}'
+    assert extract_json(text) == {
+        "answers": [{"n": 1, "answer": 4, "sure": True}, {"n": 2, "answer": None, "sure": False}]
+    }
+    # words before a colon inside strings stay untouched
+    assert extract_json('{a: "x, b: y", c: 1}') == {"a": "x, b: y", "c": 1}
+
+
+def test_extract_json_array_closed_but_object_left_open():
+    # llama3.2-3b, 9/11 trace call 158: `{"questions": [{...}],\n{...},\n{...}` (repair needed)
+    text = (
+        '{"questions": [\n{"question": "q1", "n": 1}],\n{"question": "q2", "n": 2},\n'
+        '{"question": "q3", "n": 3}\n]}'
+    )
+    got = extract_json(text)
+    assert [q["question"] for q in got["questions"]] == ["q1", "q2", "q3"]
+
+
 def test_strip_think():
     assert strip_think("<think>\nlong\n</think>\nAnswer") == "Answer"
 

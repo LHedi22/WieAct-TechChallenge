@@ -10,6 +10,7 @@ the creator's language is generated on the background lane."""
 
 from __future__ import annotations
 
+import hashlib
 import uuid
 from typing import Any
 
@@ -51,6 +52,18 @@ class Question(BaseModel):
         return v
 
 
+def spread_answers(questions: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Move each correct option to a position picked from a hash of the question text, so the
+    keys are spread over A–D (llama3.2-3b puts every answer first, 9 Nov). Deterministic, no
+    model call; running it again changes nothing. The key keeps pointing at the same text."""
+    for q in questions:
+        opts, right = q["options"], q["answer_index"]
+        target = hashlib.sha256(q["question"].encode()).digest()[0] % len(opts)
+        opts[right], opts[target] = opts[target], opts[right]
+        q["answer_index"] = target
+    return questions
+
+
 def valid_questions(content: Any) -> list[dict[str, Any]]:
     raw = content.get("questions", []) if isinstance(content, dict) else []
     out = []
@@ -59,7 +72,7 @@ def valid_questions(content: Any) -> list[dict[str, Any]]:
             out.append(Question.model_validate(q).model_dump())
         except ValidationError:
             continue
-    return out
+    return spread_answers(out)
 
 
 def pick_context(chunks: list[Chunk], k: int = CONTEXT_CHUNKS, offset: int = 0) -> list[Chunk]:
