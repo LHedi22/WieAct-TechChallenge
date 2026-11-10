@@ -2,7 +2,7 @@
 API and the worker without a restart. Forced Quick mode is counted apart from real fallbacks."""
 
 import asyncio
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 
 import httpx
 import pytest
@@ -10,7 +10,7 @@ from pydantic import ValidationError
 from sqlalchemy import select, text
 
 from app.admin import auth
-from app.core import flags
+from app.core import flags, slot
 from app.core.config import Settings, get_settings
 from app.core.db import get_session, get_sessionmaker
 from app.gateway import Task, TaskKind
@@ -399,6 +399,7 @@ async def test_offline_off_releases_jobs_parked_for_the_slot(api, sm, gw, monkey
     """Offline parks background work until the next slot; switching it off runs it now. A quota
     wait keeps its delay. Found by the 8 Nov stack check: parked jobs waited for the next slot."""
     enable_admin(monkeypatch)
+    monkeypatch.setattr(slot, "END", date(2099, 12, 31))  # a next slot exists whatever the date
     await api.put("/api/admin/switches/offline_demo_mode", json={"value": "on"}, headers=ACT)
     r = await api.post("/api/dev/demo-jobs", headers=DEV, json={"lane": "background"})
     assert r.status_code == 202

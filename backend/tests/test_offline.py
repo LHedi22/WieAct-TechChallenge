@@ -4,7 +4,7 @@ Students starting an AI action get 503 `errors.offline` before anything is reser
 work (tagging, tips, plans, pools, indexing) is queued for the next live slot; a job caught by the
 switch mid-way fails with a refund when a student waits, and waits for the slot otherwise."""
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
 import pytest
 from sqlalchemy import select
@@ -23,6 +23,9 @@ from tests.test_worlds_api import api, pptx  # noqa: F401  (fixtures)
 def go_offline(monkeypatch):
     monkeypatch.setenv("OFFLINE_DEMO_MODE", "on")
     get_settings.cache_clear()
+    # Keep a "next slot" to wait for whatever today's date is (the real schedule ends 10 Nov,
+    # and after its last slot background work had nothing to wait for).
+    monkeypatch.setattr(slot, "END", date(2099, 12, 31))
 
 
 async def coins(api, headers=OWL_FR) -> int:  # noqa: F811
