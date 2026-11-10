@@ -30,7 +30,7 @@ def create_app() -> FastAPI:
     # Validates settings first: refuses to start in production unless LLM_PROVIDER=cloud.
     settings = get_settings()
     app = FastAPI(
-        title="Learning World API",
+        title="Captain Cat API",
         docs_url="/api/docs" if settings.APP_ENV != "production" else None,
         openapi_url="/openapi.json",
     )

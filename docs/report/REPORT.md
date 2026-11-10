@@ -1,4 +1,4 @@
-# Learning World — Phase 1 report (draft, ≤ 6 pages)
+# Captain Cat — Phase 1 report (draft, ≤ 6 pages)
 
 > Draft skeleton with the numbers measured so far. Items marked **[in-slot]** come from the real
 > platform: `scripts/export_stats.py` after the user test, and the load run against cloud.

@@ -1,0 +1,15 @@
+# Demo-video recording on local models only: qwen3:8b on the dev laptop needs more than the
+# 45 s interactive mid budget (sized for the platform), and qwen3:8b with Docker + Chromium ran the
+# 15 GB laptop out of memory, so the local mid tier is llama3.2:3b (still larger than the local
+# compact qwen3:1.7b). Revert with a plain `docker compose up -d`.
+services:
+  backend:
+    environment:
+      LLM_INTERACTIVE_MID_TIMEOUT_S: "150"
+      LLM_TIMEOUT_S: "180"
+      LOCAL_MODEL_MID: "llama3.2:3b"
+  worker:
+    environment:
+      LLM_INTERACTIVE_MID_TIMEOUT_S: "150"
+      LLM_TIMEOUT_S: "180"
+      LOCAL_MODEL_MID: "llama3.2:3b"

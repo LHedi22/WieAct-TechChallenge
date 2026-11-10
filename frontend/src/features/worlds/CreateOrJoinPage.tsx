@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { api, type WorldOut } from "@/api/client";
-import { Input, LanguageSwitcher, PixelButton, PixelPanel, Sprite } from "@/components";
+import { BrandIcon, Input, LanguageSwitcher, PixelButton, PixelPanel } from "@/components";
 import { cx } from "@/components/cx";
 import { ErrorBanner, JoinCard, WorldSummaryBar } from "./parts";
 import { UploadStep } from "./UploadStep";
@@ -74,7 +74,7 @@ export function CreateOrJoinPage() {
     <main className="mx-auto flex max-w-screen-xl flex-col gap-6 px-4 py-6 sm:px-8">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <span className="flex items-center gap-2 font-heading text-h3">
-          <Sprite name="oliveBranch" scale={2} />
+          <BrandIcon />
           {t("common:app.name")}
         </span>
         <LanguageSwitcher />

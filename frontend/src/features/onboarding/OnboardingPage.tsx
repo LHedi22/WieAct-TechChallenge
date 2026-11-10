@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { api, type ProfileIn, type StyleOut } from "@/api/client";
 import { homePath } from "@/app/home";
 import {
+  BrandIcon,
   type AvatarLook,
   Bidi,
   DEFAULT_LOOK,
@@ -96,7 +97,7 @@ export function OnboardingPage() {
     <div className="flex min-h-screen flex-col">
       <header className="flex flex-wrap items-center gap-4 px-4 py-4 sm:px-8">
         <span className="flex items-center gap-2 font-heading text-h3">
-          <Sprite name="island" scale={1} />
+          <BrandIcon />
           {t("common:app.name")}
         </span>
         <div className="mx-auto flex w-full max-w-md flex-col gap-1 sm:w-auto sm:flex-1">

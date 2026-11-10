@@ -10,7 +10,7 @@ that isn't in the docs. Humans resolve OPEN items.
 - OPEN: Quota header names and the exact status code for "team quota exhausted" — 30/10 probe: no rate-limit/quota headers on 200 responses (only `X-Frame-Options` matched the filter); the status code for an exhausted quota is still unseen; 9/11: quota headers seen on 200 (`x-ratelimit-api_key-*`, entry 2026-11-09 below)
 - OPEN: Our slot group (A or B) and whether the alternation continues to 10/11 — 30/10: the key answered at 18:06 and 20:50 on Fri (a Group A 12–24 slot), so we are **Group A**; continuation to 10/11 unconfirmed
   - 27/10 19:03 Tunis (Group B half per slot.py): `GET /v1/models` → `401 auth_error "Key is blocked"`. Suggests we are **Group A** and that out-of-slot = 401 key blocked (gateway/system status should map this to offline demo mode). Re-check Wed 28/10 12:00.
-- OPEN: Final app name (candidates: Jazira, Archipel, Kerkennah, Manara, Marsa, Atoll, Bahr, Learnipelago…) and mascot cat name — keep "Learning World" / `app.name` i18n key until decided
+- 2026-11-10: App name is **Captain Cat** (tagline "A learning world"); logos in `design/assets/brand/`, favicon + icons in `frontend/public/`. (Was OPEN: final app name and mascot name.) until decided
 - OPEN: Pixel art source — draw the final sprites ourselves or use an openly licensed pack, and when?
 - OPEN: Darija TTS — pregenerate with silma-tts-derja or transcript-only? (M7 ships transcript-only for Darija as the default; adding silma-tts later only changes the player)
 

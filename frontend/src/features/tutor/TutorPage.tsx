@@ -53,7 +53,10 @@ export function TutorPage() {
   useEffect(() => {
     if (jobDone) void qc.invalidateQueries({ queryKey: ["tutor", sessionId] });
   }, [jobDone, qc, sessionId]);
-  useEffect(() => bottom.current?.scrollIntoView?.({ block: "end" }), [session?.turns.length]);
+  useEffect(() => {
+    // braces: newer Chrome returns a Promise here, and an effect's return value is its cleanup
+    void bottom.current?.scrollIntoView?.({ block: "end" });
+  }, [session?.turns.length]);
 
   const send = useMutation({
     mutationFn: ({ msg, action }: { msg: string; action: TutorAction }) =>

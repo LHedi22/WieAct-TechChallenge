@@ -1,6 +1,8 @@
-# Learning World
+<p align="center"><img src="design/assets/brand/captain-cat-horizontal.png" alt="Captain Cat — a learning world" width="420"></p>
 
-> Working name. Your courses, turned into islands you explore: a GenAI peer-learning companion for
+# Captain Cat
+
+> A learning world. Your courses, turned into islands you explore: a GenAI peer-learning companion for
 > university students, built for the EdNova "GenAI Peer Learning Companion" technical challenge
 > (IEEE WIE ACT 5.0).
 

@@ -2,7 +2,7 @@
   "_review": "Darija drafted by Claude Code on 2026-10-27; every string needs native-speaker review (BUILD_PLAN M8).",
   "common": {
     "app": {
-      "name": "Learning World"
+      "name": "Captain Cat"
     },
     "language": {
       "label": "اللغة",
@@ -220,7 +220,7 @@
     "unverifiedKeys": "الأجوبة مازالت ما تثبّتتش"
   },
   "styleguide": {
-    "title": "Learning World · دليل الستيل",
+    "title": "Captain Cat · دليل الستيل",
     "subtitle": "بكسل آرت 16 بت بألوان المتوسط. البكسل للعالم، وخط واضح لكل شي تقراه.",
     "switcher": {
       "sideBySide": "قارن الإنجليزي والعربي جنب بعضهم",

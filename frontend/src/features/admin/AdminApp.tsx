@@ -53,7 +53,7 @@ function SignIn() {
     if (token) signIn.mutate();
   };
   return (
-    <Centered title="Learning World admin">
+    <Centered title="Captain Cat admin">
       <form
         onSubmit={submit}
         className="flex flex-col gap-4 rounded-soft border-2 border-sand bg-white p-4"

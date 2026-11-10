@@ -5,7 +5,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { api, type ApiError, type Me } from "@/api/client";
 import { homePath } from "@/app/home";
 import { useUiStore } from "@/app/uiStore";
-import { Input, LanguageSwitcher, PixelButton, PixelPanel, Sprite } from "@/components";
+import { BrandIcon, Input, LanguageSwitcher, PixelButton, PixelPanel } from "@/components";
 
 const MIN_PASSWORD = 8; // same rule as the server (errors.password_short)
 
@@ -46,7 +46,7 @@ export function AuthPage({ mode }: { mode: "signup" | "signin" }) {
     <div className="flex min-h-screen flex-col">
       <header className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-8">
         <Link to="/" className="flex items-center gap-2 font-heading text-h3">
-          <Sprite name="island" scale={1} />
+          <BrandIcon />
           {tc("app.name")}
         </Link>
         <LanguageSwitcher />
