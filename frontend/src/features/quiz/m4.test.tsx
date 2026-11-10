@@ -289,6 +289,26 @@ describe("Socratic Tutor", () => {
     });
   });
 
+  it("leaves cleanly when scrollIntoView returns a Promise (newer Chrome)", async () => {
+    // 10 Nov: the scroll effect returned scrollIntoView's value as its cleanup; Chrome now
+    // returns a Promise there and React crashed with "destroy is not a function".
+    const original = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = vi.fn(() => Promise.resolve()) as never;
+    try {
+      serve({ [`GET /api/tutor/${S}`]: session() });
+      const view = show(
+        <TutorPage />,
+        "/worlds/:worldId/courses/:courseId/tutor/:sessionId",
+        `/worlds/${W}/courses/${C}/tutor/${S}`,
+      );
+      expect(await screen.findByText(/Understand why 0\/0/)).toBeInTheDocument();
+      expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
+      expect(() => view.unmount()).not.toThrow();
+    } finally {
+      Element.prototype.scrollIntoView = original;
+    }
+  });
+
   it("disables hints at 3 and shows the summary when ended (Arabic)", async () => {
     serve({
       [`GET /api/tutor/${S}`]: session({
