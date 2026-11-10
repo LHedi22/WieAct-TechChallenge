@@ -55,9 +55,8 @@ Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
 ## 4. Deliverables still to write or finish
 - [x] **Merge `m5-economy-arena` into `main`** (1 Nov, PR #1; CI green on backend, frontend, mock-llm
       and secrets before the merge).
-- [ ] **Screenshots** for the README (EN + AR, desktop + phone) → `docs/screenshots/`, linked
-      from README. The Docker MCP browser can't save into the repo; use a desktop browser or a
-      Playwright installed in the frontend container.
+- [x] **Screenshots** for the README (10/11): 10 EN desktop + 2 AR phone in `docs/screenshots/`,
+      linked from README (captured on local models after the slots, labelled in the README).
 - [ ] **Report** (≤ 6 pages): fill the **[in-slot]** gaps in `docs/report/REPORT.md` and export
       it to PDF.
 - [ ] **Video** ≤ 1:30.
