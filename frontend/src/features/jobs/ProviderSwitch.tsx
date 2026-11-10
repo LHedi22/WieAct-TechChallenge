@@ -41,7 +41,7 @@ export function ProviderSwitch({ className }: { className?: string }) {
   const refreshing = refreshJob && refreshStatus !== "done" && refreshStatus !== "failed";
 
   return (
-    <div className={cx("flex flex-col items-start gap-1", className)}>
+    <div data-testid="provider-switch" className={cx("flex flex-col items-start gap-1", className)}>
       <div
         role="radiogroup"
         aria-label={t("provider.choose")}
