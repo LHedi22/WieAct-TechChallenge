@@ -6,6 +6,23 @@
 > university students, built for the EdNova "GenAI Peer Learning Companion" technical challenge
 > (IEEE WIE ACT 5.0).
 
+<p align="center">
+  <a href="docs/report/video/final-subtitled.mp4"><b>▶ Watch the 90-second demo</b></a> ·
+  <a href="#screenshots">Screenshots</a> ·
+  <a href="#genai-module-technical-explanation">GenAI module</a> ·
+  <a href="#setup">Setup</a> ·
+  <a href="docs/report/REPORT.md">Report</a>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/en-landing.png" alt="Captain Cat landing page" width="49%">
+  <img src="docs/screenshots/en-island.png" alt="A course island with its five buildings" width="49%">
+</p>
+
+**Languages:** English · Français · العربية · تونسي (Darija), with a full right-to-left layout for
+Arabic and Darija. **Models:** the EdNova platform's open-source models (compact `llama3.2-3b`, mid
+`llama3.1-8b`), routed per task.
+
 ## What it does
 
 Upload your course material once, and every classmate who joins your world gets the same islands.
@@ -26,12 +43,52 @@ the class already made is free. The UI is in English, French, Arabic and Tunisia
 
 Challenge fit: `docs/PRODUCT.md` → Challenge fit.
 
+## Screenshots
+
+| | |
+| --- | --- |
+| ![World map: each course is an island; mastery rings and the daily challenges](docs/screenshots/en-map.png) | ![Quiz Hall: a wrong answer gets a hint and a second try, never the answer first](docs/screenshots/en-quiz-hint.png) |
+| **World map:** one island per course, with mastery rings, coins, streak and the daily plan | **Quiz Hall:** a wrong answer gets a hint and a second try before any explanation |
+| ![Socratic Tutor: guiding questions, hint counter and ideas found](docs/screenshots/en-tutor.png) | ![Teach-Back Arena: classmates' answers scored by the AI, best one pinned](docs/screenshots/en-teach-back.png) |
+| **Socratic Tutor:** guiding questions, never the final answer; hint counter and "ideas you've found" | **Teach-Back Arena:** explain to classmates; AI score and feedback, the asker pins the best answer, unsure grades wait for a mid-model review |
+| ![Study Studio: revision notes with page references](docs/screenshots/en-study-studio.png) | ![Audio Studio: a spoken episode with transcript and speed](docs/screenshots/en-audio.png) |
+| **Study Studio:** notes with page references, flashcards, mind map; made once, free for the class | **Audio Studio:** a spoken episode of the chapter (browser voices), transcript and speed |
+| ![Real progress while the job runs, with a Class Wisdom tip](docs/screenshots/en-loading-wisdom.png) | ![Leaderboard: class and global, opt-out](docs/screenshots/en-leaderboard.png) |
+| **Waiting is part of the design:** real job stages from the backend, and a Class Wisdom tip from classmates' shared mistakes | **Leaderboard:** class or everyone, this week or all time; one tap hides you |
+
+<p align="center">
+  <img src="docs/screenshots/ar-phone-map.png" alt="Arabic, phone: course list, right to left" width="260">
+  &nbsp;
+  <img src="docs/screenshots/ar-phone-island.png" alt="Arabic, phone: the island" width="260">
+</p>
+<p align="center"><sub>Arabic on a phone (390 px): mirrored layout, logical CSS properties throughout.</sub></p>
+
+<sub>The screens were captured from our dev stack after the platform time slots closed, so the AI
+content in them comes from our local open-source models, and the app labels it "Test data
+(local)". The cloud cache only ever serves platform-generated content.</sub>
+
 ## GenAI module (technical explanation)
 
 The platform is CPU-only, has no streaming, allows 2 concurrent requests and ~20 requests/min per
 key, and mid-size compute is the scarce resource. Everything below follows from those limits.
 Details: `docs/PLATFORM.md` (limits and the error contract) and `docs/ARCHITECTURE.md` (routing
 table, data model).
+
+```mermaid
+flowchart LR
+  UI["React app<br/>(EN · FR · AR · Darija)"] -- "POST /api/…" --> API["FastAPI<br/>validate · reserve coins"]
+  API -- "job row" --> Q[("Postgres<br/>jobs · ledgers · cache")]
+  UI -. "poll /api/jobs/{id} every 1.5 s" .-> API
+  Q -- "SKIP LOCKED<br/>interactive first" --> W["Worker"]
+  W --> GW
+  subgraph GW["AI gateway (the only code that calls a model)"]
+    direction LR
+    C["ai_cache<br/>+ single-flight"] --> R["router<br/>task → tier + pattern"] --> L["limiter<br/>2 in flight · RPM"] --> E["error contract<br/>queue · fallback · shrink"]
+  end
+  E --> P["EdNova platform<br/>compact llama3.2-3b · mid llama3.1-8b"]
+  W --> V[("Qdrant<br/>chunk vectors")]
+  W --> EM["bge-m3 embeddings<br/>(self-hosted Ollama)"]
+```
 
 **One gateway.** Every LLM and embeddings call goes through `backend/app/gateway/`:
 cache → priority queue (interactive before background) → limiter (2 in flight, `LLM_MAX_RPM`) →
@@ -139,8 +196,8 @@ cd frontend && pnpm install && pnpm dev
 ## Tests
 
 ```bash
-cd backend && uv run ruff check . && uv run pytest -q          # 304 tests, mock platform in-process
-cd frontend && pnpm lint && pnpm typecheck && pnpm test --run && pnpm i18n:check
+cd backend && uv run ruff check . && uv run pytest -q          # 529 tests, mock platform in-process
+cd frontend && pnpm lint && pnpm typecheck && pnpm test --run && pnpm i18n:check   # 93 tests, 828 keys × 4
 cd backend && uv run python ../scripts/load.py --jobs 30       # against the running stack
 cd backend && uv run python -m app.evals slot                  # every AI feature × 4 languages, saved for review
 ```
@@ -163,6 +220,17 @@ Tesseract OCR (local) · Qdrant (self-hosted in dev; Qdrant Cloud for the demo u
 Qdrant is reachable) · PostgreSQL · browser Web Speech API (client-side voices) · Ollama (chat models dev only;
 `bge-m3` embeddings in production, since our key has none) · hosting on Vercel and Railway. No other LLM or AI API is used.
 The full list is in `docs/DECISIONS.md`.
+
+## Brand
+
+<p align="center">
+  <img src="design/assets/brand/captain-cat-app_icon.png" alt="Captain Cat app icon" width="96">
+  &nbsp;&nbsp;
+  <img src="design/assets/brand/captain-cat-primary.png" alt="Captain Cat primary logo" width="180">
+</p>
+
+Pixel-art logo system (primary, horizontal, app icon, badge) and palette sheet in
+`design/assets/brand/`; favicon and touch icons in `frontend/public/`.
 
 ## Docs
 
