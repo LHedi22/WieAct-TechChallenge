@@ -1,7 +1,7 @@
 {
   "common": {
     "app": {
-      "name": "Learning World"
+      "name": "Captain Cat"
     },
     "language": {
       "label": "اللغة",
@@ -219,7 +219,7 @@
     "unverifiedKeys": "لم يتم التحقق من الإجابات بعد"
   },
   "styleguide": {
-    "title": "Learning World · دليل الأسلوب",
+    "title": "Captain Cat · دليل الأسلوب",
     "subtitle": "فن بكسل 16 بت بألوان المتوسط. البكسل للعالم، وخط واضح لكل ما تقرؤه.",
     "switcher": {
       "sideBySide": "قارن الإنجليزية والعربية جنبًا إلى جنب",

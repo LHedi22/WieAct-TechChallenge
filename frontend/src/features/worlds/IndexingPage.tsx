@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import { api, type DocumentOut, type IndexingChapter, type IndexingOut } from "@/api/client";
 import {
+  BrandIcon,
   Bidi,
   LanguageSwitcher,
   Mascot,
@@ -36,7 +37,7 @@ export function IndexingPage() {
     <main className="mx-auto flex max-w-screen-xl flex-col gap-6 px-4 py-6 sm:px-8">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <span className="flex items-center gap-2 font-heading text-h3">
-          <Sprite name="oliveBranch" scale={2} />
+          <BrandIcon />
           {t("common:app.name")}
         </span>
         <div className="flex items-center gap-4">

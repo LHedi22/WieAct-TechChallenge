@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import type { MapCourse } from "@/api/client";
 import { homePath } from "@/app/home";
-import { LanguageSwitcher, PixelButton, Sprite, type SpriteName } from "@/components";
+import { BrandIcon, LanguageSwitcher, PixelButton, Sprite, type SpriteName } from "@/components";
 import { useMe } from "@/hooks/useSession";
 import { MapScene } from "@/features/map/MapScene";
 
@@ -40,14 +40,20 @@ export function LandingPage() {
     <div className="flex min-h-screen flex-col">
       <header className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-8">
         <span className="flex items-center gap-2 font-heading text-h3">
-          <Sprite name="island" scale={1} />
+          <BrandIcon />
           {tc("app.name")}
         </span>
         <LanguageSwitcher />
       </header>
       <main className="mx-auto grid w-full max-w-screen-xl flex-1 items-center gap-8 px-4 py-6 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
         <section className="flex min-w-0 flex-col gap-5">
-          <Sprite name="oliveBranch" scale={3} />
+          <img
+            src="/brand/logo-primary.png"
+            width={250}
+            height={176}
+            alt={tc("app.name")}
+            className="[image-rendering:pixelated]"
+          />
           <h1 className="font-heading text-[2.5rem] leading-tight sm:text-display">{t("title")}</h1>
           <p className="max-w-prose text-ink/80">{t("body")}</p>
           <div className="flex flex-wrap items-center gap-4">

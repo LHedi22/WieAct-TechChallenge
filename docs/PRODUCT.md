@@ -1,4 +1,4 @@
-# Product — Learning World (working name)
+# Product — Captain Cat
 
 A university student's courses become islands in a shared archipelago ("world") for their class.
 Each island has the same five buildings, all grounded in that course's uploaded material.

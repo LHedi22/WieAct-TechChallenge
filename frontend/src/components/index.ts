@@ -12,6 +12,7 @@ export {
   SKINS,
 } from "./avatarLook";
 export { Banner, type BannerKind } from "./Banner";
+export { BrandIcon } from "./BrandIcon";
 export { Bidi } from "./Bidi";
 export { Chip, type ChipKind } from "./Chip";
 export { QuickCopyNotice } from "./QuickCopyNotice";

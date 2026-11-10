@@ -1,7 +1,7 @@
 {
   "common": {
     "app": {
-      "name": "Learning World"
+      "name": "Captain Cat"
     },
     "language": {
       "label": "Language",
@@ -219,7 +219,7 @@
     "unverifiedKeys": "Answers not double-checked yet"
   },
   "styleguide": {
-    "title": "Learning World · style guide",
+    "title": "Captain Cat · style guide",
     "subtitle": "16-bit pixel art in Mediterranean colors. Pixels for the world, clean type for everything you read.",
     "switcher": {
       "sideBySide": "Compare English and Arabic side by side",

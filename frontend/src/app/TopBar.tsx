@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "@/api/client";
 import {
+  BrandIcon,
   Avatar,
   type AvatarLook,
   Bidi,
@@ -11,7 +12,6 @@ import {
   LanguageSwitcher,
   PointsCounter,
   RefillTimer,
-  Sprite,
   StreakCounter,
 } from "@/components";
 import { ProviderSwitch } from "@/features/jobs/ProviderSwitch";
@@ -42,7 +42,7 @@ export function TopBar({ worldId }: { worldId?: string }) {
   return (
     <header className="flex flex-wrap items-center gap-3 border-b-2 border-sand bg-whitewash px-4 py-2 sm:px-6">
       <Link to="/" className="flex items-center gap-2 font-heading text-h3">
-        <Sprite name="island" scale={1} />
+        <BrandIcon />
         {t("common:app.name")}
       </Link>
       {worlds.length > 0 && (

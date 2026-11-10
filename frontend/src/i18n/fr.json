@@ -1,7 +1,7 @@
 {
   "common": {
     "app": {
-      "name": "Learning World"
+      "name": "Captain Cat"
     },
     "language": {
       "label": "Langue",
@@ -219,7 +219,7 @@
     "unverifiedKeys": "Réponses pas encore vérifiées"
   },
   "styleguide": {
-    "title": "Learning World · guide de style",
+    "title": "Captain Cat · guide de style",
     "subtitle": "Pixel art 16 bits aux couleurs méditerranéennes. Des pixels pour le monde, une typo nette pour tout ce qui se lit.",
     "switcher": {
       "sideBySide": "Comparer l'anglais et l'arabe côte à côte",
