@@ -205,6 +205,26 @@ def test_extract_json_items_spilled_after_a_closed_array():
     }
 
 
+def test_extract_json_unquoted_keys():
+    # llama3.1-8b (mid) on QUIZ_VERIFY, 9/11 trace call 160; the repair call failed on it too
+    text = '{"answers": [\n{n: 1, answer: 4, sure: true},\n{n: 2, answer: null, sure: false}\n]}'
+    assert extract_json(text) == {
+        "answers": [{"n": 1, "answer": 4, "sure": True}, {"n": 2, "answer": None, "sure": False}]
+    }
+    # words before a colon inside strings stay untouched
+    assert extract_json('{a: "x, b: y", c: 1}') == {"a": "x, b: y", "c": 1}
+
+
+def test_extract_json_array_closed_but_object_left_open():
+    # llama3.2-3b, 9/11 trace call 158: `{"questions": [{...}],\n{...},\n{...}` (repair needed)
+    text = (
+        '{"questions": [\n{"question": "q1", "n": 1}],\n{"question": "q2", "n": 2},\n'
+        '{"question": "q3", "n": 3}\n]}'
+    )
+    got = extract_json(text)
+    assert [q["question"] for q in got["questions"]] == ["q1", "q2", "q3"]
+
+
 def test_strip_think():
     assert strip_think("<think>\nlong\n</think>\nAnswer") == "Answer"
 

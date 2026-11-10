@@ -70,6 +70,45 @@ def _missing_commas(text: str) -> str:
     return "".join(out)
 
 
+def _quote_keys(text: str) -> str:
+    """Quote bare object keys, `{n: 1, answer: 4}` → `{"n": 1, "answer": 4}` (outside strings).
+    llama3.1-8b answered QUIZ_VERIFY like this, and the repair call couldn't fix it (9 Nov)."""
+    out: list[str] = []
+    in_str = escape = False
+    prev = ""  # the last non-space character outside a string
+    i, n = 0, len(text)
+    while i < n:
+        c = text[i]
+        if in_str:
+            if escape:
+                escape = False
+            elif c == "\\":
+                escape = True
+            elif c == '"':
+                in_str = False
+            out.append(c)
+            i += 1
+            continue
+        if (c.isalpha() or c == "_") and prev in "{,":
+            j = i
+            while j < n and (text[j].isalnum() or text[j] == "_"):
+                j += 1
+            k = j
+            while k < n and text[k].isspace():
+                k += 1
+            if k < n and text[k] == ":":
+                out.append(f'"{text[i:j]}"')
+                prev, i = '"', j
+                continue
+        if c == '"':
+            in_str = True
+        if not c.isspace():
+            prev = c
+        out.append(c)
+        i += 1
+    return "".join(out)
+
+
 def _objects(text: str) -> list[dict[str, Any]]:
     """Every complete JSON object in `text`, left to right, skipping stray `,` `}` `]`."""
     found: list[dict[str, Any]] = []
@@ -77,7 +116,7 @@ def _objects(text: str) -> list[dict[str, Any]]:
     while (i := text.find("{", i)) != -1:
         piece = _balanced(text, i)
         try:
-            value = json.loads(_TRAILING_COMMA.sub(r"\1", piece))
+            value = json.loads(_TRAILING_COMMA.sub(r"\1", _quote_keys(piece)))
         except json.JSONDecodeError:
             i += 1
             continue
@@ -118,10 +157,29 @@ def extract_json(text: str) -> Any | None:
         return _spilled(json.loads(candidate), rest)
     except json.JSONDecodeError:
         pass
+    fixed = _quote_keys(_missing_commas(candidate))
     try:
-        return _spilled(json.loads(_missing_commas(candidate)), rest)
+        return _spilled(json.loads(fixed), rest)
     except json.JSONDecodeError:
+        pass
+    return _salvage_list(fixed)
+
+
+_LIST_START = re.compile(r'\s*\{\s*"(\w+)"\s*:\s*\[')
+
+
+def _salvage_list(text: str) -> dict[str, Any] | None:
+    """Last resort for `{"items": [ ... ]` whose brackets are mixed up (e.g. `[{...}],\n{...}`
+    with the object left open, 9 Nov): collect every complete item object after the `[` that
+    has the same first key as the first item."""
+    m = _LIST_START.match(text)
+    if not m:
         return None
+    objs = _objects(text[m.end() :])
+    if not objs or not objs[0]:
+        return None
+    marker = next(iter(objs[0]))
+    return {m.group(1): [o for o in objs if marker in o]}
 
 
 REPAIR_SYSTEM = (
