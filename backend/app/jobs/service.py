@@ -20,7 +20,7 @@ from app.models import AICallLog, Job
 
 LANE_RANK = {"interactive": 0, "background": 1}
 DEFAULT_CALL_S = 8.0  # until the call log has history
-HISTORY_JOBS = 20  # finished jobs per kind behind the ETA
+HISTORY_JOBS = 20  # finished jobs per kind and lane behind the ETA
 JOB_CALLS = 3  # a kind with no finished job yet: about this many calls (most make 2-4)
 
 
@@ -164,15 +164,17 @@ async def queue_position(s: AsyncSession, job: Job) -> int:
     return int(ahead or 0) + 1
 
 
-async def _avg_job_s(s: AsyncSession) -> dict[str, float]:
-    """Average run time of each kind's last HISTORY_JOBS finished jobs (the last day)."""
+async def _avg_job_s(s: AsyncSession) -> dict[tuple[str, str], float]:
+    """Average run time of the last HISTORY_JOBS finished jobs of each (kind, lane), the last day:
+    a student's quiz start and the background quiz pool share a kind but not a wait."""
     took = func.extract("epoch", Job.finished_at - Job.started_at)
     recent = (
         select(
             Job.kind,
+            Job.lane,
             took.label("s"),
             func.row_number()
-            .over(partition_by=Job.kind, order_by=Job.finished_at.desc())
+            .over(partition_by=(Job.kind, Job.lane), order_by=Job.finished_at.desc())
             .label("n"),
         )
         .where(
@@ -183,23 +185,23 @@ async def _avg_job_s(s: AsyncSession) -> dict[str, float]:
         .subquery()
     )
     rows = await s.execute(
-        select(recent.c.kind, func.avg(recent.c.s))
+        select(recent.c.kind, recent.c.lane, func.avg(recent.c.s))
         .where(recent.c.n <= HISTORY_JOBS)
-        .group_by(recent.c.kind)
+        .group_by(recent.c.kind, recent.c.lane)
     )
-    return {kind: float(avg) for kind, avg in rows}
+    return {(kind, lane): float(avg) for kind, lane, avg in rows}
 
 
 async def eta_s(s: AsyncSession, job: Job) -> float:
-    """Seconds until this job is done: the work ahead of it (each job at its kind's recent
-    duration, running jobs at what is left of theirs) over the calls that run at once, then its
-    own duration (a job's calls run one after another). A kind with no history counts as
-    JOB_CALLS calls (audit OPT-10)."""
+    """Seconds until this job is done: the work ahead of it (each job at its kind and lane's
+    recent duration, running jobs at what is left of theirs) over the calls that run at once,
+    then its own duration (a job's calls run one after another). A kind with no history counts
+    as JOB_CALLS calls (audit OPT-10)."""
     now = datetime.now(UTC)
     avg = await _avg_job_s(s)
     fallback = JOB_CALLS * await _avg_call_s(s)
     ahead = await s.execute(
-        select(Job.kind, Job.status, Job.started_at).where(
+        select(Job.kind, Job.lane, Job.status, Job.started_at).where(
             or_(
                 _ahead_of(job, now),
                 and_(Job.status == "running", Job.kind != "DEBUG_REPLAY", Job.id != job.id),
@@ -207,12 +209,12 @@ async def eta_s(s: AsyncSession, job: Job) -> float:
         )
     )
     work = 0.0
-    for kind, status, started in ahead:
-        took = avg.get(kind, fallback)
+    for kind, lane, status, started in ahead:
+        took = avg.get((kind, lane), fallback)
         if status == "running" and started is not None:
             took = max(0.0, took - (now - started).total_seconds())
         work += took
-    own = avg.get(job.kind, fallback)
+    own = avg.get((job.kind, job.lane), fallback)
     return work / max(1, get_settings().LLM_MAX_CONCURRENCY) + own
 
 

@@ -41,6 +41,7 @@ async def test_eta_adds_up_real_job_durations_per_kind_and_lane(sm):
         row(now, demo.KIND, "done", ago=900, took=8),
         row(now, demo.KIND, "done", ago=800, took=12),  # demo jobs take 10 s
         row(now, pack.KIND, "done", ago=700, took=30),  # study packs 30 s
+        row(now, pack.KIND, "done", lane="background", ago=600, took=90),  # same kind, other lane
     ]
     running = row(now, pack.KIND, "running", ago=60, started_ago=10)  # 20 s left
     ahead = [row(now, demo.KIND, "queued", ago=50), row(now, demo.KIND, "queued", ago=40)]
@@ -56,4 +57,4 @@ async def test_eta_adds_up_real_job_durations_per_kind_and_lane(sm):
         assert 49 <= v.eta_s <= 51, v.eta_s
         bg = await view(s, behind)  # behind everything interactive, itself included
         assert bg.queue_position == 4
-        assert 64 <= bg.eta_s <= 66, bg.eta_s  # (20 + 10 + 10 + 30) / 2 + 30
+        assert 124 <= bg.eta_s <= 126, bg.eta_s  # (20 + 10 + 10 + 30) / 2 + 90 (background pack)
