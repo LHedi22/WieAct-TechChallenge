@@ -14,11 +14,9 @@ from app.jobs import demo
 from app.jobs.service import queue_position, view
 from app.models import Job
 
-NOW = datetime.now(UTC)
 
-
-def row(kind, status, lane="interactive", *, ago=0.0, took=None, started_ago=None, **kw):
-    created = NOW - timedelta(seconds=ago)
+def row(now, kind, status, lane="interactive", *, ago=0.0, took=None, started_ago=None, **kw):
+    created = now - timedelta(seconds=ago)
     j = Job(
         id=uuid.uuid4(),
         kind=kind,
@@ -32,22 +30,23 @@ def row(kind, status, lane="interactive", *, ago=0.0, took=None, started_ago=Non
     if took is not None:  # a finished job of this kind: how long it ran
         j.started_at, j.finished_at = created, created + timedelta(seconds=took)
     if started_ago is not None:
-        j.started_at = NOW - timedelta(seconds=started_ago)
+        j.started_at = now - timedelta(seconds=started_ago)
     return j
 
 
 async def test_eta_adds_up_real_job_durations_per_kind_and_lane(sm):
     assert get_settings().LLM_MAX_CONCURRENCY == 2
+    now = datetime.now(UTC)
     history = [
-        row(demo.KIND, "done", ago=900, took=8),
-        row(demo.KIND, "done", ago=800, took=12),  # demo jobs take 10 s
-        row(pack.KIND, "done", ago=700, took=30),  # study packs 30 s
+        row(now, demo.KIND, "done", ago=900, took=8),
+        row(now, demo.KIND, "done", ago=800, took=12),  # demo jobs take 10 s
+        row(now, pack.KIND, "done", ago=700, took=30),  # study packs 30 s
     ]
-    running = row(pack.KIND, "running", ago=60, started_ago=10)  # 20 s left
-    ahead = [row(demo.KIND, "queued", ago=50), row(demo.KIND, "queued", ago=40)]
-    later = row(demo.KIND, "queued", ago=45, not_before=NOW + timedelta(minutes=10))
-    behind = row(pack.KIND, "queued", lane="background", ago=55)  # background waits for us
-    me = row(pack.KIND, "queued", ago=1)
+    running = row(now, pack.KIND, "running", ago=60, started_ago=10)  # 20 s left
+    ahead = [row(now, demo.KIND, "queued", ago=50), row(now, demo.KIND, "queued", ago=40)]
+    later = row(now, demo.KIND, "queued", ago=45, not_before=now + timedelta(minutes=10))
+    behind = row(now, pack.KIND, "queued", lane="background", ago=55)  # background waits for us
+    me = row(now, pack.KIND, "queued", ago=1)
     async with sm() as s:
         s.add_all([*history, running, *ahead, later, behind, me])
         await s.commit()
