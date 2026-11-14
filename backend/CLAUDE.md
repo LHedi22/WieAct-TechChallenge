@@ -9,5 +9,6 @@
 - Money-like values (coins, points) are integers; every change is a ledger row in one transaction.
 - Dates: store UTC; "today" for daily refill/challenges/streaks is computed in `Africa/Tunis`.
 - Errors to clients are i18n message keys (`errors.quota_queue`, …), never raw exceptions or model text.
-- Logs: never log headers, prompts with user text in production (`LOG_PROMPTS=false` default), or the key.
+- Logs: never log headers, prompts with user text, or the key. Prompt traces exist only while the
+  admin `trace_prompts` switch is on (capped, redacted, deleted after 24 h).
 - Tests: pytest + pytest-asyncio; `tests/conftest.py` sets `LLM_PROVIDER=mock` and points `MOCK_BASE_URL` at the mock app in-process (ASGI transport) so tests never touch the network.

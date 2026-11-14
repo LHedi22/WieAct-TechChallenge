@@ -97,7 +97,6 @@ class Settings(BaseSettings):
     LLM_MAX_CONCURRENCY: int = 2
     # Embeddings are metered separately (own quota); they share the per-key concurrency limit
     LLM_EMBED_MAX_RPM: int = 18
-    LLM_MAX_TOKENS_DEFAULT: int = 700
     LLM_SLOT_GROUP: Literal["A", "B"] = "A"
     # auto: send response_format=json_object, drop it for that model on a 400 (support is OPEN)
     LLM_JSON_MODE: Literal["auto", "on", "off"] = "auto"
@@ -121,10 +120,8 @@ class Settings(BaseSettings):
     SESSION_COOKIE_SAMESITE: Literal["lax", "strict", "none"] = "lax"
     # Empty or "auto" = Secure whenever APP_ENV=production (audit F-SEC-1), plain in development
     SESSION_COOKIE_SECURE: bool | None = None
-    APP_TIMEZONE: str = "Africa/Tunis"
     CORS_ORIGINS: str = "http://localhost:5173"
     OFFLINE_DEMO_MODE: Literal["auto", "on", "off"] = "auto"
-    LOG_PROMPTS: bool = False
     UPLOAD_MAX_MB: int = 50
     UPLOAD_DIR: str = "./data/uploads"
     TESSERACT_LANGS: str = "ara+fra+eng"
