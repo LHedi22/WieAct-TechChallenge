@@ -59,8 +59,8 @@ Priority lanes, 2-in-flight limiter, RPM bucket, quota delay → requeue with ET
 then compact (Quick mode), 400 → shrink once, cache-first shared outputs, single-flight,
 precompute at upload on the background lane, offline demo mode outside our slot (cached results
 only, no coins move). Load test: 30 jobs with 503 + quota faults, 30/30 done, ≤ 2 in flight,
-interactive p50 25.6 s vs background 106.3 s (mock, 14 Nov audit; 9.5 s vs 62.4 s without
-faults); against cloud: **[in-slot]**.
+interactive p50 23.9 s vs background 113.4 s (mock, 14 Nov after the audit fixes; 10.0 s vs
+63.8 s without faults); against cloud: **[in-slot]**.
 The Quick mode shown in the demo video is switched on by an admin (a real compact call, logged
 `forced`): `/api/admin/stats` reports these as forced Quick mode, apart from the fallbacks the
 platform caused, and leaves them out of the compact/mid split.
