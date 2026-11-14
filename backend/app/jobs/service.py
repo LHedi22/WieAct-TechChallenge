@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
 
 from pydantic import BaseModel
@@ -20,6 +20,8 @@ from app.models import AICallLog, Job
 
 LANE_RANK = {"interactive": 0, "background": 1}
 DEFAULT_CALL_S = 8.0  # until the call log has history
+HISTORY_JOBS = 20  # finished jobs per kind behind the ETA
+JOB_CALLS = 3  # a kind with no finished job yet: about this many calls (most make 2-4)
 
 
 class AIPaused(Exception):
@@ -141,20 +143,75 @@ async def _avg_call_s(s: AsyncSession) -> float:
     return float(avg) / 1000 if avg else DEFAULT_CALL_S
 
 
+def _ahead_of(job: Job, now: datetime):
+    """Queued jobs that will run before this one: a higher-priority lane, or the same lane and
+    older; never one deferred to a later `not_before` (audit OPT-10)."""
+    return and_(
+        Job.status == "queued",
+        Job.id != job.id,
+        Job.kind != "DEBUG_REPLAY",  # admin replays (dev only) aren't a student's wait
+        or_(Job.not_before.is_(None), Job.not_before <= now),
+        or_(
+            and_(Job.lane == "interactive", job.lane == "background"),
+            and_(Job.lane == job.lane, Job.created_at < job.created_at),
+        ),
+    )
+
+
 async def queue_position(s: AsyncSession, job: Job) -> int:
-    """Jobs that will run before this one (higher-priority lane, or same lane and older) + 1."""
-    ahead = await s.scalar(
-        select(func.count()).where(
-            Job.status == "queued",
-            Job.id != job.id,
-            Job.kind != "DEBUG_REPLAY",  # admin replays (dev only) aren't a student's wait
+    """Jobs that will run before this one + 1."""
+    ahead = await s.scalar(select(func.count()).where(_ahead_of(job, datetime.now(UTC))))
+    return int(ahead or 0) + 1
+
+
+async def _avg_job_s(s: AsyncSession) -> dict[str, float]:
+    """Average run time of each kind's last HISTORY_JOBS finished jobs (the last day)."""
+    took = func.extract("epoch", Job.finished_at - Job.started_at)
+    recent = (
+        select(
+            Job.kind,
+            took.label("s"),
+            func.row_number()
+            .over(partition_by=Job.kind, order_by=Job.finished_at.desc())
+            .label("n"),
+        )
+        .where(
+            Job.status == "done",
+            Job.started_at.is_not(None),
+            Job.finished_at > datetime.now(UTC) - timedelta(days=1),
+        )
+        .subquery()
+    )
+    rows = await s.execute(
+        select(recent.c.kind, func.avg(recent.c.s))
+        .where(recent.c.n <= HISTORY_JOBS)
+        .group_by(recent.c.kind)
+    )
+    return {kind: float(avg) for kind, avg in rows}
+
+
+async def eta_s(s: AsyncSession, job: Job) -> float:
+    """Seconds until this job is done: the work ahead of it (each job at its kind's recent
+    duration, running jobs at what is left of theirs) plus its own, over the calls that run at
+    once. A kind with no history counts as JOB_CALLS calls (audit OPT-10)."""
+    now = datetime.now(UTC)
+    avg = await _avg_job_s(s)
+    fallback = JOB_CALLS * await _avg_call_s(s)
+    ahead = await s.execute(
+        select(Job.kind, Job.status, Job.started_at).where(
             or_(
-                and_(Job.lane == "interactive", job.lane == "background"),
-                and_(Job.lane == job.lane, Job.created_at < job.created_at),
-            ),
+                _ahead_of(job, now),
+                and_(Job.status == "running", Job.kind != "DEBUG_REPLAY", Job.id != job.id),
+            )
         )
     )
-    return int(ahead or 0) + 1
+    work = avg.get(job.kind, fallback)
+    for kind, status, started in ahead:
+        took = avg.get(kind, fallback)
+        if status == "running" and started is not None:
+            took = max(0.0, took - (now - started).total_seconds())
+        work += took
+    return work / max(1, get_settings().LLM_MAX_CONCURRENCY)
 
 
 async def view(s: AsyncSession, job: Job) -> JobView:
@@ -162,10 +219,9 @@ async def view(s: AsyncSession, job: Job) -> JobView:
     waiting = None
     if job.status == "queued":
         position = await queue_position(s, job)
-        per_call = await _avg_call_s(s)
-        concurrency = max(1, get_settings().LLM_MAX_CONCURRENCY)
-        eta_f = position * per_call / concurrency
+        eta_f = await eta_s(s, job)
         if job.not_before:
+            per_call = await _avg_call_s(s)
             eta_f = max(eta_f, (job.not_before - datetime.now(UTC)).total_seconds() + per_call)
         eta = max(1, round(eta_f))
         if job.error and job.error.startswith("deferred:"):
