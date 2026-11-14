@@ -23,6 +23,7 @@ from app.core import db
 from app.core.provenance import replaces, servable
 from app.features.quiz import verify
 from app.gateway import BadOutput, Task, TaskKind
+from app.gateway.cache import text_hash
 from app.jobs.registry import JobContext, job
 from app.jobs.service import create_or_join_shared_job, share_key
 from app.models import Chapter, Chunk, Course, Document, Job, QuizSet, User, World
@@ -248,7 +249,7 @@ async def quiz_pool(ctx: JobContext) -> dict[str, Any]:
                     lane=ctx.lane,
                     messages=messages,
                     language=language,
-                    cache_key=f"quiz:{chapter_id}:{level}:{language}:{seed}{salt}",
+                    cache_key=f"quiz:{chapter_id}:{level}:{language}:{seed}:{text_hash(context)}{salt}",
                     prompt_version=version,
                 )
             )

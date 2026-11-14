@@ -18,6 +18,7 @@ from app.core.provenance import replaces, servable
 from app.features.quiz import verify
 from app.features.quiz.pool import Question, pick_context, spread_answers
 from app.gateway import BadOutput, Defer, Task, TaskKind
+from app.gateway.cache import text_hash
 from app.jobs.registry import JobContext, job
 from app.models import Chapter, ChapterMastery, Chunk, Course, CourseLevel, PlacementSet
 
@@ -128,7 +129,7 @@ async def generate(ctx: JobContext) -> dict[str, Any]:
                 lane="interactive",
                 messages=messages,
                 language=language,
-                cache_key=f"placement:{course_id}:{language}",
+                cache_key=f"placement:{course_id}:{language}:{text_hash(context)}",  # OPT-17
                 prompt_version=version,
             )
         )
