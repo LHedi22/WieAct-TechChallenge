@@ -794,7 +794,10 @@
       "cancel": "Cancel",
       "confirm": "Enter",
       "fromPlacement": "From your placement",
-      "classMade": "Your class already made one"
+      "classMade": "Your class already made one",
+      "ready": "Ready",
+      "preparing": "Being prepared · about {count, plural, one {# min} other {# min}}",
+      "getItNow": "Get it now"
     }
   },
   "placement": {

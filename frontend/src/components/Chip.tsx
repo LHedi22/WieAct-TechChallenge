@@ -10,7 +10,8 @@ export type ChipKind =
   | "quickMode"
   | "weakSpot"
   | "confidence"
-  | "pinned";
+  | "pinned"
+  | "ready";
 
 const STYLES: Record<ChipKind, string> = {
   beginner: "border-transparent bg-primary/10 text-primary",
@@ -21,6 +22,7 @@ const STYLES: Record<ChipKind, string> = {
   weakSpot: "border-transparent bg-terracotta-light/30 text-terracotta-ink",
   confidence: "border-transparent bg-olive-light/30 text-olive-ink",
   pinned: "border-transparent bg-olive-ink text-white",
+  ready: "border-transparent bg-olive-light/30 text-olive-ink",
 };
 
 interface ChipProps {
@@ -29,7 +31,7 @@ interface ChipProps {
   className?: string;
 }
 
-/** Level, cost, Quick mode, Weak spot, Confidence, Pinned. */
+/** Level, cost, Quick mode, Weak spot, Confidence, Pinned, Ready. */
 export function Chip({ kind, children, className }: ChipProps) {
   return (
     <span

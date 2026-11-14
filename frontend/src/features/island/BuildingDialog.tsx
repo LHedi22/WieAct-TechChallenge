@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAiPaused } from "@/hooks/useAiPaused";
-import { api, type IslandOut } from "@/api/client";
+import { api, type IslandOut, type QuizPrice } from "@/api/client";
 import { Bidi, Chip, PixelButton, PixelPanel } from "@/components";
 import { cx } from "@/components/cx";
 import { useNumberFormat } from "@/components/useNumberFormat";
@@ -45,10 +45,7 @@ export function BuildingDialog({
 
   // Quiz Hall, Study Studio and Audio Studio ask the server before Confirm: free when the class
   // already made it (an unseen quiz set, the study pack, the episode) — DESIGN.md fix 2, ECONOMY.md.
-  const PRICES: Record<
-    string,
-    (chapter: string, level: string) => Promise<{ cost: number; cached: boolean }>
-  > = {
+  const PRICES: Record<string, (chapter: string, level: string) => Promise<QuizPrice>> = {
     quiz_hall: api.quizPrice,
     study_studio: api.studioPrice,
     audio_studio: api.audioPrice,
@@ -59,9 +56,13 @@ export function BuildingDialog({
     queryKey: [building.key, "price", chapterId, level],
     queryFn: () => priceOf!(chapterId, level),
     enabled: priced && !!chapterId,
+    // While the class's copy is being prepared in the background, check until it is Ready.
+    refetchInterval: (q) => (q.state.data?.preparing ? 5_000 : false),
   });
   const cost = priced ? (livePrice.data?.cost ?? building.cost) : building.cost;
   const cachedQuiz = priced && livePrice.data?.cached;
+  // A background job (prefetch) is making it: free, and Confirm moves it up the queue.
+  const preparing = priced ? livePrice.data?.preparing : null;
   const balance = wallet?.coins ?? 0;
   const after = balance - cost;
   // Answering in the Teach-Back Arena is free: only asking costs, and that is checked on ask.
@@ -145,9 +146,19 @@ export function BuildingDialog({
                 <span className="font-semibold">{t("costs.teachback", { ask: cost })}</span>
               ) : cost === 0 ? (
                 <span className="flex flex-col items-end gap-1">
-                  <Chip kind="cost">{tc("chip.free")}</Chip>
+                  <span className="flex flex-wrap justify-end gap-1">
+                    {cachedQuiz && <Chip kind="ready">{t("dialog.ready")}</Chip>}
+                    <Chip kind="cost">{tc("chip.free")}</Chip>
+                  </span>
                   {cachedQuiz && (
                     <span className="text-small text-ink/70">{t("dialog.classMade")}</span>
+                  )}
+                  {preparing && (
+                    <span className="text-small text-ink/70" role="status">
+                      {t("dialog.preparing", {
+                        count: Math.max(1, Math.ceil(preparing.eta_s / 60)),
+                      })}
+                    </span>
                   )}
                 </span>
               ) : (
@@ -171,7 +182,7 @@ export function BuildingDialog({
               disabled={short || paused || !chapterId}
               onClick={() => onConfirm(chapterId, level)}
             >
-              {t("dialog.confirm")}
+              {preparing ? t("dialog.getItNow") : t("dialog.confirm")}
             </PixelButton>
           </div>
         </PixelPanel>

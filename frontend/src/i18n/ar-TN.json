@@ -795,7 +795,10 @@
       "cancel": "بطّل",
       "confirm": "ادخل",
       "fromPlacement": "حسب اختبار مستواك",
-      "classMade": "صنع صفّك واحدًا من قبل"
+      "classMade": "صنع صفّك واحدًا من قبل",
+      "ready": "حاضر",
+      "preparing": "قاعد يتحضّر · تقريب {count, plural, zero {# دقيقة} one {دقيقة} two {دقيقتين} few {# دقايق} many {# دقيقة} other {# دقيقة}}",
+      "getItNow": "هاتو توّا"
     }
   },
   "placement": {

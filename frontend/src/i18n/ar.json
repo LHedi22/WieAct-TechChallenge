@@ -794,7 +794,10 @@
       "cancel": "إلغاء",
       "confirm": "ادخل",
       "fromPlacement": "حسب اختبار مستواك",
-      "classMade": "صنع صفّك واحدًا من قبل"
+      "classMade": "صنع صفّك واحدًا من قبل",
+      "ready": "جاهز",
+      "preparing": "قيد التحضير · حوالي {count, plural, zero {# دقيقة} one {دقيقة واحدة} two {دقيقتين} few {# دقائق} many {# دقيقة} other {# دقيقة}}",
+      "getItNow": "احصل عليه الآن"
     }
   },
   "placement": {

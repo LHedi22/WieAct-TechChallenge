@@ -794,7 +794,10 @@
       "cancel": "Annuler",
       "confirm": "Entrer",
       "fromPlacement": "D'après ton placement",
-      "classMade": "Ta classe en a déjà fait un"
+      "classMade": "Ta classe en a déjà fait un",
+      "ready": "Prêt",
+      "preparing": "En préparation · environ {count, plural, one {# min} other {# min}}",
+      "getItNow": "Tout de suite"
     }
   },
   "placement": {

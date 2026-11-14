@@ -3189,6 +3189,16 @@ export interface components {
       /** Recent */
       recent: components["schemas"]["Gift"][];
     };
+    /** Preparing */
+    Preparing: {
+      /**
+       * Job Id
+       * Format: uuid
+       */
+      job_id: string;
+      /** Eta S */
+      eta_s: number;
+    };
     /** PresenceIn */
     PresenceIn: {
       /** Chapter Id */
@@ -3200,6 +3210,7 @@ export interface components {
       cost: number;
       /** Cached */
       cached: boolean;
+      preparing?: components["schemas"]["Preparing"] | null;
     };
     /** Products */
     Products: {
