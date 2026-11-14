@@ -1,0 +1,48 @@
+ Container cc-opt-backend-run-39ae72ca2b28 Creating 
+ Container cc-opt-backend-run-39ae72ca2b28 Created 
+Bytecode compiled 5680 files in 1.21s
+All checks passed!
+ruff-check exit 0
+Bytecode compiled 5680 files in 402ms
+247 files already formatted
+ruff-format exit 0
+  /opt/venv/lib/python3.12/site-packages/sqlalchemy/sql/visitors.py:124: RuntimeWarning: coroutine 'Connection._cancel' was never awaited
+    meth = getter(visitor)
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/test_wallet.py::test_out_of_coins_is_a_402_with_an_i18n_key
+  /usr/local/lib/python3.12/inspect.py:3076: RuntimeWarning: coroutine 'Connection._cancel' was never awaited
+    params = OrderedDict((param.name, param) for param in parameters)
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/test_wallet.py::test_wallet_endpoint_shows_real_balances
+  /opt/venv/lib/python3.12/site-packages/pydantic/_internal/_config.py:238: RuntimeWarning: coroutine 'Connection._cancel' was never awaited
+    def __init__(self, config_wrapper: ConfigWrapper):
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/test_wisdom.py::test_three_students_same_mistake_make_one_tip_in_every_language
+  /opt/venv/lib/python3.12/site-packages/sqlalchemy/sql/util.py:462: RuntimeWarning: coroutine 'Connection._cancel' was never awaited
+    def tables_from_leftmost(clause: FromClause) -> Iterator[FromClause]:
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/test_worlds_acl.py::test_the_creator_can_still_manage_course_material
+  /opt/venv/lib/python3.12/site-packages/fastapi/utils.py:134: RuntimeWarning: coroutine 'Connection._cancel' was never awaited
+    if not isinstance(item, DefaultPlaceholder):
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/test_worlds_api.py::test_outsiders_get_404_everywhere
+  /opt/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py:1069: RuntimeWarning: coroutine 'Connection._cancel' was never awaited
+    def _get_args_resolving_forward_refs(self, obj: Any, required: bool = False) -> tuple[Any, ...] | None:
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+529 passed, 45 warnings in 194.21s (0:03:14)
+/opt/venv/lib/python3.12/site-packages/_pytest/unraisableexception.py:33: RuntimeWarning: coroutine 'Connection._cancel' was never awaited
+  gc.collect()
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback

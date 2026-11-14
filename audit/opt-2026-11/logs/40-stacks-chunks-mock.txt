@@ -1,0 +1,12 @@
+0|slide:1|82|plates|Stacks A stack is a LIFO structure: last in, first out. Thin
+1|slide:2|87|operations|Stack operations push(x) adds on top, pop() removes the top,
+2|slide:3|83|array|Array-based stack Keep an array and a top index. push writes
+3|slide:4|86|capacity|Linked stack Each push creates a node pointing to the previo
+4|slide:5|77|balanced|Uses of stacks Undo history, the call stack, checking balanc
+5|slide:6|79|balanced|Balanced brackets Push every opening bracket; on a closing o
+6|slide:7|71|bakery|Queues A queue is FIFO: first in, first out, like a line at 
+7|slide:8|85|dequeue|Queue operations enqueue(x) adds at the back, dequeue() remo
+8|slide:9|85|around|Circular buffer An array with head and tail indices that wra
+9|slide:10|84|dequeue|Linked queue Keep pointers to head and tail nodes; enqueue a
+10|slide:11|82|buffering|Uses of queues Printer jobs, BFS on graphs, task scheduling,
+11|slide:12|77|queue|Stack vs queue Stack: LIFO, one end. Queue: FIFO, two ends. 

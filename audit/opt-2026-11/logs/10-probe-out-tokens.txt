@@ -1,0 +1,17 @@
+source: platform-log scripts/out/probe-cloud-20261030-1806.json (30 Oct)
+llama3.2-3b  quiz_json  ok=True s=12.8 out_tokens=340 chars=1279 q_items=3 note=valid schema
+llama3.2-3b  tag_json   ok=True s=4.3 out_tokens=16 chars=53 q_items=0 note=misconception
+llama3.2-3b  math       ok=True s=0.6 out_tokens=2 chars=1 q_items=0 note=4
+llama3.2-3b  arabic     ok=True s=5.2 out_tokens=74 chars=184 q_items=0 note=arabic 100%
+llama3.2-3b  darija     ok=True s=2.5 out_tokens=87 chars=175 q_items=0 note=arabic 99% (review Darija)
+llama3.2-3b  french     ok=True s=1.7 out_tokens=59 chars=188 q_items=0 note=french
+llama3.2-3b  socratic   ok=True s=1.7 out_tokens=51 chars=222 q_items=0 note=asks, no leak
+llama3.1-8b  quiz_json  ok=True s=23.6 out_tokens=373 chars=1210 q_items=3 note=valid schema
+llama3.1-8b  tag_json   ok=True s=9.3 out_tokens=22 chars=70 q_items=0 note=misconception
+llama3.1-8b  math       ok=True s=1.0 out_tokens=2 chars=1 q_items=0 note=4
+llama3.1-8b  arabic     ok=True s=3.8 out_tokens=51 chars=125 q_items=0 note=arabic 100%
+llama3.1-8b  darija     ok=True s=3.1 out_tokens=42 chars=96 q_items=0 note=arabic 100% (review Darija)
+llama3.1-8b  french     ok=True s=3.1 out_tokens=57 chars=234 q_items=0 note=french
+llama3.1-8b  socratic   ok=True s=3.6 out_tokens=47 chars=196 q_items=0 note=asks, no leak
+ceiling: HTTP 200: {"id": "chatcmpl-00156c22-9455-461f-affe-cacaf10cb5a1", "created": 1793380009, "model": "llama3.2-3b", "object": "chat.completion", "choices": [{"finish_reason": "stop", "index": 0, "message
+meta: {"llama3.2-3b": {"created": 1677610602, "owned_by": "openai"}, "qwen2.5-3b": {"created": 1677610602, "owned_by": "openai"}, "llama3.1-8b": {"created": 1677610602, "owned_by": "openai"}, "mistral-7b": {"created": 1677610602, "owned_by": "openai"}, "qwen2.5-coder-7b": {"created": 1677610602, "owned_by": "openai"}, "deepseek-ocr": {"created": 1677610602, "owned_by": "openai"}}

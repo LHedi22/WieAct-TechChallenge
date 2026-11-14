@@ -1,0 +1,28 @@
+{"ts": 1794612298.365, "route": "mock", "path": "/v1/models", "model": null, "status": 200, "body_sha": null, "in_flight": 1, "fault": null, "ms": 8}
+{"ts": 1794612301.161, "route": "mock", "path": "/v1/embeddings", "model": "mock-embed", "status": 200, "body_sha": "41c4d61a709ead68", "in_flight": 1, "fault": null, "ms": 5}
+{"ts": 1794612301.164, "route": "mock", "path": "/v1/embeddings", "model": "mock-embed", "status": 200, "body_sha": "41c4d61a709ead68", "in_flight": 2, "fault": null, "ms": 2}
+{"ts": 1794612301.172, "route": "mock", "path": "/v1/embeddings", "model": "mock-embed", "status": 200, "body_sha": "41c4d61a709ead68", "in_flight": 1, "fault": null, "ms": 0}
+{"ts": 1794612308.492, "route": "mock", "path": "/v1/models", "model": null, "status": 200, "body_sha": null, "in_flight": 3, "fault": null, "ms": 2}
+{"ts": 1794612301.254, "route": "mock", "path": "/v1/chat/completions", "model": "mock-mid", "status": 200, "body_sha": "212bea3361744a8c", "in_flight": 1, "fault": null, "ms": 9891}
+---
+{"ts": 1794612313.256, "route": "mock", "path": "/v1/chat/completions", "model": "mock-mid", "status": 503, "body_sha": "212bea3361744a8c", "in_flight": 2, "fault": null, "ms": 6}
+{"ts": 1794612313.311, "route": "mock", "path": "/v1/embeddings", "model": "mock-embed", "status": 200, "body_sha": "41c4d61a709ead68", "in_flight": 2, "fault": null, "ms": 2}
+{"ts": 1794612313.317, "route": "mock", "path": "/v1/embeddings", "model": "mock-embed", "status": 200, "body_sha": "41c4d61a709ead68", "in_flight": 2, "fault": null, "ms": 1}
+{"ts": 1794612313.322, "route": "mock", "path": "/v1/chat/completions", "model": "mock-compact", "status": 200, "body_sha": "ccd1966d88c48241", "in_flight": 2, "fault": null, "ms": 2982}
+{"ts": 1794612318.735, "route": "mock", "path": "/v1/models", "model": null, "status": 200, "body_sha": null, "in_flight": 3, "fault": null, "ms": 10}
+{"ts": 1794612316.323, "route": "mock", "path": "/v1/chat/completions", "model": "mock-compact", "status": 200, "body_sha": "ccd1966d88c48241", "in_flight": 2, "fault": null, "ms": 2692}
+---
+{"ts": 1794612316.323, "route": "mock", "path": "/v1/chat/completions", "model": "mock-compact", "status": 200, "body_sha": "ccd1966d88c48241", "in_flight": 2, "fault": null, "ms": 2692}
+{"ts": 1794612311.163, "route": "mock", "path": "/v1/chat/completions", "model": "mock-mid", "status": 200, "body_sha": "212bea3361744a8c", "in_flight": 2, "fault": null, "ms": 9637}
+{"ts": 1794612321.164, "route": "mock", "path": "/v1/chat/completions", "model": "mock-compact", "status": 200, "body_sha": "0abd4fa29629471c", "in_flight": 2, "fault": null, "ms": 2275}
+{"ts": 1794612324.499, "route": "mock", "path": "/v1/chat/completions", "model": "mock-compact", "status": 200, "body_sha": "ccd1966d88c48241", "in_flight": 2, "fault": null, "ms": 2277}
+{"ts": 1794612328.881, "route": "mock", "path": "/v1/models", "model": null, "status": 200, "body_sha": null, "in_flight": 3, "fault": null, "ms": 2}
+{"ts": 1794612327.834, "route": "mock", "path": "/v1/chat/completions", "model": "mock-compact", "status": 200, "body_sha": "0abd4fa29629471c", "in_flight": 2, "fault": null, "ms": 1933}
+---
+{"ts": 1794612331.163, "route": "mock", "path": "/v1/chat/completions", "model": "mock-mid", "status": 200, "body_sha": "212bea3361744a8c", "in_flight": 1, "fault": null, "ms": 6744}
+{"ts": 1794612339.072, "route": "mock", "path": "/v1/models", "model": null, "status": 200, "body_sha": null, "in_flight": 2, "fault": null, "ms": 2}
+{"ts": 1794612337.841, "route": "mock", "path": "/v1/chat/completions", "model": "mock-compact", "status": 200, "body_sha": "ccd1966d88c48241", "in_flight": 2, "fault": null, "ms": 2082}
+{"ts": 1794612341.178, "route": "mock", "path": "/v1/chat/completions", "model": "mock-compact", "status": 200, "body_sha": "ccd1966d88c48241", "in_flight": 1, "fault": null, "ms": 1588}
+{"ts": 1794612349.229, "route": "mock", "path": "/v1/models", "model": null, "status": 200, "body_sha": null, "in_flight": 3, "fault": null, "ms": 3}
+{"ts": 1794612347.841, "route": "mock", "path": "/v1/chat/completions", "model": "mock-compact", "status": 200, "body_sha": "0abd4fa29629471c", "in_flight": 2, "fault": null, "ms": 2028}
+---

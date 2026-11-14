@@ -1,0 +1,35 @@
+generate 200 {'job_id': '1c2f1b7b-f531-4483-82e4-71355a099d9b', 'cost': 15, 'cached': False}
+cc-opt-db-1
+{
+ "action": "db",
+ "job_cost": 15,
+ "states": [
+  [
+   0,
+   "http 500"
+  ],
+  [
+   2,
+   "running",
+   null,
+   null,
+   null
+  ],
+  [
+   83,
+   "failed",
+   null,
+   null,
+   "errors.job_interrupted"
+  ]
+ ],
+ "secs_after_fault": 84,
+ "coins_before_start": 70,
+ "coins_after": 70,
+ "worker": "running restarts=0"
+}
+worker-1  | 2026-11-13 23:28:59,095 worker database unavailable (ConnectionRefusedError); retrying in 1s
+worker-1  | future: <Task finished name='Task-354' coro=<Worker.execute() done, defined at /app/app/jobs/worker.py:288> exception=DBAPIError('(sqlalchemy.dialects.postgresql.asyncpg.Error) the database system is starting up')>
+worker-1  | asyncpg.exceptions.CannotConnectNowError: the database system is starting up
+worker-1  | sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.Error: the database system is starting up
+worker-1  | sqlalchemy.exc.DBAPIError: (sqlalchemy.dialects.postgresql.asyncpg.Error) the database system is starting up

@@ -1,0 +1,195 @@
+
+> learning-world-frontend@0.1.0 test /app
+> vitest --run
+
+
+ RUN  v3.2.7 /app
+
+stdout | src/features/studio/studio.test.tsx
+🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/features/arena/m5.test.tsx
+🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/features/quiz/m4.test.tsx
+🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/features/worlds/worlds.test.tsx
+🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/features/styleguide/StyleguidePage.test.tsx
+🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/features/admin/admin.test.tsx
+🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/features/onboarding/m3.test.tsx
+🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ ✓ src/features/admin/admin.test.tsx (4 tests) 1036ms
+   ✓ Admin > signs in with the token and then forgets it  486ms
+ ✓ src/features/styleguide/StyleguidePage.test.tsx (3 tests) 1255ms
+   ✓ /styleguide > renders every section in English  683ms
+   ✓ /styleguide > renders in Arabic  317ms
+ ✓ src/features/arena/m5.test.tsx (5 tests) 1393ms
+   ✓ Out of coins > shows refill, +3 per good answer, an honest Exam Pass and a labelled demo purchase  625ms
+   ✓ Teach-Back peer room > lets the asker see a classmate's score and pin it as the best answer  577ms
+ ✓ src/features/studio/studio.test.tsx (5 tests) 1329ms
+   ✓ Study Studio > shows notes with refs, then the mind map tab  606ms
+   ✓ Study Studio > offers to make the pack, paid by me or by the Class Pool  425ms
+stdout | src/features/admin/actions.test.tsx
+🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ ✓ src/features/quiz/m4.test.tsx (8 tests) 2356ms
+   ✓ Quiz attempt > wrong → hint → second try → explanation → results with points and next step  1533ms
+   ✓ Socratic Tutor > shows goal, hints used, ideas found and quick mode; sends turns  401ms
+stdout | src/features/admin/inspect.test.tsx
+🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/features/audio/audio.test.tsx
+🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/features/jobs/ProviderSwitch.test.tsx
+🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ ✓ src/features/worlds/worlds.test.tsx (9 tests) 3293ms
+   ✓ Create-world wizard > walks name → courses → chapters, creates the world once, then shows uploads  1668ms
+   ✓ Create-world wizard > uploads files and shows each one's state; rejects unsupported types locally  801ms
+ ✓ src/features/admin/inspect.test.tsx (1 test) 771ms
+   ✓ Student inspector > shows failing invariants with their rows and explains a price  769ms
+stderr | src/features/audio/audio.test.tsx > Audio player > reads the segments one by one and highlights the current one
+An update to Player inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/features/jobs/ProviderSwitch.test.tsx (5 tests) 578ms
+   ✓ ProviderSwitch > offers the competition cloud models and my local Ollama models  391ms
+ ✓ src/features/admin/actions.test.tsx (2 tests) 1394ms
+   ✓ Admin actions > grants coins only with a reason, as a ledger request with the CSRF header  937ms
+   ✓ Admin actions > deletes only after a dry run and the exact name  456ms
+ ✓ src/features/audio/audio.test.tsx (4 tests) 766ms
+   ✓ Audio player > reads the segments one by one and highlights the current one  568ms
+stdout | src/features/daily/daily.test.tsx
+🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/features/admin/browse.test.tsx
+🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ ✓ src/features/daily/daily.test.tsx (2 tests) 818ms
+   ✓ Daily challenges > shows 3 challenges with progress, rewards from the economy and the reminder  622ms
+stdout | src/features/admin/debug.test.tsx
+🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/app/language.test.tsx
+🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/features/jobs/offline.test.tsx
+🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ ✓ src/features/admin/browse.test.tsx (1 test) 770ms
+   ✓ Admin read pages > lists users with ledger wallets, searches server-side and pages by 50  768ms
+stdout | src/features/jobs/jobs.test.tsx
+🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stderr | src/features/jobs/offline.test.tsx > offline demo mode > shows no banner while the slot is live
+An update to OfflineBanner inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/features/onboarding/m3.test.tsx (10 tests) 5503ms
+   ✓ Sign up / sign in > checks the password length locally and shows the server's message key  1274ms
+   ✓ Onboarding > scores the style test on the server and shows the mix, then locks priced extras  1044ms
+   ✓ Onboarding > builds the explorer with tap-to-pick tiles and Surprise me (free extras only)  659ms
+   ✓ Onboarding > checks the year of study on the first step (the server takes 1–8 or nothing)  308ms
+   ✓ World map > locks islands until placement and lists courses in list view  311ms
+   ✓ Island > shows costs from the economy, the placement banner, and the dialog's balance after  528ms
+   ✓ Placement > answers 8 cached questions and shows the level  990ms
+ ✓ src/app/language.test.tsx (3 tests) 431ms
+   ✓ language → <html dir lang> > sets dir and lang on <html> when switching  428ms
+ ✓ src/features/admin/debug.test.tsx (2 tests) 679ms
+   ✓ Admin debug > shows the worker heartbeat, the call strip and a production trace warning  553ms
+stderr | src/features/jobs/offline.test.tsx > offline demo mode > keeps generating enabled while the slot is live
+An update to PoolCard inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/features/jobs/offline.test.tsx > offline demo mode > keeps generating enabled while the slot is live
+An update to GeneratePanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/features/jobs/offline.test.tsx (4 tests) 605ms
+   ✓ offline demo mode > disables generating new material, in Arabic too  411ms
+ ✓ src/features/jobs/jobs.test.tsx (6 tests) 554ms
+   ✓ JobProgress > shows queue position, ETA, why it waits, and the cancel button  356ms
+stdout | src/components/components.test.tsx
+🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stderr | src/components/components.test.tsx > Sprite > never renders fractional scales
+Sprite: scale 2.5 is not an integer 1–6, using 3
+Sprite: scale 0.3 is not an integer 1–6, using 1
+Sprite: scale 9 is not an integer 1–6, using 6
+
+stdout | src/features/wisdom/wisdom.test.tsx
+🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ ✓ src/components/components.test.tsx (11 tests) 408ms
+stdout | src/components/QuickCopyNotice.test.tsx
+🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/components/TestDataChip.test.tsx
+🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/features/worlds/util.test.ts
+🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ ✓ src/features/worlds/util.test.ts (1 test) 24ms
+ ✓ src/components/TestDataChip.test.tsx (2 tests) 53ms
+stderr | src/features/wisdom/wisdom.test.tsx > Loading-screen tips > shows only this course's tips, else a general study tip
+An update to Screen inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/features/wisdom/wisdom.test.tsx (3 tests) 370ms
+ ✓ src/components/QuickCopyNotice.test.tsx (2 tests) 244ms
+
+ Test Files  22 passed (22)
+      Tests  93 passed (93)
+   Start at  23:15:20
+   Duration  11.42s (transform 3.84s, setup 8.94s, collect 9.54s, tests 24.63s, environment 23.24s, prepare 3.15s)
+

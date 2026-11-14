@@ -1,0 +1,25 @@
+vite v6.4.5 building for production...
+transforming...
+✓ 638 modules transformed.
+rendering chunks...
+computing gzip size...
+../tmp/cc-opt-dist/index.html                     0.97 kB │ gzip:   0.50 kB
+../tmp/cc-opt-dist/assets/index-8rMemDT_.css     30.93 kB │ gzip:   6.59 kB
+../tmp/cc-opt-dist/assets/AdminApp-CLugPzV_.js   86.99 kB │ gzip:  23.65 kB
+../tmp/cc-opt-dist/assets/index-DLUHYvGA.js     942.54 kB │ gzip: 296.57 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 3.04s
+
+1.2M	/tmp/cc-opt-dist
+total 1052
+drwxr-xr-x 2 root root   4096 Nov 13 23:30 .
+drwxr-xr-x 4 root root   4096 Nov 13 23:30 ..
+-rw-r--r-- 1 root root  30925 Nov 13 23:30 index-8rMemDT_.css
+-rw-r--r-- 1 root root  86990 Nov 13 23:30 AdminApp-CLugPzV_.js
+-rw-r--r-- 1 root root 942544 Nov 13 23:30 index-DLUHYvGA.js
+AdminApp-CLugPzV_.js gzip=23587
+index-DLUHYvGA.js gzip=296678

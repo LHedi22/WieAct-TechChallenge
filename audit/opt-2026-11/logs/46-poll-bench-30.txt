@@ -1,0 +1,1 @@
+{'students': 30, 'seconds': 30.0, 'requests': 600, 'rps': 20.0, 'p50_ms': 60.6, 'p95_ms': 143.0, 'max_ms': 308.8}
