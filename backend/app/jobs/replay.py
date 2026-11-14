@@ -14,7 +14,7 @@ from typing import Any
 from sqlalchemy import update
 
 from app import gateway
-from app.core.db import get_sessionmaker
+from app.core import db
 from app.gateway import Task, TaskKind
 from app.gateway.context import debug_target
 from app.jobs.registry import JobContext, job
@@ -34,7 +34,7 @@ async def replay(ctx: JobContext) -> dict[str, Any]:
     messages = p["messages"]
     # The prompt (course text, student answers) leaves the job row once read; the job and its
     # result are deleted with the traces after 24 h (gateway/trace.py cleanup).
-    async with get_sessionmaker()() as s:
+    async with db.get_sessionmaker()() as s:
         kept = {k: v for k, v in p.items() if k != "messages"}
         await s.execute(update(Job).where(Job.id == ctx.job_id).values(payload=kept))
         await s.commit()
