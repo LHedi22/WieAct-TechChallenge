@@ -5,6 +5,10 @@ and the background lane pauses while the platform reports a low quota.
 Chat and embeddings are metered separately on the platform, so each has its own bucket
 ("chat" / "embed"); the concurrency limit is per key, so both share it.
 
+On top of the bucket, no sliding 60 s window carries more than PLATFORM_CALLS_PER_MIN calls per
+meter, whatever LLM_MAX_RPM and the burst are (audit OPT-04: capacity 3 + 18/min let one window
+carry 21).
+
 Process-local by design: only the single worker process calls the gateway (backend/CLAUDE.md).
 """
 
@@ -20,6 +24,7 @@ from typing import Literal
 from app.gateway.types import Lane
 
 Meter = Literal["chat", "embed"]
+PLATFORM_CALLS_PER_MIN = 20  # the platform's sustained rate per key (PLATFORM.md, email)
 
 
 class _Bucket:
@@ -109,6 +114,8 @@ class Limiter:
         """None if `lane` may go now, else seconds worth sleeping before rechecking."""
         if self.active >= self.concurrency:
             return 1.0  # woken by release()
+        if self.calls_last_60s(meter) >= PLATFORM_CALLS_PER_MIN:
+            return max(0.05, 60 - (time.monotonic() - self._recent[meter][0]))
         if lane == "background":
             if self.waiting["interactive"]:
                 return 1.0
