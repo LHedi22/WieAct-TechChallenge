@@ -1,0 +1,18 @@
+ Container cc-opt-backend-run-f22d3d9054aa Creating 
+ Container cc-opt-backend-run-f22d3d9054aa Created 
+Bytecode compiled 5680 files in 659ms
+firing 30 jobs (10 interactive), faults: 503,quota …
+
+finished in 172 s
+jobs done            30/30
+wait p50 / p95       85.0 s / 168.6 s
+  interactive        p50 25.1 s · p95 51.3 s
+  background         p50 123.8 s · p95 168.6 s
+max queue position   30
+max concurrency      1 (mock-side)
+calls at the mock    55 · by status {'200': 31, '503': 15, '429': 9}
+quick-mode jobs      1 · fallbacks 2
+refusals handled     {'quota': 9, 'saturated': 15, 'ceiling': 0}
+forced 503 job        done · quick mode True
+
+RESULT PASS

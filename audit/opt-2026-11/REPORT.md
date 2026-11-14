@@ -135,22 +135,22 @@ Ranked by (score gain × confidence) ÷ effort. Effort: S ≤ 1 h, M ≤ ½ day,
 | OPT-01 · **fixed** `65ebdbb` | jobs/cache | S1 | `logs/32-same-chapter-10.log`, `32-same-chapter-db.txt`; `studio/service.py:95-111` | measured | mock + code | §3 | S–M |
 | OPT-02 | RAG | S1 | `quiz/pool.py:78-95,157-182`; `logs/40-stacks-chunks-mock.txt`; N-6 | measured (chunk pick) + inferred (output) | mock + code + local | §3 | S |
 | OPT-03 | demo | S1 | STATUS.md §2 unticked; no `cloud-*` eval outputs; no stats export in `docs/report/` | inferred | code/docs | §3, §9 | M |
-| OPT-04 | limiter | S2 | `limiter.py:28`; logger max 21/60 s | measured | mock | §3 | S |
-| OPT-05 | gateway | S2 | `service.py:348-369`, `verify.py:93` | inferred | code | §3 | S |
-| OPT-06 | quota | S2 | `quota.py:31-34`; DECISIONS 2026-11-09 (no reset header) | inferred | code + platform-log | §3; also fix the .tex claim | S |
+| OPT-04 · **fixed** `0cc0323, 197f863` | limiter | S2 | `limiter.py:28`; logger max 21/60 s | measured | mock | §3 | S |
+| OPT-05 · **fixed** `a5785c5` | gateway | S2 | `service.py:348-369`, `verify.py:93` | inferred | code | §3 | S |
+| OPT-06 · **fixed** `841a751` | quota | S2 | `quota.py:31-34`; DECISIONS 2026-11-09 (no reset header) | inferred | code + platform-log | §3; also fix the .tex claim | S |
 | OPT-07 | moderation | S2 | N-4 artifacts | measured | local | §3 | S |
-| OPT-08 | orchestration | S3 | `router.py:19-39` | code | code | §3 | S |
+| OPT-08 · **fixed** `6406b67` | orchestration | S3 | `router.py:19-39` | code | code | §3 | S |
 | OPT-09 | orchestration | S2 | `router.py:31`; §6 | inferred | code | §3 | S |
 | OPT-10 · **fixed** `fb7a94e, a134f8c, f1d8ed4` | UX | S2 | `jobs/service.py:94-137`; ETA 1–8 s vs 19–60 s | measured | mock | §3 | S |
 | OPT-11 | language | S2 | N-5 artifacts; `_voice_rules.md:8` example «النهاية (limite)» copied into unrelated outputs | measured | local | Per chapter × language glossary from CHUNK_TAG concepts via the unused TRANSLATE_SHORT (1 compact call per chapter per language, cached), injected into notes/audio/tutor/grade prompts; replace the copied example with a placeholder | M |
 | OPT-12 · **fixed** `f3fc431, 0c66103` | worker | S2 | `logs/61-chaos-db-restart.log`: worker survived, job `failed errors.job_interrupted` after 83 s (refunded); `Worker.execute()` raised `DBAPIError` uncaught; API 500 during the restart. AUDIT 6 Nov said "pack finished" | measured | mock | Retry the job's DB writes with the same backoff the loop uses, or requeue instead of failing on a DB error inside `execute` | S–M |
-| OPT-13 | latency | S2 | mid `llama3.1-8b` 13.4 tok/s; 373 tokens in 23.6 s (probe). Local notes 370–510 tokens (`logs/11-local-output-sizes.txt`). Interactive mid budget 45 s (`config.py:89`) | inferred | platform-log + local | A first study pack/audio on the platform may often time out into Quick mode (≈ 30–40 s of generation plus prefill of a ~3k-token context on CPU). Measure in-slot; if so, generate packs for the demo chapters on the background lane at upload (precompute) or raise the budget only for NOTES/AUDIO | S (+ slot) |
+| OPT-13 · **parked** (needs a slot; prefetch is the mitigation, §12) | latency | S2 | mid `llama3.1-8b` 13.4 tok/s; 373 tokens in 23.6 s (probe). Local notes 370–510 tokens (`logs/11-local-output-sizes.txt`). Interactive mid budget 45 s (`config.py:89`) | inferred | platform-log + local | A first study pack/audio on the platform may often time out into Quick mode (≈ 30–40 s of generation plus prefill of a ~3k-token context on CPU). Measure in-slot; if so, generate packs for the demo chapters on the background lane at upload (precompute) or raise the budget only for NOTES/AUDIO | S (+ slot) |
 | OPT-14 | verifier | S2 | `quiz/pool.py:250-276`: < 5 kept → regenerate + re-verify. Local verifier kept 5 of 19 (AUDIT 6 Nov) | inferred | code + local | A first quiz on real models is likely 2 compact + 2 mid, not "1 + 1" (the .tex says 1 + 1). Ask the verifier for a 1-line worked step before its answer (0 extra calls, +~150 tokens), and generate 12 questions so 5+ survive more often | S |
 | OPT-15 | verifier quality | S2 | AUDIT residual 2: 3 of 5 kept items wrong (`local`) | measured | local | Same as OPT-14; also drop items where the verifier is "sure" but the explanation contradicts the key (server check) | S |
 | OPT-16 | grading | S2 | AUDIT residual 1: AR/Darija don't rank weak < acceptable < strong (`local`) | measured | local | Arabic and Darija calibration examples (one per rubric level) in `_teachback_rubric.md`: 0 extra calls. Re-run SLOT_CHECKLIST step 1 | S |
-| OPT-17 | cache | S3 | `quiz/pool.py:244`, `placement/service.py:131` keys have no context hash | code | code | Add a context hash so edited material regenerates | S |
-| OPT-18 | single-flight | S3 | `gateway/service.py:186-195` | code | code | Followers re-enter `run()` so one becomes the new leader | S |
-| OPT-19 | limiter scope | S3 | `limiter.py:8`; evals/reindex build their own Gateway | code | code | Refuse `--cloud` CLIs while a worker heartbeat is fresh, or document "stop the worker first" | S |
+| OPT-17 · **fixed** `12bf3be` | cache | S3 | `quiz/pool.py:244`, `placement/service.py:131` keys have no context hash | code | code | Add a context hash so edited material regenerates | S |
+| OPT-18 · **fixed** `5012999` | single-flight | S3 | `gateway/service.py:186-195` | code | code | Followers re-enter `run()` so one becomes the new leader | S |
+| OPT-19 · **fixed** `a79dd95` | limiter scope | S3 | `limiter.py:8`; evals/reindex build their own Gateway | code | code | Refuse `--cloud` CLIs while a worker heartbeat is fresh, or document "stop the worker first" | S |
 | OPT-20 | unused kinds | S3 | INTENT_LANG, TRANSLATE_SHORT, CHALLENGE_ITEMS (`router.py:19,32,36`) | code | code | Use TRANSLATE_SHORT for OPT-11; mark the other two "reserved" in ARCHITECTURE | S |
 | OPT-21 | frontend | S3 | `logs/70-vite-build.log`: one 942.5 KB entry (296.6 KB gz); only AdminApp lazy (`App.tsx:33`); 4 locales eager (200 KB raw, `i18n/index.ts:4-7`) | measured | mock | Lazy-load the five buildings and non-active locales: ≈ −40 % first load on phones (estimate). Low score value | M |
 | OPT-22 | polling | info | `logs/46-poll-bench-30.txt`: 30 pollers → 20 req/s, p50 61 ms, p95 143 ms, max 309 ms. `useJob` stops on terminal status; TanStack stops when the tab is hidden; no backoff | measured | mock | No change needed. Optional backoff to 3 s after 60 s queued | S |
@@ -396,6 +396,27 @@ same commands as §7. Logs are in `audit/opt-2026-11/after/`.
 | First ETA shown vs real wait | studio 1–5 s for p50 24.8 s; quiz 2–8 s for p50 18.8 s | studio **15 s for 17.3 s**, quiz **10 s for 9.3 s** (`32c-*`, once the kind has history). A first-ever study pack showed 4 s for 15.9 s before `a134f8c` |
 | Logger over the same-chapter runs | — | 20 chat calls, max in flight 2, max 7 in a 60 s window, 0 repeated identical bodies |
 | Postgres restart mid study pack | job **failed** `errors.job_interrupted` after 83 s (refunded); one poll got **500** | job **done** 18 s after the restart, charged 15 once; worker logged "database back after 1s"; the poll during the restart got **503** (`61-*`) |
+
+### Group B: gateway, quota and labels
+
+| Finding | Status | Commits |
+| --- | --- | --- |
+| OPT-04 no 60 s window over 20 calls | fixed | `0cc0323`, `197f863` (1 s margin for arrival skew, found by the re-run) |
+| OPT-05 timed-out mid check never resent | fixed | `a5785c5` |
+| OPT-06 low-quota pause without a reset header | fixed | `841a751` |
+| OPT-08 official pattern names in the log and Stats | fixed | `6406b67` |
+| OPT-17 context hash in quiz/placement keys | fixed | `12bf3be` |
+| OPT-18 single-flight leader re-election | fixed | `5012999` |
+| OPT-19 cloud CLIs refuse beside a live worker | fixed | `a79dd95` |
+| OPT-13 first mid pack may time out on the platform | **parked**: only a slot can measure it; Group E's prefetch makes packs before students open them | — |
+
+| Run (`mock`, `load.py --jobs 30`) | Before (`logs/`) | After (`after/`) |
+| --- | --- | --- |
+| Faults 503 + quota (`30-*`) | 30/30 in 163 s · interactive p50 25.6 s / p95 49.5 s · background p50 106.3 s / p95 156.9 s · 54 calls · fallbacks 2 · logger: max in flight 2, **21 calls in 60 s** | 30/30 in 172 s · interactive p50 25.1 s / p95 51.3 s · background p50 123.8 s / p95 168.6 s · 55 calls (31 × 200, 15 × 503, 9 × 429) · fallbacks 2 · logger: max in flight 2, **19 in 60 s**, 0 repeated · PASS |
+| No faults (`31-*`) | 30/30 in 93 s · interactive p50 9.5 s / p95 26.5 s · background p50 62.4 s / p95 90.0 s · logger: **21 in 60 s** | 30/30 in 93 s · interactive p50 9.7 s / p95 26.8 s · background p50 65.3 s / p95 89.9 s · logger: max in flight 2, **20 in 60 s**, 0 repeated · PASS |
+
+The first re-run after `0cc0323` still showed 21 in 60 s (logger: calls 1 and 21 arrived 59.98 s
+apart). The limiter counts at acquire and the server at arrival; `197f863` adds a 1 s margin.
 
 ## Logs index (`audit/opt-2026-11/logs/`)
 
