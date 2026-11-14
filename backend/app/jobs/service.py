@@ -7,7 +7,8 @@ from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
 
 from pydantic import BaseModel
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, func, literal, or_, select, update
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -22,6 +23,10 @@ LANE_RANK = {"interactive": 0, "background": 1}
 DEFAULT_CALL_S = 8.0  # until the call log has history
 HISTORY_JOBS = 20  # finished jobs per kind and lane behind the ETA
 JOB_CALLS = 3  # a kind with no finished job yet: about this many calls (most make 2-4)
+# jobs.priority inside a lane, lower first (Group E, migration 0018)
+P_NEEDED_NOW = 10  # a queued prefetch a student has just joined
+P_NEXT_CHAPTER = 50  # prefetch of the chapter after the one a student is on
+P_DEFAULT = 100
 
 
 class AIPaused(Exception):
@@ -58,15 +63,18 @@ async def create_job(
     user_id: uuid.UUID | None = None,
     world_id: uuid.UUID | None = None,
     cost: int = 0,
+    priority: int = P_DEFAULT,
 ) -> Job:
-    job = await _new_job(s, kind, lane, payload, user_id, world_id, cost)
+    job = await _new_job(s, kind, lane, payload, user_id, world_id, cost, priority=priority)
     await s.flush()
     await coins.reserve(s, job)
     await s.commit()
     return job
 
 
-async def _new_job(s, kind, lane, payload, user_id, world_id, cost, share_key=None) -> Job:
+async def _new_job(
+    s, kind, lane, payload, user_id, world_id, cost, share_key=None, priority=P_DEFAULT
+) -> Job:
     spec = spec_for(kind)
     offline, resume_at = await paused_until(get_settings(), get_sessionmaker())
     if offline and (lane == "interactive" or resume_at is None):
@@ -81,6 +89,7 @@ async def _new_job(s, kind, lane, payload, user_id, world_id, cost, share_key=No
         world_id=world_id,
         cost=cost,
         share_key=share_key,
+        priority=priority,
         # Background work (tagging, tips, plans, pools, indexing) waits for the next live slot.
         not_before=resume_at if offline else None,
     )
@@ -109,19 +118,27 @@ async def create_or_join_shared_job(
     user_id: uuid.UUID | None = None,
     world_id: uuid.UUID | None = None,
     cost: int = 0,
+    priority: int = P_DEFAULT,
 ) -> tuple[uuid.UUID, bool]:
     """One queued/running job per shared class asset (audit OPT-01). Returns (job id, created).
 
     The insert is guarded by the partial unique index on `share_key` (migration 0017): a
     classmate's concurrent insert waits for ours and then conflicts, so whoever loses joins the
     winner's job, across API processes too. Only the creator reserves coins, in the same
-    transaction as the insert; anyone who joins pays nothing."""
+    transaction as the insert; anyone who joins pays nothing.
+
+    A student (interactive lane) who joins a queued background job, e.g. a prefetch, promotes it
+    to the interactive lane at P_NEEDED_NOW; it stays free and ownerless (Group E)."""
     for _ in range(5):
         if (found := await active_shared_job(s, share_key)) is not None:
+            if lane == "interactive":
+                await promote(s, found)
             return found, False
         try:
             async with s.begin_nested():
-                job = await _new_job(s, kind, lane, payload, user_id, world_id, cost, share_key)
+                job = await _new_job(
+                    s, kind, lane, payload, user_id, world_id, cost, share_key, priority
+                )
                 await s.flush()
         except IntegrityError:
             continue  # a classmate created it a moment ago: join theirs
@@ -129,6 +146,23 @@ async def create_or_join_shared_job(
         await s.commit()
         return job.id, True
     raise RuntimeError(f"shared job {share_key} kept changing")  # pragma: no cover
+
+
+async def promote(s: AsyncSession, job_id: uuid.UUID) -> bool:
+    """A student needs this queued background job now: move it to the interactive lane at
+    P_NEEDED_NOW. A running job keeps its lane (its calls are already under way)."""
+    entry = {"t": datetime.now(UTC).isoformat(timespec="milliseconds"), "type": "promoted"}
+    done = await s.execute(
+        update(Job)
+        .where(Job.id == job_id, Job.status == "queued", Job.lane == "background")
+        .values(
+            lane="interactive",
+            priority=func.least(Job.priority, P_NEEDED_NOW),
+            events=Job.events.op("||")(literal([entry], type_=JSONB)),
+        )
+    )
+    await s.commit()
+    return bool(done.rowcount)
 
 
 async def _avg_call_s(s: AsyncSession) -> float:
@@ -144,8 +178,9 @@ async def _avg_call_s(s: AsyncSession) -> float:
 
 
 def _ahead_of(job: Job, now: datetime):
-    """Queued jobs that will run before this one: a higher-priority lane, or the same lane and
-    older; never one deferred to a later `not_before` (audit OPT-10)."""
+    """Queued jobs that will run before this one: a higher-priority lane, or the same lane and a
+    lower `priority`, or the same priority and older; never one deferred to a later `not_before`
+    (audit OPT-10)."""
     return and_(
         Job.status == "queued",
         Job.id != job.id,
@@ -153,7 +188,12 @@ def _ahead_of(job: Job, now: datetime):
         or_(Job.not_before.is_(None), Job.not_before <= now),
         or_(
             and_(Job.lane == "interactive", job.lane == "background"),
-            and_(Job.lane == job.lane, Job.created_at < job.created_at),
+            and_(Job.lane == job.lane, Job.priority < job.priority),
+            and_(
+                Job.lane == job.lane,
+                Job.priority == job.priority,
+                Job.created_at < job.created_at,
+            ),
         ),
     )
 

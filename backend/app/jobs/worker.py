@@ -100,7 +100,7 @@ class Worker:
                     Job.lane == lane,
                     or_(Job.not_before.is_(None), Job.not_before <= now),
                 )
-                .order_by(Job.created_at)
+                .order_by(Job.priority, Job.created_at)
                 .limit(1)
                 .with_for_update(skip_locked=True)
             )

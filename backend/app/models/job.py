@@ -17,6 +17,8 @@ class Job(Base):
         # Worker picks by lane priority, respecting not_before (SELECT … FOR UPDATE SKIP LOCKED).
         Index("ix_jobs_queue", "status", "lane", "not_before"),
         Index("ix_jobs_lease", "status", "lease_until"),
+        # Inside a lane, lower priority first, then oldest (Group E, migration 0018).
+        Index("ix_jobs_queue_priority", "status", "lane", "priority", "created_at"),
         # One queued/running job per shared class asset (audit OPT-01, migration 0017).
         Index(
             "uq_jobs_share_key_active",
@@ -35,6 +37,8 @@ class Job(Base):
     )
     kind: Mapped[str] = mapped_column(String(32))
     lane: Mapped[str] = mapped_column(String(16))  # interactive | background
+    # Lower runs first inside a lane: 10 needed now, 50 next-chapter prefetch, 100 default.
+    priority: Mapped[int] = mapped_column(Integer, default=100, server_default=text("100"))
     # queued | running | done | failed | cancelled
     status: Mapped[str] = mapped_column(String(16), default="queued")
     payload: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)  # handler input
