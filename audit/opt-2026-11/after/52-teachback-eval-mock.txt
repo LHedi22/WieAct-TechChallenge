@@ -1,0 +1,25 @@
+Bytecode compiled 5680 files in 218ms
+/opt/venv/lib/python3.12/site-packages/qdrant_client/async_qdrant_remote.py:230: UserWarning: Qdrant client version 1.20.0 is incompatible with server version 1.12.4. Major versions should match and minor version difference must not exceed 1. Set check_compatibility=False to skip version check.
+  show_warning(
+  en    weak       → ok 50 final []
+  en    acceptable → ok 60 final []
+  en    strong     → ok 40 final []
+  en    off_topic  → ok 20 final []
+  en    injected   → ok 0 final ['injection', 'evidence']
+  fr    weak       → ok 10 final []
+  fr    acceptable → ok 40 final []
+  fr    strong     → ok 20 final []
+  fr    off_topic  → ok 20 final []
+  fr    injected   → ok 0 final ['injection', 'evidence']
+  ar    weak       → ok 30 final []
+  ar    acceptable → ok 20 final []
+  ar    strong     → ok 20 final []
+  ar    off_topic  → ok 10 final []
+  ar    injected   → ok 0 final []
+  ar-TN weak       → ok 30 final []
+  ar-TN acceptable → ok 40 final []
+  ar-TN strong     → ok 20 final []
+  ar-TN off_topic  → ok 10 final []
+  ar-TN injected   → ok 0 final []
+calls {'compact': 10, 'mid': 12} · scores_vary PASS · ranks_weak_acceptable_strong FAIL · same_answer_same_band_across_languages FAIL · off_topic_gets_nothing PASS · injection_not_rewarded PASS
+→ /app/tests/evals/teachback/outputs/mock-1794673016.json

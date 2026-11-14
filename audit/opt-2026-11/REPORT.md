@@ -133,25 +133,25 @@ Ranked by (score gain × confidence) ÷ effort. Effort: S ≤ 1 h, M ≤ ½ day,
 | ID | Area | Sev | Evidence | Measured / inferred | Source | Recommendation | Effort |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | OPT-01 · **fixed** `65ebdbb` | jobs/cache | S1 | `logs/32-same-chapter-10.log`, `32-same-chapter-db.txt`; `studio/service.py:95-111` | measured | mock + code | §3 | S–M |
-| OPT-02 | RAG | S1 | `quiz/pool.py:78-95,157-182`; `logs/40-stacks-chunks-mock.txt`; N-6 | measured (chunk pick) + inferred (output) | mock + code + local | §3 | S |
+| OPT-02 · **fixed** `fecaf13` | RAG | S1 | `quiz/pool.py:78-95,157-182`; `logs/40-stacks-chunks-mock.txt`; N-6 | measured (chunk pick) + inferred (output) | mock + code + local | §3 | S |
 | OPT-03 | demo | S1 | STATUS.md §2 unticked; no `cloud-*` eval outputs; no stats export in `docs/report/` | inferred | code/docs | §3, §9 | M |
 | OPT-04 · **fixed** `0cc0323, 197f863` | limiter | S2 | `limiter.py:28`; logger max 21/60 s | measured | mock | §3 | S |
 | OPT-05 · **fixed** `a5785c5` | gateway | S2 | `service.py:348-369`, `verify.py:93` | inferred | code | §3 | S |
 | OPT-06 · **fixed** `841a751` | quota | S2 | `quota.py:31-34`; DECISIONS 2026-11-09 (no reset header) | inferred | code + platform-log | §3; also fix the .tex claim | S |
-| OPT-07 | moderation | S2 | N-4 artifacts | measured | local | §3 | S |
+| OPT-07 · **fixed** `5b60cb8` | moderation | S2 | N-4 artifacts | measured | local | §3 | S |
 | OPT-08 · **fixed** `6406b67` | orchestration | S3 | `router.py:19-39` | code | code | §3 | S |
-| OPT-09 | orchestration | S2 | `router.py:31`; §6 | inferred | code | §3 | S |
+| OPT-09 · **fixed** `1b3ac42` | orchestration | S2 | `router.py:31`; §6 | inferred | code | §3 | S |
 | OPT-10 · **fixed** `fb7a94e, a134f8c, f1d8ed4` | UX | S2 | `jobs/service.py:94-137`; ETA 1–8 s vs 19–60 s | measured | mock | §3 | S |
-| OPT-11 | language | S2 | N-5 artifacts; `_voice_rules.md:8` example «النهاية (limite)» copied into unrelated outputs | measured | local | Per chapter × language glossary from CHUNK_TAG concepts via the unused TRANSLATE_SHORT (1 compact call per chapter per language, cached), injected into notes/audio/tutor/grade prompts; replace the copied example with a placeholder | M |
+| OPT-11 · **fixed** `6f6dc2e` | language | S2 | N-5 artifacts; `_voice_rules.md:8` example «النهاية (limite)» copied into unrelated outputs | measured | local | Per chapter × language glossary from CHUNK_TAG concepts via the unused TRANSLATE_SHORT (1 compact call per chapter per language, cached), injected into notes/audio/tutor/grade prompts; replace the copied example with a placeholder | M |
 | OPT-12 · **fixed** `f3fc431, 0c66103` | worker | S2 | `logs/61-chaos-db-restart.log`: worker survived, job `failed errors.job_interrupted` after 83 s (refunded); `Worker.execute()` raised `DBAPIError` uncaught; API 500 during the restart. AUDIT 6 Nov said "pack finished" | measured | mock | Retry the job's DB writes with the same backoff the loop uses, or requeue instead of failing on a DB error inside `execute` | S–M |
 | OPT-13 · **parked** (needs a slot; prefetch is the mitigation, §12) | latency | S2 | mid `llama3.1-8b` 13.4 tok/s; 373 tokens in 23.6 s (probe). Local notes 370–510 tokens (`logs/11-local-output-sizes.txt`). Interactive mid budget 45 s (`config.py:89`) | inferred | platform-log + local | A first study pack/audio on the platform may often time out into Quick mode (≈ 30–40 s of generation plus prefill of a ~3k-token context on CPU). Measure in-slot; if so, generate packs for the demo chapters on the background lane at upload (precompute) or raise the budget only for NOTES/AUDIO | S (+ slot) |
-| OPT-14 | verifier | S2 | `quiz/pool.py:250-276`: < 5 kept → regenerate + re-verify. Local verifier kept 5 of 19 (AUDIT 6 Nov) | inferred | code + local | A first quiz on real models is likely 2 compact + 2 mid, not "1 + 1" (the .tex says 1 + 1). Ask the verifier for a 1-line worked step before its answer (0 extra calls, +~150 tokens), and generate 12 questions so 5+ survive more often | S |
-| OPT-15 | verifier quality | S2 | AUDIT residual 2: 3 of 5 kept items wrong (`local`) | measured | local | Same as OPT-14; also drop items where the verifier is "sure" but the explanation contradicts the key (server check) | S |
-| OPT-16 | grading | S2 | AUDIT residual 1: AR/Darija don't rank weak < acceptable < strong (`local`) | measured | local | Arabic and Darija calibration examples (one per rubric level) in `_teachback_rubric.md`: 0 extra calls. Re-run SLOT_CHECKLIST step 1 | S |
+| OPT-14 · **fixed** `e0c6cbb` | verifier | S2 | `quiz/pool.py:250-276`: < 5 kept → regenerate + re-verify. Local verifier kept 5 of 19 (AUDIT 6 Nov) | inferred | code + local | A first quiz on real models is likely 2 compact + 2 mid, not "1 + 1" (the .tex says 1 + 1). Ask the verifier for a 1-line worked step before its answer (0 extra calls, +~150 tokens), and generate 12 questions so 5+ survive more often | S |
+| OPT-15 · **fixed** `e0c6cbb` | verifier quality | S2 | AUDIT residual 2: 3 of 5 kept items wrong (`local`) | measured | local | Same as OPT-14; also drop items where the verifier is "sure" but the explanation contradicts the key (server check) | S |
+| OPT-16 · **fixed** `343c40d` | grading | S2 | AUDIT residual 1: AR/Darija don't rank weak < acceptable < strong (`local`) | measured | local | Arabic and Darija calibration examples (one per rubric level) in `_teachback_rubric.md`: 0 extra calls. Re-run SLOT_CHECKLIST step 1 | S |
 | OPT-17 · **fixed** `12bf3be` | cache | S3 | `quiz/pool.py:244`, `placement/service.py:131` keys have no context hash | code | code | Add a context hash so edited material regenerates | S |
 | OPT-18 · **fixed** `5012999` | single-flight | S3 | `gateway/service.py:186-195` | code | code | Followers re-enter `run()` so one becomes the new leader | S |
 | OPT-19 · **fixed** `a79dd95` | limiter scope | S3 | `limiter.py:8`; evals/reindex build their own Gateway | code | code | Refuse `--cloud` CLIs while a worker heartbeat is fresh, or document "stop the worker first" | S |
-| OPT-20 | unused kinds | S3 | INTENT_LANG, TRANSLATE_SHORT, CHALLENGE_ITEMS (`router.py:19,32,36`) | code | code | Use TRANSLATE_SHORT for OPT-11; mark the other two "reserved" in ARCHITECTURE | S |
+| OPT-20 · **fixed** `b34652b` | unused kinds | S3 | INTENT_LANG, TRANSLATE_SHORT, CHALLENGE_ITEMS (`router.py:19,32,36`) | code | code | Use TRANSLATE_SHORT for OPT-11; mark the other two "reserved" in ARCHITECTURE | S |
 | OPT-21 | frontend | S3 | `logs/70-vite-build.log`: one 942.5 KB entry (296.6 KB gz); only AdminApp lazy (`App.tsx:33`); 4 locales eager (200 KB raw, `i18n/index.ts:4-7`) | measured | mock | Lazy-load the five buildings and non-active locales: ≈ −40 % first load on phones (estimate). Low score value | M |
 | OPT-22 | polling | info | `logs/46-poll-bench-30.txt`: 30 pollers → 20 req/s, p50 61 ms, p95 143 ms, max 309 ms. `useJob` stops on terminal status; TanStack stops when the tab is hidden; no backoff | measured | mock | No change needed. Optional backoff to 3 s after 60 s queued | S |
 | OPT-23 | DB | info | `logs/45-explain-hot-queries.txt`: job by id, queue position, avg latency, ai_cache, leaderboard all < 0.1 ms (index scans; small tables) | measured | mock | None | — |
@@ -229,7 +229,7 @@ REQUIREMENTS.md partial/missing rows:
 | Teach-Back ask | 1 MODERATE_POST | 0 | — | |
 | Teach-Back answer EN/FR | 1 draft | +1 review if low confidence or in the band | — | |
 | Teach-Back answer AR/Darija | 0 | 1 (direct) | — | `arena/service.py:55,461` |
-| Daily plan | 0 | 1 per student per day | only byte-identical prompts | OPT-09 |
+| Daily plan | 1 per student per day (after `1b3ac42`) | 0, or 1 for a student with recorded weak spots | only byte-identical prompts | OPT-09 fixed; before: 0 compact / 1 mid |
 | Wisdom tip | 0 | 1 per (world, concept, mistake type), all languages | class | |
 
 **One typical student-day** (2 placements, 1 quiz, 1 tutor session, 1 study pack, 1 EN Teach-Back answer, daily plan):
@@ -239,6 +239,14 @@ REQUIREMENTS.md partial/missing rows:
 **Class of 30, same chapter, same language:** 14 + 29 × 9 ≈ 275 compact and 5.8 + 29 × 1.8 ≈ 58 mid → **≈ 83/17** (`code` estimate).
 - About 30 of those 58 mid calls are daily plans.
 - If 10 students write Teach-Back in Arabic or Darija, about 10 calls move from compact to mid (≈ 80/20).
+
+**After OPT-09 (`1b3ac42`, recomputed):** the 30 daily plans are compact unless the student has a
+recorded weak spot (a mistake in the last 14 days or a weak chapter).
+- First day of a class (nobody has mistakes yet): ≈ 305 compact / 28 mid → **≈ 92/8**.
+- Steady state with half the class carrying a weak spot: ≈ 290 compact / 43 mid → **≈ 87/13**.
+- The glossary (OPT-11) adds at most 1 compact call per chapter for each language the material is
+not written in. The 12-question generation (OPT-14) adds tokens but no calls, and should make the
++1 c + 1 m regenerations rarer.
 
 That is well below the ≈ 60/40 capacity guide: it is not "everything to mid", and mid sits where reasoning matters. OPT-09 moves the daily-plan mid calls to the verifier and grading instead.
 
@@ -417,6 +425,25 @@ same commands as §7. Logs are in `audit/opt-2026-11/after/`.
 
 The first re-run after `0cc0323` still showed 21 in 60 s (logger: calls 1 and 21 arrived 59.98 s
 apart). The limiter counts at acquire and the server at arrival; `197f863` adds a 1 s margin.
+
+### Group C: content quality and orchestration
+
+| Finding | Status | Commits |
+| --- | --- | --- |
+| OPT-02 generation context covers the whole chapter | fixed | `fecaf13` (Stacks 6/12 → 12/12 slides, Limits 2,820 → 6,556 characters; `after/40-*`, `after/41-*`) |
+| OPT-07 moderation pre-filter + per-language examples | fixed | `5b60cb8` (probe on mock: 4/4 insults and 4/4 personal data rejected with no call, 4/4 study questions pass; `after/50-*`) |
+| OPT-09 daily plan on compact, mid for weak spots | fixed | `1b3ac42` (split recomputed in §6) |
+| OPT-11 chapter glossary, copied example removed | fixed | `6f6dc2e` (1 compact call per chapter × language, then cache hits; `after/51-*`) |
+| OPT-14 worked step + 12 questions per set | fixed | `e0c6cbb` |
+| OPT-15 explanation that names another option → dropped | fixed | `e0c6cbb` |
+| OPT-16 AR/Darija Teach-Back calibration | fixed | `343c40d` (ranking can only be measured in-slot: the mock grader ignores the rubric; `after/52-*`) |
+| OPT-20 unused kinds marked reserved | fixed | `b34652b` |
+
+Prompt edits in this group: `moderate_post` v2, `glossary` v1, `_voice_rules` v2, `notes_write` /
+`audio_script` / `tutor_plan` / `tutor_turn` v3, `teachback_grade` / `teachback_review` v5,
+`quiz_verify` v2 and `_teachback_rubric` v3. The mock quiz eval passed 20/20 valid in all 4 languages
+after each one. The Darija insult list and the Darija examples (moderation, rubric) still need
+native review.
 
 ## Logs index (`audit/opt-2026-11/logs/`)
 
