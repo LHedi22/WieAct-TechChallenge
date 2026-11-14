@@ -70,3 +70,12 @@ async def test_it_refuses_before_any_sign_up(monkeypatch, capsys):
 def test_each_phase_maps_to_its_start_route(phase):
     path, body = script.PHASES[phase]("ch1", "advanced")
     assert path.startswith("/api/") and body["level"] == "advanced"
+
+
+def test_next_chapter_mode_studies_then_moves_on():
+    """Group E: with --next-chapter each student studies chapter 1 like the UI (opens the studio
+    page, finishes the quiz), thinks, then starts chapter 2, whose waits are reported apart."""
+    assert script.rounds("c1", None) == [("", "c1")]
+    assert script.rounds("c1", "c2") == [("", "c1"), ("next:", "c2")]
+    assert script.STUDY["studio"]("c1", "beginner") == "/api/studio/c1?level=beginner"
+    assert script.FINISH("a1") == "/api/quiz/attempts/a1/finish"

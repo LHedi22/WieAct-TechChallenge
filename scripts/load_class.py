@@ -10,7 +10,12 @@ Against a backend on the cloud provider it refuses to start (before any sign-up)
 is given. Reports per phase: HTTP codes, coins charged, distinct jobs (sharing), wait p50/p95,
 the highest queue position, Quick-mode jobs, and the /api/admin/stats deltas (calls per tier,
 cache hits, repeated identical requests, fallbacks, refusals) when ADMIN_TOKEN is set.
-Exits 1 if a job did not finish."""
+Exits 1 if a job did not finish.
+
+`--next-chapter <id>` (Group E, prefetch): each student first studies `--chapter` like the UI
+(the studio page is opened before the pack is asked for, the quiz is finished), waits `--think`
+seconds, then runs the same phases on the next chapter; those rows are labelled `next:<phase>`.
+Run it with PREFETCH_ENABLED on and off on the backend to compare the next-chapter waits."""
 
 from __future__ import annotations
 
@@ -33,6 +38,14 @@ PHASES = {
     "tutor": lambda ch, lvl: ("/api/tutor/start", {"chapter_id": ch, "level": lvl}),
 }
 STAT_KEYS = ("calls", "cache_hits", "repeated_identical", "fallbacks")
+# --next-chapter: what a studying student does besides the start (the page load, the finish)
+STUDY = {"studio": lambda ch, lvl: f"/api/studio/{ch}?level={lvl}"}
+FINISH = lambda attempt: f"/api/quiz/attempts/{attempt}/finish"  # noqa: E731
+
+
+def rounds(chapter: str, next_chapter: str | None) -> list[tuple[str, str]]:
+    """(label prefix, chapter) for each round of phases."""
+    return [("", chapter)] + ([("next:", next_chapter)] if next_chapter else [])
 
 
 def pct(values: list[float], q: float) -> float | None:
@@ -84,21 +97,33 @@ class Student:
             return r.status_code
         return (await self.client.post("/api/worlds/join", json={"code": code})).status_code
 
-    async def act(self, phase: str, chapter: str, level: str, timeout_s: float) -> dict:
+    async def act(
+        self, phase: str, chapter: str, level: str, timeout_s: float, study: bool = False
+    ) -> dict:
         path, body = PHASES[phase](chapter, level)
         t0 = time.monotonic()
+        if study and phase in STUDY:
+            await self.client.get(STUDY[phase](chapter, level))
         r = await self.client.post(path, json=body)
         data = r.json() if r.headers.get("content-type", "").startswith("application/json") else {}
         row = {"http": r.status_code, "cost": data.get("cost"), "job": data.get("job_id")}
         if r.status_code != 200 or not row["job"]:
-            return row | {"wait_s": time.monotonic() - t0}
+            row |= {"wait_s": time.monotonic() - t0}
+            if study and phase == "quiz" and data.get("attempt_id"):
+                await self.client.post(FINISH(data["attempt_id"]))
+            return row
         max_pos = 0
         while True:  # poll like the UI
             v = (await self.client.get(f"/api/jobs/{row['job']}")).json()
             max_pos = max(max_pos, v.get("queue_position") or 0)
             if v["status"] in TERMINAL or time.monotonic() - t0 > timeout_s:
-                return row | {"status": v["status"], "quick": v.get("quick_mode"),
-                              "wait_s": time.monotonic() - t0, "max_pos": max_pos}  # fmt: skip
+                row |= {"status": v["status"], "quick": v.get("quick_mode"),
+                        "wait_s": time.monotonic() - t0, "max_pos": max_pos}  # fmt: skip
+                if study and phase == "quiz" and v["status"] == "done":
+                    a = await self.client.post(f"/api/quiz/attempts/from-job/{row['job']}")
+                    if a.status_code == 200:
+                        await self.client.post(FINISH(a.json()["id"]))
+                return row
             await asyncio.sleep(1.5)
 
 
@@ -122,6 +147,8 @@ async def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--phases", default="studio,quiz,tutor")
     ap.add_argument("--timeout", type=float, default=900, help="max wait per job (s)")
     ap.add_argument("--cloud", action="store_true", help="allow a backend on the cloud provider")
+    ap.add_argument("--next-chapter", help="study --chapter, think, then start this chapter")
+    ap.add_argument("--think", type=float, default=90, help="seconds between the two chapters")
     a = ap.parse_args(argv)
     phases = [p for p in a.phases.split(",") if p]
     if bad := [p for p in phases if p not in PHASES]:
@@ -137,14 +164,19 @@ async def main(argv: list[str] | None = None) -> int:
             joined = await asyncio.gather(*(s.start(a.code, a.language) for s in students))
             print(json.dumps({"provider": provider, "run": run, "joined": sorted(set(joined))}))
             ok = True
-            for phase in phases:
-                before = await stats(c, provider)
-                rows = await asyncio.gather(
-                    *(s.act(phase, a.chapter, a.level, a.timeout) for s in students)
-                )
-                out = summarize(phase, rows, before, await stats(c, provider))
-                ok &= all(r.get("status") in (None, "done") for r in rows)
-                print(json.dumps(out))
+            study = bool(a.next_chapter)
+            for label, chapter in rounds(a.chapter, a.next_chapter):
+                if label:
+                    print(json.dumps({"thinking_s": a.think}))
+                    await asyncio.sleep(a.think)
+                for phase in phases:
+                    before = await stats(c, provider)
+                    rows = await asyncio.gather(
+                        *(s.act(phase, chapter, a.level, a.timeout, study) for s in students)
+                    )
+                    out = summarize(label + phase, rows, before, await stats(c, provider))
+                    ok &= all(r.get("status") in (None, "done") for r in rows)
+                    print(json.dumps(out))
         finally:
             await asyncio.gather(*(s.client.aclose() for s in students))
     print("RESULT", "PASS" if ok else "FAIL")
