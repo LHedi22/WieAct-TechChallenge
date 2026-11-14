@@ -52,6 +52,25 @@ def get_sessionmaker() -> async_sessionmaker[AsyncSession]:
     return async_sessionmaker(get_engine(), expire_on_commit=False)
 
 
+class _Borrowed:
+    def __init__(self, s: AsyncSession) -> None:
+        self.s = s
+
+    async def __aenter__(self) -> AsyncSession:
+        return self.s
+
+    async def __aexit__(self, *exc: object) -> bool:
+        return False  # the caller's session: never closed here
+
+
+def reuse(s: AsyncSession):
+    """A sessionmaker stand-in that hands out the caller's session, for reads made while a request
+    already holds a connection (e.g. the offline switches when a job is created). Opening a second
+    session there let a burst of 30 students exhaust the pool, every request waiting for a second
+    connection with its first one held (audit OPT-34)."""
+    return lambda: _Borrowed(s)
+
+
 async def get_session() -> AsyncIterator[AsyncSession]:
     """FastAPI dependency: one session per request."""
     async with get_sessionmaker()() as session:

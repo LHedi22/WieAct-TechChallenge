@@ -13,7 +13,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
-from app.core.db import get_sessionmaker
+from app.core.db import reuse
 from app.gateway.providers import paused_until
 from app.jobs.coins import coins
 from app.jobs.registry import spec_for
@@ -76,7 +76,7 @@ async def _new_job(
     s, kind, lane, payload, user_id, world_id, cost, share_key=None, priority=P_DEFAULT
 ) -> Job:
     spec = spec_for(kind)
-    offline, resume_at = await paused_until(get_settings(), get_sessionmaker())
+    offline, resume_at = await paused_until(get_settings(), reuse(s))  # no 2nd connection
     if offline and (lane == "interactive" or resume_at is None):
         raise AIPaused()
     job = Job(

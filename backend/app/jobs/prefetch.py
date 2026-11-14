@@ -29,7 +29,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
-from app.core.db import get_sessionmaker
+from app.core.db import reuse
 from app.core.provenance import servable
 from app.gateway.providers import paused_until
 from app.jobs.service import (
@@ -83,7 +83,7 @@ async def plan_next(s: AsyncSession, user: User, chapter: Chapter, level: str) -
     settings = get_settings()
     if not settings.PREFETCH_ENABLED:
         return []
-    offline, _ = await paused_until(settings, get_sessionmaker())
+    offline, _ = await paused_until(settings, reuse(s))  # no 2nd connection (OPT-34)
     if offline:  # nothing new is made while AI is paused; the student's own start still works
         return []
     nxt = await next_chapter(s, chapter)
