@@ -37,6 +37,10 @@ Offline demo mode serves only results the platform already produced (DEPLOY.md �
 Check: sign out, switch Offline demo mode on in `/admin`, and open placement in each of the 4
 languages. It must open from the cache.
 
+Prefetch (`PREFETCH_ENABLED`, on by default) also makes chapter 2's quiz set and pack when step 1c
+opens the studio on chapter 1: up to 2 + 3 requests (≈ 2 mid) per level × language. That warms
+the offline cache further; set it to `false` before the slot if quota is tight.
+
 ## 2. Evidence for the report and the pitch
 
 | # | Finding | Command (backend container unless noted) | ≈ requests | ≈ mid |

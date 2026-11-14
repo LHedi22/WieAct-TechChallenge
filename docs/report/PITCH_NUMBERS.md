@@ -24,6 +24,7 @@ mock; the platform numbers come from the jury slot" is the honest answer.
 | Indexing cost | ~5 requests for a 30-page PDF (8 chunks per tag call); embeddings on our own `bge-m3` | `code` + `mock` (M2) |
 | Worker crash mid pack | job failed cleanly, coins refunded, worker back | `mock` (audit §7) |
 | Malicious upload | 1 MB DOCX bomb rejected in < 7 s; a classmate's Tutor start unaffected (4 s) | `mock` (audit §7) |
+| Next chapter ready before they get there | prefetch on: chapter 2 opens in 0.0–0.2 s for 0 coins (10 and 30 students), against 6.6–17.6 s and 20 coins off, no more calls (made earlier, while the class works on chapter 1) | `mock` (audit §12 Group E) |
 | 30 students polling | 20 req/s, p95 143 ms on the dev server | `mock` (audit §7) |
 | Languages | 4 UI languages (EN, FR, AR, Darija), RTL, every key present in all 4 | `code` (`pnpm i18n:check`) |
 | Tests | backend, frontend and mock-llm suites, one test per row of the platform's error contract | `code` (counts: REPORT.md §6) |

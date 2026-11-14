@@ -165,6 +165,7 @@ Ranked by (score gain × confidence) ÷ effort. Effort: S ≤ 1 h, M ≤ ½ day,
 | OPT-31 · **fixed** `eadfebc, 7a2f27c` | economy | S3 | `economy.py:27` `creator_new_member` never used; no badge code; `en.json:153` "between 1 and 50 coins" hard-coded | code | code | Cut or implement; read the 50 from `/api/economy` | S |
 | OPT-32 · **pending decision** (the Railway domain) | deploy | S1 (if the demo is on the deployed site) | `frontend/vercel.json:8` still `REPLACE-WITH-RAILWAY-DOMAIN` | code | code | Can't tell whether a deploy exists outside the repo; confirm before the pitch | S |
 | OPT-33 · **fixed** `0bfd875` | flaky test | S3 | `logs/02-frontend-verify.log` 1 failed / 93; 3 re-runs 93/93 | measured | mock | Find the flaky spec (name not captured in the tail) | S |
+| OPT-34 · **fixed** `1a07d5c` (new, 14 Nov) | DB pool | S1 | `after/57-prefetch-off-30-before-opt34.txt`: 30 students → HTTP 500 in 3 phases, `QueuePool limit of size 5 overflow 10 reached` ×90 | measured | mock | Job creation read the offline switches through a second session while holding one; read them through the caller's session | S |
 
 ## 5. Status of the 2 Nov audit findings at HEAD
 
@@ -458,13 +459,42 @@ native review.
 | OPT-21 lazy building routes, locales on demand | fixed | `c6a5845` (entry 943 → 746 kB, 297 → 238 kB gzip; `after/55-*`) |
 | OPT-03 jury-slot runbook | runbook and dry-run script done | `6cd8afc` (`docs/report/JURY_SLOT_RUNBOOK.md`, `scripts/jury_slot.py`; never run: it needs the slot) |
 | CA-2 settings nothing reads | fixed | `4f4a96e` |
-| §8 doc and claim drift (repo files) | fixed | see the docs commit for this group; `docs/report/PITCH_NUMBERS.md` lists what is safe to say before the slot |
+| §8 doc and claim drift (repo files) | fixed | `22a9e1a`; `docs/report/PITCH_NUMBERS.md` lists what is safe to say before the slot |
 | OPT-32 `vercel.json` Railway domain | **pending decision** | — |
 | OPT-22, OPT-23 | info only, no change | — |
 
 `.env.example` keeps `LLM_DISABLE_THINKING=true` (local Qwen3 in dev returns no answer without it);
 a comment now says production runs `false` with the llama cloud models. The .tex report under
 `~/Desktop` was left alone; its §8 lines still need a human edit.
+
+### Group E: background prefetch, one chapter ahead
+
+Decided by the team before coding (DECISIONS.md 2026-11-14): prefetched content is free when
+opened; prefetch jobs are ownerless (`user_id` NULL, cost 0) and never touch a wallet or the
+pool; scope is one chapter ahead.
+
+| Step | Commit |
+| --- | --- |
+| 1 · one call slot kept for students (`LLM_INTERACTIVE_RESERVED`) | `003e564` |
+| 2–3 · `jobs.priority` (migration 0018), promotion when a student joins a queued job | `46fecf1` |
+| 4–6 · planner `app/jobs/prefetch.py`, triggers (quiz finished, Study Studio opened), extra-call cost written down, a prefetched pack never Quick mode | `2eb3bb1` |
+| 7 · Ready chip, "Being prepared · about N min", "Get it now" (en/fr/ar/ar-TN, RTL at 390 px) | `5781955` (`after/56-*`) |
+| 8 · metrics on `/api/admin/stats`, `/admin/stats`, `export_stats.py` | `346e9fb` |
+| 8 · class load test across two chapters, on vs off, 10 and 30 students | `7894e87` (`after/57-*`) |
+| OPT-34 · DB pool exhausted by 30 simultaneous starts (found by step 8) | `1a07d5c` |
+
+| Run (`mock`) | Chapter 2 pack: wait p50 / coins | Chapter 2 quiz: wait p50 / coins | Calls, whole run |
+| --- | --- | --- | --- |
+| 10 students, prefetch off | 17.2 s / 15 | 14.2 s / 5 | 15 |
+| 10 students, prefetch on | 0.1 s / 0 | 0.0 s / 0 | 10 |
+| 30 students, prefetch off | 17.6 s / 15 | 6.6 s / 5 | 13 |
+| 30 students, prefetch on | 0.2 s / 0 | 0.1 s / 0 | 12 |
+
+Extra platform calls: at most once per class × next chapter × level × language, only for content
+nobody has made yet: quiz 1 compact + 1 mid (+1 + 1 on regeneration), pack 1 mid + 2 compact,
+glossary ≤ 1 compact. Wasted only if nobody in that level and language opens it; the Stats page
+counts `quiz_sets_used` to check that. Not prefetched: audio (first in the scope guard) and
+placement (already precomputed).
 
 ## Logs index (`audit/opt-2026-11/logs/`)
 
