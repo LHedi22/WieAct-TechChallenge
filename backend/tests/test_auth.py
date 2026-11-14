@@ -78,6 +78,17 @@ async def test_signup_rules(api):
     assert bad.json()["detail"] == "errors.nickname_invalid"
 
 
+async def test_a_case_variant_of_a_taken_nickname_is_taken(api):
+    """Audit OPT-28 (F-SEC-6): "seaturtle42" next to "SeaTurtle42" let one student pass for
+    another on the leaderboard and in the arena."""
+    assert (await api.post("/api/auth/signup", json=SIGNUP)).status_code == 201
+    api.cookies.clear()
+    twin = await api.post("/api/auth/signup", json=SIGNUP | {"nickname": "SEATURTLE42"})
+    assert twin.status_code == 409 and twin.json()["detail"] == "errors.nickname_taken"
+    other = await api.post("/api/auth/signup", json=SIGNUP | {"nickname": "SeaTurtle43"})
+    assert other.status_code == 201
+
+
 async def test_login_logout(api):
     await api.post("/api/auth/signup", json=SIGNUP)
     await api.post("/api/auth/logout")
