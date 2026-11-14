@@ -1,0 +1,6 @@
+token-set
+{"provider": "mock", "run": "990c2", "joined": [200]}
+{"phase": "studio", "students": 10, "http": [200], "coins_charged": 0, "distinct_jobs": 0, "status": [], "quick_mode": 0, "wait_p50_s": 0.0, "wait_p95_s": 0.1, "max_queue_position": 0, "stats_delta": {"calls": 0, "cache_hits": 0, "repeated_identical": 0, "fallbacks": 0, "mid": 0, "compact": 0, "embed": 0, "refusals": 0}}
+{"phase": "quiz", "students": 10, "http": [200], "coins_charged": 0, "distinct_jobs": 0, "status": [], "quick_mode": 0, "wait_p50_s": 0.1, "wait_p95_s": 0.1, "max_queue_position": 0, "stats_delta": {"calls": 0, "cache_hits": 0, "repeated_identical": 0, "fallbacks": 0, "mid": 0, "compact": 0, "embed": 0, "refusals": 0}}
+{"phase": "tutor", "students": 10, "http": [200], "coins_charged": 0, "distinct_jobs": 10, "status": ["done"], "quick_mode": 0, "wait_p50_s": 3.2, "wait_p95_s": 3.2, "max_queue_position": 10, "stats_delta": {"calls": 1, "cache_hits": 19, "repeated_identical": 0, "fallbacks": 0, "mid": 0, "compact": 1, "embed": 0, "refusals": 0}}
+RESULT PASS

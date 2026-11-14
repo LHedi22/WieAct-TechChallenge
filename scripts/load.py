@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Load test: N students start AI jobs at once against the running stack (mock by default).
+"""Load test: N students start AI jobs at once against the running stack (mock only: it needs the
+mock's /_mock and the dev demo-jobs endpoint; for cloud or the deployed site use load_class.py).
 
     cd backend && uv run python ../scripts/load.py --jobs 30 --faults 503,quota
 

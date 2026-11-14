@@ -7,7 +7,8 @@ requests, refusals and how they were handled).
     python3 scripts/export_stats.py --api https://<site> --load scripts/out/load-cloud.txt
     ADMIN_TOKEN=… python3 scripts/export_stats.py --api https://<site>
 
-Writes docs/report/stats-<provider>-<date>.md. `--load` appends a saved `scripts/load.py` output.
+Writes docs/report/stats-<provider>-<date>.md. `--load` appends a saved `scripts/load.py` or
+`load_class.py` output.
 Standard library only. The admin token is read from the environment, never from the command line.
 """
 
@@ -74,7 +75,7 @@ def render(s: dict, load: str | None) -> str:
     if s.get("quota_headers_seen"):
         out += ["", f"Quota headers seen: {', '.join(s['quota_headers_seen'])}"]
     if load:
-        out += ["", "## Load test (`scripts/load.py`)", "", "```", load.strip(), "```"]
+        out += ["", "## Load test (`scripts/load*.py`)", "", "```", load.strip(), "```"]
     return "\n".join(out) + "\n"
 
 

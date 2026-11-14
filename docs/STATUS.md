@@ -32,8 +32,9 @@ Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
       Also review `scripts/out/probe-cloud-20261030-1806.json`; check Darija by hand.
 - [ ] Watch for prompts that small models break (JSON validity on `llama3.2-3b`; the probe said
       `qwen2.5-3b` failed quiz JSON, ours passed).
-- [ ] Load test against cloud once: `scripts/load.py --jobs 10 --faults ""` with the backend on
-      `LLM_PROVIDER=cloud`, then `scripts/export_stats.py --load <saved output>`.
+- [ ] Load test against cloud once: `scripts/load_class.py --code <join code> --chapter <id>
+      --students 10 --cloud` (real sign-ups and features; `load.py` only drives the mock, OPT-30)
+      with the backend on `LLM_PROVIDER=cloud`, then `scripts/export_stats.py --load <saved output>`.
 - [x] Record the real quota signal (9/11): quota headers on every 200 are `x-ratelimit-api_key-{remaining,limit}-{requests,max_parallel_requests}` and
       `x-litellm-key-rpm-limit` → DECISIONS.md 2026-11-09.
   - [ ] Still unseen: the status code for "team quota exhausted".
