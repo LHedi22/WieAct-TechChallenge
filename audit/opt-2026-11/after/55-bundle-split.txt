@@ -1,0 +1,32 @@
+# OPT-21 bundle split, 2026-11-14 (vite build in the cc-opt frontend container)
+before: index 942.97 kB (gzip 296.73 kB) + AdminApp 87.20 kB; all 4 locales and every screen in the entry chunk
+after:  index 745.75 kB (gzip 237.91 kB); fr 36.44 kB (14.14 gz), ar 46.18 kB (15.30 gz), ar-TN 46.14 kB (15.40 gz); pages 1.4-14.8 kB each; AdminApp 87.20 kB
+first load: EN -20 % gzip; AR 253 kB gz vs 297 (-15 %)
+
+# Real browser (Chrome for Testing, puppeteer-core) on the built dist:
+{
+ "en": {
+  "dir": "ltr",
+  "h1": "Your courses, turned into islands you explore"
+ },
+ "initialJs": [
+  "index-C3ZSYexw.js"
+ ],
+ "afterSwitch": [
+  "ar-BXbDUG6D.js"
+ ],
+ "ar": {
+  "dir": "rtl",
+  "h1": "موادك الدراسية، جزرٌ تستكشفها"
+ },
+ "reopened": {
+  "dir": "rtl",
+  "h1": "موادك الدراسية، جزرٌ تستكشفها"
+ },
+ "reopenedJs": [
+  "index-C3ZSYexw.js",
+  "ar-BXbDUG6D.js"
+ ],
+ "errors": []
+}
+{"js":["index-C3ZSYexw.js","ar-TN-BDyoIZH0.js","ar-BXbDUG6D.js"],"h1":"المواد متاعك، جزر تكتشفها","rawKeysVisible":[],"errors":[]}

@@ -1,10 +1,7 @@
-import i18n, { type Resource } from "i18next";
+import i18n, { type BackendModule, type Resource } from "i18next";
 import ICU from "i18next-icu";
 import { initReactI18next } from "react-i18next";
-import ar from "./ar.json";
-import arTN from "./ar-TN.json";
 import en from "./en.json";
-import fr from "./fr.json";
 import type { Language } from "./languages";
 
 export const NAMESPACES = [
@@ -29,20 +26,39 @@ function toResource(file: Record<string, unknown>): Resource[string] {
   return namespaces as Resource[string];
 }
 
-export const resources: Record<Language, Resource[string]> = {
-  en: toResource(en),
-  fr: toResource(fr),
-  ar: toResource(ar),
-  "ar-TN": toResource(arTN),
+// English (every fallback ends there) is bundled; the other locales are their own chunks, loaded
+// when chosen (audit OPT-21). Darija also loads Arabic, its first fallback.
+const loaders = import.meta.glob<Record<string, unknown>>(
+  ["./fr.json", "./ar.json", "./ar-TN.json"],
+  { import: "default" },
+);
+
+const lazyLocales: BackendModule = {
+  type: "backend",
+  init() {},
+  read(language, namespace, callback) {
+    const load = loaders[`./${language}.json`];
+    if (!load) return callback(null, {}); // en: already bundled
+    load().then(
+      (file) => callback(null, toResource(file)[namespace] ?? {}),
+      (e: Error) => callback(e, null),
+    );
+  },
 };
 
-export function initI18n(lng: Language = "en") {
+let ready: Promise<unknown> = Promise.resolve();
+
+/** `preload`: locales to fetch now (tests load all of them once, then render synchronously). */
+export function initI18n(lng: Language = "en", preload: Language[] = []) {
   if (!i18n.isInitialized) {
-    void i18n
+    ready = i18n
+      .use(lazyLocales)
       .use(ICU)
       .use(initReactI18next)
       .init({
-        resources,
+        resources: { en: toResource(en) },
+        partialBundledLanguages: true,
+        preload: [lng, ...preload],
         lng,
         // Darija falls back to MSA Arabic, then English.
         fallbackLng: { "ar-TN": ["ar", "en"], default: ["en"] },
@@ -50,9 +66,14 @@ export function initI18n(lng: Language = "en") {
         defaultNS: "common",
         interpolation: { escapeValue: false },
         returnNull: false,
+        // changeLanguage loads first, then switches: no Suspense boundary needed around the app
+        react: { useSuspense: false },
       });
   }
   return i18n;
 }
+
+/** Resolves when the first language (and any preload) is in. */
+export const i18nReady = () => ready;
 
 export default i18n;
