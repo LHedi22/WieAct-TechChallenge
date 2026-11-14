@@ -1,4 +1,5 @@
-"""Shared quiz sets: QUIZ_GENERATE, compact, narrow-before-generating, ONE call for 10 questions.
+"""Shared quiz sets: QUIZ_GENERATE, compact, narrow-before-generating, ONE call for 12 questions
+(a set keeps 10; the extras are spares for the answer-key check, audit OPT-14).
 
 Narrowing without an extra call: vector search in the chapter (cached query embedding of the
 chapter title + level), then up to 6 chunks picked round-robin across their tagged concepts,
@@ -11,6 +12,7 @@ the creator's language is generated on the background lane."""
 from __future__ import annotations
 
 import hashlib
+import re
 import uuid
 from typing import Any
 
@@ -32,6 +34,7 @@ from app.rag.search import search
 KIND = "QUIZ_POOL"
 POOL_LEVEL = "intermediate"
 POOL_SIZE = 10
+GENERATE_COUNT = 12  # spares for the key check (audit OPT-14): the set keeps POOL_SIZE
 # Course text per generation call (audit OPT-02): spread over the chapter up to this many
 # characters (≈ 1,750 tokens), at most CONTEXT_MAX_CHUNKS chunks.
 CONTEXT_CHARS = 7000
@@ -69,14 +72,52 @@ def spread_answers(questions: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return questions
 
 
+# An explanation that names another option as the answer (audit OPT-15): "the answer is B",
+# "réponse (2)", "الإجابة هي ب". Checked before spread_answers moves the options.
+_ANSWER_WORD = r"(?i:answer|option|choice|r[ée]ponse|choix|الإجابة|الاجابة|الجواب|الخيار)"
+_LABEL = re.compile(_ANSWER_WORD + r"[^\w\n]{0,3}(?:\w+\s+){0,3}?\(?([A-D1-4]|[أبجد])\)?(?!\w)")
+_LABELS = {"A": 0, "B": 1, "C": 2, "D": 3, "أ": 0, "ب": 1, "ج": 2, "د": 3}
+_LABELS |= {str(i + 1): i for i in range(4)}
+
+
+def _norm(text: str) -> str:
+    return re.sub(r"\s+", " ", text.casefold()).strip()
+
+
+def _mentions(text: str, option: str) -> bool:
+    o = _norm(option)
+    return len(o) >= 4 and re.search(rf"(?<!\w){re.escape(o)}(?!\w)", text) is not None
+
+
+def contradicts(q: dict[str, Any]) -> bool:
+    """The item's own explanation points at an option other than its key: it names another
+    option's label, or quotes another option's text and not the key's. No model call."""
+    expl, options, key = q.get("explanation") or "", q["options"], q["answer_index"]
+    texts = {_norm(o) for o in options}
+    for m in _LABEL.finditer(expl):
+        if m.group(1).casefold() not in texts and _LABELS[m.group(1)] != key:
+            return True  # a label, not an option's own text such as "4"
+    text = _norm(expl)
+    if _mentions(text, options[key]):
+        return False
+    k = _norm(options[key])
+    return any(
+        _mentions(text, o) and _norm(o) not in k and k not in _norm(o)
+        for i, o in enumerate(options)
+        if i != key
+    )
+
+
 def valid_questions(content: Any) -> list[dict[str, Any]]:
     raw = content.get("questions", []) if isinstance(content, dict) else []
     out = []
     for q in raw if isinstance(raw, list) else []:
         try:
-            out.append(Question.model_validate(q).model_dump())
+            item = Question.model_validate(q).model_dump()
         except ValidationError:
             continue
+        if not contradicts(item):
+            out.append(item)
     return spread_answers(out)
 
 
@@ -267,7 +308,7 @@ async def quiz_pool(ctx: JobContext) -> dict[str, Any]:
     async def write(salt: str = "") -> tuple[list[dict[str, Any]], Any]:
         version, messages = prompts.render(
             "quiz_generate",
-            count=POOL_SIZE,
+            count=GENERATE_COUNT,
             level=level,
             language=language,
             course=course.name,
@@ -302,7 +343,7 @@ async def quiz_pool(ctx: JobContext) -> dict[str, Any]:
     if ok is None:  # mid unavailable
         if ctx.lane == "background":
             raise gateway.Defer(VERIFY_RETRY_S, "verify_unavailable")  # wait, don't publish
-        questions = verify.mark_unverified(questions)  # this student only, labelled
+        questions = verify.mark_unverified(questions)[:POOL_SIZE]  # this student only, labelled
     else:
         kept = verify.keep_verified(questions, ok)
         if len(kept) < MIN_VALID:  # regenerate once

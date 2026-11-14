@@ -43,9 +43,9 @@ K = TaskKind
 ROUTES: dict[TaskKind, Route] = {
     K.INTENT_LANG: Route("compact", "none:triage", 60),
     K.CHUNK_TAG: Route("compact", "none:batch", 800),  # 8 chunks ≈ 500 tokens of JSON (probe 7 Nov)
-    K.QUIZ_GENERATE: Route("compact", "narrow-before-generating", 1400),
+    K.QUIZ_GENERATE: Route("compact", "narrow-before-generating", 1700),  # 12 Q (OPT-14)
     K.QUIZ_GRADE_TAG: Route("compact", "none:extraction", 120),
-    K.QUIZ_VERIFY: Route("mid", "draft-then-revise", 400),  # checks compact answer keys (N-3)
+    K.QUIZ_VERIFY: Route("mid", "draft-then-revise", 800),  # 12 keys + a step each (N-3, OPT-14)
     K.TUTOR_TURN: Route("compact", "escalation", 220),
     K.TUTOR_SUMMARY: Route("compact", "none:summary", 200),
     K.TUTOR_GUARD: Route("compact", "none:guard", 160),

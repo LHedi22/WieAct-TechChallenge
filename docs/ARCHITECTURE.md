@@ -103,9 +103,9 @@ name after a colon (`none:guard`). Stats groups calls by the part before the col
 | --- | --- | --- | --- | --- |
 | INTENT_LANG (detect intent + language) | compact | none:triage | interactive | text hash |
 | CHUNK_TAG (batch of chunks → concepts, chapter) | compact | none:batch (at upload, burst) | background | doc hash |
-| QUIZ_GENERATE (10 Q, one call) | compact | narrow-before-generating | interactive / background pool | world+chapter+level+lang+seed |
+| QUIZ_GENERATE (12 Q, one call; a set keeps 10, the spares cover items the key check drops, OPT-14; an item whose own explanation names another option is dropped on the server, OPT-15) | compact | narrow-before-generating | interactive / background pool | world+chapter+level+lang+seed |
 | QUIZ_GRADE_TAG (wrong answers → concept + mistake type) | compact | none:extraction | background | lang + missed items hash |
-| QUIZ_VERIFY (mid solves each new quiz / placement item blind; only items whose key it confirms are published; one regeneration if fewer than 5 survive; mid unavailable → a student's quiz is published marked unverified and never shared, background and placement wait) | mid | draft-then-revise | same as the set | questions + context hash |
+| QUIZ_VERIFY (mid solves each new quiz / placement item blind, one short worked step per item before its answer (OPT-14); only items whose key it confirms are published; one regeneration if fewer than 5 survive; mid unavailable → a student's quiz is published marked unverified and never shared, background and placement wait) | mid | draft-then-revise | same as the set | questions + context hash |
 | TUTOR_TURN | compact → mid when stuck ≥ 2 turns or "complex" flag | escalation | interactive | plan: chapter+level+lang+style; turns: none |
 | TUTOR_GUARD (rewrite a reply that leaks the answer as a guiding question; only flagged replies) | compact | none:guard | interactive | none |
 | TUTOR_SUMMARY | compact | none:summary | interactive | session id |

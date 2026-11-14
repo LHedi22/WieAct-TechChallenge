@@ -187,9 +187,11 @@ QUIZ_TEXT = {
 
 def _quiz(user: str, lang: str, system: str = "") -> dict[str, Any]:
     q, hint, expl, right, wrong = QUIZ_TEXT.get(lang[:2], QUIZ_TEXT["en"])
-    concepts = _concepts(user, 10) or ["the topic"]
+    count = re.search(r"exactly (\d+) ", system)
+    n = int(count.group(1)) if count else 10
+    concepts = _concepts(user, n) or ["the topic"]
     questions = []
-    for i in range(10):
+    for i in range(n):
         c = concepts[i % len(concepts)]
         answer = i % 4
         options = [f"{wrong.format(c=c)} ({k + 1})" for k in range(4)]
@@ -223,7 +225,8 @@ def _verify(user: str, lang: str, system: str = "") -> dict[str, Any]:
         options = OPTION_LINE.findall(block[at:end])
         plain = [int(i) for i, text in options if not DISTRACTOR.search(text)]
         one = plain[0] if len(plain) == 1 else None
-        answers.append({"n": n, "answer": one, "sure": one is not None})
+        step = "the option without a distractor mark"
+        answers.append({"n": n, "step": step, "answer": one, "sure": one is not None})
     return {"answers": answers}
 
 
