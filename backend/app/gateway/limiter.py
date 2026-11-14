@@ -9,6 +9,10 @@ On top of the bucket, no sliding 60 s window carries more than PLATFORM_CALLS_PE
 meter, whatever LLM_MAX_RPM and the burst are (audit OPT-04: capacity 3 + 18/min let one window
 carry 21).
 
+LLM_INTERACTIVE_RESERVED slots are kept for students: background calls (prefetch, tagging, pools)
+only start while fewer than `concurrency - reserved` background calls are in flight (at least one),
+so a student's first call never waits behind a whole background batch (Group E, prefetch).
+
 Process-local by design: only the single worker process calls the gateway (backend/CLAUDE.md).
 """
 
@@ -58,6 +62,7 @@ class Limiter:
         burst: int | None = None,
         embed_rpm: float | None = None,
         background_pause: Callable[[], float] | None = None,
+        interactive_reserved: int = 0,
     ) -> None:
         self.buckets: dict[Meter, _Bucket] = {
             "chat": _Bucket(rpm, burst),
@@ -66,6 +71,8 @@ class Limiter:
         self.base_rpm = rpm
         self.concurrency = concurrency
         self.active = 0
+        self.active_by_lane: dict[Lane, int] = {"interactive": 0, "background": 0}
+        self.background_cap = max(1, concurrency - interactive_reserved)
         self.max_active = 0
         self.waiting = {"interactive": 0, "background": 0}
         # Returns seconds the background lane should keep waiting (0 = go).
@@ -91,6 +98,8 @@ class Limiter:
             b.refill()
         return {
             "active": self.active,
+            "active_by_lane": dict(self.active_by_lane),
+            "background_cap": self.background_cap,
             "concurrency": self.concurrency,
             "max_active": self.max_active,
             "waiting": dict(self.waiting),
@@ -125,8 +134,9 @@ class Limiter:
         if len(window := self._window(meter)) >= PLATFORM_CALLS_PER_MIN:
             return max(0.05, 60 + WINDOW_MARGIN_S - (time.monotonic() - window[0]))
         if lane == "background":
-            if self.waiting["interactive"]:
-                return 1.0
+            busy = self.active_by_lane["background"] >= self.background_cap
+            if self.waiting["interactive"] or busy:
+                return 1.0  # woken by release()
             pause = self.background_pause()
             if pause > 0:
                 return min(pause, 5.0)
@@ -142,13 +152,15 @@ class Limiter:
                 self.buckets[meter].tokens -= 1
                 self._recent[meter].append(time.monotonic())
                 self.active += 1
+                self.active_by_lane[lane] += 1
                 self.max_active = max(self.max_active, self.active)
             finally:
                 self.waiting[lane] -= 1
 
-    async def release(self) -> None:
+    async def release(self, lane: Lane = "interactive") -> None:
         async with self._cond:
             self.active -= 1
+            self.active_by_lane[lane] -= 1
             self._cond.notify_all()
 
     @asynccontextmanager
@@ -157,4 +169,4 @@ class Limiter:
         try:
             yield
         finally:
-            await self.release()
+            await self.release(lane)

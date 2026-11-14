@@ -83,6 +83,7 @@ class Gateway:
             settings.LLM_MAX_CONCURRENCY,
             embed_rpm=settings.LLM_EMBED_MAX_RPM,
             background_pause=self._background_pause,
+            interactive_reserved=settings.LLM_INTERACTIVE_RESERVED,
         )
         self._client_factory = client_factory or self._default_client
         self._clients: dict[str, LLMClient] = {}
@@ -161,20 +162,22 @@ class Gateway:
                 # it still counts against the in-flight limit: keep its slot until the long
                 # budget has passed (no new quota unit). Found while re-measuring audit F-RES-2.
                 held_later = True
-                self._background.add(t := asyncio.create_task(self._release_after(hold_s)))
+                self._background.add(
+                    t := asyncio.create_task(self._release_after(hold_s, task.lane))
+                )
                 t.add_done_callback(self._background.discard)
             raise
         finally:
             if not held_later:
-                await self.limiter.release()
+                await self.limiter.release(task.lane)
         self.quota.update(profile.provider, reply.headers)
         return reply
 
-    async def _release_after(self, seconds: float) -> None:
+    async def _release_after(self, seconds: float, lane: Lane) -> None:
         try:
             await self._sleep(seconds)
         finally:
-            await self.limiter.release()
+            await self.limiter.release(lane)
 
     # --- the contract -----------------------------------------------------------------------------
     async def run(self, task: Task) -> Result:

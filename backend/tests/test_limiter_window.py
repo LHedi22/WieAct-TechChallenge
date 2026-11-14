@@ -45,3 +45,24 @@ async def test_the_window_keeps_a_margin_for_arrival_skew():
         pass
     assert time.monotonic() - started >= 0.4
     assert limiter_module.WINDOW_MARGIN_S >= 0.7
+
+
+# --- Group E: one slot stays free for students ---------------------------------------------------
+
+
+async def test_background_leaves_the_reserved_slot_to_interactive():
+    lim = Limiter(6000, 2, burst=100, interactive_reserved=1)
+    await lim.acquire("background")
+    second = asyncio.create_task(lim.acquire("background"))
+    await asyncio.sleep(0.05)
+    assert not second.done()  # 2 - 1 reserved: one background call at a time
+    await asyncio.wait_for(lim.acquire("interactive"), timeout=0.5)  # the student gets the slot
+    await lim.release("interactive")
+    await lim.release("background")
+    await asyncio.wait_for(second, timeout=1.5)
+    assert lim.snapshot()["active_by_lane"] == {"interactive": 0, "background": 1}
+
+
+async def test_reserve_never_starves_background_on_one_slot():
+    lim = Limiter(6000, 1, burst=100, interactive_reserved=1)
+    await asyncio.wait_for(lim.acquire("background"), timeout=0.5)
