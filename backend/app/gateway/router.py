@@ -65,5 +65,10 @@ ROUTES: dict[TaskKind, Route] = {
 }
 
 
+# Routed but called by no feature yet (audit OPT-20): kept so a later feature has its tier and
+# budget, and listed here so the table never claims they run.
+RESERVED = frozenset({K.INTENT_LANG, K.CHALLENGE_ITEMS})
+
+
 def route_for(kind: TaskKind) -> Route:
     return ROUTES[kind]

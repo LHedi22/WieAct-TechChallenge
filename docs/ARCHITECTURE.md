@@ -101,7 +101,7 @@ Logged patterns (`ai_call_log.pattern`, the Stats page) start with one of the of
 name after a colon (`none:guard`). Stats groups calls by the part before the colon (OPT-08).
 | TaskKind | Tier | Pattern | Lane | Cache key |
 | --- | --- | --- | --- | --- |
-| INTENT_LANG (detect intent + language) | compact | none:triage | interactive | text hash |
+| INTENT_LANG (detect intent + language; **reserved**: no feature calls it yet, OPT-20) | compact | none:triage | interactive | text hash |
 | CHUNK_TAG (batch of chunks → concepts, chapter) | compact | none:batch (at upload, burst) | background | doc hash |
 | QUIZ_GENERATE (12 Q, one call; a set keeps 10, the spares cover items the key check drops, OPT-14; an item whose own explanation names another option is dropped on the server, OPT-15) | compact | narrow-before-generating | interactive / background pool | world+chapter+level+lang+seed |
 | QUIZ_GRADE_TAG (wrong answers → concept + mistake type) | compact | none:extraction | background | lang + missed items hash |
@@ -113,7 +113,7 @@ name after a colon (`none:guard`). Stats groups calls by the part before the col
 | FLASHCARDS / MAP_WRITE (STUDY_PACK steps 2–3, from the notes only) | compact | execute-compact | interactive | chapter+level+lang (+job) |
 | AUDIO_SCRIPT (AUDIO_EPISODE job) | mid | narrow-before-generating, once then cached | interactive | chapter+level+lang (+job; `study_assets` is the class cache) |
 | DAILY_PLAN (first `GET /api/daily` of a Tunis day; an instant rule plan shows meanwhile and stays if the job fails; applied only while nothing is done) | compact, once / student / day; mid only for a student with recorded weak spots (a mistake in 14 days or a weak chapter; OPT-09) | escalation | background | user+date |
-| CHALLENGE_ITEMS (unused: flashcard challenges review existing cards) | compact | execute-compact | background | user+date |
+| CHALLENGE_ITEMS (**reserved**, OPT-20: flashcard challenges review existing cards) | compact | execute-compact | background | user+date |
 | WISDOM_TIP (at `WISDOM_THRESHOLD` distinct students per world+concept+mistake type; ONE call writes the tip in every language of the world's members; later students only raise the count) | mid, once per pattern | none:generate-once | background | world+concept+type+langs+count |
 | TEACHBACK_GRADE (ARENA_GRADE / ARENA_SOLO jobs; the same call moderates the answer via `flag`) | compact draft; mid reviews only when confidence is low or the score is within `TEACHBACK_REVIEW_BAND` of `PEER_ANSWER_THRESHOLD` (solo: low confidence only); mid busy → the draft stands (Quick mode). `ar` / `ar-TN`: one mid call, no draft (compact fallback when mid is busy). Still low-confidence after grading → `pending_review`: no rewards, author-only | draft-then-revise (ar/ar-TN: mid direct) | interactive | none (personal) |
 | MODERATE_POST (ARENA_ASK job: peer questions; rejected → coins refunded) | compact | none:classification | interactive | text hash |
