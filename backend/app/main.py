@@ -33,7 +33,8 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="Captain Cat API",
         docs_url="/api/docs" if settings.APP_ENV != "production" else None,
-        openapi_url="/openapi.json",
+        # dev only: the frontend's types are generated from it (audit OPT-25, F-SEC-3)
+        openapi_url="/openapi.json" if settings.APP_ENV != "production" else None,
     )
     app.add_middleware(StripNul)  # NUL bytes never reach Postgres (audit OPT-26)
     app.add_middleware(
