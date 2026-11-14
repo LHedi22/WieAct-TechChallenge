@@ -25,6 +25,20 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 
 
+def _prefetch_rows(p: dict | None) -> list[str]:
+    """Background prefetch of the next chapter (Group E): what it cost and whether it was used."""
+    if not p or not p.get("jobs"):
+        return []
+    calls = " · ".join(f"{t} {n}" for t, n in p["calls"].items()) or "0"
+    return [
+        f"| Prefetch jobs (next chapter, background) | {p['jobs']} ({p['done']} done, "
+        f"{p['waiting']} waiting, {p['failed']} failed) |",
+        f"| Prefetch calls | {calls} |",
+        f"| Prefetches a student needed early (promoted) | {p['promoted']} |",
+        f"| Prefetched quiz sets later started | {p['quiz_sets_used']} |",
+    ]
+
+
 def fetch(api: str, provider: str) -> dict:
     req = urllib.request.Request(f"{api.rstrip('/')}/api/admin/stats?provider={provider}")
     if token := os.environ.get("ADMIN_TOKEN"):
@@ -52,6 +66,7 @@ def render(s: dict, load: str | None) -> str:
         f"| Compact fallbacks (Quick mode, caused by the platform) | {s['fallbacks']} |",
         f"| Quick mode forced by an admin (demo switch, not a fallback) | "
         f"{s.get('forced_fallbacks', 0)} |",
+        *_prefetch_rows(s.get("prefetch")),
         "",
         "| Tier | Calls | Share | Tokens in | Tokens out | Avg latency |",
         "| --- | --- | --- | --- | --- | --- |",

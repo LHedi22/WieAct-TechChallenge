@@ -6,6 +6,7 @@ later is free; a student who needs it while it is still queued promotes it (Get 
 import asyncio
 import uuid
 
+import pytest
 from sqlalchemy import func, select
 
 from app.core import economy
@@ -19,6 +20,13 @@ from tests.test_rag_indexing import gw, rag_env  # noqa: F401  (fixtures)
 from tests.test_worlds_api import SEA, api, as_user, make_world, pptx  # noqa: F401  (fixtures)
 
 KID = as_user("NextStep9", "fr")
+
+
+@pytest.fixture(autouse=True)
+def roomy_mock(mock_llm):
+    """These tests index two chapters and make several sets and packs: lift the mock's 20 rpm
+    bucket, or a background quiz check may be deferred 120 s (correct, but not what we test)."""
+    mock_llm.state.cfg = mock_llm.state.cfg.model_copy(update={"rpm": 6000, "burst": 1000})
 
 
 async def two_chapters(api, sm, pptx):  # noqa: F811
@@ -36,17 +44,31 @@ async def two_chapters(api, sm, pptx):  # noqa: F811
     return world, ch1, ch2
 
 
-async def settle(sm, timeout_s: float = 60) -> None:
-    """Drain, including background jobs deferred a few seconds by the mock's quota signal."""
+async def settle(sm, timeout_s: float = 90) -> None:
+    """Drain until the prefetch jobs are finished, including deferrals of a few seconds from the
+    mock's quota signal."""
     deadline = asyncio.get_running_loop().time() + timeout_s
     while asyncio.get_running_loop().time() < deadline:
         await Worker(sm).drain(timeout_s=timeout_s)
         async with sm() as s:
-            left = await s.scalar(select(Job.id).where(Job.status.in_(("queued", "running"))))
+            left = await s.scalar(
+                select(Job.id).where(
+                    Job.status.in_(("queued", "running")), Job.payload["prefetch"].astext == "true"
+                )
+            )
         if left is None:
             return
         await asyncio.sleep(0.5)
-    raise TimeoutError("jobs did not settle")
+    async with sm() as s:
+        stuck = [
+            (j.kind, j.status, j.lane, j.error, j.not_before, j.attempts, (j.events or [])[-4:])
+            for j in await s.scalars(
+                select(Job).where(
+                    Job.status.in_(("queued", "running")), Job.payload["prefetch"].astext == "true"
+                )
+            )
+        ]
+    raise TimeoutError(f"jobs did not settle: {stuck}")
 
 
 async def prefetch_jobs(sm, chapter: str) -> list[Job]:
@@ -144,3 +166,23 @@ async def test_a_prefetched_pack_waits_for_mid_instead_of_quick_mode(api, sm, pp
     assert pack.status == "queued" and not pack.quick_mode  # deferred: background never falls back
     assert (pack.error or "").startswith("deferred:")
     mock_llm.state.cfg = mock_llm.state.cfg.model_copy(update={"p_503_mid": 0.0})
+
+
+async def test_stats_count_prefetch_jobs_calls_promotions_and_use(api, sm, pptx, monkeypatch):  # noqa: F811
+    from tests.admin_helpers import READ, enable_admin  # noqa: PLC0415
+
+    enable_admin(monkeypatch)
+    _, ch1, ch2 = await two_chapters(api, sm, pptx)
+    await plan(sm, ch1)
+    await api.post(f"/api/studio/{ch2}/generate", json={"level": "advanced"}, headers=KID)
+    await settle(sm)
+    start = await api.post(
+        "/api/quiz/start", json={"chapter_id": ch2, "level": "advanced"}, headers=KID
+    )
+    assert start.json()["attempt_id"]  # the prefetched set, opened at once and free
+    got = (await api.get("/api/admin/stats", params={"provider": "mock"}, headers=READ)).json()
+    pf = got["prefetch"]
+    assert (pf["jobs"], pf["done"], pf["waiting"], pf["promoted"]) == (2, 2, 0, 1)
+    # mid: the quiz check + the notes; compact: the questions, the cards, the map
+    assert pf["calls"]["mid"] >= 2 and pf["calls"]["compact"] >= 3
+    assert pf["quiz_sets_used"] == 1

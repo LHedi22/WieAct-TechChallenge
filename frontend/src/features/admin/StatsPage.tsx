@@ -144,6 +144,24 @@ function StatsView({ s }: { s: Stats }) {
           <Table head={["Reason", "Count"]} rows={Object.entries(s.refusals)} />
         </Section>
       </div>
+      <Section title="Prefetch (next chapter, background)">
+        <Table
+          head={["Jobs", "Done", "Waiting", "Failed", "Promoted", "Calls", "Quiz sets used"]}
+          rows={[
+            [
+              s.prefetch.jobs,
+              s.prefetch.done,
+              s.prefetch.waiting,
+              s.prefetch.failed,
+              s.prefetch.promoted,
+              Object.entries(s.prefetch.calls)
+                .map(([t, n]) => `${t} ${n}`)
+                .join(" · ") || "0",
+              s.prefetch.quiz_sets_used,
+            ],
+          ]}
+        />
+      </Section>
       <p className="text-small text-ink/70">
         Quota headers seen:{" "}
         {s.quota_headers_seen.length ? s.quota_headers_seen.join(", ") : "none yet"}

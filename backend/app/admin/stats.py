@@ -8,14 +8,14 @@ from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-from sqlalchemy import Integer, case, cast, func, select
+from sqlalchemy import Integer, and_, case, cast, exists, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.admin.auth import AdminDep
 from app.core.db import get_session
 from app.gateway.quota import seen_header_names
 from app.gateway.router import official
-from app.models import AICallLog
+from app.models import AICallLog, Job, QuizAttempt
 
 router = APIRouter()
 
@@ -25,6 +25,18 @@ class TierStats(BaseModel):
     tokens_in: int
     tokens_out: int
     avg_latency_ms: int
+
+
+class PrefetchStats(BaseModel):
+    """Background prefetch, one chapter ahead (Group E, app/jobs/prefetch.py)."""
+
+    jobs: int
+    done: int
+    failed: int
+    waiting: int  # queued or running
+    promoted: int  # a student needed it before it was ready ("Get it now" / joined)
+    calls: dict[str, int]  # platform requests made by prefetch jobs, per tier
+    quiz_sets_used: int  # prefetched quiz sets a student later started (the waste check)
 
 
 class Stats(BaseModel):
@@ -42,6 +54,7 @@ class Stats(BaseModel):
     fallbacks: int  # mid → compact (quick mode) answers the platform caused (503, timeout)
     forced_fallbacks: int  # Quick-mode answers an admin switched on (never counted above)
     quota_headers_seen: list[str]
+    prefetch: PrefetchStats
 
 
 @router.get("/stats", response_model=Stats)
@@ -134,6 +147,7 @@ async def stats(
         await s.scalar(select(func.count()).select_from(calls_q).where(calls_q.c.forced)) or 0
     )
     compact -= forced_calls
+    prefetch = await _prefetch(s, calls_q)
     chat_calls = compact + mid  # the compact/mid split ignores embeddings (own endpoint + quota)
     return Stats(
         provider=provider,
@@ -149,4 +163,47 @@ async def stats(
         fallbacks=totals[2],
         forced_fallbacks=totals[3],
         quota_headers_seen=seen_header_names(),
+        prefetch=prefetch,
+    )
+
+
+async def _prefetch(s: AsyncSession, calls_q) -> PrefetchStats:
+    is_prefetch = Job.payload["prefetch"].astext == "true"
+    by_status = select(Job.status, func.count()).where(is_prefetch).group_by(Job.status)
+    rows = dict((await s.execute(by_status)).all())
+    promoted = await s.scalar(
+        select(func.count()).where(is_prefetch, Job.events.op("@>")([{"type": "promoted"}]))
+    )
+    tier_calls = (
+        await s.execute(
+            select(calls_q.c.model_tier, func.count())
+            .join(Job, Job.id == calls_q.c.job_id)
+            .where(is_prefetch)
+            .group_by(calls_q.c.model_tier)
+        )
+    ).all()
+    chapter = cast(Job.payload["chapter_id"].astext, QuizAttempt.chapter_id.type)
+    used = await s.scalar(
+        select(func.count()).where(
+            is_prefetch,
+            Job.kind == "QUIZ_POOL",
+            Job.status == "done",
+            exists().where(
+                and_(
+                    QuizAttempt.chapter_id == chapter,
+                    QuizAttempt.level == Job.payload["level"].astext,
+                    QuizAttempt.language == Job.payload["language"].astext,
+                    QuizAttempt.created_at >= Job.finished_at,
+                )
+            ),
+        )
+    )
+    return PrefetchStats(
+        jobs=sum(rows.values()),
+        done=rows.get("done", 0),
+        failed=rows.get("failed", 0),
+        waiting=rows.get("queued", 0) + rows.get("running", 0),
+        promoted=promoted or 0,
+        calls=dict(tier_calls),
+        quiz_sets_used=used or 0,
     )

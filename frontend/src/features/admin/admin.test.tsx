@@ -64,6 +64,15 @@ const stats: Stats = {
   fallbacks: 1,
   forced_fallbacks: 3,
   quota_headers_seen: [],
+  prefetch: {
+    jobs: 4,
+    done: 3,
+    failed: 0,
+    waiting: 1,
+    promoted: 1,
+    calls: { compact: 6, mid: 3 },
+    quiz_sets_used: 2,
+  },
 };
 
 function serve({ signedIn = true, enabled = true } = {}) {
@@ -169,6 +178,16 @@ describe("Admin", () => {
     const forced = screen.getByText("Forced Quick mode").parentElement as HTMLElement;
     expect(within(real).getByText("1")).toBeInTheDocument();
     expect(within(forced).getByText("3")).toBeInTheDocument();
+  });
+
+  it("shows what the next-chapter prefetch cost and whether it was used (Group E)", async () => {
+    serve();
+    show("/admin/stats");
+    const table = (await screen.findByText("Prefetch (next chapter, background)")).closest(
+      "section",
+    );
+    const row = within(table as HTMLElement).getAllByRole("row")[1];
+    expect(row).toHaveTextContent("compact 6 · mid 3");
   });
 
   it("groups calls by the official orchestration pattern (audit OPT-08)", async () => {

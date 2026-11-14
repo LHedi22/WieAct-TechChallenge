@@ -3189,6 +3189,28 @@ export interface components {
       /** Recent */
       recent: components["schemas"]["Gift"][];
     };
+    /**
+     * PrefetchStats
+     * @description Background prefetch, one chapter ahead (Group E, app/jobs/prefetch.py).
+     */
+    PrefetchStats: {
+      /** Jobs */
+      jobs: number;
+      /** Done */
+      done: number;
+      /** Failed */
+      failed: number;
+      /** Waiting */
+      waiting: number;
+      /** Promoted */
+      promoted: number;
+      /** Calls */
+      calls: {
+        [key: string]: number;
+      };
+      /** Quiz Sets Used */
+      quiz_sets_used: number;
+    };
     /** Preparing */
     Preparing: {
       /**
@@ -3675,6 +3697,7 @@ export interface components {
       forced_fallbacks: number;
       /** Quota Headers Seen */
       quota_headers_seen: string[];
+      prefetch: components["schemas"]["PrefetchStats"];
     };
     /** Studio */
     Studio: {
