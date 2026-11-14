@@ -151,7 +151,7 @@ others read the cache when it lands.
   notes for "intermediate" in the creator's language. M2 ships the quiz pool: when a chapter's
   last file is ready, `QUIZ_POOL` makes ONE compact QUIZ_GENERATE call (10 questions) from up to 8
   chunks picked round-robin across the chapter's concepts → `quiz_sets`.
-- `python -m app.rag.reindex --provider cloud` rebuilds a provider's collection from Postgres.
+- `python -m app.rag.reindex --provider cloud` rebuilds a provider's collection from Postgres. On cloud it refuses to start while a worker heartbeat is fresh (one limiter per key, OPT-19), like the in-process evals (`quiz`, `teachback`, `quiz-keys`); `slot` runs through the worker.
 
 ## Data model (Postgres)
 `users(id, nickname, password_hash, ui_language, created_at)` — nothing else identifying

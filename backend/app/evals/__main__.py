@@ -237,6 +237,13 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--regrade", action="store_true", help="slot: send Teach-Back answers again")
     args = p.parse_args(argv)
     langs = [x.strip() for x in args.langs.split(",") if x.strip()]
+    if args.task != "slot":  # slot sends its jobs through the running API and worker
+        from app.core import cli_guard
+        from app.core.config import get_settings
+
+        provider = "cloud" if args.cloud else get_settings().llm.provider
+        if (refused := cli_guard.refuse_beside_worker(provider)) is not None:
+            return refused
     if args.task == "quiz-keys":
         from app.evals import quiz_keys
 
