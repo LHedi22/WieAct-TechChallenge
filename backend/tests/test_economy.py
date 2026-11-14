@@ -34,3 +34,16 @@ async def test_economy_endpoint_is_public_and_wallet_needs_sign_in(api):  # noqa
     await api.post("/api/auth/signup", json=SIGNUP)
     wallet = (await api.get("/api/wallet")).json()
     assert wallet["coins"] == economy.DAILY_FREE_COINS and wallet["points"] == 0
+
+
+def test_every_reward_in_economy_py_is_paid_somewhere():
+    """Audit OPT-31: EARN.creator_new_member (5 coins) was defined and shown by /api/economy but
+    never paid. Every EARN key must be used by app code outside economy.py itself."""
+    from pathlib import Path  # noqa: PLC0415
+
+    app = Path(__file__).resolve().parents[1] / "app"
+    code = "\n".join(
+        p.read_text() for p in app.rglob("*.py") if p.name not in ("economy.py", "economy_live.py")
+    )
+    unused = [k for k in economy.EARN if f'"{k}"' not in code and f"'{k}'" not in code]
+    assert unused == []

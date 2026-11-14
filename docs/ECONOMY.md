@@ -55,8 +55,6 @@ SPENDING_ORDER = ["free", "earned", "purchased"]   # burn expiring coins first
 - Exam Pass active → activities cost 0 up to `EXAM_PASS_DAILY_LIMIT = 15` AI activities/day
   (a *high daily limit*, never "unlimited" — the platform quota is finite).
 - Class Pool: members transfer coins to `class_pool`; shared asset generation can be paid from it.
-- Creator reward: +5 coins (counts toward the daily earn cap) when a new member joins and completes
-  a first activity in their world.
 
 ## Day examples (for the report)
 - Normal day: 1 quiz (5) + 1 tutor (8) = 13 ≤ 20 free.

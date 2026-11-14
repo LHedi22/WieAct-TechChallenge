@@ -212,9 +212,9 @@ economy.py and GET /api/economy.
 1. Wallet: coin_ledger with free/earned/purchased buckets, 20 free per day refilled at Tunis
    midnight (no carry-over), earned cap 10/day, spend order free→earned→purchased, reserve on job
    create, commit on success, refund on failure/cancel, cached results cost 0, Exam Pass = 15 AI
-   activities/day, clearly labelled demo purchase, Class Pool transfers, creator reward. Pure-
+   activities/day, clearly labelled demo purchase, Class Pool transfers. Pure-
    function tests for every rule first.
-2. Points ledger, streaks (Tunis days), badges (chapter mastery, Mentor), class and global
+2. Points ledger, streaks (Tunis days), class and global
    leaderboards weekly/all-time with opt-out. Out-of-coins screen (17-out-of-coins.png) with the
    DESIGN.md copy fixes (no "unlimited", correct rewards).
 3. Teach-Back peer room (15-teachback-peer-room.png): questions per chapter (2 coins, MODERATE_POST

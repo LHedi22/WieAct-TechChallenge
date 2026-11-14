@@ -24,7 +24,6 @@ COST = {
 EARN = {
     "peer_answer_good": 3,  # only if AI score >= PEER_ANSWER_THRESHOLD
     "daily_challenge": 3,  # each, 3 per day
-    "creator_new_member": 5,
 }
 PEER_ANSWER_THRESHOLD = 70  # /100
 POOL_MAX_CONTRIBUTION = 50  # coins per Class Pool gift; keeps a misclick from emptying a wallet
