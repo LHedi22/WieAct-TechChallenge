@@ -146,7 +146,10 @@ others read the cache when it lands.
   document_id, page_ref, tags, lang}` with keyword payload indexes on the filter fields.
   Text lives in Postgres; Qdrant holds vectors + payload only (keeps the collection small).
 - Tests use an in-memory Qdrant (`QdrantClient(":memory:")`) — no network.
-- narrow-before-generating: top-k=8 by vector → compact filter keeps the 3–4 most relevant → prompt.
+- narrow-before-generating (`quiz/pool.py`): vector search returns the chapter's top `SEARCH_K=12`
+  chunks, which go first in a round-robin over the chapter's parts and concepts, capped at
+  `CONTEXT_CHARS=7000` / `CONTEXT_MAX_CHUNKS=24` → prompt. No compact filter call (it would cost a
+  request per generation for little gain on chapter-sized material).
 - Precompute right after upload (background lane, burst reserve): chunk tags, quiz pool per level,
   notes for "intermediate" in the creator's language. M2 ships the quiz pool: when a chapter's
   last file is ready, `QUIZ_POOL` makes ONE compact QUIZ_GENERATE call (10 questions) from up to 8

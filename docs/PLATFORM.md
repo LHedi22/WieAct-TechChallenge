@@ -59,8 +59,9 @@ never 10 calls. Batch chunk-tagging several chunks per call.
 | Request beyond a ceiling | `400`, message names the ceiling | fix the request | parse message → reduce `max_tokens` / chunks / history, or split; resend once | nothing, or shorter answer |
 | Identical request | — | must not regenerate | `ai_cache` hit, no call | instant |
 
-The exact status code and header names for "quota exhausted" and for quota headers are not
-documented — the parser must be tolerant (log unknown `x-*`/`ratelimit-*` headers on first sight)
+The quota headers on every 200 are known since 9/11 (`x-ratelimit-api_key-{remaining,limit}-{requests,max_parallel_requests}`,
+`x-litellm-key-rpm-limit`; DECISIONS.md 2026-11-09). The status code for "quota exhausted" is still
+unseen — the parser must be tolerant (log unknown `x-*`/`ratelimit-*` headers on first sight)
 and the mock must make them configurable. Record real values in DECISIONS.md.
 
 "Normal latency and occasional queueing are expected, not a malfunction." Persistent errors →

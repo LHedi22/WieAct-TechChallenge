@@ -1,4 +1,7 @@
-# What's still missing — as of 1 Nov 2026
+# What's still missing — as of 14 Nov 2026
+
+> The team slots ended on 10 Nov. Everything under §2 now runs in the jury demo slot, in the
+> order of `docs/report/JURY_SLOT_RUNBOOK.md` (`scripts/jury_slot.py` prints it).
 
 Deadline **Tue 10 Nov** (report + repo + 90 s video); record the demo by **Mon 9 Nov**. M0–M7 are
 built and pass their Done-when checks on the mock. Remaining work, most urgent first. Details
@@ -20,7 +23,8 @@ Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
 - [ ] **First thing in the slot:** `docker compose exec backend uv run python -m app.evals slot --cloud`
       (with `LLM_PROVIDER=cloud` in `.env`, then `docker compose restart backend worker`). It runs
       study pack, audio, daily plan, Teach-Back (solid + partial answer) in EN, FR, AR and Darija
-      plus one Class Wisdom tip: about 30 calls, 17 mid, ~10–20 min. Outputs go to
+      plus one Class Wisdom tip: about 35 calls, 13 mid (14 Nov: daily plans on compact,
+      glossary calls added), ~10–20 min. Outputs go to
       `backend/tests/evals/slot/outputs/cloud-*.json`; then `python3 scripts/export_stats.py`
       on the host. Tested on the mock only (31/10). Afterwards switch back with
       `python3 scripts/llm.py use mock` (or `auto`).

@@ -134,7 +134,7 @@ Ranked by (score gain × confidence) ÷ effort. Effort: S ≤ 1 h, M ≤ ½ day,
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | OPT-01 · **fixed** `65ebdbb` | jobs/cache | S1 | `logs/32-same-chapter-10.log`, `32-same-chapter-db.txt`; `studio/service.py:95-111` | measured | mock + code | §3 | S–M |
 | OPT-02 · **fixed** `fecaf13` | RAG | S1 | `quiz/pool.py:78-95,157-182`; `logs/40-stacks-chunks-mock.txt`; N-6 | measured (chunk pick) + inferred (output) | mock + code + local | §3 | S |
-| OPT-03 | demo | S1 | STATUS.md §2 unticked; no `cloud-*` eval outputs; no stats export in `docs/report/` | inferred | code/docs | §3, §9 | M |
+| OPT-03 · **runbook done** `6cd8afc` (the runs need the jury slot) | demo | S1 | STATUS.md §2 unticked; no `cloud-*` eval outputs; no stats export in `docs/report/` | inferred | code/docs | §3, §9 | M |
 | OPT-04 · **fixed** `0cc0323, 197f863` | limiter | S2 | `limiter.py:28`; logger max 21/60 s | measured | mock | §3 | S |
 | OPT-05 · **fixed** `a5785c5` | gateway | S2 | `service.py:348-369`, `verify.py:93` | inferred | code | §3 | S |
 | OPT-06 · **fixed** `841a751` | quota | S2 | `quota.py:31-34`; DECISIONS 2026-11-09 (no reset header) | inferred | code + platform-log | §3; also fix the .tex claim | S |
@@ -152,19 +152,19 @@ Ranked by (score gain × confidence) ÷ effort. Effort: S ≤ 1 h, M ≤ ½ day,
 | OPT-18 · **fixed** `5012999` | single-flight | S3 | `gateway/service.py:186-195` | code | code | Followers re-enter `run()` so one becomes the new leader | S |
 | OPT-19 · **fixed** `a79dd95` | limiter scope | S3 | `limiter.py:8`; evals/reindex build their own Gateway | code | code | Refuse `--cloud` CLIs while a worker heartbeat is fresh, or document "stop the worker first" | S |
 | OPT-20 · **fixed** `b34652b` | unused kinds | S3 | INTENT_LANG, TRANSLATE_SHORT, CHALLENGE_ITEMS (`router.py:19,32,36`) | code | code | Use TRANSLATE_SHORT for OPT-11; mark the other two "reserved" in ARCHITECTURE | S |
-| OPT-21 | frontend | S3 | `logs/70-vite-build.log`: one 942.5 KB entry (296.6 KB gz); only AdminApp lazy (`App.tsx:33`); 4 locales eager (200 KB raw, `i18n/index.ts:4-7`) | measured | mock | Lazy-load the five buildings and non-active locales: ≈ −40 % first load on phones (estimate). Low score value | M |
-| OPT-22 | polling | info | `logs/46-poll-bench-30.txt`: 30 pollers → 20 req/s, p50 61 ms, p95 143 ms, max 309 ms. `useJob` stops on terminal status; TanStack stops when the tab is hidden; no backoff | measured | mock | No change needed. Optional backoff to 3 s after 60 s queued | S |
-| OPT-23 | DB | info | `logs/45-explain-hot-queries.txt`: job by id, queue position, avg latency, ai_cache, leaderboard all < 0.1 ms (index scans; small tables) | measured | mock | None | — |
-| OPT-24 | a11y | S2 | `logs/50-axe-summary.txt`: color-contrast 181 nodes / 14 screens (top: `bg-olive-light/30` ×60, `bg-terracotta-light/25|30` ×52); Tutor `list` 8 nodes; no commit to `design/tokens.json` since | measured (old scans) | mock | Opaque tints / darker ink in tokens (F-A11Y-1); `li` markup in the Tutor (F-A11Y-2) | S |
-| OPT-25 | security | S3 | `main.py:35` `openapi_url="/openapi.json"` always (F-SEC-3) | code | code | `None` in production | S |
+| OPT-21 · **fixed** `c6a5845` | frontend | S3 | `logs/70-vite-build.log`: one 942.5 KB entry (296.6 KB gz); only AdminApp lazy (`App.tsx:33`); 4 locales eager (200 KB raw, `i18n/index.ts:4-7`) | measured | mock | Lazy-load the five buildings and non-active locales: ≈ −40 % first load on phones (estimate). Low score value | M |
+| OPT-22 · info, no change | polling | info | `logs/46-poll-bench-30.txt`: 30 pollers → 20 req/s, p50 61 ms, p95 143 ms, max 309 ms. `useJob` stops on terminal status; TanStack stops when the tab is hidden; no backoff | measured | mock | No change needed. Optional backoff to 3 s after 60 s queued | S |
+| OPT-23 · info, no change | DB | info | `logs/45-explain-hot-queries.txt`: job by id, queue position, avg latency, ai_cache, leaderboard all < 0.1 ms (index scans; small tables) | measured | mock | None | — |
+| OPT-24 · **fixed** `36556ea` | a11y | S2 | `logs/50-axe-summary.txt`: color-contrast 181 nodes / 14 screens (top: `bg-olive-light/30` ×60, `bg-terracotta-light/25|30` ×52); Tutor `list` 8 nodes; no commit to `design/tokens.json` since | measured (old scans) | mock | Opaque tints / darker ink in tokens (F-A11Y-1); `li` markup in the Tutor (F-A11Y-2) | S |
+| OPT-25 · **fixed** `c30ee7a` | security | S3 | `main.py:35` `openapi_url="/openapi.json"` always (F-SEC-3) | code | code | `None` in production | S |
 | OPT-26 · **fixed** `c622fd9` | API | S3 | No NUL stripping in `backend/app` (F-API-1) | code | code | Strip `\x00` in free-text input models | S |
 | OPT-27 · **fixed** `5e3dcde` | quiz | S3 | `quiz/service.py:245-266` accepts any `i` (F-QUIZ-1) | code | code | Enforce `i == attempt.current` (or pending) | S |
-| OPT-28 | auth | S3 | `api/deps.py:21` ASCII only; uniqueness case-sensitive (F-SEC-6) | code | code | casefold uniqueness; explain the rule | S |
-| OPT-29 | CI | S3 | `tests/db.py:23-31` timeout 2 s + `conftest.py:86` skip (F-TEST-1); today 0 skipped | code | code | Fail instead of skip when `CI=true` | S |
-| OPT-30 | tooling | S2 | `scripts/load.py:38` reads `provider=mock`, needs `/_mock` and `/api/dev/demo-jobs` (F-LOAD-1) | code | code | Blocks the "load test against cloud" box; use a real-feature script (like `logs/scripts/same_chapter.py`) with `--provider` | S |
+| OPT-28 · **fixed** `9f4ea5a` (case-insensitive; Arabic nicknames pending a decision) | auth | S3 | `api/deps.py:21` ASCII only; uniqueness case-sensitive (F-SEC-6) | code | code | casefold uniqueness; explain the rule | S |
+| OPT-29 · **fixed** `20b04d7` | CI | S3 | `tests/db.py:23-31` timeout 2 s + `conftest.py:86` skip (F-TEST-1); today 0 skipped | code | code | Fail instead of skip when `CI=true` | S |
+| OPT-30 · **fixed** `4e69c1f` | tooling | S2 | `scripts/load.py:38` reads `provider=mock`, needs `/_mock` and `/api/dev/demo-jobs` (F-LOAD-1) | code | code | Blocks the "load test against cloud" box; use a real-feature script (like `logs/scripts/same_chapter.py`) with `--provider` | S |
 | OPT-31 · **fixed** `eadfebc, 7a2f27c` | economy | S3 | `economy.py:27` `creator_new_member` never used; no badge code; `en.json:153` "between 1 and 50 coins" hard-coded | code | code | Cut or implement; read the 50 from `/api/economy` | S |
-| OPT-32 | deploy | S1 (if the demo is on the deployed site) | `frontend/vercel.json:8` still `REPLACE-WITH-RAILWAY-DOMAIN` | code | code | Can't tell whether a deploy exists outside the repo; confirm before the pitch | S |
-| OPT-33 | flaky test | S3 | `logs/02-frontend-verify.log` 1 failed / 93; 3 re-runs 93/93 | measured | mock | Find the flaky spec (name not captured in the tail) | S |
+| OPT-32 · **pending decision** (the Railway domain) | deploy | S1 (if the demo is on the deployed site) | `frontend/vercel.json:8` still `REPLACE-WITH-RAILWAY-DOMAIN` | code | code | Can't tell whether a deploy exists outside the repo; confirm before the pitch | S |
+| OPT-33 · **fixed** `0bfd875` | flaky test | S3 | `logs/02-frontend-verify.log` 1 failed / 93; 3 re-runs 93/93 | measured | mock | Find the flaky spec (name not captured in the tail) | S |
 
 ## 5. Status of the 2 Nov audit findings at HEAD
 
@@ -198,7 +198,7 @@ Ranked by (score gain × confidence) ÷ effort. Effort: S ≤ 1 h, M ≤ ½ day,
 | F-DOC-1 | partly fixed | README 529/93/828 ✓; `docs/report/REPORT.md` still 304/66/793 |
 | F-DOC-3 | **still open** | `.env.example:44` `true` vs DEPLOY.md `false` |
 | CA-1 (limiter process-local) | open by design | OPT-19 |
-| CA-2 (`LOG_PROMPTS` dead config) | can't tell | `config.py:127` still defined |
+| CA-2 (`LOG_PROMPTS` dead config) | **fixed** `4f4a96e` | with `LLM_MAX_TOKENS_DEFAULT` and `APP_TIMEZONE`; `test_no_dead_settings.py` |
 | CA-4 (unused kinds) | still open | OPT-20 |
 | CA-5 ("1 and 50 coins") | still open | `en.json:153` |
 | N-1 injection | fixed (`local`) | `6496eee`; graded set 0 points in 4 languages |
@@ -444,6 +444,27 @@ Prompt edits in this group: `moderate_post` v2, `glossary` v1, `_voice_rules` v2
 `quiz_verify` v2 and `_teachback_rubric` v3. The mock quiz eval passed 20/20 valid in all 4 languages
 after each one. The Darija insult list and the Darija examples (moderation, rubric) still need
 native review.
+
+### Group D: tooling, front end, docs
+
+| Finding | Status | Commits |
+| --- | --- | --- |
+| OPT-33 flaky frontend time budgets | fixed | `0bfd875` (5 of 10 runs failed on a busy host before, 10/10 after; `after/53-*`) |
+| OPT-29 CI must not skip the DB tests | fixed | `20b04d7` |
+| OPT-25 no OpenAPI in production | fixed | `c30ee7a` |
+| OPT-28 nickname uniqueness ignores case | fixed | `9f4ea5a`; Arabic-script nicknames and the rule's wording are pending decisions |
+| OPT-30 class load test on real features | fixed | `4e69c1f` (`scripts/load_class.py`, 10 mock students; `after/54-*`) |
+| OPT-24 contrast of tinted chips, Tutor list | fixed | `36556ea` |
+| OPT-21 lazy building routes, locales on demand | fixed | `c6a5845` (entry 943 → 746 kB, 297 → 238 kB gzip; `after/55-*`) |
+| OPT-03 jury-slot runbook | runbook and dry-run script done | `6cd8afc` (`docs/report/JURY_SLOT_RUNBOOK.md`, `scripts/jury_slot.py`; never run: it needs the slot) |
+| CA-2 settings nothing reads | fixed | `4f4a96e` |
+| §8 doc and claim drift (repo files) | fixed | see the docs commit for this group; `docs/report/PITCH_NUMBERS.md` lists what is safe to say before the slot |
+| OPT-32 `vercel.json` Railway domain | **pending decision** | — |
+| OPT-22, OPT-23 | info only, no change | — |
+
+`.env.example` keeps `LLM_DISABLE_THINKING=true` (local Qwen3 in dev returns no answer without it);
+a comment now says production runs `false` with the llama cloud models. The .tex report under
+`~/Desktop` was left alone; its §8 lines still need a human edit.
 
 ## Logs index (`audit/opt-2026-11/logs/`)
 

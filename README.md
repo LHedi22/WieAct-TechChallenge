@@ -134,8 +134,8 @@ daily plans (`docs/report/AUDIT.md`, F-CACHE-1).
 | identical request | `ai_cache` hit, no call | instant |
 
 **Resilience under load.** `scripts/load.py` fires N jobs at once with 503 and quota faults. Last
-runs: 30/30 jobs done, never more than 2 calls in flight, every fault handled; interactive p50 38 s
-against background 126 s on the slow mock. The final forced-503 job always falls back to compact.
+runs (14 Nov audit): 30/30 jobs done, never more than 2 calls in flight, every fault handled;
+interactive p50 25.6 s against background 106.3 s on the slow mock (9.5 s vs 62.4 s without faults). The final forced-503 job always falls back to compact.
 
 **RAG.** PDF, PPTX, DOCX, TXT and images (Tesseract OCR, `ara+fra+eng`, for scanned pages) →
 ~2,000-character chunks that never cross a page or slide, so every chunk keeps a reference
