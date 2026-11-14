@@ -1,6 +1,8 @@
 from collections.abc import AsyncIterator
 from functools import lru_cache
 
+import asyncpg
+from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -9,6 +11,10 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from app.core.config import get_settings
+
+# Postgres unreachable or restarting: refused/DNS (OSError), asyncpg errors, SQLAlchemy wrapper.
+DB_ERRORS = (DBAPIError, OSError, asyncpg.PostgresError, asyncpg.InterfaceError)
+DB_RETRY_AFTER_S = 5  # what the API tells a client to wait while the database is away (OPT-12)
 
 
 @lru_cache

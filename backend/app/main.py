@@ -56,11 +56,25 @@ def create_app() -> FastAPI:
         # Any paid start without enough coins: the UI opens the out-of-coins screen.
         return JSONResponse(status_code=402, content={"detail": e.key})
 
+    def _db_down(_: Request | None = None, __: Exception | None = None) -> JSONResponse:
+        # Postgres restarting (audit OPT-12): ask the client to come back, never a 500.
+        return JSONResponse(
+            status_code=503,
+            content={"detail": "errors.unavailable"},
+            headers={"Retry-After": str(db.DB_RETRY_AFTER_S)},
+        )
+
+    for err in db.DB_ERRORS:
+        app.add_exception_handler(err, _db_down)
+
     @app.middleware("http")
     async def _live_economy(request: Request, call_next):
         # Admin overrides of economy.py (core/economy_live.py), re-read at most every 3 s
         if request.url.path.startswith("/api/"):
-            await economy_live.refresh(db.get_sessionmaker())
+            try:
+                await economy_live.refresh(db.get_sessionmaker())
+            except db.DB_ERRORS:
+                return _db_down()
         return await call_next(request)
 
     app.include_router(health.router)

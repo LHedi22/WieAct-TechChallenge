@@ -104,6 +104,7 @@
       "job_not_cancellable": "Trop tard pour annuler : l'IA y travaille déjà.",
       "job_interrupted": "Cette activité a été interrompue par un redémarrage du serveur. Tes pièces ont été remboursées : réessaie.",
       "network": "Impossible de joindre le serveur. Vérifie ta connexion.",
+      "unavailable": "Le serveur redémarre. Nouvel essai dans quelques secondes.",
       "unexpected": "Un problème est survenu. Réessaie.",
       "forbidden": "Tu n'as pas accès à cette page.",
       "world_not_found": "Ce monde n'existe pas, ou tu n'en fais pas encore partie.",
