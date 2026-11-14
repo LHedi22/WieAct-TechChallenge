@@ -289,7 +289,7 @@ async def test_forced_quick_mode_is_counted_apart(api, sm, mock_llm, monkeypatch
     res = await worker_gw.run(
         Task(kind=TaskKind.NOTES_WRITE, lane="interactive", messages=MESSAGES)
     )
-    assert res.quick_mode and res.model_tier == "compact" and res.pattern == "forced-fallback"
+    assert res.quick_mode and res.model_tier == "compact" and res.pattern == "fallback:forced"
     bg = await worker_gw.run(Task(kind=TaskKind.NOTES_WRITE, lane="background", messages=MESSAGES))
     assert bg.model_tier == "mid" and not bg.quick_mode  # background work is never forced
     await api.put("/api/admin/switches/force_quick_mode", json={"value": 0}, headers=ACT)
@@ -310,7 +310,7 @@ async def test_forced_quick_mode_is_counted_apart(api, sm, mock_llm, monkeypatch
     async with sm() as s:
         forced = list(await s.scalars(select(AICallLog).where(AICallLog.forced.is_(True))))
     assert [(r.model_tier, r.pattern, r.fallback) for r in forced] == [
-        ("compact", "forced-fallback", True)
+        ("compact", "fallback:forced", True)
     ]
 
 

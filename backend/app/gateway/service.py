@@ -260,7 +260,7 @@ class Gateway:
                 "compact",
                 self._model(profile, "compact"),
                 True,
-                "forced-fallback",
+                "fallback:forced",
             )
             notes.append("forced quick mode (admin switch)")
 
@@ -470,7 +470,7 @@ class Gateway:
                 "compact",
                 model,
                 kind=TaskKind.JSON_REPAIR.value,
-                pattern="repair",
+                pattern="none:repair",
                 status_code=failed.error.status,
                 refusal_reason=failed.error.kind,
             )
@@ -488,7 +488,7 @@ class Gateway:
             "compact",
             model,
             kind=TaskKind.JSON_REPAIR.value,
-            pattern="repair",
+            pattern="none:repair",
             status_code=200,
             tokens_in=reply.tokens_in,
             tokens_out=reply.tokens_out,
@@ -578,7 +578,7 @@ class Gateway:
             model_tier="embed",
             provider=profile.provider,
             model=profile.embedding_model,
-            pattern="batch",
+            pattern="none:batch",
             **f,
         )
 

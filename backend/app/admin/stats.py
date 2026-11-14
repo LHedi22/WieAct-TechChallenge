@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.admin.auth import AdminDep
 from app.core.db import get_session
 from app.gateway.quota import seen_header_names
+from app.gateway.router import official
 from app.models import AICallLog
 
 router = APIRouter()
@@ -35,6 +36,8 @@ class Stats(BaseModel):
     compact_share: float  # 0-1, the orchestration indicator (forced Quick-mode calls left out)
     by_tier: dict[str, TierStats]
     by_task: dict[str, int]
+    # chat calls per official orchestration pattern (PLATFORM.md); `none` = no pattern (OPT-08)
+    by_pattern: dict[str, int]
     refusals: dict[str, int]  # quota / saturated / ceiling / blocked / transient / bad_request
     fallbacks: int  # mid → compact (quick mode) answers the platform caused (503, timeout)
     forced_fallbacks: int  # Quick-mode answers an admin switched on (never counted above)
@@ -94,6 +97,19 @@ async def stats(
     task_rows = (
         await s.execute(select(calls_q.c.task_kind, func.count()).group_by(calls_q.c.task_kind))
     ).all()
+    pattern_rows = (
+        await s.execute(
+            select(calls_q.c.pattern, func.count())
+            .where(calls_q.c.model_tier != "embed")
+            .group_by(calls_q.c.pattern)
+        )
+    ).all()
+    by_pattern: dict[str, int] = {}
+    for pattern, n in pattern_rows:
+        name = official(pattern)
+        if name in ("plan-once", "execute-compact"):
+            name = "plan-once / execute-compact"  # one official pattern, two halves
+        by_pattern[name] = by_pattern.get(name, 0) + n
     refusal_rows = (
         await s.execute(
             select(calls_q.c.refusal_reason, func.count())
@@ -128,6 +144,7 @@ async def stats(
         compact_share=round(compact / chat_calls, 3) if chat_calls else 0.0,
         by_tier=by_tier,
         by_task=dict(task_rows),
+        by_pattern=by_pattern,
         refusals=dict(refusal_rows),
         fallbacks=totals[2],
         forced_fallbacks=totals[3],

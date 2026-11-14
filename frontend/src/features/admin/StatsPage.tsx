@@ -125,6 +125,14 @@ function StatsView({ s }: { s: Stats }) {
           ])}
         />
       </Section>
+      <Section title="By orchestration pattern">
+        <Table
+          head={["Pattern", "Calls"]}
+          rows={Object.entries(s.by_pattern)
+            .sort((a, b) => b[1] - a[1])
+            .map(([p, n]) => [p === "none" ? "none (not an orchestration step)" : p, n])}
+        />
+      </Section>
       <div className="grid gap-4 md:grid-cols-2">
         <Section title="By task">
           <Table

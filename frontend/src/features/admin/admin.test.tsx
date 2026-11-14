@@ -59,6 +59,7 @@ const stats: Stats = {
   compact_share: 0.7,
   by_tier: { compact: { calls: 28, tokens_in: 1, tokens_out: 1, avg_latency_ms: 2000 } },
   by_task: { QUIZ_GENERATE: 4 },
+  by_pattern: { "narrow-before-generating": 4, escalation: 9, none: 2 },
   refusals: { saturated: 2 },
   fallbacks: 1,
   forced_fallbacks: 3,
@@ -168,5 +169,21 @@ describe("Admin", () => {
     const forced = screen.getByText("Forced Quick mode").parentElement as HTMLElement;
     expect(within(real).getByText("1")).toBeInTheDocument();
     expect(within(forced).getByText("3")).toBeInTheDocument();
+  });
+
+  it("groups calls by the official orchestration pattern (audit OPT-08)", async () => {
+    serve();
+    show("/admin/stats");
+    const table = (await screen.findByText("By orchestration pattern")).closest("section");
+    expect(table).not.toBeNull();
+    const rows = within(table as HTMLElement)
+      .getAllByRole("row")
+      .map((r) => r.textContent);
+    expect(rows).toEqual([
+      "PatternCalls",
+      "escalation9",
+      "narrow-before-generating4",
+      "none (not an orchestration step)2",
+    ]);
   });
 });

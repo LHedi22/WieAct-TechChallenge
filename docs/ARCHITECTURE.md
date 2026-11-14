@@ -96,30 +96,33 @@ shows support; otherwise prompt for JSON, parse with a tolerant extractor, valid
 and on failure do ONE compact "fix this JSON" repair call. Small models break JSON — test it.
 
 ## Model routing table
+Logged patterns (`ai_call_log.pattern`, the Stats page) start with one of the official names
+(PLATFORM.md), `fallback`, or `none`; a step that is no orchestration pattern keeps its internal
+name after a colon (`none:guard`). Stats groups calls by the part before the colon (OPT-08).
 | TaskKind | Tier | Pattern | Lane | Cache key |
 | --- | --- | --- | --- | --- |
-| INTENT_LANG (detect intent + language) | compact | triage | interactive | text hash |
-| CHUNK_TAG (batch of chunks → concepts, chapter) | compact | batch at upload (burst) | background | doc hash |
+| INTENT_LANG (detect intent + language) | compact | none:triage | interactive | text hash |
+| CHUNK_TAG (batch of chunks → concepts, chapter) | compact | none:batch (at upload, burst) | background | doc hash |
 | QUIZ_GENERATE (10 Q, one call) | compact | narrow-before-generating | interactive / background pool | world+chapter+level+lang+seed |
-| QUIZ_GRADE_TAG (wrong answers → concept + mistake type) | compact | extraction | background | lang + missed items hash |
+| QUIZ_GRADE_TAG (wrong answers → concept + mistake type) | compact | none:extraction | background | lang + missed items hash |
 | QUIZ_VERIFY (mid solves each new quiz / placement item blind; only items whose key it confirms are published; one regeneration if fewer than 5 survive; mid unavailable → a student's quiz is published marked unverified and never shared, background and placement wait) | mid | draft-then-revise | same as the set | questions + context hash |
 | TUTOR_TURN | compact → mid when stuck ≥ 2 turns or "complex" flag | escalation | interactive | plan: chapter+level+lang+style; turns: none |
-| TUTOR_GUARD (rewrite a reply that leaks the answer as a guiding question; only flagged replies) | compact | guard | interactive | none |
-| TUTOR_SUMMARY | compact | summary | interactive | session id |
+| TUTOR_GUARD (rewrite a reply that leaks the answer as a guiding question; only flagged replies) | compact | none:guard | interactive | none |
+| TUTOR_SUMMARY | compact | none:summary | interactive | session id |
 | NOTES_WRITE (STUDY_PACK job, step 1) | mid | plan-once + narrow-before-generating (quiz-pool narrowing, no filter call) | interactive | chapter+level+lang (+job; `study_assets` is the class cache) |
 | FLASHCARDS / MAP_WRITE (STUDY_PACK steps 2–3, from the notes only) | compact | execute-compact | interactive | chapter+level+lang (+job) |
 | AUDIO_SCRIPT (AUDIO_EPISODE job) | mid | narrow-before-generating, once then cached | interactive | chapter+level+lang (+job; `study_assets` is the class cache) |
 | DAILY_PLAN (first `GET /api/daily` of a Tunis day; an instant rule plan shows meanwhile and stays if the job fails; applied only while nothing is done) | mid, once / student / day | plan-once | background | user+date |
 | CHALLENGE_ITEMS (unused: flashcard challenges review existing cards) | compact | execute-compact | background | user+date |
-| WISDOM_TIP (at `WISDOM_THRESHOLD` distinct students per world+concept+mistake type; ONE call writes the tip in every language of the world's members; later students only raise the count) | mid, once per pattern | generate-once | background | world+concept+type+langs+count |
+| WISDOM_TIP (at `WISDOM_THRESHOLD` distinct students per world+concept+mistake type; ONE call writes the tip in every language of the world's members; later students only raise the count) | mid, once per pattern | none:generate-once | background | world+concept+type+langs+count |
 | TEACHBACK_GRADE (ARENA_GRADE / ARENA_SOLO jobs; the same call moderates the answer via `flag`) | compact draft; mid reviews only when confidence is low or the score is within `TEACHBACK_REVIEW_BAND` of `PEER_ANSWER_THRESHOLD` (solo: low confidence only); mid busy → the draft stands (Quick mode). `ar` / `ar-TN`: one mid call, no draft (compact fallback when mid is busy). Still low-confidence after grading → `pending_review`: no rewards, author-only | draft-then-revise (ar/ar-TN: mid direct) | interactive | none (personal) |
-| MODERATE_POST (ARENA_ASK job: peer questions; rejected → coins refunded) | compact | classification | interactive | text hash |
-| TRANSLATE_SHORT | compact | rewriting | background | text+lang |
+| MODERATE_POST (ARENA_ASK job: peer questions; rejected → coins refunded) | compact | none:classification | interactive | text hash |
+| TRANSLATE_SHORT | compact | none:rewriting | background | text+lang |
 | PLACEMENT_QUIZ (8 Q per course, 2 chunks per chapter, one call; graded server-side) | compact | narrow-before-generating | interactive | course+lang (shared by the class) |
-| any mid task when saturated | compact | fallback (`quick_mode`) | — | — |
-| JSON_REPAIR (internal: fix one broken JSON reply) | compact | repair | same as the task | none |
+| any mid task when saturated | compact | fallback (`quick_mode`; `fallback:forced` when an admin forces it) | — | — |
+| JSON_REPAIR (internal: fix one broken JSON reply) | compact | none:repair | same as the task | none |
 | DEMO_SUMMARY (dev-only M1 demo job) | mid | narrow-before-generating | interactive / background | optional |
-| EMBED (embeddings endpoint, own quota; logged as tier `embed`) | — | batch (32 texts/call) | background (upload) / interactive (search query) | search query text |
+| EMBED (embeddings endpoint, own quota; logged as tier `embed`) | — | none:batch (32 texts/call) | background (upload) / interactive (search query) | search query text |
 
 Identical cacheable tasks in flight at the same time are single-flighted: one model call, the
 others read the cache when it lands.

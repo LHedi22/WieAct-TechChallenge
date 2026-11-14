@@ -3650,6 +3650,10 @@ export interface components {
       by_task: {
         [key: string]: number;
       };
+      /** By Pattern */
+      by_pattern: {
+        [key: string]: number;
+      };
       /** Refusals */
       refusals: {
         [key: string]: number;

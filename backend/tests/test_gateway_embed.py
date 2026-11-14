@@ -29,7 +29,7 @@ async def test_batches_keep_order_and_log_each_call(monkeypatch, sm, mock_llm):
     assert [(r.task_kind, r.model_tier, r.status_code) for r in rows] == [
         ("EMBED", "embed", 200)
     ] * 4
-    assert all(r.tokens_in > 0 and r.pattern == "batch" for r in rows)
+    assert all(r.tokens_in > 0 and r.pattern == "none:batch" for r in rows)
 
 
 async def test_ceiling_shrinks_the_batch_once_and_remembers(monkeypatch, sm, mock_llm):
