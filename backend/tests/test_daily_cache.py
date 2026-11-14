@@ -10,7 +10,7 @@ from sqlalchemy import func, select
 
 import app.gateway as gateway_module
 from app.jobs.worker import Worker
-from app.models import AICallLog, Mistake, User
+from app.models import AICallLog, Job, Mistake, User
 from tests.test_quiz import indexed, join
 from tests.test_rag_indexing import gw, rag_env  # noqa: F401  (fixtures)
 from tests.test_worlds_api import api, as_user, pptx  # noqa: F401  (fixtures)
@@ -80,3 +80,15 @@ async def test_a_personal_difference_gets_its_own_plan(api, sm, pptx):  # noqa: 
     await api.get("/api/daily", headers=OWL_FR)
     await Worker(sm).drain(timeout_s=30)
     assert await plan_calls(sm) == (2, 0)
+    async with sm() as s:  # mid only for the student with a recorded weak spot (audit OPT-09)
+        tiers = dict(
+            (
+                await s.execute(
+                    select(User.nickname, AICallLog.model_tier)
+                    .join(Job, Job.id == AICallLog.job_id)
+                    .join(User, User.id == Job.user_id)
+                    .where(AICallLog.task_kind == "DAILY_PLAN")
+                )
+            ).all()
+        )
+    assert tiers == {"RedCrab9": "mid", "NightOwl7": "compact"}

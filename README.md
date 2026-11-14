@@ -38,7 +38,7 @@ Each island has five buildings:
 
 Mistakes that several classmates share become anonymous **Class Wisdom** tips, written once by
 the mid model in every language of the class. A **daily plan** (3 challenges) is written once per
-student per day. Coins (free daily refill, earned, optional purchase) pay for new AI work; anything
+student per day, by compact, or by mid for a student with recorded weak spots. Coins (free daily refill, earned, optional purchase) pay for new AI work; anything
 the class already made is free. The UI is in English, French, Arabic and Tunisian Darija (RTL).
 
 Challenge fit: `docs/PRODUCT.md` → Challenge fit.
@@ -105,9 +105,9 @@ queue position and ETA. Coins are committed on success and refunded on failure.
 
 | Pattern | Used for |
 | --- | --- |
-| escalation | Tutor turns: compact by default, mid only when the student is stuck |
+| escalation | Tutor turns: compact by default, mid only when the student is stuck. Daily plan: compact, mid only for a student with recorded weak spots |
 | draft-then-revise | Teach-Back grading: compact drafts; mid reviews low-confidence or borderline scores. Arabic and Darija go straight to mid (the compact model is unreliable there); a grade still unsure pays nothing until it's reviewed |
-| plan-once / execute-compact | Study pack: mid writes the notes once, compact turns them into cards and a map; daily plan |
+| plan-once / execute-compact | Study pack: mid writes the notes once, compact turns them into cards and a map |
 | narrow-before-generating | Quiz sets, notes, audio scripts: vector search on the chapter, then only the relevant chunks reach the model |
 | fallback | Any mid task when mid is saturated → compact, shown as a "Quick mode" badge |
 
