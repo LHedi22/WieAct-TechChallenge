@@ -32,7 +32,11 @@ from app.rag.search import search
 KIND = "QUIZ_POOL"
 POOL_LEVEL = "intermediate"
 POOL_SIZE = 10
-CONTEXT_CHUNKS = 6
+# Course text per generation call (audit OPT-02): spread over the chapter up to this many
+# characters (≈ 1,750 tokens), at most CONTEXT_MAX_CHUNKS chunks.
+CONTEXT_CHARS = 7000
+CONTEXT_MAX_CHUNKS = 24
+PARTS = 3  # start, middle, end of the chapter
 SEARCH_K = 12
 MIN_VALID = 5
 
@@ -76,22 +80,55 @@ def valid_questions(content: Any) -> list[dict[str, Any]]:
     return spread_answers(out)
 
 
-def pick_context(chunks: list[Chunk], k: int = CONTEXT_CHUNKS, offset: int = 0) -> list[Chunk]:
-    """Round-robin over each chunk's first concept so the set covers the chapter; `offset`
-    rotates the starting concept (a new seed looks at different material first)."""
+def _concept_order(part: list[Chunk], offset: int, rank: dict[uuid.UUID, int]) -> list[Chunk]:
+    """Round-robin over the part's concepts (first tag): vector hits first inside each concept,
+    concepts holding a hit first; `offset` rotates which concept leads."""
     groups: dict[str, list[Chunk]] = {}
-    for c in sorted(chunks, key=lambda c: (c.document_id, c.idx)):
+    for c in part:
         groups.setdefault(c.tags[0] if c.tags else "-", []).append(c)
-    keys = list(groups)
+    far = len(rank) + 1
+    for g in groups.values():
+        g.sort(key=lambda c: rank.get(c.id, far))  # stable: position breaks ties
+    keys = sorted(groups, key=lambda k: rank.get(groups[k][0].id, far))
     if keys:
         r = offset % len(keys)
         keys = keys[r:] + keys[:r]
+    out: list[Chunk] = []
+    while any(groups[k] for k in keys):
+        out += [groups[k].pop(0) for k in keys if groups[k]]
+    return out
+
+
+def pick_context(
+    chunks: list[Chunk],
+    k: int | None = None,
+    offset: int = 0,
+    *,
+    budget_chars: int = CONTEXT_CHARS,
+    prefer: list[uuid.UUID] | tuple = (),
+) -> list[Chunk]:
+    """The chunks a generation call sees: spread over the chapter's start, middle and end (taken
+    in turn: start, end, middle, …), round-robin over concepts inside each part, up to `k` chunks
+    and `budget_chars` of text. `prefer` (vector hits, best first) leads inside its part; `offset`
+    rotates the concepts so a new seed looks at different material first. No model call."""
+    ordered = sorted(chunks, key=lambda c: (str(c.document_id), c.idx))
+    if not ordered:
+        return []
+    k = k or CONTEXT_MAX_CHUNKS
+    rank = {cid: i for i, cid in enumerate(prefer)}
+    n = len(ordered)
+    parts = [ordered[i * n // PARTS : (i + 1) * n // PARTS] for i in range(PARTS)]
+    turns = [_concept_order(p, offset, rank) for p in (parts[0], parts[-1], *parts[1:-1]) if p]
     picked: list[Chunk] = []
-    while len(picked) < k and any(groups.values()):
-        for key in keys:
-            if groups[key] and len(picked) < k:
-                picked.append(groups[key].pop(0))
-    return sorted(picked, key=lambda c: (c.document_id, c.idx))
+    used = 0
+    while len(picked) < k and any(turns):
+        for queue in turns:
+            if queue and len(picked) < k:
+                c = queue.pop(0)
+                if used + len(c.text) <= budget_chars or not picked:
+                    picked.append(c)
+                    used += len(c.text)
+    return sorted(picked, key=lambda c: (str(c.document_id), c.idx))
 
 
 async def next_seed(s, chapter_id: uuid.UUID, level: str, language: str) -> int:
@@ -166,8 +203,8 @@ async def maybe_precompute(chapter_id: uuid.UUID) -> uuid.UUID | None:
 async def chapter_context(
     ctx: JobContext, chapter: Chapter, course: Course, level: str, seed: int = 1
 ) -> list[Chunk]:
-    """narrow-before-generating without an extra call: vector search, then round-robin by concept
-    (also used by the Study Studio's notes)."""
+    """narrow-before-generating without an extra call: the vector search ranks the chapter's
+    chunks, pick_context spreads them over the whole chapter (shared by quiz, notes and audio)."""
     try:
         hits = await search(
             course.world_id,
@@ -180,14 +217,9 @@ async def chapter_context(
         raise
     except gateway.GatewayError:
         hits = []
-    async with db.get_sessionmaker()() as s:
-        if hits:
-            rows = list(
-                await s.scalars(select(Chunk).where(Chunk.id.in_([h.chunk_id for h in hits])))
-            )
-        else:  # nothing in the vector store (yet) for this provider: use the chapter's chunks
-            rows = list(await s.scalars(select(Chunk).where(Chunk.chapter_id == chapter.id)))
-    return pick_context(rows, CONTEXT_CHUNKS, offset=seed - 1)
+    async with db.get_sessionmaker()() as s:  # the whole chapter, so its end is never left out
+        rows = list(await s.scalars(select(Chunk).where(Chunk.chapter_id == chapter.id)))
+    return pick_context(rows, offset=seed - 1, prefer=[h.chunk_id for h in hits])
 
 
 STAGES = (

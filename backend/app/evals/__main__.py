@@ -115,7 +115,7 @@ async def quiz_eval(langs: list[str], n: int, world_code: str, fresh: bool, out:
     from app import gateway, prompts
     from app.core import db
     from app.core.config import get_settings
-    from app.features.quiz.pool import CONTEXT_CHUNKS, pick_context
+    from app.features.quiz.pool import pick_context
     from app.gateway import Task, TaskKind
     from app.models import Chapter, Chunk, Course, World
 
@@ -150,7 +150,7 @@ async def quiz_eval(langs: list[str], n: int, world_code: str, fresh: bool, out:
         calls = 0
         while len(questions) < n and calls < max(2, n // 5):
             chapter, course = chapters[calls % len(chapters)]
-            picked = pick_context(chunks[chapter.id], CONTEXT_CHUNKS, offset=calls)
+            picked = pick_context(chunks[chapter.id], offset=calls)
             context = "\n\n".join(f"[{c.page_ref}] {c.text}" for c in picked)
             version, messages = prompts.render(
                 "quiz_generate",
