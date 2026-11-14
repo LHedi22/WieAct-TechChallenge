@@ -17,7 +17,7 @@ from app.features.pool import service as pool
 from app.features.quiz.service import LEVELS
 from app.features.studio import pack, srs
 from app.features.worlds.service import NotFound, member_chapter
-from app.jobs.service import create_job
+from app.jobs.service import create_or_join_shared_job, share_key
 from app.models import (
     Chapter,
     Course,
@@ -97,9 +97,12 @@ async def generate(
         return {"job_id": job_id, "cost": 0, "cached": False}
     course = await s.get(Course, chapter.course_id)
     cost = economy.COST["generate_shared_asset"] if "notes" in missing else 0
-    job = await create_job(  # reserves from the wallet, or from the pool (LedgerCoins.reserve)
+    # One job per pack even when classmates click at the same moment (audit OPT-01); only the
+    # creator reserves, from the wallet or the pool (LedgerCoins.reserve).
+    job_id, created = await create_or_join_shared_job(
         s,
         kind=pack.KIND,
+        share_key=share_key(pack.KIND, chapter.id, level, language),
         lane="interactive",
         payload={
             "chapter_id": str(chapter.id),
@@ -111,7 +114,7 @@ async def generate(
         world_id=course.world_id,
         cost=cost,
     )
-    return {"job_id": job.id, "cost": cost, "cached": False}
+    return {"job_id": job_id, "cost": cost if created else 0, "cached": False}
 
 
 # --- flashcards --------------------------------------------------------------------------------

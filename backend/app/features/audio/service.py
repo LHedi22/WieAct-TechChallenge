@@ -19,7 +19,7 @@ from app.features.studio import pack
 from app.features.studio.service import Pay, Rejected
 from app.gateway import BadOutput, Task, TaskKind
 from app.jobs.registry import JobContext, job
-from app.jobs.service import create_job
+from app.jobs.service import create_or_join_shared_job, share_key
 from app.models import Chapter, Course, User
 
 KIND = "AUDIO_EPISODE"
@@ -85,9 +85,12 @@ async def generate(
     course = await s.get(Course, chapter.course_id)
     # the full version of a Quick-mode script is free: the class already paid for the episode
     cost = 0 if existing is not None else economy.COST["generate_shared_asset"]
-    created = await create_job(  # reserves from the wallet or the pool (LedgerCoins.reserve)
+    # One job per episode even when classmates click together (audit OPT-01); only the creator
+    # reserves, from the wallet or the pool (LedgerCoins.reserve).
+    job_id, created = await create_or_join_shared_job(
         s,
         kind=KIND,
+        share_key=share_key(KIND, chapter.id, level, language),
         lane="interactive",
         payload={
             "chapter_id": str(chapter.id),
@@ -99,7 +102,7 @@ async def generate(
         world_id=course.world_id,
         cost=cost,
     )
-    return {"job_id": created.id, "cost": cost, "cached": False}
+    return {"job_id": job_id, "cost": cost if created else 0, "cached": False}
 
 
 @job(KIND, stages=("reading_chapter", "writing_script"))

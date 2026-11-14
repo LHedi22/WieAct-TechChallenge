@@ -18,7 +18,7 @@ from app.core.provenance import servable
 from app.features.daily import service as daily
 from app.features.quiz import pool
 from app.features.wallet import service as wallet
-from app.jobs.service import create_job
+from app.jobs.service import create_job, create_or_join_shared_job
 from app.models import (
     Chapter,
     ChapterMastery,
@@ -91,27 +91,25 @@ async def start(s: AsyncSession, user: User, chapter: Chapter, level: str) -> di
     if found:
         attempt = await create_attempt(s, user, found, course)
         return {"attempt_id": attempt.id, "job_id": None, "cost": 0, "cached": True}
-    # A classmate is already generating this chapter + level + language: share that job.
-    job_id = await pool.pending_generation(s, chapter.id, level, language)
-    cost = 0  # sharing that job reserves nothing: this student gets the class's set for free
-    if job_id is None:
-        cost = economy.COST["quiz"]
-        seed = await pool.next_seed(s, chapter.id, level, language)
-        job = await create_job(
-            s,
-            kind=pool.KIND,
-            lane="interactive",
-            payload={
-                "chapter_id": str(chapter.id),
-                "level": level,
-                "language": language,
-                "seed": seed,
-            },
-            user_id=user.id,
-            world_id=course.world_id,
-            cost=cost,
-        )
-        job_id = job.id
+    # A classmate is already generating this chapter + level + language: share that job. The
+    # key names "the next set", whatever seed the creator picks (audit OPT-01); joining is free.
+    seed = await pool.next_seed(s, chapter.id, level, language)
+    job_id, created = await create_or_join_shared_job(
+        s,
+        kind=pool.KIND,
+        share_key=pool.share(chapter.id, level, language),
+        lane="interactive",
+        payload={
+            "chapter_id": str(chapter.id),
+            "level": level,
+            "language": language,
+            "seed": seed,
+        },
+        user_id=user.id,
+        world_id=course.world_id,
+        cost=economy.COST["quiz"],
+    )
+    cost = economy.COST["quiz"] if created else 0
     return {"attempt_id": None, "job_id": job_id, "cost": cost, "cached": False}
 
 

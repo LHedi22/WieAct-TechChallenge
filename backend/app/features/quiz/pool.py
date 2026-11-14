@@ -24,7 +24,7 @@ from app.core.provenance import replaces, servable
 from app.features.quiz import verify
 from app.gateway import BadOutput, Task, TaskKind
 from app.jobs.registry import JobContext, job
-from app.jobs.service import create_job
+from app.jobs.service import create_or_join_shared_job, share_key
 from app.models import Chapter, Chunk, Course, Document, Job, QuizSet, User, World
 from app.rag.search import search
 
@@ -102,6 +102,12 @@ async def next_seed(s, chapter_id: uuid.UUID, level: str, language: str) -> int:
     return (top or 0) + 1
 
 
+def share(chapter_id: uuid.UUID, level: str, language: str) -> str:
+    """The next quiz set of a chapter + level + language, whatever seed its creator picks: one
+    queued or running generation at a time, shared by the class (audit OPT-01)."""
+    return share_key(KIND, chapter_id, level, language)
+
+
 async def pending_generation(s, chapter_id: uuid.UUID, level: str, language: str):
     """A generation already queued or running for this chapter + level + language (shared)."""
     return await s.scalar(
@@ -140,9 +146,10 @@ async def maybe_precompute(chapter_id: uuid.UUID) -> uuid.UUID | None:
         )
         if exists or await pending_generation(s, chapter_id, POOL_LEVEL, language):
             return None
-        created = await create_job(
+        job_id, _ = await create_or_join_shared_job(
             s,
             kind=KIND,
+            share_key=share(chapter_id, POOL_LEVEL, language),
             lane="background",
             payload={
                 "chapter_id": str(chapter_id),
@@ -152,7 +159,7 @@ async def maybe_precompute(chapter_id: uuid.UUID) -> uuid.UUID | None:
             },
             world_id=world.id,
         )
-        return created.id
+        return job_id
 
 
 async def chapter_context(

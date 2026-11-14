@@ -8,6 +8,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel
 from sqlalchemy import and_, func, or_, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
@@ -56,6 +57,14 @@ async def create_job(
     world_id: uuid.UUID | None = None,
     cost: int = 0,
 ) -> Job:
+    job = await _new_job(s, kind, lane, payload, user_id, world_id, cost)
+    await s.flush()
+    await coins.reserve(s, job)
+    await s.commit()
+    return job
+
+
+async def _new_job(s, kind, lane, payload, user_id, world_id, cost, share_key=None) -> Job:
     spec = spec_for(kind)
     offline, resume_at = await paused_until(get_settings(), get_sessionmaker())
     if offline and (lane == "interactive" or resume_at is None):
@@ -69,14 +78,55 @@ async def create_job(
         user_id=user_id,
         world_id=world_id,
         cost=cost,
+        share_key=share_key,
         # Background work (tagging, tips, plans, pools, indexing) waits for the next live slot.
         not_before=resume_at if offline else None,
     )
     s.add(job)
-    await s.flush()
-    await coins.reserve(s, job)
-    await s.commit()
     return job
+
+
+def share_key(kind: str, *parts: object) -> str:
+    """The class asset a job makes, e.g. share_key("STUDY_PACK", chapter, level, language)."""
+    return ":".join([kind, *(str(p) for p in parts)])
+
+
+async def active_shared_job(s: AsyncSession, key: str) -> uuid.UUID | None:
+    return await s.scalar(
+        select(Job.id).where(Job.share_key == key, Job.status.in_(("queued", "running")))
+    )
+
+
+async def create_or_join_shared_job(
+    s: AsyncSession,
+    *,
+    kind: str,
+    share_key: str,
+    lane: str,
+    payload: dict[str, Any] | None = None,
+    user_id: uuid.UUID | None = None,
+    world_id: uuid.UUID | None = None,
+    cost: int = 0,
+) -> tuple[uuid.UUID, bool]:
+    """One queued/running job per shared class asset (audit OPT-01). Returns (job id, created).
+
+    The insert is guarded by the partial unique index on `share_key` (migration 0017): a
+    classmate's concurrent insert waits for ours and then conflicts, so whoever loses joins the
+    winner's job, across API processes too. Only the creator reserves coins, in the same
+    transaction as the insert; anyone who joins pays nothing."""
+    for _ in range(5):
+        if (found := await active_shared_job(s, share_key)) is not None:
+            return found, False
+        try:
+            async with s.begin_nested():
+                job = await _new_job(s, kind, lane, payload, user_id, world_id, cost, share_key)
+                await s.flush()
+        except IntegrityError:
+            continue  # a classmate created it a moment ago: join theirs
+        await coins.reserve(s, job)
+        await s.commit()
+        return job.id, True
+    raise RuntimeError(f"shared job {share_key} kept changing")  # pragma: no cover
 
 
 async def _avg_call_s(s: AsyncSession) -> float:

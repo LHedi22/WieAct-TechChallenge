@@ -17,6 +17,13 @@ class Job(Base):
         # Worker picks by lane priority, respecting not_before (SELECT … FOR UPDATE SKIP LOCKED).
         Index("ix_jobs_queue", "status", "lane", "not_before"),
         Index("ix_jobs_lease", "status", "lease_until"),
+        # One queued/running job per shared class asset (audit OPT-01, migration 0017).
+        Index(
+            "uq_jobs_share_key_active",
+            "share_key",
+            unique=True,
+            postgresql_where=text("status IN ('queued', 'running') AND share_key IS NOT NULL"),
+        ),
     )
 
     id: Mapped[uuid.UUID] = uuid_pk()
@@ -47,6 +54,8 @@ class Job(Base):
     # sweep fails and refunds jobs whose lease expired (their worker died or froze).
     lease_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     worker_id: Mapped[str | None] = mapped_column(String(64))
+    # The class asset this job makes, e.g. "STUDY_PACK:<chapter>:<level>:<language>" (OPT-01).
+    share_key: Mapped[str | None] = mapped_column(String(200))
     # Timeline for /admin/debug: [{t, type: claimed|stage|deferred|requeued|done|failed|swept, …}]
     events: Mapped[list[dict[str, Any]]] = mapped_column(
         JSONB, default=list, server_default=text("'[]'::jsonb")

@@ -14,8 +14,8 @@ from app.core import economy
 from app.features.placement import service
 from app.features.worlds.map import course_for_member
 from app.features.worlds.service import NotFound
-from app.jobs.service import create_job
-from app.models import Chapter, Chunk, Job
+from app.jobs.service import create_or_join_shared_job, share_key
+from app.models import Chapter, Chunk
 
 router = APIRouter(prefix="/api/placement", tags=["placement"])
 
@@ -83,27 +83,23 @@ async def start(body: PlacementStartIn, s: Session, user: CurrentUser) -> Placem
     if not has_material:
         raise HTTPException(409, "errors.placement_no_material")
     # Classmates starting at the same moment share one job (and one AI call).
-    pending = await s.scalar(
-        select(Job.id).where(
-            Job.kind == service.KIND,
-            Job.status.in_(("queued", "running")),
-            Job.payload["course_id"].astext == str(course.id),
-            Job.payload["language"].astext == language,
-        )
+    # Classmates starting at the same moment share one job and one AI call (audit OPT-01).
+    pending, created = await create_or_join_shared_job(
+        s,
+        kind=service.KIND,
+        share_key=share_key(service.KIND, course.id, language),
+        lane="interactive",
+        payload={"course_id": str(course.id), "language": language},
+        user_id=user.id,
+        world_id=course.world_id,
+        cost=cost,
     )
-    if pending is None:
-        created = await create_job(
-            s,
-            kind=service.KIND,
-            lane="interactive",
-            payload={"course_id": str(course.id), "language": language},
-            user_id=user.id,
-            world_id=course.world_id,
-            cost=cost,
-        )
-        pending = created.id
     return PlacementStartOut(
-        course_id=course.id, cached=False, cost=cost, job_id=pending, questions=None
+        course_id=course.id,
+        cached=False,
+        cost=cost if created else 0,
+        job_id=pending,
+        questions=None,
     )
 
 
