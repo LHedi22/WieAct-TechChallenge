@@ -274,6 +274,10 @@ describe("Socratic Tutor", () => {
     expect(screen.getByRole("img", { name: "Found" })).toBeInTheDocument();
     expect(screen.getAllByRole("img", { name: "Not yet" })).toHaveLength(2);
     expect(screen.getAllByText(/Quick mode/).length).toBeGreaterThan(0);
+    // audit OPT-24 (F-A11Y-2, axe "list"): the conversation list holds list items only
+    for (const list of document.querySelectorAll("ol, ul")) {
+      for (const child of list.children) expect(child.tagName).toBe("LI");
+    }
     await user.type(screen.getByPlaceholderText(/Type your thinking/), "factor the top?");
     await user.click(screen.getByRole("button", { name: "Send" }));
     await waitFor(() =>

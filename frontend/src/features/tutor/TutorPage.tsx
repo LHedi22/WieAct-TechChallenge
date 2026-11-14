@@ -40,7 +40,7 @@ export function TutorPage() {
   const navigate = useNavigate();
   const [text, setText] = useState("");
   const inputId = useId();
-  const bottom = useRef<HTMLDivElement>(null);
+  const bottom = useRef<HTMLLIElement>(null);
 
   const query = useQuery({
     queryKey: ["tutor", sessionId],
@@ -181,7 +181,8 @@ export function TutorPage() {
                 <Banner kind="error">{t(`common:${pending.job.error}`)}</Banner>
               </li>
             )}
-            <div ref={bottom} />
+            {/* scroll anchor; a list holds only list items (audit OPT-24, axe "list") */}
+            <li ref={bottom} aria-hidden />
           </ol>
 
           {session.status === "active" ? (
