@@ -151,7 +151,7 @@
       "arena_already_pinned": "تم تثبيت أفضل إجابة بالفعل.",
       "arena_own_answer": "لا يمكنك التصويت لإجابتك.",
       "pool_insufficient": "لا يملك صندوق الصفّ ما يكفي من العملات لهذا بعد.",
-      "pool_amount_invalid": "امنح بين 1 و50 عملة.",
+      "pool_amount_invalid": "امنح بين 1 و{max} عملة.",
       "card_not_found": "هذه البطاقة لم تعد موجودة.",
       "quiz_not_finished": "أنهِ الاختبار أولًا."
     },

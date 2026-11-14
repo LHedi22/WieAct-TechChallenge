@@ -226,4 +226,15 @@ describe("Class Pool card", () => {
       expect(calls.find((c) => c.key === "POST /api/worlds/w1/pool")?.body).toEqual({ amount: 5 }),
     );
   });
+
+  it("names the server's gift limit when an amount is refused (no hard-coded number)", async () => {
+    serve({
+      "GET /api/worlds/w1/pool": { ...POOL, max_contribution: 30 },
+      "POST /api/worlds/w1/pool": () => [400, { detail: "errors.pool_amount_invalid" }],
+    });
+    show(<PoolCard worldId="w1" />, "/");
+    const card = await screen.findByTestId("pool-card");
+    await userEvent.click(within(card).getByRole("button", { name: "Add coins" }));
+    expect(await within(card).findByText("Give between 1 and 30 coins.")).toBeInTheDocument();
+  });
 });

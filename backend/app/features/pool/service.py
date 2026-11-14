@@ -12,10 +12,11 @@ from sqlalchemy import func, select, text
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import economy
 from app.features.wallet import service as wallet
 from app.models import ClassPoolLedger, Job, User
 
-MAX_CONTRIBUTION = 50  # per gift; keeps a misclick from emptying a wallet
+MAX_CONTRIBUTION = economy.POOL_MAX_CONTRIBUTION
 
 
 class InsufficientPool(Exception):

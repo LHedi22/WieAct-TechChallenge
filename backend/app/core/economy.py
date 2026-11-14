@@ -27,6 +27,7 @@ EARN = {
     "creator_new_member": 5,
 }
 PEER_ANSWER_THRESHOLD = 70  # /100
+POOL_MAX_CONTRIBUTION = 50  # coins per Class Pool gift; keeps a misclick from emptying a wallet
 WISDOM_THRESHOLD = 3  # distinct students with the same (concept, mistake_type) in a world
 
 POINTS = {

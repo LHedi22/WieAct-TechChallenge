@@ -69,7 +69,7 @@ export function PoolCard({ worldId }: { worldId: string }) {
         </PixelButton>
       </form>
       <p className="text-small text-ink/70">{t("note", { max: p.max_contribution })}</p>
-      <ErrorBanner error={give.error} />
+      <ErrorBanner error={give.error} values={{ max: p.max_contribution }} />
     </SoftCard>
   );
 }

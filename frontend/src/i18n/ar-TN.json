@@ -152,7 +152,7 @@
       "arena_already_pinned": "فمّا أحسن جواب متثبّت من قبل.",
       "arena_own_answer": "ما تنجمش تصوّت للجواب متاعك.",
       "pool_insufficient": "صندوق القسم ما فيهش فلوس كافية للحاجة هذي.",
-      "pool_amount_invalid": "اعطي بين 1 و50 فلوس.",
+      "pool_amount_invalid": "اعطي بين 1 و{max} فلوس.",
       "card_not_found": "البطاقة هذي ما عادش موجودة.",
       "quiz_not_finished": "كمّل الكويز قبل."
     },

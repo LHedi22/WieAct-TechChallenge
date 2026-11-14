@@ -151,7 +151,7 @@
       "arena_already_pinned": "Une meilleure réponse est déjà épinglée.",
       "arena_own_answer": "Tu ne peux pas voter pour ta propre réponse.",
       "pool_insufficient": "La cagnotte de classe n'a pas encore assez de pièces pour ça.",
-      "pool_amount_invalid": "Donne entre 1 et 50 pièces.",
+      "pool_amount_invalid": "Donne entre 1 et {max} pièces.",
       "card_not_found": "Cette carte n'existe plus.",
       "quiz_not_finished": "Termine d'abord le quiz."
     },

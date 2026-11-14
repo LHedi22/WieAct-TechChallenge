@@ -151,7 +151,7 @@
       "arena_already_pinned": "A best answer is already pinned.",
       "arena_own_answer": "You can't vote for your own answer.",
       "pool_insufficient": "The Class Pool doesn't have enough coins for this yet.",
-      "pool_amount_invalid": "Give between 1 and 50 coins.",
+      "pool_amount_invalid": "Give between 1 and {max} coins.",
       "card_not_found": "This flashcard no longer exists.",
       "quiz_not_finished": "Finish the quiz first."
     },
