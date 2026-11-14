@@ -63,7 +63,8 @@ UI ◀── poll GET /api/jobs/{id} ──┤  {status, stage, stages[], queue_
   next-chapter prefetch, 100 default; migration 0018), then age. One shared class asset has one
   queued/running job (`share_key`); a student who joins a queued background job promotes it to
   the interactive lane. The limiter keeps `LLM_INTERACTIVE_RESERVED` (1) call slot for students:
-  background calls use at most concurrency − reserved (min 1).
+  background calls use at most concurrency − reserved (min 1), and the worker claims no more
+  background jobs than that, so the background ETA counts one background job at a time.
 - **Prefetch** (`app/jobs/prefetch.py`): finishing a quiz or opening the Study Studio on chapter N
   queues chapter N+1's quiz set and study pack for the student's level and language (background,
   priority 50, ownerless, cost 0), unless they exist or are queued. Free when opened; the building

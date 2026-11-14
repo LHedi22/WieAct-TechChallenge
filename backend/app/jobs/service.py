@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.core.db import reuse
+from app.gateway.limiter import background_cap
 from app.gateway.providers import paused_until
 from app.jobs.coins import coins
 from app.jobs.registry import spec_for
@@ -248,14 +249,19 @@ async def eta_s(s: AsyncSession, job: Job) -> float:
             )
         )
     )
-    work = 0.0
+    work = {"interactive": 0.0, "background": 0.0}
     for kind, lane, status, started in ahead:
         took = avg.get((kind, lane), fallback)
         if status == "running" and started is not None:
             took = max(0.0, took - (now - started).total_seconds())
-        work += took
+        work[lane] += took
     own = avg.get((job.kind, job.lane), fallback)
-    return work / max(1, get_settings().LLM_MAX_CONCURRENCY) + own
+    settings = get_settings()
+    slots = max(1, settings.LLM_MAX_CONCURRENCY)
+    if job.lane == "interactive":  # background calls never take the student's reserved slot
+        return sum(work.values()) / slots + own
+    bg_slots = background_cap(slots, settings.LLM_INTERACTIVE_RESERVED)
+    return work["interactive"] / slots + work["background"] / bg_slots + own
 
 
 async def view(s: AsyncSession, job: Job) -> JobView:

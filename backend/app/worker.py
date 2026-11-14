@@ -26,7 +26,7 @@ async def main() -> None:
     # task isn't garbage-collected.
     beat = asyncio.create_task(heartbeat.run_forever(settings.DATABASE_URL))
     try:
-        await Worker(sm, background_slots=settings.LLM_MAX_CONCURRENCY).run_forever()
+        await Worker(sm).run_forever()
     finally:
         beat.cancel()
 

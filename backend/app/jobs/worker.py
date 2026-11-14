@@ -36,6 +36,7 @@ from app.core.config import get_settings
 from app.core.db import DB_ERRORS, is_outage
 from app.gateway import Defer, EmbeddingsDown, GatewayError, OfflineMode, trace
 from app.gateway.context import JobRef, current_job
+from app.gateway.limiter import background_cap
 from app.gateway.providers import paused_until, resolve
 from app.jobs.coins import coins
 from app.jobs.registry import JobContext, spec_for
@@ -75,11 +76,16 @@ class Worker:
         self,
         sm: async_sessionmaker[AsyncSession],
         *,
-        background_slots: int = 2,
+        background_slots: int | None = None,
         interactive_slots: int = 6,
         poll_s: float = 0.5,
     ) -> None:
         self.sm = sm
+        if background_slots is None:  # no more than can get a call slot (prefetch step 1)
+            settings = get_settings()
+            background_slots = background_cap(
+                settings.LLM_MAX_CONCURRENCY, settings.LLM_INTERACTIVE_RESERVED
+            )
         self.limits = {"interactive": interactive_slots, "background": background_slots}
         self.running: dict[str, set[asyncio.Task]] = {"interactive": set(), "background": set()}
         self.poll_s = poll_s

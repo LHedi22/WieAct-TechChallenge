@@ -58,3 +58,20 @@ async def test_eta_adds_up_real_job_durations_per_kind_and_lane(sm):
         bg = await view(s, behind)  # behind everything interactive, itself included
         assert bg.queue_position == 4
         assert 124 <= bg.eta_s <= 126, bg.eta_s  # (20 + 10 + 10 + 30) / 2 + 90 (background pack)
+
+
+async def test_background_eta_counts_one_background_job_at_a_time(sm):
+    """Prefetch step 1: background work runs on concurrency − LLM_INTERACTIVE_RESERVED slots
+    (1 of 2), so background work ahead is not halved."""
+    s_ = get_settings()
+    assert (s_.LLM_MAX_CONCURRENCY, s_.LLM_INTERACTIVE_RESERVED) == (2, 1)
+    now = datetime.now(UTC)
+    history = [row(now, pack.KIND, "done", lane="background", ago=600, took=60)]
+    running = row(now, pack.KIND, "running", lane="background", ago=60, started_ago=20)  # 40 left
+    ahead = row(now, pack.KIND, "queued", lane="background", ago=50)  # 60
+    me = row(now, pack.KIND, "queued", lane="background", ago=1)
+    async with sm() as s:
+        s.add_all([*history, running, ahead, me])
+        await s.commit()
+        v = await view(s, me)
+        assert 159 <= v.eta_s <= 161, v.eta_s  # (40 + 60) / 1 slot + its own 60

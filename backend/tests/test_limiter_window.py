@@ -66,3 +66,18 @@ async def test_background_leaves_the_reserved_slot_to_interactive():
 async def test_reserve_never_starves_background_on_one_slot():
     lim = Limiter(6000, 1, burst=100, interactive_reserved=1)
     await asyncio.wait_for(lim.acquire("background"), timeout=0.5)
+
+
+async def test_embeddings_share_the_background_cap_but_never_the_reserved_slot():
+    """EMBED has its own quota bucket but takes a call slot like chat: an indexing embed call in
+    the background holds the one background slot, and a student's chat call still starts."""
+    lim = Limiter(6000, 2, burst=100, embed_rpm=6000, interactive_reserved=1)
+    await lim.acquire("background", "embed")
+    chat_bg = asyncio.create_task(lim.acquire("background"))
+    await asyncio.sleep(0.05)
+    assert not chat_bg.done()
+    await asyncio.wait_for(lim.acquire("interactive"), timeout=0.5)
+    await lim.release("interactive")
+    await lim.release("background")
+    await asyncio.wait_for(chat_bg, timeout=1.5)
+    await lim.release("background")

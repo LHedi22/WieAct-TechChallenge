@@ -234,3 +234,64 @@ def test_every_handler_is_known_even_after_one_feature_registered_itself():
     )
     proc = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=False)
     assert proc.returncode == 0, proc.stderr[-500:]
+
+
+async def test_worker_claims_no_more_background_jobs_than_can_call(sm):
+    """Prefetch step 1: the limiter lets background use concurrency − LLM_INTERACTIVE_RESERVED
+    call slots (1 of 2), so the worker claims only that many background jobs. A second claimed
+    job would sit 'running' without a call slot, hold its row and throw the ETAs off."""
+    async with sm() as s:
+        for _ in range(3):
+            await create_job(s, kind=demo.KIND, lane="background")
+    w = Worker(sm)
+    w.execute = lambda job: asyncio.sleep(10)
+    await w.tick()
+    assert len(w.running["background"]) == 1
+    async with sm() as s:
+        statuses = sorted((await s.scalars(select(Job.status))).all())
+    assert statuses == ["queued", "queued", "running"]
+    for ts in w.running.values():
+        for t in ts:
+            t.cancel()
+
+
+async def test_a_student_call_starts_within_a_second_while_a_long_background_call_runs(
+    sm, mock_llm, monkeypatch
+):
+    mock_llm.state.cfg = mock_llm.state.cfg.model_copy(update={"latency_mid_ms": (4000, 4000)})
+    g = Gateway(
+        Settings(),
+        sm,
+        limiter=Limiter(6000, 2, burst=50, interactive_reserved=1),
+        client_factory=lambda p: LLMClient(
+            p, timeout_s=10, disable_thinking=True, http_client=mock_transport(mock_llm)
+        ),
+    )
+    monkeypatch.setattr(gateway_module, "run", g.run)
+    lanes = g.limiter.active_by_lane
+    async with sm() as s:
+        for _ in range(2):
+            await create_job(s, kind=demo.KIND, lane="background")
+    w = Worker(sm, poll_s=0.05)
+    loop = asyncio.get_running_loop()
+    runner = asyncio.create_task(w.run_forever())
+    try:
+        started = loop.time()
+        while lanes["background"] == 0:  # the first background call is in flight (4 s)
+            await asyncio.sleep(0.02)
+            assert loop.time() - started < 5.0
+        async with sm() as s:
+            await create_job(s, kind=demo.KIND, lane="interactive")
+        asked = loop.time()
+        while lanes["interactive"] == 0:
+            await asyncio.sleep(0.02)
+            assert loop.time() - asked < 1.0, "the student waited for the background call"
+        assert lanes["background"] == 1  # the second background job is not holding a slot
+        async with sm() as s:
+            bg = (await s.scalars(select(Job.status).where(Job.lane == "background"))).all()
+        assert sorted(bg) == ["queued", "running"]
+    finally:
+        runner.cancel()
+        for ts in w.running.values():
+            for t in ts:
+                t.cancel()

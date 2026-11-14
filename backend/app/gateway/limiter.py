@@ -53,6 +53,11 @@ class _Bucket:
         return None
 
 
+def background_cap(concurrency: int, interactive_reserved: int) -> int:
+    """Call slots the background lane may use: one stays free for students, never zero."""
+    return max(1, concurrency - interactive_reserved)
+
+
 class Limiter:
     def __init__(
         self,
@@ -72,7 +77,7 @@ class Limiter:
         self.concurrency = concurrency
         self.active = 0
         self.active_by_lane: dict[Lane, int] = {"interactive": 0, "background": 0}
-        self.background_cap = max(1, concurrency - interactive_reserved)
+        self.background_cap = background_cap(concurrency, interactive_reserved)
         self.max_active = 0
         self.waiting = {"interactive": 0, "background": 0}
         # Returns seconds the background lane should keep waiting (0 = go).
