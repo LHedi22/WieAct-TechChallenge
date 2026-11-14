@@ -184,13 +184,15 @@ class Gateway:
         if not task.cache_key:
             return await self._run(task)
         flight = (task.kind.value, task.prompt_version, task.cache_key)
-        if (pending := self._inflight.get(flight)) is not None:
+        followed = False
+        while (pending := self._inflight.get(flight)) is not None:
+            followed = True
             await asyncio.shield(pending)
-            # a cache hit now (or a fresh try if the first failed)
-            return await self._run(task, follower=True)
+        # Leader now: the first follower to wake after a failed leader takes over and the others
+        # wait for it again (audit OPT-18); after a successful leader this is a cache hit.
         self._inflight[flight] = asyncio.get_running_loop().create_future()
         try:
-            return await self._run(task)
+            return await self._run(task, follower=followed)
         finally:
             self._inflight.pop(flight).set_result(None)
 

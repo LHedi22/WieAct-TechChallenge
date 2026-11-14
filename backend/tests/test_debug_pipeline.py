@@ -374,3 +374,26 @@ async def test_a_deferred_replay_fails_once_and_old_replays_are_deleted(sm, gw_m
     await trace.cleanup(sm)
     async with sm() as s:
         assert await s.get(Job, stuck.id) is None and await s.get(Job, job_id) is not None
+
+
+async def test_when_the_leader_fails_one_follower_takes_over(sm, gw_mock, monkeypatch):
+    """Audit OPT-18: when the single-flight leader's call failed, every waiting follower called
+    the model at once (5 classmates → 1 + 4 identical requests). Followers now re-enter run(): one
+    becomes the new leader, the others wait for it and read its cached answer."""
+    real_call = gw_mock._call
+    sent = {"n": 0}
+
+    async def first_fails(*a, **kw):
+        sent["n"] += 1
+        await asyncio.sleep(0.05)  # long enough for everyone to queue behind the leader
+        if sent["n"] == 1:
+            from app.gateway import BadOutput  # noqa: PLC0415
+
+            raise BadOutput("unusable", refusal="bad_json")
+        return await real_call(*a, **kw)
+
+    monkeypatch.setattr(gw_mock, "_call", first_fails)
+    task = Task(kind=TaskKind.DEMO_SUMMARY, lane="interactive", messages=NOTES, cache_key="sf-2")
+    out = await asyncio.gather(*(gw_mock.run(task) for _ in range(5)), return_exceptions=True)
+    assert sum(isinstance(o, Exception) for o in out) == 1  # only the first leader's own call
+    assert sent["n"] == 2  # the failed call + ONE retry, not one per follower
