@@ -192,8 +192,9 @@ async def _avg_job_s(s: AsyncSession) -> dict[str, float]:
 
 async def eta_s(s: AsyncSession, job: Job) -> float:
     """Seconds until this job is done: the work ahead of it (each job at its kind's recent
-    duration, running jobs at what is left of theirs) plus its own, over the calls that run at
-    once. A kind with no history counts as JOB_CALLS calls (audit OPT-10)."""
+    duration, running jobs at what is left of theirs) over the calls that run at once, then its
+    own duration (a job's calls run one after another). A kind with no history counts as
+    JOB_CALLS calls (audit OPT-10)."""
     now = datetime.now(UTC)
     avg = await _avg_job_s(s)
     fallback = JOB_CALLS * await _avg_call_s(s)
@@ -205,13 +206,14 @@ async def eta_s(s: AsyncSession, job: Job) -> float:
             )
         )
     )
-    work = avg.get(job.kind, fallback)
+    work = 0.0
     for kind, status, started in ahead:
         took = avg.get(kind, fallback)
         if status == "running" and started is not None:
             took = max(0.0, took - (now - started).total_seconds())
         work += took
-    return work / max(1, get_settings().LLM_MAX_CONCURRENCY)
+    own = avg.get(job.kind, fallback)
+    return work / max(1, get_settings().LLM_MAX_CONCURRENCY) + own
 
 
 async def view(s: AsyncSession, job: Job) -> JobView:

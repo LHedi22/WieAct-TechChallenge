@@ -52,8 +52,8 @@ async def test_eta_adds_up_real_job_durations_per_kind_and_lane(sm):
         await s.commit()
         assert await queue_position(s, me) == 3  # the deferred job isn't ahead
         v = await view(s, me)
-        # (20 left + 10 + 10 ahead + 30 for itself) / 2 calls at once
-        assert 34 <= v.eta_s <= 36, v.eta_s
+        # (20 left + 10 + 10 ahead) / 2 calls at once, then its own 30 s (its calls run in turn)
+        assert 49 <= v.eta_s <= 51, v.eta_s
         bg = await view(s, behind)  # behind everything interactive, itself included
         assert bg.queue_position == 4
-        assert 49 <= bg.eta_s <= 51, bg.eta_s  # (20 + 10 + 10 + 30 + 30) / 2
+        assert 64 <= bg.eta_s <= 66, bg.eta_s  # (20 + 10 + 10 + 30) / 2 + 30
