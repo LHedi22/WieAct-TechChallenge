@@ -1,6 +1,7 @@
 """Teach-Back Arena (PRODUCT.md): a peer room per chapter and a solo mode.
 
-- ask    — ARENA_ASK job: ONE compact MODERATE_POST (classification, cached by text). Costs
+- ask    — ARENA_ASK job: ONE compact MODERATE_POST (classification, cached by text), or none when
+           the pre-filter settles a clear case (prefilter.py, audit OPT-07). Costs
            COST["peer_question"], refunded when the question is rejected.
 - answer — ARENA_GRADE job: ONE compact TEACHBACK_GRADE that also moderates (its `flag`), grounded
            in the chapter (narrow-before-generating, k=4). Free.
@@ -38,7 +39,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app import gateway, prompts
 from app.core import db, economy
 from app.core.config import get_settings
-from app.features.arena import injection
+from app.features.arena import injection, prefilter
 from app.features.daily import service as daily
 from app.features.wallet import service as wallet
 from app.gateway import Task, TaskKind
@@ -522,6 +523,21 @@ async def check_question(ctx: JobContext) -> dict[str, Any]:
         chapter = await s.get(Chapter, q.chapter_id)
         course = await s.get(Course, chapter.course_id)
     await ctx.set_stage("checking_message")
+    # Clear cases (phone, email, address, a listed insult) need no model call (audit OPT-07).
+    verdict = prefilter.check(q.text) or await _moderate(ctx, q, course, chapter)
+    ok = verdict in ("ok", "")  # an unreadable verdict lets the question through
+    async with db.get_sessionmaker()() as s:
+        q = await s.get(PeerQuestion, qid)
+        q.status = "open" if ok else "rejected"
+        q.reject_reason = None if ok else verdict[:16]
+        if not ok:  # the 2 coins come back
+            await wallet.refund(s, await s.get(Job, ctx.job_id))
+        await s.commit()
+    return {"question_id": str(qid), "status": q.status, "reason": q.reject_reason}
+
+
+async def _moderate(ctx: JobContext, q: PeerQuestion, course: Course, chapter: Chapter) -> str:
+    """ONE compact MODERATE_POST call (classification, cached by text)."""
     version, messages = prompts.render(
         "moderate_post", language=q.language, course=course.name, chapter=chapter.title, text=q.text
     )
@@ -537,16 +553,7 @@ async def check_question(ctx: JobContext) -> dict[str, Any]:
             )
         )
     )
-    verdict = str((result.content or {}).get("verdict") if isinstance(result.content, dict) else "")
-    ok = verdict in ("ok", "")  # an unreadable verdict lets the question through
-    async with db.get_sessionmaker()() as s:
-        q = await s.get(PeerQuestion, qid)
-        q.status = "open" if ok else "rejected"
-        q.reject_reason = None if ok else verdict[:16]
-        if not ok:  # the 2 coins come back
-            await wallet.refund(s, await s.get(Job, ctx.job_id))
-        await s.commit()
-    return {"question_id": str(qid), "status": q.status, "reason": q.reject_reason}
+    return str((result.content or {}).get("verdict") if isinstance(result.content, dict) else "")
 
 
 async def _settle_peer(
