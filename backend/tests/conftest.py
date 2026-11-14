@@ -15,7 +15,7 @@ sys.path.insert(0, str(REPO / "mock-llm" / "src"))  # the mock runs in-process (
 from mock_llm.app import create_app as create_mock_app  # noqa: E402
 from mock_llm.config import MockConfig  # noqa: E402
 
-from tests.db import prepare, test_url  # noqa: E402
+from tests.db import prepare, test_url, unreachable  # noqa: E402
 
 _PREFIXES = (
     "LLM_",
@@ -83,7 +83,7 @@ def fresh_login_limiter(monkeypatch):
 def pg_url() -> str:
     url = test_url(DEV_DB_URL)
     if not prepare(url):
-        pytest.skip("Postgres not reachable at DATABASE_URL (docker compose up -d db)")
+        unreachable()
     return url
 
 
