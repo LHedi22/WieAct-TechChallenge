@@ -25,6 +25,9 @@ from app.gateway.types import Lane
 
 Meter = Literal["chat", "embed"]
 PLATFORM_CALLS_PER_MIN = 20  # the platform's sustained rate per key (PLATFORM.md, email)
+# We count at acquire, the platform at arrival; a run's first call also sets up the client and
+# connection after acquire, so keep the window this much longer than 60 s (load re-run 14 Nov).
+WINDOW_MARGIN_S = 1.0
 
 
 class _Bucket:
@@ -72,10 +75,15 @@ class Limiter:
 
     def calls_last_60s(self, meter: Meter = "chat") -> int:
         """Calls started in the last 60 s (for the worker status heartbeat)."""
+        now = time.monotonic()
+        return sum(1 for t in self._window(meter) if now - t <= 60)
+
+    def _window(self, meter: Meter) -> deque[float]:
+        """Start times of the calls in the last 60 s + WINDOW_MARGIN_S."""
         q, now = self._recent[meter], time.monotonic()
-        while q and now - q[0] > 60:
+        while q and now - q[0] > 60 + WINDOW_MARGIN_S:
             q.popleft()
-        return len(q)
+        return q
 
     def snapshot(self) -> dict[str, object]:
         """The limiter's state as plain JSON for /admin/debug (worker_status)."""
@@ -114,8 +122,8 @@ class Limiter:
         """None if `lane` may go now, else seconds worth sleeping before rechecking."""
         if self.active >= self.concurrency:
             return 1.0  # woken by release()
-        if self.calls_last_60s(meter) >= PLATFORM_CALLS_PER_MIN:
-            return max(0.05, 60 - (time.monotonic() - self._recent[meter][0]))
+        if len(window := self._window(meter)) >= PLATFORM_CALLS_PER_MIN:
+            return max(0.05, 60 + WINDOW_MARGIN_S - (time.monotonic() - window[0]))
         if lane == "background":
             if self.waiting["interactive"]:
                 return 1.0

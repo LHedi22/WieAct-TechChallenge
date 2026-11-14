@@ -28,5 +28,20 @@ async def test_the_window_frees_a_slot_once_the_oldest_call_is_60s_old():
     started = time.monotonic()
     async with lim.slot("interactive"):
         pass
-    assert 0.1 <= time.monotonic() - started < 1.5
+    assert 0.1 <= time.monotonic() - started < 2.5
     assert limiter_module.PLATFORM_CALLS_PER_MIN == 20
+
+
+async def test_the_window_keeps_a_margin_for_arrival_skew():
+    """Found re-running the load test: the limiter counts at acquire, the platform at arrival.
+    The first call of a run also sets up the client and connection after acquire, so at the
+    server call 1 and call 21 were 59.98 s apart (logger). The 21st now waits for the oldest call
+    to be 60 s + WINDOW_MARGIN_S old."""
+    lim = Limiter(6000, 2, burst=100)
+    now = time.monotonic()
+    lim._recent["chat"].extend([now - 60.3] + [now - 1] * 19)
+    started = time.monotonic()
+    async with lim.slot("interactive"):
+        pass
+    assert time.monotonic() - started >= 0.4
+    assert limiter_module.WINDOW_MARGIN_S >= 0.7
