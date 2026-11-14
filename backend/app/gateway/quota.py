@@ -10,6 +10,7 @@ from dataclasses import dataclass
 log = logging.getLogger("gateway.quota")
 
 LOW_WATERMARK = 3  # remaining requests at which the background lane pauses
+DEFAULT_LIMIT_RPM = 20.0  # the platform's rate when no limit header came (PLATFORM.md)
 _IGNORED = {"x-content-type-options", "x-frame-options", "x-request-id", "x-xss-protection"}
 _seen: set[str] = set()
 
@@ -18,19 +19,27 @@ _seen: set[str] = set()
 class QuotaState:
     remaining: int | None = None
     reset_s: float | None = None
+    limit_rpm: float | None = None  # the key's sustained rate, when a limit header says it
     observed_at: float = 0.0
+
+    def pause_s(self) -> float:
+        """How long after the observation the background lane waits. The platform sends no reset
+        header (DECISIONS 2026-11-09), so without one this is the time the token bucket needs to
+        refill above LOW_WATERMARK at the key's rate (audit OPT-06)."""
+        if self.remaining is None or self.remaining > LOW_WATERMARK:
+            return 0.0
+        if self.reset_s is not None:
+            return self.reset_s
+        rpm = self.limit_rpm or DEFAULT_LIMIT_RPM
+        return (LOW_WATERMARK + 1 - self.remaining) * 60 / rpm
 
     @property
     def low(self) -> bool:
-        if self.remaining is None or self.remaining > LOW_WATERMARK:
-            return False
         # Stale observations stop pausing once the bucket has had time to refill.
-        return self.reset_s is None or time.monotonic() < self.observed_at + self.reset_s
+        return time.monotonic() < self.observed_at + self.pause_s()
 
     def resume_in_s(self) -> float:
-        if not self.low or self.reset_s is None:
-            return 0.0
-        return max(0.0, self.observed_at + self.reset_s - time.monotonic())
+        return max(0.0, self.observed_at + self.pause_s() - time.monotonic())
 
 
 def _number(v: str) -> float | None:
@@ -59,6 +68,8 @@ def parse(headers: dict[str, str]) -> QuotaState | None:
         if "remaining" in kl and ("request" in kl or "token" not in kl):
             state.remaining = int(n)
             found = True
+        elif "limit" in kl and ("request" in kl or "rpm" in kl) and "token" not in kl:
+            state.limit_rpm = n  # x-ratelimit-api_key-limit-requests, x-litellm-key-rpm-limit
         elif "reset" in kl:
             state.reset_s = n / 1000 if kl.endswith("ms") else n
             found = True

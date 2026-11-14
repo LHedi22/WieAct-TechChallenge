@@ -53,7 +53,7 @@ never 10 calls. Batch chunk-tagging several chunks per call.
 ## Response & error contract (official, stable for the whole challenge)
 | Situation | Service response | Required handling | Our gateway | User sees |
 | --- | --- | --- | --- | --- |
-| Normal | `200` + quota headers | read remaining quota, pace requests | parse headers → `QuotaState`; when low, pause background lane | nothing |
+| Normal | `200` + quota headers | read remaining quota, pace requests | parse headers → `QuotaState`; at ≤ 3 requests left, pause the background lane for the refill time, (4 − remaining) × 60 ÷ the limit header's rpm (no reset header is sent) | nothing |
 | Team quota exhausted | "team quota exhausted" + delay | wait the stated delay, retry | requeue with `not_before = now + delay`; expose queue position/ETA | "High demand, your quiz is in line (about N s)" + cached content |
 | Model class saturated | `503` + `Retry-After` | retry at intervals **or** fall back to compact | interactive: one retry then compact fallback (`quick_mode=true`); background: retry later | "Quick mode" badge |
 | Request beyond a ceiling | `400`, message names the ceiling | fix the request | parse message → reduce `max_tokens` / chunks / history, or split; resend once | nothing, or shorter answer |
