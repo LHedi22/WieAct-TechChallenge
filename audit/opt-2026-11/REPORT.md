@@ -162,7 +162,7 @@ Ranked by (score gain × confidence) ÷ effort. Effort: S ≤ 1 h, M ≤ ½ day,
 | OPT-28 | auth | S3 | `api/deps.py:21` ASCII only; uniqueness case-sensitive (F-SEC-6) | code | code | casefold uniqueness; explain the rule | S |
 | OPT-29 | CI | S3 | `tests/db.py:23-31` timeout 2 s + `conftest.py:86` skip (F-TEST-1); today 0 skipped | code | code | Fail instead of skip when `CI=true` | S |
 | OPT-30 | tooling | S2 | `scripts/load.py:38` reads `provider=mock`, needs `/_mock` and `/api/dev/demo-jobs` (F-LOAD-1) | code | code | Blocks the "load test against cloud" box; use a real-feature script (like `logs/scripts/same_chapter.py`) with `--provider` | S |
-| OPT-31 · **fixed** `eadfebc; partly, see §12` | economy | S3 | `economy.py:27` `creator_new_member` never used; no badge code; `en.json:153` "between 1 and 50 coins" hard-coded | code | code | Cut or implement; read the 50 from `/api/economy` | S |
+| OPT-31 · **fixed** `eadfebc, 7a2f27c` | economy | S3 | `economy.py:27` `creator_new_member` never used; no badge code; `en.json:153` "between 1 and 50 coins" hard-coded | code | code | Cut or implement; read the 50 from `/api/economy` | S |
 | OPT-32 | deploy | S1 (if the demo is on the deployed site) | `frontend/vercel.json:8` still `REPLACE-WITH-RAILWAY-DOMAIN` | code | code | Can't tell whether a deploy exists outside the repo; confirm before the pitch | S |
 | OPT-33 | flaky test | S3 | `logs/02-frontend-verify.log` 1 failed / 93; 3 re-runs 93/93 | measured | mock | Find the flaky spec (name not captured in the tail) | S |
 
@@ -383,7 +383,7 @@ Each fix has a test that failed on the code before it. The §4 rows carry the co
 | OPT-27 answer only the current question | fixed | `5e3dcde` |
 | OPT-26 NUL characters in free text | fixed | `c622fd9` |
 | OPT-31 hard-coded "1 and 50" pool limit | fixed | `eadfebc` |
-| OPT-31 `creator_new_member` never paid, no badge code | **parked**: product/coins decision (implement or cut) | — |
+| OPT-31 `creator_new_member` never paid, no badge code | fixed: both cut (team decision 14 Nov) | `7a2f27c` |
 
 Re-measured on a fresh cc-opt stack (`down -v` of cc-opt only, then `python -m app.seed`), with the
 same commands as §7. Logs are in `audit/opt-2026-11/after/`.
