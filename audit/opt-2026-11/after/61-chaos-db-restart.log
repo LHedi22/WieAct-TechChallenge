@@ -1,0 +1,48 @@
+generate 200 {'job_id': '13107e0d-d684-4f59-a659-102f289136ec', 'cost': 15, 'cached': False}
+cc-opt-db-1
+{
+ "action": "db",
+ "job_cost": 15,
+ "states": [
+  [
+   0,
+   "http 503"
+  ],
+  [
+   2,
+   "running",
+   "writing_notes",
+   null,
+   null
+  ],
+  [
+   14,
+   "running",
+   "making_flashcards",
+   null,
+   null
+  ],
+  [
+   16,
+   "running",
+   "drawing_map",
+   null,
+   null
+  ],
+  [
+   18,
+   "done",
+   "drawing_map",
+   null,
+   null
+  ]
+ ],
+ "secs_after_fault": 19,
+ "coins_before_start": 70,
+ "coins_after": 55,
+ "worker": "running restarts=0"
+}
+2026-11-14 14:31:45,582 worker database unavailable (DBAPIError); retrying in 1s
+2026-11-14 14:31:46,660 worker database back after 1s
+2026-11-14 14:31:48,947 worker heartbeat connection lost (InterfaceError); retrying
+   1 Unavailable INFO:     172.66.168.209:24319 - "GET /api/jobs/13107e0d-d684-4f59-a659-102f289136ec HTTP/1.1" 503 Service Unavailable

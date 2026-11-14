@@ -132,7 +132,7 @@ Ranked by (score gain × confidence) ÷ effort. Effort: S ≤ 1 h, M ≤ ½ day,
 
 | ID | Area | Sev | Evidence | Measured / inferred | Source | Recommendation | Effort |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| OPT-01 | jobs/cache | S1 | `logs/32-same-chapter-10.log`, `32-same-chapter-db.txt`; `studio/service.py:95-111` | measured | mock + code | §3 | S–M |
+| OPT-01 · **fixed** `65ebdbb` | jobs/cache | S1 | `logs/32-same-chapter-10.log`, `32-same-chapter-db.txt`; `studio/service.py:95-111` | measured | mock + code | §3 | S–M |
 | OPT-02 | RAG | S1 | `quiz/pool.py:78-95,157-182`; `logs/40-stacks-chunks-mock.txt`; N-6 | measured (chunk pick) + inferred (output) | mock + code + local | §3 | S |
 | OPT-03 | demo | S1 | STATUS.md §2 unticked; no `cloud-*` eval outputs; no stats export in `docs/report/` | inferred | code/docs | §3, §9 | M |
 | OPT-04 | limiter | S2 | `limiter.py:28`; logger max 21/60 s | measured | mock | §3 | S |
@@ -141,9 +141,9 @@ Ranked by (score gain × confidence) ÷ effort. Effort: S ≤ 1 h, M ≤ ½ day,
 | OPT-07 | moderation | S2 | N-4 artifacts | measured | local | §3 | S |
 | OPT-08 | orchestration | S3 | `router.py:19-39` | code | code | §3 | S |
 | OPT-09 | orchestration | S2 | `router.py:31`; §6 | inferred | code | §3 | S |
-| OPT-10 | UX | S2 | `jobs/service.py:94-137`; ETA 1–8 s vs 19–60 s | measured | mock | §3 | S |
+| OPT-10 · **fixed** `fb7a94e, a134f8c, f1d8ed4` | UX | S2 | `jobs/service.py:94-137`; ETA 1–8 s vs 19–60 s | measured | mock | §3 | S |
 | OPT-11 | language | S2 | N-5 artifacts; `_voice_rules.md:8` example «النهاية (limite)» copied into unrelated outputs | measured | local | Per chapter × language glossary from CHUNK_TAG concepts via the unused TRANSLATE_SHORT (1 compact call per chapter per language, cached), injected into notes/audio/tutor/grade prompts; replace the copied example with a placeholder | M |
-| OPT-12 | worker | S2 | `logs/61-chaos-db-restart.log`: worker survived, job `failed errors.job_interrupted` after 83 s (refunded); `Worker.execute()` raised `DBAPIError` uncaught; API 500 during the restart. AUDIT 6 Nov said "pack finished" | measured | mock | Retry the job's DB writes with the same backoff the loop uses, or requeue instead of failing on a DB error inside `execute` | S–M |
+| OPT-12 · **fixed** `f3fc431, 0c66103` | worker | S2 | `logs/61-chaos-db-restart.log`: worker survived, job `failed errors.job_interrupted` after 83 s (refunded); `Worker.execute()` raised `DBAPIError` uncaught; API 500 during the restart. AUDIT 6 Nov said "pack finished" | measured | mock | Retry the job's DB writes with the same backoff the loop uses, or requeue instead of failing on a DB error inside `execute` | S–M |
 | OPT-13 | latency | S2 | mid `llama3.1-8b` 13.4 tok/s; 373 tokens in 23.6 s (probe). Local notes 370–510 tokens (`logs/11-local-output-sizes.txt`). Interactive mid budget 45 s (`config.py:89`) | inferred | platform-log + local | A first study pack/audio on the platform may often time out into Quick mode (≈ 30–40 s of generation plus prefill of a ~3k-token context on CPU). Measure in-slot; if so, generate packs for the demo chapters on the background lane at upload (precompute) or raise the budget only for NOTES/AUDIO | S (+ slot) |
 | OPT-14 | verifier | S2 | `quiz/pool.py:250-276`: < 5 kept → regenerate + re-verify. Local verifier kept 5 of 19 (AUDIT 6 Nov) | inferred | code + local | A first quiz on real models is likely 2 compact + 2 mid, not "1 + 1" (the .tex says 1 + 1). Ask the verifier for a 1-line worked step before its answer (0 extra calls, +~150 tokens), and generate 12 questions so 5+ survive more often | S |
 | OPT-15 | verifier quality | S2 | AUDIT residual 2: 3 of 5 kept items wrong (`local`) | measured | local | Same as OPT-14; also drop items where the verifier is "sure" but the explanation contradicts the key (server check) | S |
@@ -157,12 +157,12 @@ Ranked by (score gain × confidence) ÷ effort. Effort: S ≤ 1 h, M ≤ ½ day,
 | OPT-23 | DB | info | `logs/45-explain-hot-queries.txt`: job by id, queue position, avg latency, ai_cache, leaderboard all < 0.1 ms (index scans; small tables) | measured | mock | None | — |
 | OPT-24 | a11y | S2 | `logs/50-axe-summary.txt`: color-contrast 181 nodes / 14 screens (top: `bg-olive-light/30` ×60, `bg-terracotta-light/25|30` ×52); Tutor `list` 8 nodes; no commit to `design/tokens.json` since | measured (old scans) | mock | Opaque tints / darker ink in tokens (F-A11Y-1); `li` markup in the Tutor (F-A11Y-2) | S |
 | OPT-25 | security | S3 | `main.py:35` `openapi_url="/openapi.json"` always (F-SEC-3) | code | code | `None` in production | S |
-| OPT-26 | API | S3 | No NUL stripping in `backend/app` (F-API-1) | code | code | Strip `\x00` in free-text input models | S |
-| OPT-27 | quiz | S3 | `quiz/service.py:245-266` accepts any `i` (F-QUIZ-1) | code | code | Enforce `i == attempt.current` (or pending) | S |
+| OPT-26 · **fixed** `c622fd9` | API | S3 | No NUL stripping in `backend/app` (F-API-1) | code | code | Strip `\x00` in free-text input models | S |
+| OPT-27 · **fixed** `5e3dcde` | quiz | S3 | `quiz/service.py:245-266` accepts any `i` (F-QUIZ-1) | code | code | Enforce `i == attempt.current` (or pending) | S |
 | OPT-28 | auth | S3 | `api/deps.py:21` ASCII only; uniqueness case-sensitive (F-SEC-6) | code | code | casefold uniqueness; explain the rule | S |
 | OPT-29 | CI | S3 | `tests/db.py:23-31` timeout 2 s + `conftest.py:86` skip (F-TEST-1); today 0 skipped | code | code | Fail instead of skip when `CI=true` | S |
 | OPT-30 | tooling | S2 | `scripts/load.py:38` reads `provider=mock`, needs `/_mock` and `/api/dev/demo-jobs` (F-LOAD-1) | code | code | Blocks the "load test against cloud" box; use a real-feature script (like `logs/scripts/same_chapter.py`) with `--provider` | S |
-| OPT-31 | economy | S3 | `economy.py:27` `creator_new_member` never used; no badge code; `en.json:153` "between 1 and 50 coins" hard-coded | code | code | Cut or implement; read the 50 from `/api/economy` | S |
+| OPT-31 · **fixed** `eadfebc; partly, see §12` | economy | S3 | `economy.py:27` `creator_new_member` never used; no badge code; `en.json:153` "between 1 and 50 coins" hard-coded | code | code | Cut or implement; read the 50 from `/api/economy` | S |
 | OPT-32 | deploy | S1 (if the demo is on the deployed site) | `frontend/vercel.json:8` still `REPLACE-WITH-RAILWAY-DOMAIN` | code | code | Can't tell whether a deploy exists outside the repo; confirm before the pitch | S |
 | OPT-33 | flaky test | S3 | `logs/02-frontend-verify.log` 1 failed / 93; 3 re-runs 93/93 | measured | mock | Find the flaky spec (name not captured in the tail) | S |
 
@@ -368,6 +368,34 @@ Request counts come from `code` and SLOT_CHECKLIST (`local` measurements). They 
 | 8 | How good is the Darija? | The UI is fully translated but not yet reviewed by native speakers. The local model often answered in MSA; we're adding a chapter glossary and Darija examples. | N-5; OPT-11 |
 | 9 | What if the server crashes mid-job? | The job's lease expires, it fails with a clear message, and the coins are refunded once. Measured: 63 s after a worker kill. A database restart doesn't kill the worker. | `logs/60-*`, `61-*`; `tests/test_job_lease.py` |
 | 10 | Did real students use it? | Not yet: the planned 10-student test needed a platform slot. Everything so far is automated journeys in 4 languages × 4 browsers and synthetic students. | STATUS.md §2; AUDIT errata (16/16) |
+
+## 12. Fixes on `fix/opt-audit-prefetch` (2026-11-14, all `mock`)
+
+Each fix has a test that failed on the code before it. The §4 rows carry the commit hashes.
+
+### Group A: jobs and coins
+
+| Finding | Status | Commits |
+| --- | --- | --- |
+| OPT-01 one job per shared class asset | fixed | `65ebdbb` |
+| OPT-12 ride out a Postgres outage | fixed | `f3fc431`, `0c66103` |
+| OPT-10 ETA from real job durations | fixed | `fb7a94e`, `5a275fb`, `a134f8c`, `f1d8ed4` |
+| OPT-27 answer only the current question | fixed | `5e3dcde` |
+| OPT-26 NUL characters in free text | fixed | `c622fd9` |
+| OPT-31 hard-coded "1 and 50" pool limit | fixed | `eadfebc` |
+| OPT-31 `creator_new_member` never paid, no badge code | **parked**: product/coins decision (implement or cut) | — |
+
+Re-measured on a fresh cc-opt stack (`down -v` of cc-opt only, then `python -m app.seed`), with the
+same commands as §7. Logs are in `audit/opt-2026-11/after/`.
+
+| Run (`mock`) | Before (`logs/`) | After (`after/`) |
+| --- | --- | --- |
+| 10 students, same chapter: study pack | **10 jobs, 10 × 15 coins**, NOTES 7 · MAP 6 · FLASHCARDS 6, repeated_identical +15, wait p50 24.8 s / p95 59.8 s | **1 job, 1 × 15 coins** (9 join free), NOTES 1 · MAP 1 · FLASHCARDS 1, repeated_identical +0, wait p50 15.9 s / p95 15.9 s (`32-*`) |
+| 10 students, same chapter: quiz | **10 jobs × 5 coins**, 1 QUIZ_GENERATE + **7 QUIZ_VERIFY**, repeated +4, wait p50 18.8 s / p95 34.0 s | **1 job, 1 × 5 coins**, 1 QUIZ_GENERATE + **1 QUIZ_VERIFY**, repeated +0, wait p50 11.0 s / p95 11.0 s (`32-*`) |
+| 10 students, same chapter: Tutor start | 10 × 402 (wallets emptied by the 15 + 5 charges) | 9 × 200 + 1 × 402 (only the student who paid both is short); `33-*` with fresh students: 10 × 200, 0 calls, p50 1.6 s |
+| First ETA shown vs real wait | studio 1–5 s for p50 24.8 s; quiz 2–8 s for p50 18.8 s | studio **15 s for 17.3 s**, quiz **10 s for 9.3 s** (`32c-*`, once the kind has history). A first-ever study pack showed 4 s for 15.9 s before `a134f8c` |
+| Logger over the same-chapter runs | — | 20 chat calls, max in flight 2, max 7 in a 60 s window, 0 repeated identical bodies |
+| Postgres restart mid study pack | job **failed** `errors.job_interrupted` after 83 s (refunded); one poll got **500** | job **done** 18 s after the restart, charged 15 once; worker logged "database back after 1s"; the poll during the restart got **503** (`61-*`) |
 
 ## Logs index (`audit/opt-2026-11/logs/`)
 
