@@ -543,7 +543,18 @@ def _audio(user: str, lang: str, system: str = "") -> dict[str, Any]:
     return {"title": title, "segments": segments}
 
 
+GLOSSARY_SAY = {"fr": "{t} (fr)", "ar": "مصطلح {t}", "ar-TN": "كلمة {t}", "en": "{t}"}
+
+
+def _glossary(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    """TRANSLATE_SHORT for the chapter glossary: every listed term with a marked rendering."""
+    terms = re.findall(r"^- (.+)$", user.split("TERMS:", 1)[-1], re.MULTILINE)
+    say = GLOSSARY_SAY.get(lang, "{t}")
+    return {"terms": [{"term": t.strip(), "say": say.format(t=t.strip())} for t in terms]}
+
+
 GENERATORS = {
+    "TRANSLATE_SHORT": _glossary,
     "MODERATE_POST": _moderate,
     "TEACHBACK_GRADE": _teachback,
     "TUTOR_TURN": _tutor,

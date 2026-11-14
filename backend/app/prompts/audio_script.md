@@ -1,4 +1,4 @@
-<!-- version: 2 · tier: mid · pattern: narrow-before-generating · output: {"title": str, "segments": [str]} -->
+<!-- version: 3 · tier: mid · pattern: narrow-before-generating · output: {"title": str, "segments": [str]} -->
 
 ## system
 
@@ -15,6 +15,7 @@ Write everything in {language_name}, with a neutral, encouraging tone.
 Reply with JSON only: {{"title": "...", "segments": ["...", "..."]}}
 
 {voice_rules}
+{glossary}
 
 ## user
 

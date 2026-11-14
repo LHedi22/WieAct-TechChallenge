@@ -41,6 +41,7 @@ from app.core import db, economy
 from app.core.config import get_settings
 from app.features.arena import injection, prefilter
 from app.features.daily import service as daily
+from app.features.glossary import service as glossary
 from app.features.wallet import service as wallet
 from app.gateway import Task, TaskKind
 from app.jobs.registry import JobContext, job
@@ -450,6 +451,8 @@ async def grade(
     await ctx.set_stage("reading_chapter")
     context = await _context(world_id, chapter.id, f"{prompt} {text}"[:500])
     values = _values(mode, language, course.name, chapter.title, context, prompt, text)
+    # kept in `values`, so a later background review sees the same glossary
+    values["glossary"] = await glossary.for_chapter(chapter.id, language, "interactive")
     await ctx.set_stage("scoring_answer")
     version, messages = prompts.render("teachback_grade", **values)
     result = ctx.note(

@@ -66,6 +66,7 @@ def render(name: str, **values: Any) -> tuple[str, list[dict[str, str]]]:
         values.setdefault("language_name", LANGUAGE_NAMES.get(values["language"], "English"))
     values.setdefault("voice_rules", voice_rules())
     values.setdefault("teachback_rubric", fragment("teachback_rubric"))
+    values.setdefault("glossary", "")  # features/glossary (audit OPT-11); empty when not needed
     messages = [
         {"role": role, "content": sections[role].format(**values)}
         for role in ("system", "user")

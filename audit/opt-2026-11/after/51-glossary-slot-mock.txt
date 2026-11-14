@@ -1,0 +1,20 @@
+# OPT-11 glossary on the cc-opt mock, 2026-11-14 (python -m app.evals slot --langs en,fr,ar,ar-TN --level beginner --regrade)
+wisdom: done
+done in 94s → /app/tests/evals/slot/outputs
+this run: calls 35, compact 14, mid 13, cache hits 15, repeated identical 6, fallbacks 1, refusals 3
+
+# TRANSLATE_SHORT calls in that run (ts | job | language | cache_hit | single_flight | tokens_out)
+15:55:58|STUDY_PACK|ar-TN|f|f|132
+15:55:59|AUDIO_EPISODE|ar|f|f|135
+15:55:59|STUDY_PACK|ar|t|t|0
+15:56:02|AUDIO_EPISODE|ar-TN|t|f|0
+15:56:20|STUDY_PACK|fr|f|f|132
+15:56:20|AUDIO_EPISODE|fr|t|t|0
+15:56:20|ARENA_SOLO|ar-TN|t|f|0
+15:56:23|ARENA_SOLO|ar|t|f|0
+15:56:34|ARENA_SOLO|fr|t|f|0
+15:56:42|ARENA_SOLO|ar|t|f|0
+15:56:43|ARENA_SOLO|ar-TN|t|f|0
+15:56:52|ARENA_SOLO|fr|t|f|0
+
+# Repeated identical requests in the window: MAP_WRITE ×3 come from the mock writing the same notes at every level (the map prompt is byte-identical between advanced and beginner). The TRANSLATE_SHORT repeats pair an earlier run on the stale mock image, which had no TRANSLATE_SHORT generator, with the first valid call; that run also used a forget step that has since been removed. None of this is a repeat within the current code.

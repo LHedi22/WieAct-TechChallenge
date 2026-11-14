@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import gateway, prompts
 from app.core import db, economy
+from app.features.glossary import service as glossary
 from app.features.pool import service as pool
 from app.features.quiz.pool import chapter_context
 from app.features.quiz.service import LEVELS
@@ -125,6 +126,7 @@ async def audio_episode(ctx: JobContext) -> dict[str, Any]:
         course=course.name,
         chapter=chapter.title,
         context="\n\n".join(f"[{c.page_ref}] {c.text}" for c in rows),
+        glossary=await glossary.for_chapter(chapter_id, language, ctx.lane),
     )
     result = ctx.note(
         await gateway.run(

@@ -20,6 +20,7 @@ from sqlalchemy.dialects.postgresql import insert
 from app import gateway, prompts
 from app.core import db
 from app.core.provenance import replaces, servable
+from app.features.glossary import service as glossary
 from app.features.quiz.pool import chapter_context
 from app.gateway import BadOutput, Task, TaskKind
 from app.jobs.registry import JobContext, job
@@ -247,6 +248,7 @@ async def _notes(ctx, chapter, course, level, language) -> dict[str, Any]:
         course=course.name,
         chapter=chapter.title,
         context=context,
+        glossary=await glossary.for_chapter(chapter.id, language, ctx.lane),
     )
     key = _key(ctx, chapter, level, language, "notes")
     result = ctx.note(

@@ -24,6 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app import gateway, prompts
 from app.core import db, economy
 from app.features.daily import service as daily
+from app.features.glossary import service as glossary
 from app.features.wallet import service as wallet
 from app.gateway import Task, TaskKind
 from app.jobs.registry import JobContext, job
@@ -331,6 +332,7 @@ async def tutor_step(ctx: JobContext) -> dict[str, Any]:
             course=course.name,
             chapter=chapter.title,
             context=context,
+            glossary=await glossary.for_chapter(chapter.id, lang, "interactive"),
         )
         await ctx.set_stage("thinking")
         result = ctx.note(
@@ -376,6 +378,7 @@ async def tutor_step(ctx: JobContext) -> dict[str, Any]:
         goal=session.goal or chapter.title,
         ideas=ideas or "-",
         context=context,
+        glossary=await glossary.for_chapter(chapter.id, lang, "interactive"),  # cached
         history=_history(session.turns[:-1]),
         action=action,
         message=message or f"({action})",
