@@ -16,9 +16,16 @@ from app.models import Job, QuizAttempt
 router = APIRouter(prefix="/api/quiz", tags=["quiz"])
 
 
+class Preparing(BaseModel):
+    job_id: uuid.UUID
+    eta_s: int
+
+
 class Price(BaseModel):
     cost: int
     cached: bool
+    # A background job (prefetch) is making it: free, and "Get it now" moves it up (Group E).
+    preparing: Preparing | None = None
 
 
 class QuizStartIn(BaseModel):

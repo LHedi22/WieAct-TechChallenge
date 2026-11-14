@@ -18,6 +18,7 @@ from app.core.provenance import servable
 from app.features.daily import service as daily
 from app.features.quiz import pool
 from app.features.wallet import service as wallet
+from app.jobs import prefetch
 from app.jobs.service import create_job, create_or_join_shared_job
 from app.models import (
     Chapter,
@@ -66,6 +67,10 @@ async def price(s, user, chapter_id, level, language) -> dict[str, Any]:
     """What Confirm will cost, told to the UI before the student confirms (ECONOMY.md)."""
     if await unseen_set(s, user, chapter_id, level, language):
         return {"cost": economy.COST["cached_content"], "cached": True}
+    if pending := await pool.pending_generation(s, chapter_id, level, language):
+        # joining a classmate's or a prefetch's generation is free (OPT-01, Group E)
+        preparing = await prefetch.preparing(s, pending)
+        return {"cost": economy.COST["cached_content"], "cached": False, "preparing": preparing}
     return {"cost": economy.COST["quiz"], "cached": False}
 
 
@@ -373,6 +378,8 @@ async def finish(s: AsyncSession, user: User, attempt: QuizAttempt) -> Results:
     else:
         mastery = mastery_row.mastery if mastery_row else pct
     await s.commit()
+    if first_finish:
+        await prefetch.safely(s, user, chapter, attempt.level)  # the next chapter, in background
 
     missed = []
     right: list[str] = []

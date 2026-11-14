@@ -62,7 +62,7 @@ async def test_one_pack_costs_one_mid_and_two_compact_calls_then_is_free(api, sm
     refs = {r for sec in after["notes"]["sections"] for r in sec["refs"]}
     assert refs and all(r.startswith("slide:") for r in refs)  # only refs we sent
     price = await api.get(f"/api/studio/{chapter}/price", params=LEVEL, headers=SEA)
-    assert price.json() == {"cost": 0, "cached": True}
+    assert price.json() == {"cost": 0, "cached": True, "preparing": None}
     again = (await generate(api, chapter, SEA)).json()
     assert again == {"job_id": None, "cost": 0, "cached": True}
     assert await calls(sm, "NOTES_WRITE") == 1  # nothing generated twice

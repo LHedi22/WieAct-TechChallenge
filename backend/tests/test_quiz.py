@@ -51,7 +51,7 @@ async def test_unseen_shared_set_is_free_and_needs_no_ai_call(api, sm, pptx):  #
             headers=OWL_FR,
         )
     ).json()
-    assert price == {"cost": 0, "cached": True}
+    assert price == {"cost": 0, "cached": True, "preparing": None}
     r = await api.post(
         "/api/quiz/start", json={"chapter_id": chapter, "level": "intermediate"}, headers=OWL_FR
     )
@@ -71,7 +71,7 @@ async def test_all_seen_generates_a_new_set_as_a_job(api, sm, pptx):  # noqa: F8
     assert again["attempt_id"] == first["attempt_id"]  # unfinished: resumed, no new set used
     await api.post(f"/api/quiz/attempts/{first['attempt_id']}/finish", headers=OWL_FR)
     price = (await api.get("/api/quiz/price", params=body, headers=OWL_FR)).json()
-    assert price == {"cost": economy.COST["quiz"], "cached": False}
+    assert price == {"cost": economy.COST["quiz"], "cached": False, "preparing": None}
     start = (await api.post("/api/quiz/start", json=body, headers=OWL_FR)).json()
     assert start["job_id"] and start["attempt_id"] is None and start["cost"] == 5
     await Worker(sm).drain(timeout_s=60)

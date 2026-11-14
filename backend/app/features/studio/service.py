@@ -17,7 +17,8 @@ from app.features.pool import service as pool
 from app.features.quiz.service import LEVELS
 from app.features.studio import pack, srs
 from app.features.worlds.service import NotFound, member_chapter
-from app.jobs.service import create_or_join_shared_job, share_key
+from app.jobs import prefetch
+from app.jobs.service import create_or_join_shared_job, promote, share_key
 from app.models import (
     Chapter,
     Course,
@@ -49,9 +50,15 @@ async def price(s: AsyncSession, chapter_id: uuid.UUID, level: str, language: st
     """What Confirm will cost (DESIGN.md: "Free" when the class already has the pack). Filling a
     part that failed earlier is free too: the class already paid for the pack."""
     missing = await pack.missing(s, chapter_id, level, language)
-    if "notes" not in missing or await pack.pending_generation(s, chapter_id, level, language):
-        # also free: the full version of a Quick-mode copy (the class already paid for the pack)
-        return {"cost": economy.COST["cached_content"], "cached": not missing}
+    pending = await pack.pending_generation(s, chapter_id, level, language)
+    if "notes" not in missing or pending:
+        # also free: the full version of a Quick-mode copy (the class already paid for the pack),
+        # and joining a classmate's or a prefetch's job (Group E)
+        return {
+            "cost": economy.COST["cached_content"],
+            "cached": not missing,
+            "preparing": await prefetch.preparing(s, pending),
+        }
     return {"cost": economy.COST["generate_shared_asset"], "cached": False}
 
 
@@ -63,6 +70,7 @@ async def status(s: AsyncSession, user: User, chapter: Chapter, level: str) -> d
     _check_level(level)
     language = user.ui_language
     course = await s.get(Course, chapter.course_id)
+    await prefetch.safely(s, user, chapter, level)  # the next chapter, in background
     found = await pack.assets(s, chapter.id, level, language)
     counts = (await queue(s, user, chapter, level))["counts"]
     return {
@@ -94,6 +102,7 @@ async def generate(
         return {"job_id": None, "cost": 0, "cached": True}
     job_id = await pack.pending_generation(s, chapter.id, level, language)
     if job_id:
+        await promote(s, job_id)  # a queued prefetch: the student needs it now (Group E)
         return {"job_id": job_id, "cost": 0, "cached": False}
     course = await s.get(Course, chapter.course_id)
     cost = economy.COST["generate_shared_asset"] if "notes" in missing else 0

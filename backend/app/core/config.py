@@ -97,6 +97,8 @@ class Settings(BaseSettings):
     LLM_MAX_CONCURRENCY: int = 2
     # Call slots kept for students: background calls use at most concurrency - this (min 1).
     LLM_INTERACTIVE_RESERVED: int = 1
+    # Queue the next chapter's quiz set and study pack in the background (app/jobs/prefetch.py).
+    PREFETCH_ENABLED: bool = True
     # Embeddings are metered separately (own quota); they share the per-key concurrency limit
     LLM_EMBED_MAX_RPM: int = 18
     LLM_SLOT_GROUP: Literal["A", "B"] = "A"
