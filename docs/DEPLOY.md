@@ -95,8 +95,10 @@ while the key is live (`python3 scripts/slot.py`):
 1. Railway service → **Shell**: `uv run python -m app.seed` (the demo world `OLIVE-7Q2`; the
    worker indexes the files and writes the class quiz sets).
 2. When indexing is done, run `uv run python -m app.seed` again (the Class Wisdom tip).
-3. In the browser, as a demo student in EN and in AR: placement for both courses, one Study
-   Studio pack and one Audio episode per course, one Tutor session, and one Teach-Back answer.
+3. In the browser: placement for both courses in **all 4 languages** (EN, FR, AR, Darija: offline
+   placement opens only from this cache, audit F-OFF-2); as a demo student in EN and in AR, one
+   Study Studio pack and one Audio episode per course, one Tutor session, and one Teach-Back
+   answer. The full in-order list with request counts is `docs/report/JURY_SLOT_RUNBOOK.md`.
 4. `/api/admin/stats` (with `X-Admin-Token`) → note the compact/mid split, cache hits and
    repeated identical requests (should be 0) for the report.
 
