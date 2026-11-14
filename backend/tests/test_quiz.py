@@ -195,3 +195,27 @@ async def test_eval_script_writes_outputs_with_checks(api, sm, pptx, tmp_path): 
         assert report["checks_passed"]["valid"] == 20
         assert report["checks_passed"]["language_script"] == 20
         assert report["questions"][0]["review"] == {"correct": None, "notes": ""}
+
+
+async def test_questions_are_answered_in_order(api, sm, pptx):  # noqa: F811
+    """Audit OPT-27 (F-QUIZ-1): any `q` was accepted, so a client could answer or skip question 9
+    while question 0 was still on screen (e.g. collect hints out of order)."""
+    _, chapter = await indexed(api, sm, pptx)
+    start = (
+        await api.post(
+            "/api/quiz/start", json={"chapter_id": chapter, "level": "intermediate"}, headers=OWL_FR
+        )
+    ).json()
+    aid = start["attempt_id"]
+    right = await answers_of(sm)
+
+    def post(path, body):
+        return api.post(f"/api/quiz/attempts/{aid}/{path}", json=body, headers=OWL_FR)
+
+    for path, body in (("answer", {"q": 3, "choice": right[3]}), ("skip", {"q": 9})):
+        r = await post(path, body)
+        assert r.status_code == 409 and r.json()["detail"] == "errors.quiz_question_invalid"
+    assert (await post("answer", {"q": 0, "choice": right[0]})).status_code == 200
+    assert (await post("skip", {"q": 1})).status_code == 200  # the next one is now current
+    resumed = (await api.get(f"/api/quiz/attempts/{aid}", headers=OWL_FR)).json()
+    assert resumed["current"] == 2 and resumed["points"] == 10

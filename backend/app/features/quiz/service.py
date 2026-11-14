@@ -234,6 +234,12 @@ async def _load(s: AsyncSession, attempt: QuizAttempt, i: int) -> tuple[dict, di
     return qs.questions[i], answers[i], answers
 
 
+def _check_current(attempt: QuizAttempt, i: int) -> None:
+    # One question at a time, in order (audit OPT-27): the UI only ever sends the current one.
+    if i != attempt.current:
+        raise Rejected("errors.quiz_question_invalid", 409)
+
+
 def _advance(attempt: QuizAttempt, answers: list[dict]) -> None:
     attempt.answers = answers  # reassign: JSONB changes are tracked per attribute
     pending = [k for k, a in enumerate(answers) if a["status"] not in DONE]
@@ -246,6 +252,7 @@ async def answer(s: AsyncSession, attempt: QuizAttempt, i: int, choice: int) -> 
         raise Rejected("errors.quiz_choice_invalid")
     if a["status"] in DONE:
         raise Rejected("errors.quiz_question_done", 409)
+    _check_current(attempt, i)
     right = choice == q["answer_index"]
     if a["status"] == "pending":
         a["first"] = choice
@@ -274,6 +281,7 @@ async def skip(s: AsyncSession, attempt: QuizAttempt, i: int) -> QuestionView:
     q, a, answers = await _load(s, attempt, i)
     if a["status"] in DONE:
         raise Rejected("errors.quiz_question_done", 409)
+    _check_current(attempt, i)
     a["status"] = "skipped"
     answers[i] = a
     _advance(attempt, answers)
