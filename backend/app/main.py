@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 
 from app import admin
 from app.api import dev, economy, health, jobs, system
+from app.api.sanitize import StripNul
 from app.core import db, economy_live
 from app.core.config import get_settings
 from app.features.arena import router as arena
@@ -34,6 +35,7 @@ def create_app() -> FastAPI:
         docs_url="/api/docs" if settings.APP_ENV != "production" else None,
         openapi_url="/openapi.json",
     )
+    app.add_middleware(StripNul)  # NUL bytes never reach Postgres (audit OPT-26)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
