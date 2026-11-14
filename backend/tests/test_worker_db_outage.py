@@ -244,3 +244,39 @@ async def test_the_api_answers_503_with_retry_after_while_the_database_is_down(m
     monkeypatch.setattr(economy_live, "refresh", refresh_down)  # the middleware's own read
     r = await api.get("/api/jobs/00000000-0000-0000-0000-000000000000")
     assert r.status_code == 503 and r.headers["retry-after"] == "5"
+
+
+BROKEN_KIND = "TEST_DB_DATA_ERROR"
+
+
+@job(BROKEN_KIND, stages=("thinking",))
+async def _a_real_bug(ctx):
+    from sqlalchemy.exc import IntegrityError  # noqa: PLC0415
+
+    raise IntegrityError("INSERT …", {}, Exception("duplicate key value"))
+
+
+async def test_a_data_error_is_a_bug_not_an_outage(sm, quick_backoff):
+    """Only a lost connection is an outage: a constraint violation fails the job at once (and
+    refunds it) rather than being retried, and the API keeps answering it as a 500."""
+    from app.core import db  # noqa: PLC0415
+
+    u = await student(sm, "RealBug")
+    async with sm() as s:
+        j = await create_job(s, kind=BROKEN_KIND, lane="interactive", user_id=u.id, cost=8)
+    w = Worker(sm)
+    await w.execute(await w.claim("interactive"))
+    async with sm() as s:
+        fresh = await s.get(Job, j.id)
+    assert fresh.status == "failed" and fresh.error == "errors.ai_failed"
+    assert await coins_of(sm, u.id) == 20
+    assert db.is_outage(STARTING_UP) and db.is_outage(ConnectionRefusedError())
+    import asyncpg  # noqa: PLC0415
+
+    real = asyncpg.exceptions.CannotConnectNowError("the database system is starting up")
+    wrapped = Exception("asyncpg adapter error")
+    wrapped.__cause__ = real  # how SQLAlchemy's asyncpg adapter chains it (logs/61-*)
+    assert db.is_outage(DBAPIError("SELECT 1", {}, wrapped))
+    assert not db.is_outage(
+        DBAPIError("SELECT", {}, Exception("invalid byte sequence for encoding UTF8: 0x00"))
+    )

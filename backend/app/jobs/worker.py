@@ -33,7 +33,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core import economy_live, flags, slot
 from app.core.config import get_settings
-from app.core.db import DB_ERRORS
+from app.core.db import DB_ERRORS, is_outage
 from app.gateway import Defer, EmbeddingsDown, GatewayError, OfflineMode, trace
 from app.gateway.context import JobRef, current_job
 from app.gateway.providers import paused_until, resolve
@@ -341,10 +341,10 @@ class Worker:
             values = {"error": e.user_key}
             detail = f"{type(e).__name__}: {e}"
             log.warning("job %s failed: %s", job.id, type(e).__name__)
-        except DB_ERRORS as e:
-            # Postgres restarting (audit OPT-12): run it again shortly instead of failing it. The
-            # model calls it already made are in ai_cache (keys carry the job id), so none repeat.
-            if job.attempts < MAX_ATTEMPTS:
+        except Exception as e:
+            if is_outage(e) and job.attempts < MAX_ATTEMPTS:
+                # Postgres restarting (audit OPT-12): run it again shortly instead of failing it.
+                # Calls already made are in ai_cache (keys carry the job id), so none repeat.
                 status = "queued"
                 values = {
                     "not_before": datetime.now(UTC) + timedelta(seconds=DB_REQUEUE_S),
@@ -354,10 +354,7 @@ class Worker:
             else:
                 values = {"error": "errors.ai_failed"}
                 detail = f"{type(e).__name__}: {e}"
-        except Exception as e:
-            values = {"error": "errors.ai_failed"}
-            detail = f"{type(e).__name__}: {e}"
-            log.exception("job %s crashed", job.id)
+                log.exception("job %s crashed", job.id)
         finally:
             current_job.reset(token)
         try:
@@ -374,7 +371,7 @@ class Worker:
             try:
                 return await write()
             except DB_ERRORS as e:
-                if clock() - start >= DB_OUTAGE_LIMIT_S:
+                if not is_outage(e) or clock() - start >= DB_OUTAGE_LIMIT_S:
                     raise
                 wait = DB_RETRY_S[min(retries, len(DB_RETRY_S) - 1)]
                 retries += 1

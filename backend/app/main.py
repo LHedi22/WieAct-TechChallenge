@@ -56,7 +56,7 @@ def create_app() -> FastAPI:
         # Any paid start without enough coins: the UI opens the out-of-coins screen.
         return JSONResponse(status_code=402, content={"detail": e.key})
 
-    def _db_down(_: Request | None = None, __: Exception | None = None) -> JSONResponse:
+    def _db_down() -> JSONResponse:
         # Postgres restarting (audit OPT-12): ask the client to come back, never a 500.
         return JSONResponse(
             status_code=503,
@@ -64,8 +64,13 @@ def create_app() -> FastAPI:
             headers={"Retry-After": str(db.DB_RETRY_AFTER_S)},
         )
 
+    async def _db_error(_: Request, e: Exception) -> JSONResponse:
+        if not db.is_outage(e):
+            raise e  # a bug (constraint, bad data): stays a 500 with its traceback
+        return _db_down()
+
     for err in db.DB_ERRORS:
-        app.add_exception_handler(err, _db_down)
+        app.add_exception_handler(err, _db_error)
 
     @app.middleware("http")
     async def _live_economy(request: Request, call_next):
@@ -73,7 +78,9 @@ def create_app() -> FastAPI:
         if request.url.path.startswith("/api/"):
             try:
                 await economy_live.refresh(db.get_sessionmaker())
-            except db.DB_ERRORS:
+            except db.DB_ERRORS as e:
+                if not db.is_outage(e):
+                    raise
                 return _db_down()
         return await call_next(request)
 
