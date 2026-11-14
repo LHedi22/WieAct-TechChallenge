@@ -1,0 +1,33 @@
+create world 201 201 {'id': 'c0c9528d-366c-41d5-b647-1a9ed4b8760a', 'name': 'Bomb course', 'color_key': 'island-1', 'exam_date': None, 'chapters': [{'id': 'fa723041-0389-47b7-baa4-6b8287b53cde', 'idx': 1, 'title': 'Ch1', 
+upload 202 1015554 bytes {'document': {'id': 'd0036364-ab1f-4c8f-996e-8eb3a9e8f386', 'chapter_id': 'fa723041-0389-47b7-baa4-6b8287b53cde', 'filename': 'bomb.docx', 'kind': 'docx', 'size': 1015554, 'status': 'uploaded', 'progr
+{
+ "bomb_bytes": 1015554,
+ "upload_http": 202,
+ "tutor_states": [
+  [
+   0,
+   "queued",
+   null,
+   null,
+   null
+  ],
+  [
+   2,
+   "running",
+   "thinking",
+   null,
+   null
+  ],
+  [
+   4,
+   "done",
+   "thinking",
+   null,
+   null
+  ]
+ ],
+ "tutor_secs": 4,
+ "doc": "{'world_id': 'd9af9746-5f85-4551-8796-aef1940ad960', 'name': 'Bomb c9a6b', 'join_code': 'PALMS-KRX', 'percent': 100, 'eta_s': 0, 'done': True, 'chapters': [{'chapter_id': 'fa723041-0389-47b7-baa4-6b8287b53cde', 'course_id': 'c0c9528d-366c-41d5-b647-1a9ed4b8760a', 'course_name': 'Bomb course', 'idx': 1, 'title': 'Ch1', 'state': 'failed', 'documents': [{'id': 'd0036364-ab1f-4c8f-996e-8eb3a9e8f386', ",
+ "since_upload_s": 8
+}
+exit=0

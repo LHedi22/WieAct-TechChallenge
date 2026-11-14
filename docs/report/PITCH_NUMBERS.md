@@ -16,7 +16,7 @@ mock; the platform numbers come from the jury slot" is the honest answer.
 | --- | --- | --- |
 | Concurrency on the key | never more than 2 calls in flight, 30 jobs at once with 503 and quota faults | `mock` (audit §7) |
 | Faults handled | 30/30 jobs done; 16 × 503 and 7 quota refusals, all retried or requeued; no error reached a student | `mock` (audit §7) |
-| Interactive work first | interactive p50 25.6 s vs background 106.3 s with faults; 9.5 s vs 62.4 s without | `mock` (audit §7; the final re-measure in audit §12 replaces these) |
+| Interactive work first | interactive p50 23.9 s vs background 113.4 s with faults; 10.0 s vs 63.8 s without | `mock` (audit §12, final re-measure) |
 | Mid busy → still an answer | the forced-503 job always finishes in Quick mode (compact) | `mock` (`scripts/load.py`) |
 | One call for a whole quiz | 12 questions in one compact call, checked by one mid call; 10 kept | `code` (`quiz/pool.py`) |
 | A class shares its material | study pack 1 mid + 2 compact, then free for every classmate in that language | `code` + `mock` |

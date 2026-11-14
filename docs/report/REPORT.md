@@ -46,8 +46,8 @@ supports teachers and doesn't replace them.
 ## 6. Testing strategy and results
 - Gateway contract: one test per row of the error contract (quota, 503, 400 ceiling, 401, cache,
   malformed JSON → one repair call) against an in-process mock with fault injection.
-- 631 backend tests, 114 frontend tests, mock-llm tests; i18n check (829 keys × 4 languages)
-  (14 Nov, after the audit fixes).
+- 645 backend tests, 117 frontend tests, mock-llm tests; i18n check (832 keys × 4 languages)
+  (14 Nov, after the audit fixes and prefetch).
 - End-to-end through the real UI per milestone (EN, FR, AR; 1440×900 and 390×844, RTL).
 - Prompt eval on real outputs: **[in-slot]** (`python -m app.evals quiz` + `python -m app.evals
   slot --cloud`, then the prompt-evaluator over `backend/tests/evals/*/outputs/`). The mock run of

@@ -1,0 +1,45 @@
+generate 200 {'job_id': '098eacd9-af34-4f31-a609-8a807a02608c', 'cost': 15, 'cached': False}
+cc-opt-db-1
+{
+ "action": "db",
+ "job_cost": 15,
+ "states": [
+  [
+   0,
+   "http 503"
+  ],
+  [
+   3,
+   "running",
+   "writing_notes",
+   null,
+   null
+  ],
+  [
+   17,
+   "running",
+   "making_flashcards",
+   null,
+   null
+  ],
+  [
+   19,
+   "running",
+   "drawing_map",
+   null,
+   null
+  ],
+  [
+   22,
+   "done",
+   "drawing_map",
+   null,
+   null
+  ]
+ ],
+ "secs_after_fault": 24,
+ "coins_before_start": 70,
+ "coins_after": 55,
+ "worker": "running restarts=0"
+}
+exit=0

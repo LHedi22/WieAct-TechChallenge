@@ -496,6 +496,31 @@ glossary ≤ 1 compact. Wasted only if nobody in that level and language opens i
 counts `quiz_sets_used` to check that. Not prefetched: audio (first in the scope guard) and
 placement (already precomputed).
 
+### Final re-measure (all groups, 14 Nov evening, `mock`)
+
+Fresh cc-opt stack (`down -v` of cc-opt only, `python -m app.seed` twice) at `897868b`, with
+prefetch on and `LLM_INTERACTIVE_RESERVED=1`. The commands are the same as §7. Logs are
+`after/90-*` to `after/96-*`.
+
+| Run | Before (§7, `logs/`) | After (`after/9x-*`) |
+| --- | --- | --- |
+| 30 jobs, 503 + quota faults | 30/30 in 163 s · interactive p50 25.6 s / p95 49.5 s · background p50 106.3 s / p95 156.9 s · 54 calls (16 × 503, 7 × 429) · fallbacks 2 · logger: max in flight 2, **21 calls in 60 s** | 30/30 in 174 s · interactive p50 23.9 s / p95 50.6 s · background p50 113.4 s / p95 162.6 s · 57 calls (19 × 503, 7 × 429) · fallbacks 1, forced-503 job in Quick mode · logger: max in flight 2, **20 in 60 s**, 0 repeated bodies |
+| 30 jobs, no faults | 30/30 in 93 s · interactive p50 9.5 s / p95 26.5 s · background p50 62.4 s / p95 90.0 s · logger **21 in 60 s** | 30/30 in 93 s · interactive p50 10.0 s / p95 26.3 s · background p50 63.8 s / p95 90.3 s · logger: max in flight 2, **20 in 60 s**, 0 repeated bodies |
+| 10 students, same chapter: study pack | **10 jobs, 10 × 15 coins**, NOTES 7 · MAP 6 · FLASHCARDS 6, wait p50 24.8 s / p95 59.8 s, first ETA 1–5 s | **1 job, 1 × 15 coins**, 1 NOTES + 1 FLASHCARDS + 1 MAP, wait p50 14.2 s / p95 14.3 s, first ETA 5 s |
+| 10 students, same chapter: quiz | **10 jobs × 5 coins**, 1 QUIZ_GENERATE + **7 QUIZ_VERIFY**, wait p50 18.8 s | **1 job × 5 coins**, 1 QUIZ_GENERATE + 1 QUIZ_VERIFY, wait p50 11.2 s, first ETA 6 s |
+| 10 students, same chapter: Tutor start | 10 × 402 (wallets emptied by 10 × 15 + 10 × 5) | 9 × 200 + 1 × 402 (only the payer of both is short), p50 3.3 s |
+| Same-chapter run, logger | — | 6 chat calls, max in flight 2, 0 repeated bodies (the call log's +1 matches the seed's precomputed set: the mock ignores the level) |
+| Worker kill mid pack | failed `errors.job_interrupted` after 63 s, refunded, worker back | failed `errors.job_interrupted` after 64 s, refunded (70 → 70), worker back |
+| Postgres restart mid pack | worker stayed up; **job failed** after 83 s (refunded); one poll **500** | **job done** 22 s after the restart, charged once (70 → 55); the poll during the restart got **503**, worker never restarted |
+| DOCX bomb (1,015,554 bytes) | `failed` within 7 s; classmate's Tutor start 4 s | `failed errors.document_too_complex` within 8 s; classmate's Tutor start 4 s |
+| `/verify` smoke, 10 jobs, 503 + quota | PASS | PASS: 10/10, max 2 in flight, 6 × 503 handled, forced-503 job in Quick mode |
+| 30 students, real features, start together (new) | — | before OPT-34: **HTTP 500** in 3 phases (pool) · after: all 200 (`after/57-*`) |
+| Next chapter, 10 / 30 students (new, Group E) | prefetch off: 6.6–17.6 s, 20 coins | prefetch on: 0.0–0.2 s, 0 coins, no more calls |
+
+Background p50/p95 with faults rose by about 7 s. That is the price of the slot kept for
+students (Group E step 1): background calls now run one at a time while interactive work waits.
+Interactive waits held.
+
 ## Logs index (`audit/opt-2026-11/logs/`)
 
 - **Baseline:** `00-baseline-git.txt` · `01-backend-verify.log` (ruff ✓, format ✓, **529 passed, 0 skipped**) · `02*-frontend-*.log` (lint ✓, tsc ✓, vitest 92/93 then 93/93 × 3, i18n 828 × 4) · `03-constraint-greps.log` (all empty = pass) · `05-constraint-auditor.md`
