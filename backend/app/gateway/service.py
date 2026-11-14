@@ -361,6 +361,11 @@ class Gateway:
                     )
                     notes.append("mid timed out: compact fallback")
                     continue
+                if failed.timed_out and task.lane == "interactive" and tier == "mid":
+                    # No fallback allowed (a check of compact's own work, audit OPT-05): resending
+                    # the identical request costs another unit and up to LLM_TIMEOUT_S more. The
+                    # caller's "mid unavailable" path runs now (unverified quiz / review later).
+                    raise Defer(INTERACTIVE_503_WAIT_CAP_S, "timeout")
                 if err.kind == "transient":
                     if not retried_net:
                         retried_net = True
