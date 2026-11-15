@@ -217,7 +217,14 @@
       "upgrade": "Make the full version · Free"
     },
     "testData": "Test data ({provider})",
-    "unverifiedKeys": "Answers not double-checked yet"
+    "unverifiedKeys": "Answers not double-checked yet",
+    "prefetch": {
+      "ready": "Ready",
+      "preparing": "Being prepared · about {count, plural, one {# min} other {# min}}",
+      "inLine": "Place {position, number} in line",
+      "body": "Your class's copy is being made in the background. It's free.",
+      "getItNow": "Get it now"
+    }
   },
   "styleguide": {
     "title": "Captain Cat · style guide",
@@ -796,7 +803,6 @@
       "fromPlacement": "From your placement",
       "classMade": "Your class already made one",
       "ready": "Ready",
-      "preparing": "Being prepared · about {count, plural, one {# min} other {# min}}",
       "getItNow": "Get it now"
     }
   },

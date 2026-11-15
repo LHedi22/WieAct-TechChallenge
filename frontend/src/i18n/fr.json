@@ -217,7 +217,14 @@
       "upgrade": "Faire la version complète · Gratuit"
     },
     "testData": "Données de test ({provider})",
-    "unverifiedKeys": "Réponses pas encore vérifiées"
+    "unverifiedKeys": "Réponses pas encore vérifiées",
+    "prefetch": {
+      "ready": "Prêt",
+      "preparing": "En préparation · environ {count, plural, one {# min} other {# min}}",
+      "inLine": "Place {position, number} dans la file",
+      "body": "La copie de ta classe se prépare en arrière-plan. C'est gratuit.",
+      "getItNow": "Tout de suite"
+    }
   },
   "styleguide": {
     "title": "Captain Cat · guide de style",
@@ -796,7 +803,6 @@
       "fromPlacement": "D'après ton placement",
       "classMade": "Ta classe en a déjà fait un",
       "ready": "Prêt",
-      "preparing": "En préparation · environ {count, plural, one {# min} other {# min}}",
       "getItNow": "Tout de suite"
     }
   },

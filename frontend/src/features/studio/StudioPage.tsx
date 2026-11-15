@@ -3,7 +3,15 @@ import { type ReactNode, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { api, type StudioPay } from "@/api/client";
-import { Bidi, PixelButton, PixelPanel, QuickCopyNotice, Sprite, TestDataChip } from "@/components";
+import {
+  Bidi,
+  PixelButton,
+  PixelPanel,
+  PreparingNote,
+  QuickCopyNotice,
+  Sprite,
+  TestDataChip,
+} from "@/components";
 import { cx } from "@/components/cx";
 import { JobProgress } from "@/features/jobs/JobProgress";
 import { useWisdomTip } from "@/features/wisdom/useWisdomTip";
@@ -37,6 +45,7 @@ export function StudioPage() {
     queryKey: ["studio", chapterId, level],
     queryFn: () => api.studio(chapterId, level),
     enabled: !!chapterId,
+    refetchInterval: (q) => (q.state.data?.preparing ? 5_000 : false),
   });
   const s = studio.data;
   const chapter = island.data?.chapters.find((c) => c.id === chapterId);
@@ -46,7 +55,10 @@ export function StudioPage() {
   const [started, setStarted] = useState<string | null>(null);
   const [finished, setFinished] = useState<string[]>([]);
   const pending = s?.pending_job_id;
-  const jobId = started ?? (pending && !finished.includes(pending) ? pending : null);
+  // A background prefetch for the class: shown as "being prepared" until someone asks for it now.
+  const prefetching = !started && s?.preparing ? s.preparing : null;
+  const jobId =
+    started ?? (pending && !finished.includes(pending) && !prefetching ? pending : null);
   const generate = useMutation({
     mutationFn: (pay: StudioPay) => api.studioGenerate(chapterId, level, pay),
     onSuccess: (g) => {
@@ -54,6 +66,7 @@ export function StudioPage() {
       void qc.invalidateQueries({ queryKey: ["pool", worldId] });
     },
   });
+  const getItNow = () => generate.mutate("me");
   const onDone = (id: string) => {
     setFinished((f) => [...f, id]);
     setStarted(null);
@@ -68,7 +81,16 @@ export function StudioPage() {
 
   let body: ReactNode = null;
   if (s) {
-    if (jobId) {
+    if (prefetching) {
+      body = (
+        <PreparingNote
+          preparing={prefetching}
+          busy={generate.isPending}
+          autoStart={params.get("now") === "1"}
+          onGetItNow={getItNow}
+        />
+      );
+    } else if (jobId) {
       body = (
         <JobProgress jobId={jobId} tip={tip}>
           {(_, job) => <Finish onDone={() => onDone(job.id)} />}

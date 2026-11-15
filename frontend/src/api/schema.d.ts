@@ -1920,6 +1920,28 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/chapters/{chapter_id}/opened": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Chapter Opened
+     * @description A building dialog opened on chapter N: queue chapter N+1 for this student's level and
+     *     language (prefetch). Members only; no AI call here; idempotent, so every dialog mount may send
+     *     it.
+     */
+    post: operations["chapter_opened_api_chapters__chapter_id__opened_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/chapters/{chapter_id}/documents": {
     parameters: {
       query?: never;
@@ -2585,6 +2607,7 @@ export interface components {
       made_by?: string | null;
       /** Pending Job Id */
       pending_job_id: string | null;
+      preparing?: components["schemas"]["Preparing"] | null;
       /** Pool Balance */
       pool_balance: number;
       /** Cost */
@@ -2861,6 +2884,7 @@ export interface components {
       buildings: components["schemas"]["Building"][];
       /** Visitors */
       visitors: components["schemas"]["Visitor"][];
+      placement: components["schemas"]["PlacementState"];
     };
     /** JobCreated */
     JobCreated: {
@@ -3101,6 +3125,19 @@ export interface components {
       /** Key Terms */
       key_terms: components["schemas"]["KeyTerm"][];
     };
+    /**
+     * OpenedIn
+     * @description A building dialog opened on a chapter (prefetch trigger). No level: the student's own
+     *     level for the course is read from the database; anything else in the body is ignored.
+     */
+    OpenedIn: {
+      /**
+       * Building
+       * @enum {string}
+       */
+      building:
+        "quiz_hall" | "socratic_tutor" | "study_studio" | "audio_studio" | "teachback_arena";
+    };
     /** OverrideIn */
     OverrideIn: {
       /** Value */
@@ -3164,6 +3201,12 @@ export interface components {
       /** Made By */
       made_by?: string | null;
     };
+    /** PlacementState */
+    PlacementState: {
+      /** Ready */
+      ready: boolean;
+      preparing?: components["schemas"]["Preparing"] | null;
+    };
     /** PointsIn */
     PointsIn: {
       /** World Id */
@@ -3211,7 +3254,11 @@ export interface components {
       /** Quiz Sets Used */
       quiz_sets_used: number;
     };
-    /** Preparing */
+    /**
+     * Preparing
+     * @description A background job (a prefetch) is making this content: "Being prepared · about N min ·
+     *     #k in line" and its "Get it now" button (which promotes it).
+     */
     Preparing: {
       /**
        * Job Id
@@ -3220,6 +3267,8 @@ export interface components {
       job_id: string;
       /** Eta S */
       eta_s: number;
+      /** Queue Position */
+      queue_position?: number | null;
     };
     /** PresenceIn */
     PresenceIn: {
@@ -3725,6 +3774,7 @@ export interface components {
       made_by?: string | null;
       /** Pending Job Id */
       pending_job_id: string | null;
+      preparing?: components["schemas"]["Preparing"] | null;
       cards: components["schemas"]["CardCounts"];
       /** Pool Balance */
       pool_balance: number;
@@ -8578,6 +8628,44 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["ChapterOut"];
         };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  chapter_opened_api_chapters__chapter_id__opened_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        "x-dev-user"?: string | null;
+        "x-ui-language"?: string | null;
+      };
+      path: {
+        chapter_id: string;
+      };
+      cookie?: {
+        lw_session?: string | null;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OpenedIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Validation Error */
       422: {

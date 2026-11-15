@@ -23,6 +23,7 @@ export { LanguageSwitcher } from "./LanguageSwitcher";
 export { LoadingStages, type LoadingTip, type Stage, type StageState } from "./LoadingStages";
 export { MathText } from "./MathText";
 export { Mascot, type MascotPose } from "./Mascot";
+export { PreparingNote } from "./PreparingNote";
 export { PixelButton, type PixelButtonVariant } from "./PixelButton";
 export {
   MasteryRing,

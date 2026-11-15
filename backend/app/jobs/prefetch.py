@@ -33,6 +33,7 @@ from dataclasses import dataclass
 from datetime import datetime, time
 from typing import Any
 
+from pydantic import BaseModel
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -48,8 +49,10 @@ from app.jobs.service import (
     P_EXTRA,
     P_NEXT_CHAPTER,
     AIPaused,
+    active_shared_job,
     create_or_join_shared_job,
     eta_s,
+    queue_position,
     share_key,
 )
 from app.models import (
@@ -589,15 +592,43 @@ async def guard(s: AsyncSession, planning) -> None:
         log.exception("prefetch planning failed")
 
 
+class Preparing(BaseModel):
+    """A background job (a prefetch) is making this content: "Being prepared · about N min ·
+    #k in line" and its "Get it now" button (which promotes it)."""
+
+    job_id: uuid.UUID
+    eta_s: int
+    queue_position: int | None = None  # None once it is running
+
+
 async def preparing(s: AsyncSession, job_id: uuid.UUID | None) -> dict[str, Any] | None:
-    """{job_id, eta_s} while a background job (a prefetch) makes this content, for the
-    "Being prepared · about N min" note and its "Get it now" button."""
     if job_id is None:
         return None
     job = await s.get(Job, job_id)
     if job is None or job.lane != "background" or job.status not in ("queued", "running"):
         return None
-    return {"job_id": job.id, "eta_s": max(1, round(await eta_s(s, job)))}
+    queued = job.status == "queued"
+    return {
+        "job_id": job.id,
+        "eta_s": max(1, round(await eta_s(s, job))),
+        "queue_position": await queue_position(s, job) if queued else None,
+    }
+
+
+async def placement_state(s: AsyncSession, course_id: uuid.UUID, language: str) -> dict[str, Any]:
+    """For the island's placement banner: the class's placement quiz is ready in this language,
+    or a prefetch is making it."""
+    made = await s.scalar(
+        select(PlacementSet.id).where(
+            PlacementSet.course_id == course_id,
+            PlacementSet.language == language,
+            servable(PlacementSet.provider),
+        )
+    )
+    if made is not None:
+        return {"ready": True, "preparing": None}
+    job_id = await active_shared_job(s, share_key(PLACEMENT, course_id, language))
+    return {"ready": False, "preparing": await preparing(s, job_id)}
 
 
 # --- CLI: the jury-slot warm-up ------------------------------------------------------------------

@@ -650,3 +650,37 @@ async def test_a_running_prefetch_keeps_its_lane_and_priority(api, sm, pptx, mon
     async with sm() as s:
         j = await s.get(Job, job_id)
         assert (j.lane, j.priority) == ("background", P_NEXT_CHAPTER)  # its calls are under way
+
+
+# --- Step 7: what the screens show while a prefetch is being made ------------------------------
+
+
+async def test_status_price_and_island_show_a_prefetch_in_line(api, sm, pptx, monkeypatch):
+    world, ch1, ch2 = await two_chapters(api, sm, pptx, monkeypatch)
+    course = world["course"]["id"]
+    island = (await api.get(f"/api/courses/{course}", headers=KID)).json()
+    assert island["placement"] == {"ready": False, "preparing": None}
+    await plan_world(sm, world, placement=True, chapter_id=uuid.UUID(ch1))
+    await plan(sm, ch1)  # chapter 2, advanced
+    jobs = {(j.kind, j.payload.get("chapter_id")): j for j in await prefetch_jobs(sm)}
+    for path, kind in (
+        (f"/api/studio/{ch2}", "STUDY_PACK"),
+        (f"/api/audio/{ch2}", "AUDIO_EPISODE"),
+    ):
+        got = (await api.get(path, params={"level": "advanced"}, headers=KID)).json()
+        prep = got["preparing"]
+        assert prep["job_id"] == str(jobs[(kind, ch2)].id) and prep["queue_position"] >= 1, path
+        assert got["cost"] == 0
+    price = (
+        await api.get(
+            "/api/quiz/price", params={"chapter_id": ch2, "level": "advanced"}, headers=KID
+        )
+    ).json()
+    assert price["preparing"]["queue_position"] >= 1
+    island = (await api.get(f"/api/courses/{course}", headers=KID)).json()
+    assert island["placement"]["preparing"]["job_id"] == str(jobs[("PLACEMENT", None)].id)
+    await settle(sm)
+    island = (await api.get(f"/api/courses/{course}", headers=KID)).json()
+    assert island["placement"] == {"ready": True, "preparing": None}
+    got = (await api.get(f"/api/studio/{ch2}", params={"level": "advanced"}, headers=KID)).json()
+    assert got["preparing"] is None and got["notes"]

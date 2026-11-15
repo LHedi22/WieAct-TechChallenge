@@ -217,7 +217,14 @@
       "upgrade": "اصنع النسخة الكاملة · مجانًا"
     },
     "testData": "بيانات تجريبية ({provider})",
-    "unverifiedKeys": "لم يتم التحقق من الإجابات بعد"
+    "unverifiedKeys": "لم يتم التحقق من الإجابات بعد",
+    "prefetch": {
+      "ready": "جاهز",
+      "preparing": "قيد التحضير · حوالي {count, plural, zero {# دقيقة} one {دقيقة واحدة} two {دقيقتين} few {# دقائق} many {# دقيقة} other {# دقيقة}}",
+      "inLine": "المرتبة {position, number} في الدور",
+      "body": "تُحضَّر نسخة صفّك في الخلفية، وهي مجانية.",
+      "getItNow": "احصل عليه الآن"
+    }
   },
   "styleguide": {
     "title": "Captain Cat · دليل الأسلوب",
@@ -796,7 +803,6 @@
       "fromPlacement": "حسب اختبار مستواك",
       "classMade": "صنع صفّك واحدًا من قبل",
       "ready": "جاهز",
-      "preparing": "قيد التحضير · حوالي {count, plural, zero {# دقيقة} one {دقيقة واحدة} two {دقيقتين} few {# دقائق} many {# دقيقة} other {# دقيقة}}",
       "getItNow": "احصل عليه الآن"
     }
   },

@@ -375,6 +375,7 @@ describe("Socratic Tutor", () => {
 describe("Entry dialog", () => {
   const island: IslandOut = {
     id: C,
+    placement: { ready: false, preparing: null },
     world_id: W,
     name: "Calculus I",
     color_key: "island-1",
@@ -440,14 +441,14 @@ describe("Entry dialog", () => {
 
   // Group E: the next chapter is being prefetched in the background; Confirm moves it up.
   it.each([
-    ["en" as Language, "Being prepared · about 2 min", "Get it now"],
+    ["en" as Language, "Being prepared · about 2 min · Place 3 in line", "Get it now"],
     ["ar" as Language, "قيد التحضير · حوالي دقيقتين", "احصل عليه الآن"],
   ])("shows a prefetch in progress (%s)", async (lang, note, button) => {
     serve({
       "GET /api/studio/ch1/price": {
         cost: 0,
         cached: false,
-        preparing: { job_id: "j1", eta_s: 70 },
+        preparing: { job_id: "j1", eta_s: 70, queue_position: 3 },
       },
       "GET /api/wallet": wallet,
     });
@@ -466,6 +467,6 @@ describe("Entry dialog", () => {
     expect(await screen.findByRole("status")).toHaveTextContent(note);
     expect(screen.queryByText(lang === "en" ? "Ready" : "جاهز")).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: button }));
-    expect(picked).toHaveBeenCalledWith("ch1", "advanced");
+    expect(picked).toHaveBeenCalledWith("ch1", "advanced", true);
   });
 });

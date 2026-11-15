@@ -19,6 +19,7 @@ from app.features.quiz.service import LEVELS
 from app.features.studio import pack
 from app.features.studio.service import Pay, Rejected
 from app.gateway import BadOutput, Task, TaskKind
+from app.jobs import prefetch
 from app.jobs.registry import JobContext, job
 from app.jobs.service import create_or_join_shared_job, promote, share_key
 from app.models import Chapter, Course, User
@@ -46,8 +47,10 @@ async def price(s: AsyncSession, chapter_id: uuid.UUID, level: str, language: st
     found = await pack.assets(s, chapter_id, level, language)
     if ASSET in found:  # free, and the full version of a Quick-mode script is free too
         return {"cost": economy.COST["cached_content"], "cached": not pack.is_quick(found[ASSET])}
-    if await _pending(s, chapter_id, level, language):
-        return {"cost": economy.COST["cached_content"], "cached": False}
+    if pending := await _pending(s, chapter_id, level, language):
+        # joining a classmate's or a prefetch's job is free (OPT-01, Group E)
+        preparing = await prefetch.preparing(s, pending)
+        return {"cost": economy.COST["cached_content"], "cached": False, "preparing": preparing}
     return {"cost": economy.COST["generate_shared_asset"], "cached": False}
 
 

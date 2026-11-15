@@ -3,7 +3,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAiPaused } from "@/hooks/useAiPaused";
 import { api, type IslandOut, type QuizPrice } from "@/api/client";
-import { Bidi, Chip, PixelButton, PixelPanel } from "@/components";
+import { Bidi, Chip, PixelButton, PixelPanel, PreparingNote } from "@/components";
 import { cx } from "@/components/cx";
 import { useNumberFormat } from "@/components/useNumberFormat";
 import { useWallet } from "@/hooks/useSession";
@@ -23,7 +23,8 @@ export function BuildingDialog({
   island: IslandOut;
   building: Building;
   onClose: () => void;
-  onConfirm: (chapterId: string, level: Level) => void;
+  /** `now`: the class's copy is being prepared in the background and the student asked for it now. */
+  onConfirm: (chapterId: string, level: Level, now: boolean) => void;
 }) {
   const { t } = useTranslation("island");
   const { t: tc } = useTranslation();
@@ -159,13 +160,7 @@ export function BuildingDialog({
                   {cachedQuiz && (
                     <span className="text-small text-ink/70">{t("dialog.classMade")}</span>
                   )}
-                  {preparing && (
-                    <span className="text-small text-ink/70" role="status">
-                      {t("dialog.preparing", {
-                        count: Math.max(1, Math.ceil(preparing.eta_s / 60)),
-                      })}
-                    </span>
-                  )}
+                  {preparing && <PreparingNote preparing={preparing} compact />}
                 </span>
               ) : (
                 <Chip kind="cost">{tc("chip.cost", { count: cost })}</Chip>
@@ -186,7 +181,7 @@ export function BuildingDialog({
             <PixelButton
               variant="spend"
               disabled={short || paused || !chapterId}
-              onClick={() => onConfirm(chapterId, level)}
+              onClick={() => onConfirm(chapterId, level, !!preparing)}
             >
               {preparing ? t("dialog.getItNow") : t("dialog.confirm")}
             </PixelButton>

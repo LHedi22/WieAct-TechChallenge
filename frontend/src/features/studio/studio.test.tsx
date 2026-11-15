@@ -200,6 +200,55 @@ describe("Study Studio", () => {
     expect(await screen.findByText("Writing the notes")).toBeInTheDocument();
   });
 
+  // Prefetch: the class's pack is being made in the background; "Get it now" moves it up (free).
+  const prefetching = () => ({
+    ...base({
+      notes: null,
+      map: null,
+      missing: ["notes", "flashcards", "map"],
+      cards: { new: 0, learning: 0, review: 0, total: 0 },
+      pending_job_id: "j9",
+      cost: 0,
+      cached: false,
+      preparing: { job_id: "j9", eta_s: 130, queue_position: 2 },
+    }),
+    "POST /api/studio/ch1/generate": () => [200, { job_id: "j9", cost: 0, cached: false }],
+    "GET /api/jobs/j9": {
+      id: "j9",
+      status: "running",
+      stage: "writing_notes",
+      stages: ["reading_chapter", "writing_notes", "making_flashcards", "drawing_map"],
+      queue_position: null,
+      eta_s: null,
+      quick_mode: false,
+      result: null,
+      error: null,
+    },
+  });
+
+  it("shows a pack being prepared for the class and gets it now for free", async () => {
+    const calls = serve(prefetching());
+    show(<StudioPage />, ROUTE);
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Being prepared · about 3 min · Place 2 in line",
+    );
+    expect(screen.queryByTestId("generate-panel")).not.toBeInTheDocument();
+    expect(calls.some((c) => c.key === "POST /api/studio/ch1/generate")).toBe(false);
+    await userEvent.click(screen.getByRole("button", { name: "Get it now" }));
+    expect(await screen.findByText("Writing the notes")).toBeInTheDocument();
+    expect(calls.filter((c) => c.key === "POST /api/studio/ch1/generate")).toEqual([
+      { key: "POST /api/studio/ch1/generate", body: { level: "intermediate", pay: "me" } },
+    ]);
+  });
+
+  it("gets it at once when the student already asked in the building dialog (Arabic)", async () => {
+    const calls = serve(prefetching());
+    show(<StudioPage />, `${ROUTE}&now=1`, "ar");
+    await waitFor(() =>
+      expect(calls.filter((c) => c.key === "POST /api/studio/ch1/generate")).toHaveLength(1),
+    );
+  });
+
   it("opens the mind map tab in Arabic", async () => {
     serve(base());
     show(<StudioPage />, `${ROUTE}&tab=map`, "ar");

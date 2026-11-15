@@ -11,14 +11,10 @@ from app.api.deps import CurrentUser, Session
 from app.features.quiz import service
 from app.features.quiz.service import AttemptView, QuestionView, Rejected, Results
 from app.features.worlds.service import NotFound, member_chapter
+from app.jobs.prefetch import Preparing
 from app.models import Job, QuizAttempt
 
 router = APIRouter(prefix="/api/quiz", tags=["quiz"])
-
-
-class Preparing(BaseModel):
-    job_id: uuid.UUID
-    eta_s: int
 
 
 class Price(BaseModel):

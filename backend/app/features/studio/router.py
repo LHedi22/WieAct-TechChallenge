@@ -15,6 +15,7 @@ from app.features.studio import service, srs
 from app.features.studio.service import Pay, Rejected
 from app.features.worlds.service import NotFound, member_chapter
 from app.jobs import prefetch
+from app.jobs.prefetch import Preparing
 from app.models import QuizAttempt
 
 router = APIRouter(prefix="/api/studio", tags=["studio"])
@@ -66,6 +67,7 @@ class Studio(BaseModel):
     quick_mode: bool = False  # notes written by the compact fallback; full version is free
     made_by: str | None = None  # provider that wrote it; the UI labels non-platform test data
     pending_job_id: uuid.UUID | None
+    preparing: Preparing | None = None  # the pending job is a background prefetch
     cards: CardCounts
     pool_balance: int
     cost: int

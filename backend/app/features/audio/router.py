@@ -13,6 +13,7 @@ from app.features.quiz.router import Price
 from app.features.studio.router import GenerateIn, GenerateOut, chapter_or_404, http_error
 from app.features.studio.service import Rejected
 from app.jobs import prefetch
+from app.jobs.prefetch import Preparing
 
 router = APIRouter(prefix="/api/audio", tags=["audio"])
 
@@ -30,6 +31,7 @@ class Episode(BaseModel):
     quick_mode: bool = False  # script written by the compact fallback; full version is free
     made_by: str | None = None  # provider that wrote it; the UI labels non-platform test data
     pending_job_id: uuid.UUID | None
+    preparing: Preparing | None = None  # the pending job is a background prefetch
     pool_balance: int
     cost: int
     cached: bool
