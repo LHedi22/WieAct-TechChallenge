@@ -2275,6 +2275,13 @@ export interface components {
       /** Answer Cost */
       answer_cost?: number | null;
     };
+    /** CapUse */
+    CapUse: {
+      /** Used */
+      used: number;
+      /** Cap */
+      cap: number;
+    };
     /** CardCounts */
     CardCounts: {
       /** New */
@@ -2432,6 +2439,18 @@ export interface components {
       exam_date: string | null;
       /** Chapters */
       chapters?: components["schemas"]["ChapterOut"][];
+    };
+    /** CreatorCapUse */
+    CreatorCapUse: {
+      /** Used */
+      used: number;
+      /** Cap */
+      cap: number;
+      /**
+       * Creator Id
+       * Format: uuid
+       */
+      creator_id: string;
     };
     /** Daily */
     Daily: {
@@ -3054,6 +3073,17 @@ export interface components {
       /** Is Me */
       is_me: boolean;
     };
+    /**
+     * MidToday
+     * @description The three daily prefetch mid caps (PREFETCH_MAX_MID_PER_{DAY,WORLD,CREATOR}_…).
+     */
+    MidToday: {
+      all: components["schemas"]["CapUse"];
+      /** Worlds */
+      worlds: components["schemas"]["WorldCapUse"][];
+      /** Creators */
+      creators: components["schemas"]["CreatorCapUse"][];
+    };
     /** MindMap */
     MindMap: {
       /** Root */
@@ -3253,6 +3283,12 @@ export interface components {
       };
       /** Quiz Sets Used */
       quiz_sets_used: number;
+      /** Opened */
+      opened: number;
+      /** Hit Rate */
+      hit_rate: number | null;
+      time_to_content_s: components["schemas"]["TimeToContent"];
+      mid_today: components["schemas"]["MidToday"];
     };
     /**
      * Preparing
@@ -3890,6 +3926,15 @@ export interface components {
       /** Avg Latency Ms */
       avg_latency_ms: number;
     };
+    /** TimeToContent */
+    TimeToContent: {
+      /** P50 */
+      p50: number;
+      /** P95 */
+      p95: number;
+      /** N */
+      n: number;
+    };
     /** Tip */
     Tip: {
       /**
@@ -4049,6 +4094,18 @@ export interface components {
       exam_pass_until: string | null;
       /** Exam Pass Left Today */
       exam_pass_left_today: number | null;
+    };
+    /** WorldCapUse */
+    WorldCapUse: {
+      /** Used */
+      used: number;
+      /** Cap */
+      cap: number;
+      /**
+       * World Id
+       * Format: uuid
+       */
+      world_id: string;
     };
     /** WorldEdit */
     WorldEdit: {

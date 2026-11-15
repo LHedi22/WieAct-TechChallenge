@@ -1,0 +1,43 @@
+# 80-step8-prefetch-off-10 · mock · PREFETCH_ENABLED=false · 10 students · 2026-11-15T11:01:52Z
+## before the class arrives (after seed + indexing)
+## load_class.py
+{"provider": "mock", "run": "650e9", "joined": [200]}
+{"phase": "studio", "students": 10, "http": [200], "coins_charged": 15, "distinct_jobs": 1, "status": ["done"], "quick_mode": 0, "wait_p50_s": 17.4, "wait_p95_s": 17.4, "max_queue_position": 1, "stats_delta": {"calls": 3, "cache_hits": 1, "repeated_identical": 0, "fallbacks": 0, "compact": 2, "embed": 0, "mid": 1, "refusals": 0}}
+{"phase": "quiz", "students": 10, "http": [200], "coins_charged": 0, "distinct_jobs": 0, "status": [], "quick_mode": 0, "wait_p50_s": 0.1, "wait_p95_s": 0.1, "max_queue_position": 0, "stats_delta": {"calls": 0, "cache_hits": 0, "repeated_identical": 0, "fallbacks": 0, "compact": 0, "embed": 0, "mid": 0, "refusals": 0}}
+{"thinking_s": 60.0}
+{"phase": "next:studio", "students": 10, "http": [200], "coins_charged": 15, "distinct_jobs": 1, "status": ["done"], "quick_mode": 0, "wait_p50_s": 20.3, "wait_p95_s": 20.3, "max_queue_position": 1, "stats_delta": {"calls": 6, "cache_hits": 1, "repeated_identical": 0, "fallbacks": 0, "compact": 2, "embed": 0, "mid": 4, "refusals": 1}}
+{"phase": "next:quiz", "students": 10, "http": [200], "coins_charged": 0, "distinct_jobs": 0, "status": [], "quick_mode": 0, "wait_p50_s": 0.1, "wait_p95_s": 0.1, "max_queue_position": 0, "stats_delta": {"calls": 0, "cache_hits": 0, "repeated_identical": 0, "fallbacks": 0, "compact": 0, "embed": 0, "mid": 0, "refusals": 0}}
+RESULT PASS
+exit=0
+## /api/admin/stats prefetch (provider=mock)
+{"calls": 53, "cache_hits": 22, "repeated_identical": 0, "compact_share": 0.391}
+{
+ "jobs": 0,
+ "done": 0,
+ "failed": 0,
+ "waiting": 0,
+ "promoted": 0,
+ "calls": {},
+ "quiz_sets_used": 0,
+ "opened": 0,
+ "hit_rate": null,
+ "time_to_content_s": {
+  "p50": 0.0,
+  "p95": 0.0,
+  "n": 0
+ },
+ "mid_today": {
+  "all": {
+   "used": 0,
+   "cap": 120
+  },
+  "worlds": [],
+  "creators": []
+ }
+}
+## repeated identical requests: every hash answered more than once
+hash|task|tier|calls|job kinds|levels|languages|prefetch?|share keys
+## EXPLAIN of the opened UPDATE (ix_jobs_prefetch_unopened)
+Update on jobs  (cost=0.00..6.86 rows=0 width=0)
+  ->  Seq Scan on jobs  (cost=0.00..6.86 rows=1 width=14)
+        Filter: ((opened_at IS NULL) AND ((share_key)::text = 'STUDY_PACK:c3fba79f-9c2a-4377-8948-54685708c958:intermediate:en'::text) AND ((payload ->> 'prefetch'::text) = 'true'::text))

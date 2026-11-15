@@ -161,6 +161,30 @@ function StatsView({ s }: { s: Stats }) {
             ],
           ]}
         />
+        <Table
+          head={["Opened", "Hit rate (opened ÷ done)", "Time to content p50 / p95"]}
+          rows={[
+            [
+              s.prefetch.opened,
+              s.prefetch.hit_rate == null ? "–" : `${Math.round(s.prefetch.hit_rate * 100)} %`,
+              `${s.prefetch.time_to_content_s.p50} s / ${s.prefetch.time_to_content_s.p95} s (n ${s.prefetch.time_to_content_s.n})`,
+            ],
+          ]}
+        />
+        <Table
+          head={["Mid cap today", "Used / cap"]}
+          rows={[
+            ["All worlds", capUse(s.prefetch.mid_today.all)],
+            ...s.prefetch.mid_today.worlds.map((w) => [
+              `World ${w.world_id.slice(0, 8)}`,
+              capUse(w),
+            ]),
+            ...s.prefetch.mid_today.creators.map((c) => [
+              `Creator ${c.creator_id.slice(0, 8)}`,
+              capUse(c),
+            ]),
+          ]}
+        />
       </Section>
       <p className="text-small text-ink/70">
         Quota headers seen:{" "}
@@ -168,4 +192,8 @@ function StatsView({ s }: { s: Stats }) {
       </p>
     </>
   );
+}
+
+function capUse({ used, cap }: { used: number; cap: number }) {
+  return `${used} / ${cap}${used >= cap ? " (full)" : ""}`;
 }

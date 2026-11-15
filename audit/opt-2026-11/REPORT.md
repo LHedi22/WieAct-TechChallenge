@@ -496,6 +496,42 @@ glossary ≤ 1 compact. Wasted only if nobody in that level and language opens i
 counts `quiz_sets_used` to check that. Not prefetched: audio (first in the scope guard) and
 placement (already precomputed).
 
+### Prefetch brief, steps 1–8 (14–15 Nov, `mock`)
+
+World-level planner (quiz set, pack, audio, placement; member languages; intermediate + placed
+levels; chapters 1–2 then N+1), event triggers, three daily mid caps, optional quality pass, UI and
+metrics. Commits `feat(prefetch): …` on this branch; every brief item with file:line is in the final
+session report. Load runs: `after/80-83-step8-*.txt` (fresh cc-opt stack each, `load_class.py`,
+chapter 1 then chapter 2 after 60 s, phases studio + quiz).
+
+| Run (`mock`) | Ch 1 pack p50 / coins | Ch 2 pack p50 / coins | Quizzes | Requests, whole run | compact share |
+| --- | --- | --- | --- | --- | --- |
+| 10 students, prefetch off | 17.4 s / 15 | 20.3 s / 15 | 0.1 s (upload made them) | 53 | 0.391 |
+| 10 students, prefetch on | 0.4 s / 0 | 0.1 s / 0 | 0.1 s | 70 | 0.349 |
+| 30 students, prefetch off | 13.4 s / 15 | 17.6 s / 15 | 0.1–0.2 s | 54 | 0.383 |
+| 30 students, prefetch on | 0.2 s / 0 | 0.2 s / 0 | 0.1–0.3 s | 66 | 0.373 |
+
+- **Cost, said plainly:** prefetch on sent 12–17 more requests (+22–32 %) and lowered the compact
+  share by 1–4 points: it made 11 sets at upload (3 quiz sets, 3 packs, 3 audio episodes, 2
+  placement quizzes, both courses), and this script opens only Calculus packs and quizzes. Hit rate
+  4 / 11 = 36 % (`/api/admin/stats` → prefetch). A class that also opens audio, placement and the
+  second course uses more of it; the hit rate on the jury slot is the number to quote, not this one.
+- **Mid calls counted against the caps include refused attempts:** run 83 had 15 prefetch mid rows,
+  11 answered (one per job) and 4 refused by the mock's 503 and retried. A refused request still
+  uses quota, so the caps count it.
+- **Time to content:** p50 = p95 = 0 s (n 4) in both "on" runs: everything opened was ready first.
+  A student who presses Get it now on a queued prefetch is measured by
+  `test_prefetch_metrics.py::test_joining_a_queued_prefetch_counts_the_wait`.
+- **`opened_at` UPDATE:** run 82 (larger jobs table) plans `Index Scan using
+  ix_jobs_prefetch_unopened` with `Index Cond: share_key = …`; on smaller tables Postgres picks a
+  seq scan (cheaper there); with seq scans off it always takes the partial index
+  (`after/85`, `test_the_opened_update_uses_the_partial_index`).
+- **Repeated identical requests were real, now fixed** (`after/84` before, `after/85` after): with two
+  levels, MAP_WRITE and QUIZ_VERIFY sent byte-identical requests because the mock wrote the same notes
+  and questions at both levels and those prompts don't name the level. They are now cached by their
+  request. A regeneration also resent the first prompt by construction; it now names the failed
+  questions (`prompts/_redraft.md`).
+
 ### Final re-measure (all groups, 14 Nov evening, `mock`)
 
 Fresh cc-opt stack (`down -v` of cc-opt only, `python -m app.seed` twice) at `897868b`, with

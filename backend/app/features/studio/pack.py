@@ -23,6 +23,7 @@ from app.core.provenance import replaces, servable
 from app.features.glossary import service as glossary
 from app.features.quiz.pool import chapter_context
 from app.gateway import BadOutput, Task, TaskKind
+from app.gateway.cache import content_key
 from app.jobs import prefetch
 from app.jobs.registry import JobContext, job
 from app.models import Chapter, Course, Flashcard, Job, StudyAsset
@@ -347,7 +348,7 @@ async def _check_cards(ctx, chapter, level, language, text: str, cards):
     dropped, never below MIN_CARDS. A failed call keeps every card."""
     numbered = "\n".join(f"{i}. {c['front']} → {c['back']}" for i, c in enumerate(cards, 1))
     version, messages = prompts.render("cards_check", language=language, notes=text, cards=numbered)
-    key = _key(ctx, chapter, level, language, "cards_check")
+    key = content_key(messages)  # notes + cards only, like the map
     try:
         result = ctx.note(
             await gateway.run(_task(TaskKind.CARDS_CHECK, ctx, messages, language, key, version))
@@ -363,12 +364,16 @@ async def _map(ctx, chapter, course, level, language, text: str) -> dict[str, An
     version, messages = prompts.render(
         "mind_map", language=language, course=course.name, chapter=chapter.title, notes=text
     )
-    key = _key(ctx, chapter, level, language, "map")
+    # Keyed by the request itself: the prompt holds only the notes, so two levels with the same
+    # notes would send the same bytes (step 8, after/84). An unusable map is dropped from the
+    # cache so the next job asks again.
+    key = content_key(messages)
     result = ctx.note(
         await gateway.run(_task(TaskKind.MAP_WRITE, ctx, messages, language, key, version))
     )
     tree = valid_map(result.content)
     if tree is None:
+        await gateway.forget(result)
         raise BadOutput("no usable mind map", refusal="bad_map")
     return tree, result.provider
 

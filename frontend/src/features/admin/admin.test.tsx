@@ -72,6 +72,14 @@ const stats: Stats = {
     promoted: 1,
     calls: { compact: 6, mid: 3 },
     quiz_sets_used: 2,
+    opened: 2,
+    hit_rate: 0.667,
+    time_to_content_s: { p50: 0, p95: 12.5, n: 2 },
+    mid_today: {
+      all: { used: 41, cap: 120 },
+      worlds: [{ world_id: "w1234567-aaaa", used: 40, cap: 40 }],
+      creators: [{ creator_id: "c7654321-bbbb", used: 41, cap: 40 }],
+    },
   },
 };
 
@@ -186,8 +194,16 @@ describe("Admin", () => {
     const table = (await screen.findByText("Prefetch (next chapter, background)")).closest(
       "section",
     );
-    const row = within(table as HTMLElement).getAllByRole("row")[1];
-    expect(row).toHaveTextContent("compact 6 · mid 3");
+    const rows = within(table as HTMLElement).getAllByRole("row");
+    expect(rows[1]).toHaveTextContent("compact 6 · mid 3");
+    expect(rows[3]).toHaveTextContent("67 %");
+    expect(rows[3]).toHaveTextContent("0 s / 12.5 s (n 2)");
+    const caps = rows.slice(5).map((r) => r.textContent);
+    expect(caps).toEqual([
+      "All worlds41 / 120",
+      "World w1234567" + "40 / 40 (full)",
+      "Creator c7654321" + "41 / 40 (full)",
+    ]);
   });
 
   it("groups calls by the official orchestration pattern (audit OPT-08)", async () => {

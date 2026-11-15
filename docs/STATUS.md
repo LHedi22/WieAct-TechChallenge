@@ -1,4 +1,4 @@
-# What's still missing — as of 14 Nov 2026
+# What's still missing — as of 15 Nov 2026
 
 > The team slots ended on 10 Nov. Everything under §2 now runs in the jury demo slot, in the
 > order of `docs/report/JURY_SLOT_RUNBOOK.md` (`scripts/jury_slot.py` prints it).
@@ -43,6 +43,11 @@ Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
       `x-litellm-key-rpm-limit` → DECISIONS.md 2026-11-09.
   - [ ] Still unseen: the status code for "team quota exhausted".
   - [x] `quota.py` no longer reads `remaining-max_parallel_requests` as requests remaining (9/11; it could pause the background lane).
+- [ ] **Prefetch the demo world** right after the slot run, before the warm-up:
+      `docker compose exec backend uv run python -m app.jobs.prefetch --world <join code>` (queues
+      only; the worker makes the calls). Prefetch runs only while the key is live, so nothing is
+      prepared outside the slot. Check `/admin/stats` → Prefetch (mid today under the caps, hit
+      rate later). Quality pass stays off unless the mid share stays under 40 % (runbook).
 - [ ] Warm up the deployed class cache (DEPLOY.md §4) so offline demo mode has real content.
 - [ ] User test with ~10 students at once; export stats for the report.
 - [ ] Record the demo video (`docs/report/VIDEO.md` shot list).
@@ -112,6 +117,11 @@ Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
       `scripts/debug_bundle.py`; `/fix-bug` + `bug-fixer` agent (CLAUDE.md §Fixing a bug).
       Migration 0016. **Keep prompt traces off during the user test and the demo** (they store
       course text and student answers for 24 h; the switch turns itself off after ≤ 120 min).
+- [x] **Background prefetch** (15/11, branch `fix/opt-audit-prefetch`, not merged): world
+      planner (quiz set, pack, audio, placement; member languages; intermediate + placed levels;
+      chapters 1–2 then N+1), event triggers, three daily mid caps, optional quality pass, UI
+      ("Being prepared · place k in line", Get it now), stats (hit rate, time to content, caps).
+      Mock only so far; numbers in `audit/opt-2026-11/REPORT.md` §12 and PITCH_NUMBERS.md.
 - [ ] Optional: the KaTeX swap for `MathText` if the npm registry allows it.
 - [ ] Optional: "ask the AI after 10 min without a peer answer" (deferred, DECISIONS.md).
 

@@ -138,12 +138,29 @@ async def test_placement_regenerates_once_when_too_few_keys_survive(api, sm, ppt
         return out
 
     monkeypatch.setitem(mock_app.GENERATORS, "QUIZ_VERIFY", unsure_first)
+    draft = mock_app.GENERATORS["PLACEMENT_QUIZ"]
+
+    def redrafts(user, lang, system=""):  # a model writes new questions when told to
+        out = draft(user, lang, system)
+        if "FIRST DRAFT FAILED" in user:
+            out = {**out, "questions": [{**q, "question": q["question"] + " (v2)"}
+                                        for q in out["questions"]]}  # fmt: skip
+        return out
+
+    monkeypatch.setitem(mock_app.GENERATORS, "PLACEMENT_QUIZ", redrafts)
     set_env(monkeypatch, PREFETCH_MAX_MID_PER_WORLD_PER_DAY=1)
     assert len(await plan_world(sm, world)) == 1  # placement first: the only job that fits
     set_env(monkeypatch, PREFETCH_MAX_MID_PER_WORLD_PER_DAY=10)  # room for the regeneration
     await settle(sm)
     made = await calls(sm)
     assert (made["PLACEMENT_QUIZ"], len(seen)) == (2, 2)
+    async with sm() as s:  # the regeneration is a revision, never the same request again
+        hashes = (
+            await s.scalars(
+                select(AICallLog.request_hash).where(AICallLog.task_kind == "PLACEMENT_QUIZ")
+            )
+        ).all()
+    assert len(set(hashes)) == 2
     async with sm() as s:
         assert await s.scalar(select(PlacementSet.id)) is not None
 

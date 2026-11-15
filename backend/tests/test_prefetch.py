@@ -553,8 +553,10 @@ async def test_stats_count_prefetch_jobs_calls_promotions_and_use(api, sm, pptx,
     got = (await api.get("/api/admin/stats", params={"provider": "mock"}, headers=READ)).json()
     pf = got["prefetch"]
     assert (pf["jobs"], pf["done"], pf["waiting"], pf["promoted"]) == (3, 3, 0, 1)
-    # mid: the quiz check, the notes, the script; compact: the questions, the cards, the map
-    assert pf["calls"]["mid"] >= 3 and pf["calls"]["compact"] >= 3
+    # mid: the notes, the script, and the quiz check unless the cache answers it (the mock writes
+    # the same questions at every level, and the check is keyed by its request since step 8);
+    # compact: the questions, the cards, the map
+    assert pf["calls"]["mid"] >= 2 and pf["calls"]["compact"] >= 3
     assert pf["quiz_sets_used"] == 1
 
 

@@ -5,12 +5,12 @@ Postgres concurrency). A failed or cancelled job frees its key, and the money in
 
 import asyncio
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 
 from app.admin import invariants
 from app.core import economy
 from app.jobs.worker import Worker
-from app.models import Job
+from app.models import AICallLog, Job
 from tests.test_map import join
 from tests.test_quiz import calls, indexed
 from tests.test_rag_indexing import gw, rag_env  # noqa: F401  (fixtures)
@@ -74,10 +74,21 @@ async def test_ten_classmates_one_audio_episode(api, sm, pptx):  # noqa: F811
     await no_broken_invariants(sm)
 
 
+async def checked(sm) -> int:
+    """QUIZ_VERIFY answers: sent and answered, or read from the cache."""
+    async with sm() as s:
+        return await s.scalar(
+            select(func.count()).where(
+                AICallLog.task_kind == "QUIZ_VERIFY",
+                or_(AICallLog.status_code == 200, AICallLog.cache_hit.is_(True)),
+            )
+        )
+
+
 async def test_ten_classmates_one_new_quiz_set_and_one_verification(api, sm, pptx):  # noqa: F811
     world, chapter = await indexed(api, sm, pptx)
     users = await classmates(api, world)
-    verify_before = await calls(sm, "QUIZ_VERIFY")
+    verify_before = await checked(sm)
     rs = await asyncio.gather(
         *(
             api.post(
@@ -90,7 +101,9 @@ async def test_ten_classmates_one_new_quiz_set_and_one_verification(api, sm, ppt
     assert len({o["job_id"] for o in out}) == 1, out
     assert sum(o["cost"] for o in out) == economy.COST["quiz"]  # one payer, the rest join free
     await Worker(sm).drain(timeout_s=60)
-    assert await calls(sm, "QUIZ_VERIFY") - verify_before == 1
+    # one check: a call, or the cache when the mock wrote the same questions as the upload's
+    # intermediate set (the check is keyed by its request since step 8, audit after/84)
+    assert await checked(sm) - verify_before == 1
     for u, o in zip(users, out, strict=True):  # every classmate gets an attempt on that set
         r = await api.post(f"/api/quiz/attempts/from-job/{o['job_id']}", headers=u)
         assert r.status_code == 200, r.text

@@ -36,6 +36,28 @@ def _prefetch_rows(p: dict | None) -> list[str]:
         f"| Prefetch calls | {calls} |",
         f"| Prefetches a student needed early (promoted) | {p['promoted']} |",
         f"| Prefetched quiz sets later started | {p['quiz_sets_used']} |",
+        *_prefetch_use_rows(p),
+    ]
+
+
+def _prefetch_use_rows(p: dict) -> list[str]:
+    """Step 8: how much of the prefetch was opened, how long students still waited, the caps."""
+    if "opened" not in p:  # an older backend
+        return []
+    hit = "–" if p["hit_rate"] is None else f"{round(p['hit_rate'] * 100)} %"
+    ttc = p["time_to_content_s"]
+    mid = p["mid_today"]
+
+    def busiest(rows: list[dict]) -> str:
+        top = max(rows, key=lambda r: r["used"], default=None)
+        return f"{top['used']}/{top['cap']}" if top else "0"
+
+    return [
+        f"| Prefetches opened / hit rate (opened ÷ done) | {p['opened']} / {hit} |",
+        f"| Time to content, p50 / p95 (n) | {ttc['p50']} s / {ttc['p95']} s ({ttc['n']}) |",
+        f"| Prefetch mid today: all / busiest world / busiest creator | "
+        f"{mid['all']['used']}/{mid['all']['cap']} · {busiest(mid['worlds'])} · "
+        f"{busiest(mid['creators'])} |",
     ]
 
 

@@ -136,6 +136,7 @@ async def create_or_join_shared_job(
         if (found := await active_shared_job(s, share_key)) is not None:
             if lane == "interactive":
                 await promote(s, found)
+                await mark_opened(s, share_key)
             return found, False
         try:
             async with s.begin_nested():
@@ -149,6 +150,23 @@ async def create_or_join_shared_job(
         await s.commit()
         return job.id, True
     raise RuntimeError(f"shared job {share_key} kept changing")  # pragma: no cover
+
+
+async def mark_opened(s: AsyncSession, share_key: str) -> None:
+    """A student was served this class asset, or joined the job making it: the prefetch jobs
+    that made it count as used (the hit rate and time to content on /api/admin/stats). Matches
+    `ix_jobs_prefetch_unopened`, so after the first open it finds no row and writes nothing."""
+    done = await s.execute(
+        update(Job)
+        .where(
+            Job.share_key == share_key,
+            Job.opened_at.is_(None),
+            Job.payload["prefetch"].astext == "true",
+        )
+        .values(opened_at=func.now())
+    )
+    if done.rowcount:
+        await s.commit()
 
 
 async def promote(s: AsyncSession, job_id: uuid.UUID) -> bool:

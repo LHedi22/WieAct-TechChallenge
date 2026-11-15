@@ -119,12 +119,17 @@ async def generate(ctx: JobContext) -> dict[str, Any]:
     except NoMaterial as e:
         raise BadOutput("no material", refusal="no_material") from e
     await ctx.set_stage("matching_level")
-    version, messages = prompts.render(
-        "placement_quiz", count=COUNT, language=language, course=course.name, context=context
-    )
     await ctx.set_stage("writing_questions")
 
-    async def write(salt: str = ""):
+    async def write(salt: str = "", redraft: str = ""):
+        version, messages = prompts.render(
+            "placement_quiz",
+            count=COUNT,
+            language=language,
+            course=course.name,
+            context=context,
+            redraft=redraft,
+        )
         result = ctx.note(
             await gateway.run(
                 Task(
@@ -162,11 +167,12 @@ async def generate(ctx: JobContext) -> dict[str, Any]:
     ok = await check(questions)
     if ok is None:
         raise Defer(VERIFY_RETRY_S, "verify_unavailable")
+    failed = [q["question"] for q, good in zip(questions, ok, strict=True) if not good]
     questions = verify.keep_verified(questions, ok)
     if len(questions) < MIN_VERIFIED and await prefetch.quality_pass(
         ctx.lane, ctx.payload, course.world_id
     ):  # prefetch quality pass: regenerate once, like the quiz pool
-        more, _ = await write(":regen")
+        more, _ = await write(":regen", prompts.redraft(failed))
         ok2 = await check(more) if len(more) >= MIN_VALID else None
         questions += verify.keep_verified(more, ok2) if ok2 is not None else []
         questions = questions[:COUNT]

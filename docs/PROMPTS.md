@@ -276,6 +276,10 @@ Run the prompt-evaluator agent over the study_assets notes whose content has a "
 fixes make the section more correct or only different? Are the "missing" concepts really in the
 excerpts? Any English left inside Arabic or Darija points? Report what the 8B reviewer missed.
 ```
+A quiz or placement regeneration (a first draft whose keys the check could not confirm) adds
+`prompts/_redraft.md` after the excerpts, naming the failed questions, so the second draft is a
+revision and never the same request again (15 Nov, audit after/84). In-slot, check that the
+regenerated questions are really new and not reworded copies of the failed ones.
 
 ## M8 · Ship
 ```

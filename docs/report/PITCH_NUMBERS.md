@@ -24,7 +24,7 @@ mock; the platform numbers come from the jury slot" is the honest answer.
 | Indexing cost | ~5 requests for a 30-page PDF (8 chunks per tag call); embeddings on our own `bge-m3` | `code` + `mock` (M2) |
 | Worker crash mid pack | job failed cleanly, coins refunded, worker back | `mock` (audit §7) |
 | Malicious upload | 1 MB DOCX bomb rejected in < 7 s; a classmate's Tutor start unaffected (4 s) | `mock` (audit §7) |
-| Next chapter ready before they get there | prefetch on: chapter 2 opens in 0.0–0.2 s for 0 coins (10 and 30 students), against 6.6–17.6 s and 20 coins off, no more calls (made earlier, while the class works on chapter 1) | `mock` (audit §12 Group E) |
+| Content ready before they get there | prefetch on: the chapter 1 and 2 packs and quizzes open in 0.1–0.4 s for 0 coins (10 and 30 students), against 13.4–20.3 s and 15 coins per pack off. Cost: +12–17 requests per run (+22–32 %), compact share −1 to −4 points, hit rate 36 % in a script that opens only packs and quizzes | `mock` (audit §12, `after/80-83`) |
 | 30 students polling | 20 req/s, p95 143 ms on the dev server | `mock` (audit §7) |
 | Languages | 4 UI languages (EN, FR, AR, Darija), RTL, every key present in all 4 | `code` (`pnpm i18n:check`) |
 | Tests | backend, frontend and mock-llm suites, one test per row of the platform's error contract | `code` (counts: REPORT.md §6) |
@@ -35,6 +35,7 @@ mock; the platform numbers come from the jury slot" is the honest answer.
 | --- | --- | --- |
 | Compact/mid split on our key | stats export, "calls per tier" | 2g |
 | Repeated identical requests (aim: 0) | stats export, "repeated identical" | 2g |
+| Prefetch hit rate and time to content on a real class | stats export, prefetch rows | 2g |
 | Quota refusals and how they were handled | stats export, refusals by kind | 2g |
 | First study pack latency on the CPU platform (budget 45 s) | `/admin/debug` Live or the call log | 1c |
 | 10 real students at once: waits, fallbacks | `scripts/out/load-cloud.txt` | 2f |
@@ -43,6 +44,8 @@ mock; the platform numbers come from the jury slot" is the honest answer.
 | Moderation per language | `audit/artifacts/phase6/adversarial-*moderation*.json` | 2e |
 
 ## Don't say
+- "Prefetch is free": it is free for students, not for the quota (+22–32 % requests on the mock
+  runs). Say "it spends idle background quota, capped per day, on what the class opens next".
 - "A study pack costs three requests whatever the class size". This holds one click at a time.
   Ten simultaneous clicks used to cost 7 mid + 12 compact (OPT-01, fixed on
   `fix/opt-audit-prefetch`; re-measured in audit §12).

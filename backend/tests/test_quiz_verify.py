@@ -203,7 +203,9 @@ def test_quiz_verify_prompt_is_versioned():
 
 async def test_an_unusable_verifier_reply_is_not_cached(sm, monkeypatch, gw):  # noqa: F811
     """Found in the end-of-batch run: the first (unusable) reply was cached by content, so every
-    retry of the background pool replayed it and the set could never be published."""
+    retry of the background pool replayed it and the set could never be published. Since step 8
+    the check is keyed by its request again (two sets with the same questions are checked once,
+    after/84), so an unusable reply is dropped from the cache instead (gateway.forget)."""
     from app.jobs.registry import JobContext
 
     replies = [{"oops": True}, truthful_solver(ITEMS[:2])]
@@ -215,6 +217,12 @@ async def test_an_unusable_verifier_reply_is_not_cached(sm, monkeypatch, gw):  #
                       pattern="t")  # fmt: skip
 
     monkeypatch.setattr(gateway_module, "run", run)
+    forgotten = []
+
+    async def forget(result):
+        forgotten.append(result.content)
+
+    monkeypatch.setattr(gateway_module, "forget", forget)
 
     async def no_stage(_s):
         return None
@@ -226,7 +234,8 @@ async def test_an_unusable_verifier_reply_is_not_cached(sm, monkeypatch, gw):  #
     where = {"context": FIX["context"], "course": "c", "chapter": "ch", "language": "en"}
     assert await verify.check(ctx, qs, lane="background", **where) is None
     assert await verify.check(ctx, qs, lane="background", **where) == [True, False]
-    assert keys == [None, None]
+    assert forgotten == [{"oops": True}]  # only the unusable reply leaves the cache
+    assert keys[0] == keys[1] and keys[0].startswith("content:")
 
 
 def test_the_quiz_eval_scores_a_bare_string_item_as_invalid():

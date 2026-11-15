@@ -36,6 +36,7 @@ def gw(sm, mock_llm, monkeypatch):
         ),
     )
     monkeypatch.setattr(gateway_module, "run", g.run)
+    monkeypatch.setattr(gateway_module, "forget", g.forget)
     return g
 
 
@@ -268,6 +269,7 @@ async def test_a_student_call_starts_within_a_second_while_a_long_background_cal
         ),
     )
     monkeypatch.setattr(gateway_module, "run", g.run)
+    monkeypatch.setattr(gateway_module, "forget", g.forget)
     lanes = g.limiter.active_by_lane
     async with sm() as s:
         for _ in range(2):

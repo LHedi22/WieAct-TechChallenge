@@ -1,0 +1,64 @@
+# 83-step8-prefetch-on-30 · mock · PREFETCH_ENABLED=true · 30 students · 2026-11-15T11:25:18Z
+## before the class arrives (after seed + indexing)
+AUDIO_EPISODE|done|3
+PLACEMENT|done|2
+QUIZ_POOL|done|3
+STUDY_PACK|done|3
+## load_class.py
+{"provider": "mock", "run": "a2332", "joined": [200]}
+{"phase": "studio", "students": 30, "http": [200], "coins_charged": 0, "distinct_jobs": 0, "status": [], "quick_mode": 0, "wait_p50_s": 0.2, "wait_p95_s": 0.3, "max_queue_position": 0, "stats_delta": {"calls": 0, "cache_hits": 0, "repeated_identical": 0, "fallbacks": 0, "mid": 0, "compact": 0, "embed": 0, "refusals": 0}}
+{"phase": "quiz", "students": 30, "http": [200], "coins_charged": 0, "distinct_jobs": 0, "status": [], "quick_mode": 0, "wait_p50_s": 0.1, "wait_p95_s": 0.2, "max_queue_position": 0, "stats_delta": {"calls": 0, "cache_hits": 0, "repeated_identical": 0, "fallbacks": 0, "mid": 0, "compact": 0, "embed": 0, "refusals": 0}}
+{"thinking_s": 60.0}
+{"phase": "next:studio", "students": 30, "http": [200], "coins_charged": 0, "distinct_jobs": 0, "status": [], "quick_mode": 0, "wait_p50_s": 0.2, "wait_p95_s": 0.3, "max_queue_position": 0, "stats_delta": {"calls": 0, "cache_hits": 0, "repeated_identical": 0, "fallbacks": 0, "mid": 0, "compact": 0, "embed": 0, "refusals": 0}}
+{"phase": "next:quiz", "students": 30, "http": [200], "coins_charged": 0, "distinct_jobs": 0, "status": [], "quick_mode": 0, "wait_p50_s": 0.2, "wait_p95_s": 0.3, "max_queue_position": 0, "stats_delta": {"calls": 0, "cache_hits": 0, "repeated_identical": 0, "fallbacks": 0, "mid": 0, "compact": 0, "embed": 0, "refusals": 0}}
+RESULT PASS
+exit=0
+## /api/admin/stats prefetch (provider=mock)
+{"calls": 66, "cache_hits": 71, "repeated_identical": 0, "compact_share": 0.373}
+{
+ "jobs": 11,
+ "done": 11,
+ "failed": 0,
+ "waiting": 0,
+ "promoted": 0,
+ "calls": {
+  "compact": 12,
+  "embed": 3,
+  "mid": 15
+ },
+ "quiz_sets_used": 2,
+ "opened": 4,
+ "hit_rate": 0.364,
+ "time_to_content_s": {
+  "p50": 0.0,
+  "p95": 0.0,
+  "n": 4
+ },
+ "mid_today": {
+  "all": {
+   "used": 15,
+   "cap": 120
+  },
+  "worlds": [
+   {
+    "used": 15,
+    "cap": 40,
+    "world_id": "c1926721-679d-4491-b677-8b0fefa39d31"
+   }
+  ],
+  "creators": [
+   {
+    "used": 15,
+    "cap": 40,
+    "creator_id": "86ef977a-0e52-440a-8c45-513d0180909d"
+   }
+  ]
+ }
+}
+## repeated identical requests: every hash answered more than once
+hash|task|tier|calls|job kinds|levels|languages|prefetch?|share keys
+## EXPLAIN of the opened UPDATE (ix_jobs_prefetch_unopened)
+Update on jobs  (cost=0.13..8.16 rows=0 width=0)
+  ->  Index Scan using ix_jobs_prefetch_unopened on jobs  (cost=0.13..8.16 rows=1 width=14)
+        Index Cond: ((share_key)::text = 'STUDY_PACK:928c9bfd-bed4-407e-b5ae-94923e3e3812:intermediate:en'::text)
+        Filter: ((opened_at IS NULL) AND ((payload ->> 'prefetch'::text) = 'true'::text))

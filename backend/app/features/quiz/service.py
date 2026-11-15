@@ -19,7 +19,7 @@ from app.features.daily import service as daily
 from app.features.quiz import pool
 from app.features.wallet import service as wallet
 from app.jobs import prefetch
-from app.jobs.service import create_job, create_or_join_shared_job
+from app.jobs.service import create_job, create_or_join_shared_job, mark_opened
 from app.models import (
     Chapter,
     ChapterMastery,
@@ -95,6 +95,7 @@ async def start(s: AsyncSession, user: User, chapter: Chapter, level: str) -> di
     found = await unseen_set(s, user, chapter.id, level, language)
     if found:
         attempt = await create_attempt(s, user, found, course)
+        await mark_opened(s, pool.share(chapter.id, level, language))  # step 8 stats
         return {"attempt_id": attempt.id, "job_id": None, "cost": 0, "cached": True}
     # A classmate is already generating this chapter + level + language: share that job. The
     # key names "the next set", whatever seed the creator picks (audit OPT-01); joining is free.

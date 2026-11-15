@@ -18,7 +18,7 @@ from app.features.quiz.service import LEVELS
 from app.features.studio import pack, srs
 from app.features.worlds.service import NotFound, member_chapter
 from app.jobs import prefetch
-from app.jobs.service import create_or_join_shared_job, promote, share_key
+from app.jobs.service import create_or_join_shared_job, mark_opened, promote, share_key
 from app.models import (
     Chapter,
     Course,
@@ -71,6 +71,8 @@ async def status(s: AsyncSession, user: User, chapter: Chapter, level: str) -> d
     language = user.ui_language
     course = await s.get(Course, chapter.course_id)
     found = await pack.assets(s, chapter.id, level, language)
+    if "notes" in found:  # served: a prefetch that made it was used (step 8 stats)
+        await mark_opened(s, share_key(pack.KIND, chapter.id, level, language))
     counts = (await queue(s, user, chapter, level))["counts"]
     return {
         "chapter_id": chapter.id,
@@ -102,6 +104,7 @@ async def generate(
     job_id = await pack.pending_generation(s, chapter.id, level, language)
     if job_id:
         await promote(s, job_id)  # a queued prefetch: the student needs it now (Group E)
+        await mark_opened(s, share_key(pack.KIND, chapter.id, level, language))
         return {"job_id": job_id, "cost": 0, "cached": False}
     course = await s.get(Course, chapter.course_id)
     cost = economy.COST["generate_shared_asset"] if "notes" in missing else 0

@@ -29,12 +29,13 @@ import argparse
 import asyncio
 import logging
 import uuid
+from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, time
 from typing import Any
 
 from pydantic import BaseModel
-from sqlalchemy import and_, func, select
+from sqlalchemy import and_, case, func, literal, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import economy, flags
@@ -288,6 +289,50 @@ def caps() -> dict[str, int]:
         "world": settings.PREFETCH_MAX_MID_PER_WORLD_PER_DAY,
         "creator": settings.PREFETCH_MAX_MID_PER_CREATOR_PER_DAY,
         "all": settings.PREFETCH_MAX_MID_PER_DAY,
+    }
+
+
+async def mid_today(s: AsyncSession) -> dict[str, Any]:
+    """The three cap counters for /api/admin/stats: per world, per creator and for the whole app,
+    the same count as `mid_used` (made today + expected from queued prefetch jobs)."""
+    is_prefetch = Job.payload["prefetch"].astext == "true"
+    made = (
+        select(Job.world_id, World.creator_id, func.count())
+        .select_from(AICallLog)
+        .join(Job, Job.id == AICallLog.job_id)
+        .join(World, World.id == Job.world_id)
+        .where(
+            is_prefetch,
+            AICallLog.model_tier == "mid",
+            AICallLog.cache_hit.is_(False),
+            AICallLog.debug.is_(False),
+            AICallLog.ts >= _day_start(),
+        )
+        .group_by(Job.world_id, World.creator_id)
+    )
+    pass_on = get_settings().PREFETCH_QUALITY_PASS
+    expected = case((Job.kind == PACK, 2), else_=1) if pass_on else literal(1)
+    queued = (
+        select(Job.world_id, World.creator_id, func.sum(expected))
+        .join(World, World.id == Job.world_id)
+        .where(is_prefetch, Job.status == "queued", Job.attempts == 0)
+        .group_by(Job.world_id, World.creator_id)
+    )
+    worlds: Counter[uuid.UUID] = Counter()
+    creators: Counter[uuid.UUID] = Counter()
+    for q in (made, queued):
+        for world_id, creator_id, n in (await s.execute(q)).all():
+            worlds[world_id] += int(n)
+            creators[creator_id] += int(n)
+    cap = caps()
+    return {
+        "all": {"used": sum(worlds.values()), "cap": cap["all"]},
+        "worlds": [
+            {"world_id": w, "used": n, "cap": cap["world"]} for w, n in worlds.most_common()
+        ],
+        "creators": [
+            {"creator_id": c, "used": n, "cap": cap["creator"]} for c, n in creators.most_common()
+        ],
     }
 
 

@@ -265,9 +265,10 @@ async def quiz_pool(ctx: JobContext) -> dict[str, Any]:
     context = "\n\n".join(f"[{c.page_ref}] {c.text}" for c in rows)
     await ctx.set_stage("writing_questions")
 
-    async def write(salt: str = "") -> tuple[list[dict[str, Any]], Any]:
+    async def write(salt: str = "", redraft: str = "") -> tuple[list[dict[str, Any]], Any]:
         version, messages = prompts.render(
             "quiz_generate",
+            redraft=redraft,
             count=GENERATE_COUNT,
             level=level,
             language=language,
@@ -309,7 +310,8 @@ async def quiz_pool(ctx: JobContext) -> dict[str, Any]:
         if len(kept) < MIN_VALID and await prefetch.may_spend_mid(
             ctx.lane, ctx.payload, course.world_id
         ):  # regenerate once (a prefetch only while its mid caps leave room)
-            more, _ = await write(":regen")
+            failed = [q["question"] for q, good in zip(questions, ok, strict=True) if not good]
+            more, _ = await write(":regen", prompts.redraft(failed))
             ok2 = (
                 await verify.check(ctx, more, language=language, lane=ctx.lane, **where)
                 if more

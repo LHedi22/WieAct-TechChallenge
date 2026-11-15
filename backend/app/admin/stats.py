@@ -4,17 +4,19 @@ report and the demo. Defaults to provider=cloud so local/mock traffic never infl
 Quick-mode answers an admin forced (core/flags.py) are counted in `forced_fallbacks`, never in
 `fallbacks`: the report must only claim fallbacks the platform actually caused."""
 
+import uuid
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-from sqlalchemy import Integer, and_, case, cast, exists, func, select
+from sqlalchemy import Integer, and_, case, cast, exists, extract, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.admin.auth import AdminDep
 from app.core.db import get_session
 from app.gateway.quota import seen_header_names
 from app.gateway.router import official
+from app.jobs import prefetch as prefetch_jobs
 from app.models import AICallLog, Job, QuizAttempt
 
 router = APIRouter()
@@ -27,6 +29,33 @@ class TierStats(BaseModel):
     avg_latency_ms: int
 
 
+class CapUse(BaseModel):
+    used: int  # prefetch mid calls today (Tunis day) + those expected from queued prefetch jobs
+    cap: int
+
+
+class WorldCapUse(CapUse):
+    world_id: uuid.UUID
+
+
+class CreatorCapUse(CapUse):
+    creator_id: uuid.UUID
+
+
+class MidToday(BaseModel):
+    """The three daily prefetch mid caps (PREFETCH_MAX_MID_PER_{DAY,WORLD,CREATOR}_…)."""
+
+    all: CapUse
+    worlds: list[WorldCapUse]
+    creators: list[CreatorCapUse]
+
+
+class TimeToContent(BaseModel):
+    p50: float
+    p95: float
+    n: int  # done prefetch jobs a student opened
+
+
 class PrefetchStats(BaseModel):
     """Background prefetch, one chapter ahead (Group E, app/jobs/prefetch.py)."""
 
@@ -37,6 +66,11 @@ class PrefetchStats(BaseModel):
     promoted: int  # a student needed it before it was ready ("Get it now" / joined)
     calls: dict[str, int]  # platform requests made by prefetch jobs, per tier
     quiz_sets_used: int  # prefetched quiz sets a student later started (the waste check)
+    opened: int  # prefetch jobs whose content a student was served or joined (jobs.opened_at)
+    hit_rate: float | None  # opened ÷ done (done ones): how much of what was prefetched got used
+    # seconds from opening to content, 0 when it was ready first
+    time_to_content_s: TimeToContent
+    mid_today: MidToday
 
 
 class Stats(BaseModel):
@@ -198,6 +232,18 @@ async def _prefetch(s: AsyncSession, calls_q) -> PrefetchStats:
             ),
         )
     )
+    opened = await s.scalar(select(func.count()).where(is_prefetch, Job.opened_at.is_not(None)))
+    wait = func.greatest(0, extract("epoch", Job.finished_at - Job.opened_at))
+    p50, p95, n = (
+        await s.execute(
+            select(
+                func.percentile_cont(0.5).within_group(wait),
+                func.percentile_cont(0.95).within_group(wait),
+                func.count(),
+            ).where(is_prefetch, Job.status == "done", Job.opened_at.is_not(None))
+        )
+    ).one()
+    done = rows.get("done", 0)
     return PrefetchStats(
         jobs=sum(rows.values()),
         done=rows.get("done", 0),
@@ -206,4 +252,12 @@ async def _prefetch(s: AsyncSession, calls_q) -> PrefetchStats:
         promoted=promoted or 0,
         calls=dict(tier_calls),
         quiz_sets_used=used or 0,
+        opened=opened or 0,
+        hit_rate=round(n / done, 3) if done else None,  # done jobs a student opened
+        time_to_content_s={
+            "p50": round(float(p50 or 0), 1),
+            "p95": round(float(p95 or 0), 1),
+            "n": n,
+        },
+        mid_today=await prefetch_jobs.mid_today(s),
     )

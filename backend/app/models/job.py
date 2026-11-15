@@ -26,6 +26,12 @@ class Job(Base):
             unique=True,
             postgresql_where=text("status IN ('queued', 'running') AND share_key IS NOT NULL"),
         ),
+        # Prefetch jobs nobody opened yet: the serve paths' UPDATE (migration 0019).
+        Index(
+            "ix_jobs_prefetch_unopened",
+            "share_key",
+            postgresql_where=text("opened_at IS NULL AND (payload ->> 'prefetch') = 'true'"),
+        ),
     )
 
     id: Mapped[uuid.UUID] = uuid_pk()
@@ -60,6 +66,8 @@ class Job(Base):
     worker_id: Mapped[str | None] = mapped_column(String(64))
     # The class asset this job makes, e.g. "STUDY_PACK:<chapter>:<level>:<language>" (OPT-01).
     share_key: Mapped[str | None] = mapped_column(String(200))
+    # Prefetch jobs: first time a student was served what it made, or joined it (migration 0019).
+    opened_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     # Timeline for /admin/debug: [{t, type: claimed|stage|deferred|requeued|done|failed|swept, …}]
     events: Mapped[list[dict[str, Any]]] = mapped_column(
         JSONB, default=list, server_default=text("'[]'::jsonb")

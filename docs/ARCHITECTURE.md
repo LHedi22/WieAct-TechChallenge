@@ -76,7 +76,13 @@ UI ◀── poll GET /api/jobs/{id} ──┤  {status, stage, stages[], queue_
   Off with `PREFETCH_ENABLED=false` (an upload then still makes the chapter's first intermediate
   quiz set), while AI is paused, offline or `pause_background_lane`. The building dialog shows
   "Being prepared · about N min" with "Get it now". CLI: `python -m app.jobs.prefetch --world
-  <code>`. Counted on `/api/admin/stats` (`prefetch`).
+  <code>`. Counted on `/api/admin/stats` (`prefetch`): jobs done/failed/waiting, calls per
+  tier, promoted, `opened` (`jobs.opened_at`, set by one UPDATE on the partial index
+  `ix_jobs_prefetch_unopened` when a student is served the asset or joins its job: studio and
+  audio status with content, quiz start on a class set, placement start, Get it now), `hit_rate`
+  (opened ÷ done), `time_to_content_s` p50/p95 (0 when it was ready first) and `mid_today`, the
+  three caps used / cap. The UI shows "Being prepared · about N min · place k in line" on the
+  building dialog, Study Studio, Audio Studio and the island's placement banner (`PreparingNote`).
   Triggers are events, never a polled GET, and each is idempotent: a chapter finishes indexing
   (upload or `REFRESH_CONTENT`: planned if it is one of the course's first two ready chapters
   or a member has a quiz attempt or presence on the chapter before it; one query decides); a
@@ -192,7 +198,7 @@ others read the cache when it lands.
 `documents(id, chapter_id, filename, kind, size, status, error)` · `chunks(id, document_id, chapter_id, text, page_ref, tags[], lang)` — vectors in Qdrant
 `course_levels(user_id, course_id, level, placed_at, goal)` · `chapter_mastery(user_id, chapter_id, mastery, weak)`
 `placement_sets(id, course_id, language, questions jsonb)` — answers never leave the server · `presence(user_id, course_id, chapter_id, seen_at)` — "on this island now", 2-minute window
-`jobs(id, user_id, world_id, kind, lane, priority, status, stage, stages, not_before, attempts, cost, result jsonb, error, quick_mode, created_at, finished_at, events jsonb)` — `events`: the timeline (claimed, stage, deferred, done, failed, swept)
+`jobs(id, user_id, world_id, kind, lane, priority, status, stage, stages, not_before, attempts, cost, result jsonb, error, quick_mode, created_at, finished_at, events jsonb, share_key, opened_at)` — `events`: the timeline (claimed, stage, deferred, done, failed, swept)
 `ai_cache(key PK, task_kind, content jsonb, model_tier, created_at, hits)`
 `ai_call_log(id, ts, task_kind, model_tier, pattern, status_code, tokens_in, tokens_out, latency_ms, cache_hit, fallback, refusal_reason, job_id, attempt, debug, single_flight)` — `debug` rows (replays) are left out of every metric
 `ai_call_trace(call_log_id, created_at, messages, reply, parsed, error)` — only while the `trace_prompts_until` switch is on; capped, redacted, deleted after 24 h

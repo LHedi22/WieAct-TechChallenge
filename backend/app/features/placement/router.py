@@ -15,7 +15,7 @@ from app.features.placement import service
 from app.features.worlds.map import course_for_member
 from app.features.worlds.service import NotFound
 from app.jobs import prefetch
-from app.jobs.service import create_or_join_shared_job, share_key
+from app.jobs.service import create_or_join_shared_job, mark_opened, share_key
 from app.models import Chapter, Chunk
 
 router = APIRouter(prefix="/api/placement", tags=["placement"])
@@ -67,6 +67,7 @@ async def start(body: PlacementStartIn, s: Session, user: CurrentUser) -> Placem
     cost = economy.COST["placement_quiz"]
     existing = await service.find_set(course.id, language)
     if existing:
+        await mark_opened(s, share_key(service.KIND, course.id, language))  # step 8 stats
         return PlacementStartOut(
             course_id=course.id,
             cached=True,

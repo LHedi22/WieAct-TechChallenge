@@ -50,6 +50,16 @@ Official orchestration patterns — use these names in code comments, logs and t
 Implication: the economy of *requests* matters more than tokens. One call for 10 quiz questions,
 never 10 calls. Batch chunk-tagging several chunks per call.
 
+**Background prefetch spends idle quota, never a student's** (`app/jobs/prefetch.py`,
+ARCHITECTURE.md): it queues what the class will open next in the background lane, which uses at
+most concurrency − `LLM_INTERACTIVE_RESERVED` call slots (1 of 2), so a student's call never waits
+for it; a student who needs a prefetch early promotes it. Each asset is made once per class
+(share key + cache), and three daily caps bound its mid calls (per world 40, per creator 40,
+whole app 120; audio is dropped first, then packs). It runs **only while the key is live**: outside
+a slot (offline demo mode) it plans nothing, so the jury slot must run the planner first
+(`JURY_SLOT_RUNBOOK.md`). One set (chapter × level × language) costs about 7 requests, 3 of them
+mid (quiz 1 + 1, pack 3 + 1, audio 1 mid; 9 / 4 with `PREFETCH_QUALITY_PASS`).
+
 ## Response & error contract (official, stable for the whole challenge)
 | Situation | Service response | Required handling | Our gateway | User sees |
 | --- | --- | --- | --- | --- |
