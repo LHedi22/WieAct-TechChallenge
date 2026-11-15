@@ -44,6 +44,9 @@ chapters 1–2 ready in every member language (quiz set, study pack, audio, plac
 queues jobs (no call itself) and prints the mid used today against the three caps. One set
 (chapter × level × language) is ≈ 7 requests, 3 mid; placement 2 requests, 1 mid per language.
 Set it to `false` before the slot if quota is tight.
+The quality pass (`PREFETCH_QUALITY_PASS`, off by default) adds 1 mid + 1 compact per pack and a
+placement regeneration when keys fail. Turn it on for the warm-up **only if the measured mid share
+stays under 40 %** (`/admin` Stats, "calls per tier"); the jury counts the compact/mid split.
 
 ## 2. Evidence for the report and the pitch
 

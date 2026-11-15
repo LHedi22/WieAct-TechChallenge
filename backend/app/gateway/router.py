@@ -53,6 +53,8 @@ ROUTES: dict[TaskKind, Route] = {
     K.MAP_WRITE: Route("compact", "execute-compact", 400),  # from the mid notes (DECISIONS)
     K.AUDIO_SCRIPT: Route("mid", "narrow-before-generating", 700),
     K.FLASHCARDS: Route("compact", "execute-compact", 600),
+    K.NOTES_REVIEW: Route("mid", "draft-then-revise", 700),  # prefetch quality pass only
+    K.CARDS_CHECK: Route("compact", "none:extraction", 120),  # prefetch quality pass only
     K.DAILY_PLAN: Route("compact", "escalation", 400),  # mid for recorded weak spots (OPT-09)
     K.CHALLENGE_ITEMS: Route("compact", "execute-compact", 400),
     K.WISDOM_TIP: Route("mid", "none:generate-once", 160),

@@ -23,6 +23,7 @@ from app.core.provenance import replaces, servable
 from app.features.glossary import service as glossary
 from app.features.quiz.pool import chapter_context
 from app.gateway import BadOutput, Task, TaskKind
+from app.jobs import prefetch
 from app.jobs.registry import JobContext, job
 from app.models import Chapter, Course, Flashcard, Job, StudyAsset
 
@@ -238,7 +239,7 @@ def _task(kind: TaskKind, ctx: JobContext, messages, language: str, key: str, ve
     )
 
 
-async def _notes(ctx, chapter, course, level, language) -> dict[str, Any]:
+async def _notes(ctx, chapter, course, level, language) -> tuple[dict[str, Any], str | None]:
     rows = await chapter_context(ctx, chapter, course, level)
     context = "\n\n".join(f"[{c.page_ref}] {c.text}" for c in rows)
     version, messages = prompts.render(
@@ -259,7 +260,64 @@ async def _notes(ctx, chapter, course, level, language) -> dict[str, Any]:
         raise BadOutput("no usable notes", refusal="bad_notes")
     if result.quick_mode:  # compact fallback: mark it so the class can get the mid version later
         notes = {**notes, "quick_mode": True}
+    elif await prefetch.quality_pass(ctx.lane, ctx.payload, course.world_id):
+        notes = await _review(ctx, chapter, course, level, language, notes, context)
     return notes, result.provider
+
+
+REVIEW_MAX_FIXES = 3
+
+
+async def _review(ctx, chapter, course, level, language, notes, context: str) -> dict[str, Any]:
+    """Prefetch quality pass (draft-then-revise): one mid call checks the notes against the
+    excerpts, the language (no stray English in Arabic or Darija, Darija not MSA) and the
+    chapter's main concepts. Valid fixes replace a section's points; anything else keeps the
+    notes as they are. Missing concepts are recorded on the notes, not invented."""
+    concepts, _ = await glossary.terms(chapter.id)
+    numbered = "\n".join(
+        f"{i}. {sec['heading']}\n" + "\n".join(f"- {p}" for p in sec["points"])
+        for i, sec in enumerate(notes["sections"], 1)
+    )
+    version, messages = prompts.render(
+        "notes_review",
+        level=level,
+        language=language,
+        course=course.name,
+        chapter=chapter.title,
+        concepts=", ".join(concepts) or "-",
+        notes=numbered,
+        context=context,
+        glossary=await glossary.for_chapter(chapter.id, language, ctx.lane),
+    )
+    key = _key(ctx, chapter, level, language, "notes_review")
+    try:
+        result = ctx.note(
+            await gateway.run(
+                _task(TaskKind.NOTES_REVIEW, ctx, messages, language, key, version).model_copy(
+                    update={"allow_fallback": False}
+                )
+            )
+        )
+    except gateway.GatewayError:  # Defer included: the notes are good enough to publish
+        return notes
+    return apply_review(notes, result.content)
+
+
+def apply_review(notes: dict[str, Any], content: Any) -> dict[str, Any]:
+    sections = [dict(sec) for sec in notes["sections"]]
+    fixed = 0
+    for raw in _items(content, "fixes")[:REVIEW_MAX_FIXES]:
+        if not isinstance(raw, dict) or not isinstance(raw.get("section"), int):
+            continue
+        n, points = raw["section"], raw.get("points")
+        if not 1 <= n <= len(sections) or not isinstance(points, list):
+            continue
+        clean = [p.strip() for p in points if isinstance(p, str) and 0 < len(p.strip()) <= 300]
+        if 1 <= len(clean) <= 6:
+            sections[n - 1]["points"] = clean
+            fixed += 1
+    missing = [m.strip()[:80] for m in _items(content, "missing") if isinstance(m, str)]
+    return {**notes, "sections": sections, "review": {"fixed": fixed, "missing": missing[:8]}}
 
 
 async def _cards(ctx, chapter, course, level, language, text: str) -> list[dict[str, str]]:
@@ -279,7 +337,26 @@ async def _cards(ctx, chapter, course, level, language, text: str) -> list[dict[
     cards = valid_cards(result.content)
     if len(cards) < MIN_CARDS:
         raise BadOutput(f"only {len(cards)} valid cards", refusal="bad_cards")
+    if await prefetch.quality_pass(ctx.lane, ctx.payload, course.world_id):
+        cards = await _check_cards(ctx, chapter, level, language, text, cards)
     return cards
+
+
+async def _check_cards(ctx, chapter, level, language, text: str, cards):
+    """Prefetch quality pass: one compact call names the cards the notes don't back; they are
+    dropped, never below MIN_CARDS. A failed call keeps every card."""
+    numbered = "\n".join(f"{i}. {c['front']} → {c['back']}" for i, c in enumerate(cards, 1))
+    version, messages = prompts.render("cards_check", language=language, notes=text, cards=numbered)
+    key = _key(ctx, chapter, level, language, "cards_check")
+    try:
+        result = ctx.note(
+            await gateway.run(_task(TaskKind.CARDS_CHECK, ctx, messages, language, key, version))
+        )
+    except gateway.GatewayError:
+        return cards
+    bad = {n for n in _items(result.content, "unsupported") if isinstance(n, int)}
+    kept = [c for i, c in enumerate(cards, 1) if i not in bad]
+    return kept if len(kept) >= MIN_CARDS else cards
 
 
 async def _map(ctx, chapter, course, level, language, text: str) -> dict[str, Any]:

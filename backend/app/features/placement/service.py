@@ -19,6 +19,7 @@ from app.features.quiz import verify
 from app.features.quiz.pool import Question, pick_context, spread_answers
 from app.gateway import BadOutput, Defer, Task, TaskKind
 from app.gateway.cache import text_hash
+from app.jobs import prefetch
 from app.jobs.registry import JobContext, job
 from app.models import Chapter, ChapterMastery, Chunk, Course, CourseLevel, PlacementSet
 
@@ -122,37 +123,53 @@ async def generate(ctx: JobContext) -> dict[str, Any]:
         "placement_quiz", count=COUNT, language=language, course=course.name, context=context
     )
     await ctx.set_stage("writing_questions")
-    result = ctx.note(
-        await gateway.run(
-            Task(
-                kind=TaskKind.PLACEMENT_QUIZ,
-                lane=ctx.lane,  # a prefetch runs in the background lane (no Quick-mode fallback)
-                messages=messages,
-                language=language,
-                cache_key=f"placement:{course_id}:{language}:{text_hash(context)}",  # OPT-17
-                prompt_version=version,
+
+    async def write(salt: str = ""):
+        result = ctx.note(
+            await gateway.run(
+                Task(
+                    kind=TaskKind.PLACEMENT_QUIZ,
+                    lane=ctx.lane,  # a prefetch runs in the background (no Quick-mode fallback)
+                    messages=messages,
+                    language=language,
+                    cache_key=f"placement:{course_id}:{language}:{text_hash(context)}{salt}",
+                    prompt_version=version,
+                )
             )
         )
-    )
-    questions = clean(result.content, chapters)
+        questions = clean(result.content, chapters)
+        if len(questions) < MIN_VALID:
+            await gateway.forget(result)  # shared by the course: a retry must not replay it
+        return questions, result
+
+    async def check(questions):
+        return await verify.check(
+            ctx,
+            questions,
+            context=context,
+            course=course.name,
+            chapter=course.name,
+            language=language,
+            lane=ctx.lane,
+        )
+
+    questions, result = await write()
     if len(questions) < MIN_VALID:
-        await gateway.forget(result)  # shared by the course: a retry must not replay it
         raise BadOutput(f"only {len(questions)} valid questions", refusal="bad_quiz")
     # Audit N-3: a wrong key would mis-place the student, and the set is shared by the course:
     # only items the mid solver confirms are kept; mid unavailable → wait for it (free, queued).
     await ctx.set_stage("checking_answers")
-    ok = await verify.check(
-        ctx,
-        questions,
-        context=context,
-        course=course.name,
-        chapter=course.name,
-        language=language,
-        lane=ctx.lane,
-    )
+    ok = await check(questions)
     if ok is None:
         raise Defer(VERIFY_RETRY_S, "verify_unavailable")
     questions = verify.keep_verified(questions, ok)
+    if len(questions) < MIN_VERIFIED and await prefetch.quality_pass(
+        ctx.lane, ctx.payload, course.world_id
+    ):  # prefetch quality pass: regenerate once, like the quiz pool
+        more, _ = await write(":regen")
+        ok2 = await check(more) if len(more) >= MIN_VALID else None
+        questions += verify.keep_verified(more, ok2) if ok2 is not None else []
+        questions = questions[:COUNT]
     if len(questions) < MIN_VERIFIED:
         raise BadOutput(f"only {len(questions)} answer keys verified", refusal="bad_key")
     async with db.get_sessionmaker()() as s:

@@ -556,6 +556,16 @@ def _glossary(user: str, lang: str, system: str = "") -> dict[str, Any]:
     return {"terms": [{"term": t.strip(), "say": say.format(t=t.strip())} for t in terms]}
 
 
+def _notes_review(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    """NOTES_REVIEW: the mock's notes are its own, so nothing to fix."""
+    return {"ok": True, "fixes": [], "missing": []}
+
+
+def _cards_check(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    """CARDS_CHECK: every mock card comes from the notes."""
+    return {"unsupported": []}
+
+
 GENERATORS = {
     "TRANSLATE_SHORT": _glossary,
     "MODERATE_POST": _moderate,
@@ -574,6 +584,8 @@ GENERATORS = {
     "FLASHCARDS": _flashcards,
     "MAP_WRITE": _mind_map,
     "AUDIO_SCRIPT": _audio,
+    "NOTES_REVIEW": _notes_review,
+    "CARDS_CHECK": _cards_check,
 }
 
 

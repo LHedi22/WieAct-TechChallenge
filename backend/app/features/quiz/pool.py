@@ -26,6 +26,7 @@ from app.core.provenance import replaces, servable
 from app.features.quiz import verify
 from app.gateway import BadOutput, Task, TaskKind
 from app.gateway.cache import text_hash
+from app.jobs import prefetch
 from app.jobs.registry import JobContext, job
 from app.jobs.service import share_key
 from app.models import Chapter, Chunk, Course, Job, QuizSet
@@ -305,7 +306,9 @@ async def quiz_pool(ctx: JobContext) -> dict[str, Any]:
         questions = verify.mark_unverified(questions)[:POOL_SIZE]  # this student only, labelled
     else:
         kept = verify.keep_verified(questions, ok)
-        if len(kept) < MIN_VALID:  # regenerate once
+        if len(kept) < MIN_VALID and await prefetch.may_spend_mid(
+            ctx.lane, ctx.payload, course.world_id
+        ):  # regenerate once (a prefetch only while its mid caps leave room)
             more, _ = await write(":regen")
             ok2 = (
                 await verify.check(ctx, more, language=language, lane=ctx.lane, **where)

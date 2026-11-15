@@ -103,6 +103,9 @@ class Settings(BaseSettings):
     PREFETCH_MAX_MID_PER_WORLD_PER_DAY: int = 40
     PREFETCH_MAX_MID_PER_CREATOR_PER_DAY: int = 40
     PREFETCH_MAX_MID_PER_DAY: int = 120
+    # Background quality checks on prefetched content (mid notes review, compact card check,
+    # placement regeneration); counted in the mid caps. Off: they raise the mid share.
+    PREFETCH_QUALITY_PASS: bool = False
     # Embeddings are metered separately (own quota); they share the per-key concurrency limit
     LLM_EMBED_MAX_RPM: int = 18
     LLM_SLOT_GROUP: Literal["A", "B"] = "A"

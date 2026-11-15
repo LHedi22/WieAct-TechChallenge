@@ -77,7 +77,8 @@ FIRST_CHAPTERS = 2
 PLACEMENT, QUIZ, PACK, AUDIO = "PLACEMENT", "QUIZ_POOL", "STUDY_PACK", "AUDIO_EPISODE"
 # Order inside one prefetch set (background lane, lower first; ties run oldest first).
 PRIORITY = {PLACEMENT: P_COURSE_START, QUIZ: P_NEXT_CHAPTER, PACK: P_NEXT_CHAPTER, AUDIO: P_EXTRA}
-# Mid calls one job is expected to make, for the caps (regenerations are counted once made).
+# Mid calls one job is expected to make, for the caps (regenerations are counted once made);
+# the quality pass adds the notes review to a pack (expected_mid).
 EXPECTED_MID = {PLACEMENT: 1, QUIZ: 1, PACK: 1, AUDIO: 1}
 # What a cap drops first: audio, then packs, then quiz sets, placement last.
 KEEP_ORDER = (PLACEMENT, QUIZ, PACK, AUDIO)
@@ -85,6 +86,11 @@ KEEP_ORDER = (PLACEMENT, QUIZ, PACK, AUDIO)
 
 def priority(kind: str) -> int:
     return PRIORITY.get(kind, P_NEXT_CHAPTER)
+
+
+def expected_mid(kind: str) -> int:
+    review = kind == PACK and get_settings().PREFETCH_QUALITY_PASS
+    return EXPECTED_MID[kind] + (1 if review else 0)
 
 
 @dataclass(frozen=True)
@@ -255,6 +261,17 @@ async def mid_used(s: AsyncSession, world: World) -> dict[str, int]:
             .where(is_prefetch, Job.status == "queued", Job.attempts == 0)
         )
     ).one()
+    # the queued jobs' expected mid calls: one each (+1 per pack with the quality pass)
+    if get_settings().PREFETCH_QUALITY_PASS:
+        packs = (
+            await s.execute(
+                select(*scopes)
+                .select_from(Job)
+                .join(World, World.id == Job.world_id, isouter=True)
+                .where(is_prefetch, Job.status == "queued", Job.attempts == 0, Job.kind == PACK)
+            )
+        ).one()
+        queued = tuple(q + p for q, p in zip(queued, packs, strict=True))
     return {
         "world": made[0] + queued[0],
         "creator": made[1] + queued[1],
@@ -274,6 +291,29 @@ def caps() -> dict[str, int]:
 async def mid_left(s: AsyncSession, world: World) -> int:
     used = await mid_used(s, world)
     return max(0, min(cap - used[scope] for scope, cap in caps().items()))
+
+
+async def may_spend_mid(lane: str, payload: dict[str, Any], world_id: uuid.UUID | None) -> bool:
+    """An optional extra mid call from inside a job (a regeneration, a review): always for a
+    student's job, for a prefetch only while its world's caps leave room."""
+    if not payload.get("prefetch"):
+        return True
+    from app.core.db import get_sessionmaker  # noqa: PLC0415
+
+    async with get_sessionmaker()() as s:
+        world = await s.get(World, world_id) if world_id else None
+        return world is not None and await mid_left(s, world) > 0
+
+
+async def quality_pass(lane: str, payload: dict[str, Any], world_id: uuid.UUID | None) -> bool:
+    """The background quality checks run on a prefetch still in the background lane (a promoted
+    one has a student waiting), with PREFETCH_QUALITY_PASS on and room in the mid caps."""
+    return (
+        get_settings().PREFETCH_QUALITY_PASS
+        and lane == "background"
+        and bool(payload.get("prefetch"))
+        and await may_spend_mid(lane, payload, world_id)
+    )
 
 
 # --- the planner ---------------------------------------------------------------------------------
@@ -347,7 +387,7 @@ async def plan(
 
     left, queued, dropped = await mid_left(s, world), [], 0
     for w in wanted:
-        if EXPECTED_MID[w.kind] > left:
+        if expected_mid(w.kind) > left:
             dropped += 1
             continue
         try:
@@ -363,7 +403,7 @@ async def plan(
         except AIPaused:  # offline switched on meanwhile
             break
         if created:
-            left -= EXPECTED_MID[w.kind]
+            left -= expected_mid(w.kind)
             queued.append(job_id)
     if queued or dropped:
         log.info(

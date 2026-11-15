@@ -263,6 +263,20 @@ Web Speech API player (transcript, speed). Otherwise mark Audio Studio as cut in
 hide its building behind a "coming soon" state.
 ```
 
+## Prefetch quality pass (14 Nov)
+Two app prompts run only on prefetched content still in the background lane, with
+`PREFETCH_QUALITY_PASS=true` (off by default; counted in the prefetch mid caps):
+`backend/app/prompts/notes_review.md` (mid, draft-then-revise: fixes up to 3 sections of the
+notes, lists missing concepts; aimed at audit N-5 language mixing in Arabic/Darija and N-6
+whole-chapter coverage) and `cards_check.md` (compact: card numbers the notes don't back).
+In-slot evaluation, after a warm-up with the pass on:
+```
+Run the prompt-evaluator agent over the study_assets notes whose content has a "review" key
+(export them to backend/tests/evals/notes_review/outputs/cloud-*.json first). For each: did the
+fixes make the section more correct or only different? Are the "missing" concepts really in the
+excerpts? Any English left inside Arabic or Darija points? Report what the 8B reviewer missed.
+```
+
 ## M8 · Ship
 ```
 /milestone M8

@@ -137,6 +137,8 @@ name after a colon (`none:guard`). Stats groups calls by the part before the col
 | TUTOR_SUMMARY | compact | none:summary | interactive | session id |
 | NOTES_WRITE (STUDY_PACK job, step 1) | mid | plan-once + narrow-before-generating (quiz-pool narrowing, no filter call) | interactive | chapter+level+lang (+job; `study_assets` is the class cache) |
 | FLASHCARDS / MAP_WRITE (STUDY_PACK steps 2–3, from the notes only) | compact | execute-compact | interactive | chapter+level+lang (+job) |
+| NOTES_REVIEW (prefetch quality pass, `PREFETCH_QUALITY_PASS`: mid checks a prefetched pack's notes against the excerpts, the language (no stray English in Arabic or Darija; Darija not MSA; audit N-5) and the chapter's top concepts (N-6); up to 3 section fixes applied, missing concepts recorded, never invented; any failure keeps the notes) | mid | draft-then-revise | background only (a promoted job skips it) | chapter+level+lang (+job) |
+| CARDS_CHECK (prefetch quality pass: compact names the cards the notes don't back; dropped, never below `MIN_CARDS`) | compact | none:extraction | background only | chapter+level+lang (+job) |
 | AUDIO_SCRIPT (AUDIO_EPISODE job) | mid | narrow-before-generating, once then cached | interactive | chapter+level+lang (+job; `study_assets` is the class cache) |
 | DAILY_PLAN (first `GET /api/daily` of a Tunis day; an instant rule plan shows meanwhile and stays if the job fails; applied only while nothing is done) | compact, once / student / day; mid only for a student with recorded weak spots (a mistake in 14 days or a weak chapter; OPT-09) | escalation | background | user+date |
 | CHALLENGE_ITEMS (**reserved**, OPT-20: flashcard challenges review existing cards) | compact | execute-compact | background | user+date |
