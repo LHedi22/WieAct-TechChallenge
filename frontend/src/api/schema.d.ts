@@ -2967,6 +2967,11 @@ export interface components {
       created_at: string;
       /** Finished At */
       finished_at: string | null;
+      /**
+       * Mine
+       * @default false
+       */
+      mine: boolean;
     };
     /** JoinIn */
     JoinIn: {

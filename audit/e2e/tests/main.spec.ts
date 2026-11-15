@@ -28,7 +28,7 @@ for (const lang of LANGS) {
     // Onboarding: walk the steps (style questions are radio cards; then Continue / Set sail)
     const cont = page.getByRole("button", { name: new RegExp(`^(${t(lang, "onboarding.continue")}|${t(lang, "onboarding.setSail")})$`) });
     for (let i = 0; i < 25 && /\/welcome/.test(page.url()); i++) {
-      const radios = page.getByRole("radio");
+      const radios = page.locator("main").getByRole("radio"); // never the dev top bar's provider switch
       if ((await radios.count()) > 0 && (await radios.first().isVisible())) {
         await radios.first().check({ force: true }).catch(() => radios.first().click({ force: true }));
       }
@@ -59,7 +59,7 @@ for (const lang of LANGS) {
       .click();
     await page.waitForURL(/placement/);
     for (let i = 0; i < 12; i++) {
-      const opts = page.getByRole("radio");
+      const opts = page.locator("main").getByRole("radio");
       await opts.first().waitFor({ state: "attached", timeout: 120_000 });
       await opts.first().check({ force: true });
       const finish = page.getByRole("button", { name: rx(t(lang, "placement.finish")) });

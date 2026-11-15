@@ -55,6 +55,8 @@ class JobView(BaseModel):
     error: str | None  # i18n key, never a raw model error
     created_at: datetime
     finished_at: datetime | None
+    # The viewer owns it, so may cancel it; false for a classmate's or the class's prefetch job
+    mine: bool = False
 
 
 async def create_job(

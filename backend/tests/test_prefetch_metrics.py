@@ -70,6 +70,9 @@ async def test_joining_a_queued_prefetch_counts_the_wait(api, sm, pptx, monkeypa
         f"/api/studio/{ch2}/generate", json={"level": "intermediate", "pay": "me"}, headers=KID
     )
     assert r.json()["cost"] == 0  # Get it now
+    # the class's job, not the student's: no "Cancel and keep my coins" (found in the e2e run)
+    view = (await api.get(f"/api/jobs/{r.json()['job_id']}", headers=KID)).json()
+    assert view["status"] == "queued" and view["mine"] is False
     pack = by_kind(await prefetch_jobs(sm, ch2))["STUDY_PACK"]
     assert pack.opened_at is not None and pack.lane == "interactive"
     await settle(sm)

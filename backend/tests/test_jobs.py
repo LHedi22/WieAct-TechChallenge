@@ -69,6 +69,7 @@ async def test_demo_job_runs_end_to_end(sm, gw, api):
     queued = await get(api, job_id)
     assert queued["status"] == "queued" and queued["queue_position"] == 1 and queued["eta_s"] >= 1
     assert queued["stages"] == ["reading_chapter", "writing_summary"]
+    assert queued["mine"] is True  # the owner may cancel
 
     await Worker(sm).drain()
     done = await get(api, job_id)

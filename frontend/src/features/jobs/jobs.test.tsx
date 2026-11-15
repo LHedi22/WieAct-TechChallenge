@@ -24,6 +24,7 @@ const base: JobView = {
   error: null,
   created_at: "2026-10-28T12:00:00Z",
   finished_at: null,
+  mine: true,
 };
 
 function respond(routes: Record<string, JobView>) {
@@ -77,6 +78,13 @@ describe("JobProgress", () => {
     expect(screen.getByText(/asked us to wait/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Cancel and keep my coins" })).toBeEnabled();
     expect(screen.getByText("Reading the chapter")).toBeInTheDocument();
+  });
+
+  it("offers no cancel on a job the student joined (a classmate's or the class's prefetch)", async () => {
+    respond({ [GET]: { ...base, queue_position: 2, eta_s: 30, mine: false } });
+    show();
+    expect(await screen.findByText(/number 2 in line/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Cancel and keep my coins" })).toBeNull();
   });
 
   it("renders the result with the Quick mode chip", async () => {

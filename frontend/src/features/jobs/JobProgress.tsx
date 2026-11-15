@@ -27,9 +27,12 @@ export function JobProgress({ jobId, tip, children }: JobProgressProps) {
         <Banner
           kind="queue"
           action={
-            <PixelButton variant="secondary" onClick={() => j.cancel()} disabled={j.cancelling}>
-              {t("jobs.cancel")}
-            </PixelButton>
+            // only the owner may cancel: a joined job (a classmate's, the class's prefetch) is free
+            job.mine && (
+              <PixelButton variant="secondary" onClick={() => j.cancel()} disabled={j.cancelling}>
+                {t("jobs.cancel")}
+              </PixelButton>
+            )
           }
         >
           {t("jobs.queue", { position: j.queuePosition, seconds: j.etaS ?? 0 })}

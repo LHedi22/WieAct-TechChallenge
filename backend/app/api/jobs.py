@@ -38,7 +38,8 @@ async def _job(s: AsyncSession, job_id: uuid.UUID, user: User, *, cancel: bool =
 @router.get("/{job_id}", response_model=JobView)
 async def get_job(job_id: uuid.UUID, s: Session, user: CurrentUser) -> JobView:
     """Polled by the UI every 1.5 s (no streaming on the platform)."""
-    return await service.view(s, await _job(s, job_id, user))
+    job = await _job(s, job_id, user)
+    return (await service.view(s, job)).model_copy(update={"mine": job.user_id == user.id})
 
 
 @router.post("/{job_id}/cancel", response_model=JobView)
@@ -49,4 +50,4 @@ async def cancel_job(job_id: uuid.UUID, s: Session, user: CurrentUser) -> JobVie
         await service.cancel(s, job)
     except NotCancellable as e:
         raise HTTPException(409, "errors.job_not_cancellable") from e
-    return await service.view(s, job)
+    return (await service.view(s, job)).model_copy(update={"mine": True})
