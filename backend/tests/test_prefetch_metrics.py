@@ -11,7 +11,7 @@ from sqlalchemy import func, select, text
 
 from app.jobs import prefetch
 from app.jobs.service import mark_opened
-from app.models import AICallLog, Job
+from app.models import AICallLog, Job, World
 from tests.admin_helpers import READ, enable_admin
 from tests.test_prefetch import (  # noqa: F401  (fixtures and helpers)
     KID,
@@ -19,6 +19,7 @@ from tests.test_prefetch import (  # noqa: F401  (fixtures and helpers)
     prefetch_jobs,
     prefetch_on,
     roomy_mock,
+    set_env,
     settle,
     two_chapters,
 )
@@ -127,12 +128,13 @@ async def test_stats_show_the_three_mid_caps(api, sm, pptx, monkeypatch):
     await plan_world(sm, world, chapter_id=uuid.UUID(ch2), level="intermediate", language="fr")
     p = await stats(api, monkeypatch)
     caps = prefetch.caps()
-    assert p["mid_today"]["all"] == {"used": 2, "cap": caps["all"]}  # pack + audio, expected
+    expected = {"used": 2, "cap": caps["all"], "over": 0, "refused": 0}  # pack + audio, expected
+    assert p["mid_today"]["all"] == expected
     [w] = p["mid_today"]["worlds"]
     assert (w["world_id"], w["used"], w["cap"]) == (world["id"], 2, caps["world"])
     [c] = p["mid_today"]["creators"]
     assert (c["used"], c["cap"]) == (2, caps["creator"])
-    assert set(c) == {"creator_id", "used", "cap"}  # an id, never a nickname
+    assert set(c) == {"creator_id", "used", "cap", "over", "refused"}  # an id, never a nickname
     async with sm() as s:
         assert await s.scalar(select(Job.id).where(Job.opened_at.is_not(None))) is None
 
@@ -179,3 +181,49 @@ async def test_a_derived_request_identical_across_levels_is_sent_once(api, sm, p
     enable_admin(monkeypatch)
     r = await api.get("/api/admin/stats", params={"provider": "mock"}, headers=READ)
     assert r.json()["repeated_identical"] == 0
+
+
+async def test_only_answered_mid_calls_count_and_the_counter_never_reads_above_its_cap(
+    api, sm, pptx, monkeypatch
+):
+    """The Stats page once showed 43/40: refused attempts (503, 429) were counted, and they use
+    no model time. Now only answered calls count toward the three caps; refused ones are a
+    separate number, and what running jobs add past a cap reads "40/40 (+n finishing)"."""
+    world, _, _ = await two_chapters(api, sm, pptx, monkeypatch)
+    set_env(monkeypatch, PREFETCH_MAX_MID_PER_WORLD_PER_DAY=40)
+    async with sm() as s:
+        job = Job(
+            kind="STUDY_PACK",
+            lane="background",
+            status="running",
+            world_id=uuid.UUID(world["id"]),
+            payload={"prefetch": True},
+        )
+        s.add(job)
+        await s.flush()
+        row = {
+            "task_kind": "NOTES_WRITE",
+            "model_tier": "mid",
+            "provider": "mock",
+            "model": "m",
+            "pattern": "plan-once",
+            "job_id": job.id,
+        }
+        s.add_all([AICallLog(**row, status_code=200) for _ in range(37)])
+        s.add_all([AICallLog(**row, status_code=503) for _ in range(6)])
+        await s.commit()
+        w = await s.get(World, uuid.UUID(world["id"]))
+        assert (await prefetch.mid_used(s, w))["world"] == 37  # refused calls don't count
+        assert await prefetch.mid_left(s, w) == 3
+
+    p = await stats(api, monkeypatch)
+    [w] = p["mid_today"]["worlds"]
+    assert (w["used"], w["cap"], w["over"], w["refused"]) == (37, 40, 0, 6)
+
+    async with sm() as s:  # the running job finishes past the cap
+        s.add_all([AICallLog(**row, status_code=200) for _ in range(6)])
+        await s.commit()
+    p = await stats(api, monkeypatch)
+    [w] = p["mid_today"]["worlds"]
+    assert (w["used"], w["cap"], w["over"], w["refused"]) == (40, 40, 3, 6)
+    assert all(e["used"] <= e["cap"] for e in [p["mid_today"]["all"], *p["mid_today"]["creators"]])

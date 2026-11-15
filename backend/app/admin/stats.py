@@ -30,8 +30,12 @@ class TierStats(BaseModel):
 
 
 class CapUse(BaseModel):
-    used: int  # prefetch mid calls today (Tunis day) + those expected from queued prefetch jobs
+    # answered prefetch mid calls today (Tunis day) + those expected from queued prefetch jobs,
+    # never above the cap; what running jobs add past it is `over` ("40/40 (+3 finishing)")
+    used: int
     cap: int
+    over: int
+    refused: int  # refused attempts (503, 429, timeout): no model time, so not counted in `used`
 
 
 class WorldCapUse(CapUse):

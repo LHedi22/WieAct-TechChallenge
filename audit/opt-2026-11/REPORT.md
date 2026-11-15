@@ -516,9 +516,10 @@ chapter 1 then chapter 2 after 60 s, phases studio + quiz).
   placement quizzes, both courses), and this script opens only Calculus packs and quizzes. Hit rate
   4 / 11 = 36 % (`/api/admin/stats` → prefetch). A class that also opens audio, placement and the
   second course uses more of it; the hit rate on the jury slot is the number to quote, not this one.
-- **Mid calls counted against the caps include refused attempts:** run 83 had 15 prefetch mid rows,
-  11 answered (one per job) and 4 refused by the mock's 503 and retried. A refused request still
-  uses quota, so the caps count it.
+- **Refused attempts are shown apart from the caps:** run 83 had 15 prefetch mid rows, 11 answered
+  (one per job) and 4 refused by the mock's 503 and retried. At the time the caps counted all 15;
+  since 15 Nov they count the 11 answered ones (a refused call used no model time), show the 4 as
+  `refused`, and never read above the cap ("40 / 40 (+3 finishing)" instead of 43 / 40).
 - **Time to content:** p50 = p95 = 0 s (n 4) in both "on" runs: everything opened was ready first.
   A student who presses Get it now on a queued prefetch is measured by
   `test_prefetch_metrics.py::test_joining_a_queued_prefetch_counts_the_wait`.

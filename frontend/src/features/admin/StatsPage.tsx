@@ -172,16 +172,18 @@ function StatsView({ s }: { s: Stats }) {
           ]}
         />
         <Table
-          head={["Mid cap today", "Used / cap"]}
+          head={["Mid cap today", "Answered / cap", "Refused (retried)"]}
           rows={[
-            ["All worlds", capUse(s.prefetch.mid_today.all)],
+            ["All worlds", capUse(s.prefetch.mid_today.all), s.prefetch.mid_today.all.refused],
             ...s.prefetch.mid_today.worlds.map((w) => [
               `World ${w.world_id.slice(0, 8)}`,
               capUse(w),
+              w.refused,
             ]),
             ...s.prefetch.mid_today.creators.map((c) => [
               `Creator ${c.creator_id.slice(0, 8)}`,
               capUse(c),
+              c.refused,
             ]),
           ]}
         />
@@ -194,6 +196,8 @@ function StatsView({ s }: { s: Stats }) {
   );
 }
 
-function capUse({ used, cap }: { used: number; cap: number }) {
+/** Never above the cap: what running jobs add past it shows as "(+n finishing)". */
+function capUse({ used, cap, over }: { used: number; cap: number; over: number }) {
+  if (over > 0) return `${used} / ${cap} (+${over} finishing)`;
   return `${used} / ${cap}${used >= cap ? " (full)" : ""}`;
 }

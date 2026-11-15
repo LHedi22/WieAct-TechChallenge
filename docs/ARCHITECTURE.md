@@ -81,7 +81,8 @@ UI ◀── poll GET /api/jobs/{id} ──┤  {status, stage, stages[], queue_
   `ix_jobs_prefetch_unopened` when a student is served the asset or joins its job: studio and
   audio status with content, quiz start on a class set, placement start, Get it now), `hit_rate`
   (opened ÷ done), `time_to_content_s` p50/p95 (0 when it was ready first) and `mid_today`, the
-  three caps used / cap. The UI shows "Being prepared · about N min · place k in line" on the
+  three caps: answered mid calls / cap (never above it; running jobs past it are `over`, "+n
+  finishing"), refused attempts apart. The UI shows "Being prepared · about N min · place k in line" on the
   building dialog, Study Studio, Audio Studio and the island's placement banner (`PreparingNote`).
   Triggers are events, never a polled GET, and each is idempotent: a chapter finishes indexing
   (upload or `REFRESH_CONTENT`: planned if it is one of the course's first two ready chapters

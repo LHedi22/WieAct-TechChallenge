@@ -35,7 +35,7 @@ from datetime import datetime, time
 from typing import Any
 
 from pydantic import BaseModel
-from sqlalchemy import and_, case, func, literal, select
+from sqlalchemy import ColumnElement, Select, and_, case, func, literal, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import economy, flags
@@ -232,10 +232,24 @@ def _day_start() -> datetime:
     return datetime.combine(tunis_day(), time.min, tzinfo=economy.TZ)
 
 
+def _mid_today(*, answered: bool) -> tuple[ColumnElement[bool], ...]:
+    """Prefetch mid calls logged today (Tunis day). Only answered ones count toward the caps: a
+    refused attempt (503, 429, a timeout) used no model time. Cache hits and debug replays are no
+    platform calls."""
+    ok = AICallLog.status_code == 200
+    return (
+        Job.payload["prefetch"].astext == "true",
+        AICallLog.model_tier == "mid",
+        AICallLog.cache_hit.is_(False),
+        AICallLog.debug.is_(False),
+        AICallLog.ts >= _day_start(),
+        ok if answered else or_(AICallLog.status_code.is_(None), ~ok),
+    )
+
+
 async def mid_used(s: AsyncSession, world: World) -> dict[str, int]:
-    """Prefetch mid calls today (Tunis day) for this world, its creator's worlds and the whole
-    app, plus the mid calls still expected from queued prefetch jobs. Cache hits and debug
-    replays are no platform calls."""
+    """Answered prefetch mid calls today (Tunis day) for this world, its creator's worlds and the
+    whole app, plus the mid calls still expected from queued prefetch jobs."""
     is_prefetch = Job.payload["prefetch"].astext == "true"
     scopes = (
         func.count().filter(Job.world_id == world.id),
@@ -248,13 +262,7 @@ async def mid_used(s: AsyncSession, world: World) -> dict[str, int]:
             .select_from(AICallLog)
             .join(Job, Job.id == AICallLog.job_id)
             .join(World, World.id == Job.world_id, isouter=True)
-            .where(
-                is_prefetch,
-                AICallLog.model_tier == "mid",
-                AICallLog.cache_hit.is_(False),
-                AICallLog.debug.is_(False),
-                AICallLog.ts >= _day_start(),
-            )
+            .where(*_mid_today(answered=True))
         )
     ).one()
     queued = (
@@ -294,22 +302,21 @@ def caps() -> dict[str, int]:
 
 async def mid_today(s: AsyncSession) -> dict[str, Any]:
     """The three cap counters for /api/admin/stats: per world, per creator and for the whole app,
-    the same count as `mid_used` (made today + expected from queued prefetch jobs)."""
+    the same count as `mid_used` (answered today + expected from queued prefetch jobs). `used`
+    never reads above the cap: the planner stops there, and what running jobs add past it (a
+    regeneration, a review) is `over`. `refused` counts the refused attempts apart."""
     is_prefetch = Job.payload["prefetch"].astext == "true"
-    made = (
-        select(Job.world_id, World.creator_id, func.count())
-        .select_from(AICallLog)
-        .join(Job, Job.id == AICallLog.job_id)
-        .join(World, World.id == Job.world_id)
-        .where(
-            is_prefetch,
-            AICallLog.model_tier == "mid",
-            AICallLog.cache_hit.is_(False),
-            AICallLog.debug.is_(False),
-            AICallLog.ts >= _day_start(),
+
+    def calls(*, answered: bool) -> Select[Any]:
+        return (
+            select(Job.world_id, World.creator_id, func.count())
+            .select_from(AICallLog)
+            .join(Job, Job.id == AICallLog.job_id)
+            .join(World, World.id == Job.world_id)
+            .where(*_mid_today(answered=answered))
+            .group_by(Job.world_id, World.creator_id)
         )
-        .group_by(Job.world_id, World.creator_id)
-    )
+
     pass_on = get_settings().PREFETCH_QUALITY_PASS
     expected = case((Job.kind == PACK, 2), else_=1) if pass_on else literal(1)
     queued = (
@@ -320,18 +327,30 @@ async def mid_today(s: AsyncSession) -> dict[str, Any]:
     )
     worlds: Counter[uuid.UUID] = Counter()
     creators: Counter[uuid.UUID] = Counter()
-    for q in (made, queued):
+    refused_w: Counter[uuid.UUID] = Counter()
+    refused_c: Counter[uuid.UUID] = Counter()
+    for q, w, c in (
+        (calls(answered=True), worlds, creators),
+        (queued, worlds, creators),
+        (calls(answered=False), refused_w, refused_c),
+    ):
         for world_id, creator_id, n in (await s.execute(q)).all():
-            worlds[world_id] += int(n)
-            creators[creator_id] += int(n)
+            w[world_id] += int(n)
+            c[creator_id] += int(n)
     cap = caps()
+
+    def use(n: int, limit: int, refused: int) -> dict[str, int]:
+        return {"used": min(n, limit), "cap": limit, "over": max(0, n - limit), "refused": refused}
+
     return {
-        "all": {"used": sum(worlds.values()), "cap": cap["all"]},
+        "all": use(sum(worlds.values()), cap["all"], sum(refused_w.values())),
         "worlds": [
-            {"world_id": w, "used": n, "cap": cap["world"]} for w, n in worlds.most_common()
+            {"world_id": w, **use(worlds[w], cap["world"], refused_w[w])}
+            for w, _ in (worlds + refused_w).most_common()
         ],
         "creators": [
-            {"creator_id": c, "used": n, "cap": cap["creator"]} for c, n in creators.most_common()
+            {"creator_id": c, **use(creators[c], cap["creator"], refused_c[c])}
+            for c, _ in (creators + refused_c).most_common()
         ],
     }
 

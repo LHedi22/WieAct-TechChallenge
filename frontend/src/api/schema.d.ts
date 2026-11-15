@@ -2281,6 +2281,10 @@ export interface components {
       used: number;
       /** Cap */
       cap: number;
+      /** Over */
+      over: number;
+      /** Refused */
+      refused: number;
     };
     /** CardCounts */
     CardCounts: {
@@ -2446,6 +2450,10 @@ export interface components {
       used: number;
       /** Cap */
       cap: number;
+      /** Over */
+      over: number;
+      /** Refused */
+      refused: number;
       /**
        * Creator Id
        * Format: uuid
@@ -4106,6 +4114,10 @@ export interface components {
       used: number;
       /** Cap */
       cap: number;
+      /** Over */
+      over: number;
+      /** Refused */
+      refused: number;
       /**
        * World Id
        * Format: uuid
