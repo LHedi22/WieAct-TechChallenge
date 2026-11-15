@@ -33,6 +33,8 @@ from app.core.db import reuse
 from app.core.provenance import servable
 from app.gateway.providers import paused_until
 from app.jobs.service import (
+    P_COURSE_START,
+    P_EXTRA,
     P_NEXT_CHAPTER,
     create_or_join_shared_job,
     eta_s,
@@ -41,6 +43,19 @@ from app.jobs.service import (
 from app.models import Chapter, Course, Document, Job, QuizSet, User
 
 log = logging.getLogger("prefetch")
+
+# Order inside one prefetch set (background lane, lower first; ties run oldest first). Kind
+# names as in each feature's KIND (imported lazily below: features build on jobs).
+PRIORITY = {
+    "PLACEMENT": P_COURSE_START,
+    "QUIZ_POOL": P_NEXT_CHAPTER,
+    "STUDY_PACK": P_NEXT_CHAPTER,
+    "AUDIO_EPISODE": P_EXTRA,
+}
+
+
+def priority(kind: str) -> int:
+    return PRIORITY.get(kind, P_NEXT_CHAPTER)
 
 
 async def next_chapter(s: AsyncSession, chapter: Chapter) -> Chapter | None:
@@ -110,7 +125,7 @@ async def plan_next(s: AsyncSession, user: User, chapter: Chapter, level: str) -
             lane="background",
             payload=payload,
             world_id=course.world_id,
-            priority=P_NEXT_CHAPTER,
+            priority=priority(kind),
         )
         if created:
             queued.append(job_id)

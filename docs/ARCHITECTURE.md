@@ -59,8 +59,9 @@ UI ◀── poll GET /api/jobs/{id} ──┤  {status, stage, stages[], queue_
           coins: reservation committed on success, refunded on failure
 ```
 - Postgres-backed queue: `SELECT … FOR UPDATE SKIP LOCKED`. No Redis, no Celery.
-- Inside a lane, jobs run by `priority` (lower first: 10 a prefetch a student joined, 50
-  next-chapter prefetch, 100 default; migration 0018), then age. One shared class asset has one
+- Inside a lane, jobs run by `priority` (lower first: 10 a prefetch a student joined, 40 a
+  prefetched placement quiz, 50 a prefetched quiz set or study pack, 70 a prefetched audio
+  episode, 100 default; migration 0018, `prefetch.PRIORITY`), then age. One shared class asset has one
   queued/running job (`share_key`); a student who joins a queued background job promotes it to
   the interactive lane. The limiter keeps `LLM_INTERACTIVE_RESERVED` (1) call slot for students:
   background calls use at most concurrency − reserved (min 1), and the worker claims no more

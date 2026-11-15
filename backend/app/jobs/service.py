@@ -26,7 +26,9 @@ HISTORY_JOBS = 20  # finished jobs per kind and lane behind the ETA
 JOB_CALLS = 3  # a kind with no finished job yet: about this many calls (most make 2-4)
 # jobs.priority inside a lane, lower first (Group E, migration 0018)
 P_NEEDED_NOW = 10  # a queued prefetch a student has just joined
+P_COURSE_START = 40  # prefetch of a course's placement quiz: the first screen of a course
 P_NEXT_CHAPTER = 50  # prefetch of the chapter after the one a student is on
+P_EXTRA = 70  # prefetch nobody needs to start studying (audio: first in the scope guard)
 P_DEFAULT = 100
 
 
