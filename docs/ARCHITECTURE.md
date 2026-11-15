@@ -77,6 +77,14 @@ UI ◀── poll GET /api/jobs/{id} ──┤  {status, stage, stages[], queue_
   quiz set), while AI is paused, offline or `pause_background_lane`. The building dialog shows
   "Being prepared · about N min" with "Get it now". CLI: `python -m app.jobs.prefetch --world
   <code>`. Counted on `/api/admin/stats` (`prefetch`).
+  Triggers are events, never a polled GET, and each is idempotent: a chapter finishes indexing
+  (upload or `REFRESH_CONTENT`: planned if it is one of the course's first two ready chapters
+  or a member has a quiz attempt or presence on the chapter before it; one query decides); a
+  member joins with a language new to the world (chapters 1–2 + placement in it); placement
+  finished (the start chapter, the first weak one, at the student's level, and the next);
+  chapter N's quiz finished, a Study/Audio generation started, or a building dialog opened
+  (`POST /api/chapters/{id}/opened {building}`: members only, the level comes from
+  `course_levels`, never the body; no AI call) → chapter N+1.
 - Job stages are human-readable keys (`reading_chapter`, `matching_level`, `writing_questions`,
   `writing_hints`) so the loading screen shows real progress from the backend.
 - If the answer is already cached, the API returns the result directly with `cached=true` and
@@ -205,7 +213,7 @@ a ledger row — never mutate a balance without one.
 
 ## API surface (REST, JSON, cookie session)
 `/api/auth/{signup,login,logout,me,session}` (signed HttpOnly cookie) · `/api/profile` · `/api/onboarding/style`
-`/api/worlds/{id}/map` · `/api/courses/{id}` (island) · `/api/courses/{id}/presence` · `/api/placement/{course_id}`
+`/api/worlds/{id}/map` · `/api/courses/{id}` (island) · `/api/courses/{id}/presence` · `/api/chapters/{id}/opened` (prefetch trigger) · `/api/placement/{course_id}`
 `/api/worlds` (create) · `/api/worlds/join` · `/api/worlds/{id}` (map data) · `/api/worlds/{id}/courses|chapters|documents`
 `/api/jobs/{id}` · `/api/economy` · `/api/wallet` (+ `/demo-purchase`) · `/api/daily` (+ `/seen`: the daily return screen, shown to returning students on their first open of the day) — any paid start without enough coins → `402 errors.insufficient_coins`
 `/api/quiz/price` · `/api/quiz/start` · `/api/quiz/attempts/{id}` (+ `/answer`, `/skip`, `/finish`; `/api/quiz/attempts/from-job/{job}`) · `/api/placement/{start,finish}` · `/api/tutor/start` · `/api/tutor/{id}` (+ `/turn` with action message|hint|another_way|stuck, `/end`)

@@ -14,6 +14,7 @@ from app.features.quiz.router import Price
 from app.features.studio import service, srs
 from app.features.studio.service import Pay, Rejected
 from app.features.worlds.service import NotFound, member_chapter
+from app.jobs import prefetch
 from app.models import QuizAttempt
 
 router = APIRouter(prefix="/api/studio", tags=["studio"])
@@ -150,9 +151,11 @@ async def generate(
 ) -> GenerateOut:
     chapter = await chapter_or_404(s, user, chapter_id)
     try:
-        return GenerateOut(**await service.generate(s, user, chapter, body.level, body.pay))
+        out = GenerateOut(**await service.generate(s, user, chapter, body.level, body.pay))
     except Rejected as e:
         raise http_error(e) from e
+    await prefetch.safely(s, user, chapter, body.level)  # the next chapter, in background
+    return out
 
 
 @router.get("/{chapter_id}/cards", response_model=Queue)

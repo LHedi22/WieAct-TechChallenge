@@ -14,6 +14,7 @@ from app.core import economy
 from app.features.placement import service
 from app.features.worlds.map import course_for_member
 from app.features.worlds.service import NotFound
+from app.jobs import prefetch
 from app.jobs.service import create_or_join_shared_job, share_key
 from app.models import Chapter, Chunk
 
@@ -124,4 +125,11 @@ async def finish(body: FinishIn, s: Session, user: CurrentUser) -> service.Grade
         raise HTTPException(404, "errors.placement_not_ready")
     if len(body.answers) != len(placement.questions):
         raise HTTPException(400, "errors.placement_incomplete")
-    return await service.grade(user.id, course.id, placement, body.answers)
+    graded = await service.grade(user.id, course.id, placement, body.answers)
+    weak = [
+        uuid.UUID(c.chapter_id)
+        for c in graded.chapters
+        if c.asked and 100 * c.correct < service.WEAK_BELOW * c.asked
+    ]
+    await prefetch.guard(s, prefetch.on_placement(s, user, course, graded.level, weak))
+    return graded

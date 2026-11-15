@@ -60,6 +60,8 @@ from app.models import (
     Document,
     Job,
     PlacementSet,
+    Presence,
+    QuizAttempt,
     QuizSet,
     User,
     World,
@@ -374,19 +376,108 @@ async def plan(
     return queued
 
 
+# --- triggers: events only, never a polled GET (each one idempotent) ------------------------------
+
+
 async def precompute_chapter(s: AsyncSession, chapter_id: uuid.UUID) -> list[uuid.UUID]:
-    """A chapter finished indexing (upload or REFRESH_CONTENT). With prefetch on, the planner
-    makes the class's set. With it off, the M2 precompute stays: the chapter's first
-    intermediate quiz set in the creator's language."""
+    """A chapter finished indexing (upload or REFRESH_CONTENT). With prefetch on, it is planned
+    for the whole class if it is one of the course's first two ready chapters, or if a member is
+    already on the chapter before it (a quiz attempt or presence there). With prefetch off, the M2
+    precompute stays: the chapter's first intermediate quiz set in the creator's language."""
     chapter = await s.get(Chapter, chapter_id)
     if chapter is None or not await chapter_ready(s, chapter_id):
         return []
     course = await s.get(Course, chapter.course_id)
-    if get_settings().PREFETCH_ENABLED:
-        return await plan(
-            s, course.world_id, reason="chapter_ready", chapter_id=chapter_id, placement=True
+    if not get_settings().PREFETCH_ENABLED:
+        return [j] if (j := await _first_quiz_set(s, chapter, course)) else []
+    if not await _wanted_now(s, chapter, course.world_id):
+        return []
+    return await plan(
+        s, course.world_id, reason="chapter_ready", chapter_id=chapter_id, placement=True
+    )
+
+
+async def _wanted_now(s: AsyncSession, chapter: Chapter, world_id: uuid.UUID) -> bool:
+    """One query: fewer than FIRST_CHAPTERS ready chapters before it, or a member's quiz attempt
+    or presence on the chapter right before it."""
+    earlier_ready = (
+        select(func.count(func.distinct(Chapter.id)))
+        .join(Document, Document.chapter_id == Chapter.id)
+        .where(
+            Chapter.course_id == chapter.course_id,
+            Chapter.idx < chapter.idx,
+            Document.status == "ready",
         )
-    return [j] if (j := await _first_quiz_set(s, chapter, course)) else []
+        .scalar_subquery()
+    )
+    previous = (
+        select(Chapter.id)
+        .where(Chapter.course_id == chapter.course_id, Chapter.idx < chapter.idx)
+        .order_by(Chapter.idx.desc())
+        .limit(1)
+        .scalar_subquery()
+    )
+    members = select(WorldMember.user_id).where(WorldMember.world_id == world_id)
+    on_previous = (
+        select(QuizAttempt.id)
+        .where(QuizAttempt.chapter_id == previous, QuizAttempt.user_id.in_(members))
+        .exists()
+        | select(Presence.user_id)
+        .where(Presence.chapter_id == previous, Presence.user_id.in_(members))
+        .exists()
+    )
+    return bool(await s.scalar(select((earlier_ready < FIRST_CHAPTERS) | on_previous)))
+
+
+async def on_join(s: AsyncSession, world: World, user: User) -> list[uuid.UUID]:
+    """A new member: if nobody in the world uses their language yet, plan chapters 1–2 and the
+    placement quiz in it (one query decides)."""
+    others = await s.scalar(
+        select(
+            select(User.id)
+            .where(
+                User.id != user.id,
+                User.ui_language == user.ui_language,
+                (User.id == world.creator_id)
+                | User.id.in_(select(WorldMember.user_id).where(WorldMember.world_id == world.id)),
+            )
+            .exists()
+        )
+    )
+    if others:
+        return []
+    return await plan(s, world.id, reason="join", language=user.ui_language)
+
+
+async def on_placement(
+    s: AsyncSession, user: User, course: Course, level: str, weak: list[uuid.UUID]
+) -> list[uuid.UUID]:
+    """Placement finished: the chapter the student starts on (their first weak chapter, else the
+    first ready one) at their level, and the chapter after it."""
+    chapters = await ready_chapters(s, course.id)
+    if not chapters:
+        return []
+    start = next((c for c in chapters if c.id in set(weak)), chapters[0])
+    queued = await plan(
+        s,
+        course.world_id,
+        reason="placement",
+        chapter_id=start.id,
+        level=level,
+        language=user.ui_language,
+    )
+    return queued + await plan_next(s, user, start, level, reason="placement")
+
+
+async def student_level(s: AsyncSession, user: User, course_id: uuid.UUID) -> str:
+    """The level a student was placed at for this course (intermediate before placement); never
+    a level sent by the browser."""
+    level = await s.scalar(
+        select(CourseLevel.level).where(
+            CourseLevel.user_id == user.id, CourseLevel.course_id == course_id
+        )
+    )
+    return level or BASE_LEVEL
 
 
 async def _first_quiz_set(s: AsyncSession, chapter: Chapter, course: Course) -> uuid.UUID | None:
@@ -425,8 +516,11 @@ async def _first_quiz_set(s: AsyncSession, chapter: Chapter, course: Course) -> 
     return job_id if created else None
 
 
-async def plan_next(s: AsyncSession, user: User, chapter: Chapter, level: str) -> list[uuid.UUID]:
-    """Chapter N+1 for this student's level and language."""
+async def plan_next(
+    s: AsyncSession, user: User, chapter: Chapter, level: str, *, reason: str = "next_chapter"
+) -> list[uuid.UUID]:
+    """Chapter N+1 for this student's level and language (a quiz finished, a building opened
+    or a generation started on chapter N)."""
     nxt = await next_chapter(s, chapter)
     if nxt is None:
         return []
@@ -434,7 +528,7 @@ async def plan_next(s: AsyncSession, user: User, chapter: Chapter, level: str) -
     return await plan(
         s,
         course.world_id,
-        reason="next_chapter",
+        reason=reason,
         chapter_id=nxt.id,
         level=level,
         language=user.ui_language,
@@ -443,11 +537,16 @@ async def plan_next(s: AsyncSession, user: User, chapter: Chapter, level: str) -
 
 async def safely(s: AsyncSession, user: User, chapter: Chapter, level: str) -> None:
     """plan_next from a student's request: best effort, never fails the request."""
+    await guard(s, plan_next(s, user, chapter, level))
+
+
+async def guard(s: AsyncSession, planning) -> None:
+    """Run a trigger from a request or a job: best effort, never fails the caller."""
     try:
-        await plan_next(s, user, chapter, level)
+        await planning
     except Exception:  # noqa: BLE001  (prefetch is an optimisation)
         await s.rollback()
-        log.exception("prefetch planning failed for chapter %s", chapter.id)
+        log.exception("prefetch planning failed")
 
 
 async def preparing(s: AsyncSession, job_id: uuid.UUID | None) -> dict[str, Any] | None:

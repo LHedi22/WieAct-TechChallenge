@@ -415,6 +415,29 @@ describe("Entry dialog", () => {
     expect(screen.getByText("From your placement")).toBeInTheDocument();
   });
 
+  it("tells the server which chapter it opened (prefetch trigger), without a level", async () => {
+    const calls = serve({
+      "GET /api/quiz/price": { cost: 0, cached: true },
+      "GET /api/wallet": wallet,
+      "POST /api/chapters/ch1/opened": {},
+    });
+    show(
+      <BuildingDialog
+        island={island}
+        building={{ key: "quiz_hall", cost: 5, free_if_cached: false, answer_cost: null }}
+        onClose={() => undefined}
+        onConfirm={() => undefined}
+      />,
+      "/",
+      "/",
+    );
+    await screen.findByText("Ready");
+    const opened = calls.filter((c) => c.key === "POST /api/chapters/ch1/opened");
+    expect(opened).toEqual([
+      { key: "POST /api/chapters/ch1/opened", body: { building: "quiz_hall" } },
+    ]);
+  });
+
   // Group E: the next chapter is being prefetched in the background; Confirm moves it up.
   it.each([
     ["en" as Language, "Being prepared · about 2 min", "Get it now"],

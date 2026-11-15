@@ -43,6 +43,12 @@ export function BuildingDialog({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  // Tell the server where the student is: it prepares the next chapter in the background.
+  // Best effort and idempotent server-side, so a failure is ignored.
+  useEffect(() => {
+    if (chapterId) api.chapterOpened(chapterId, building.key).catch(() => undefined);
+  }, [chapterId, building.key]);
+
   // Quiz Hall, Study Studio and Audio Studio ask the server before Confirm: free when the class
   // already made it (an unseen quiz set, the study pack, the episode) — DESIGN.md fix 2, ECONOMY.md.
   const PRICES: Record<string, (chapter: string, level: string) => Promise<QuizPrice>> = {

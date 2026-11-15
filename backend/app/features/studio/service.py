@@ -70,7 +70,6 @@ async def status(s: AsyncSession, user: User, chapter: Chapter, level: str) -> d
     _check_level(level)
     language = user.ui_language
     course = await s.get(Course, chapter.course_id)
-    await prefetch.safely(s, user, chapter, level)  # the next chapter, in background
     found = await pack.assets(s, chapter.id, level, language)
     counts = (await queue(s, user, chapter, level))["counts"]
     return {

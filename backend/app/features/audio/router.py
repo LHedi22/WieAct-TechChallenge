@@ -12,6 +12,7 @@ from app.features.audio import service
 from app.features.quiz.router import Price
 from app.features.studio.router import GenerateIn, GenerateOut, chapter_or_404, http_error
 from app.features.studio.service import Rejected
+from app.jobs import prefetch
 
 router = APIRouter(prefix="/api/audio", tags=["audio"])
 
@@ -55,6 +56,8 @@ async def generate(
 ) -> GenerateOut:
     chapter = await chapter_or_404(s, user, chapter_id)
     try:
-        return GenerateOut(**await service.generate(s, user, chapter, body.level, body.pay))
+        out = GenerateOut(**await service.generate(s, user, chapter, body.level, body.pay))
     except Rejected as e:
         raise http_error(e) from e
+    await prefetch.safely(s, user, chapter, body.level)  # the next chapter, in background
+    return out

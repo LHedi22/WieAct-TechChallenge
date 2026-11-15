@@ -1,3 +1,4 @@
+# ruff: noqa: F811  (pytest fixtures imported from other test modules)
 """Background prefetch (decided 2026-11-14): the planner queues what a world's class will open
 next, in the background lane, free and ownerless (user_id None, cost 0, no wallet or pool row):
 per (chapter, level, language) the quiz set, the study pack and the audio episode, per (course,
@@ -11,6 +12,7 @@ import pytest
 from sqlalchemy import func, select, update
 
 from app.core import config, economy, flags
+from app.core.wallet_rules import tunis_day
 from app.features.audio import service as audio
 from app.features.placement import service as placement
 from app.features.quiz import pool as quiz_pool
@@ -332,7 +334,9 @@ async def test_the_next_chapter_for_one_students_level_and_language(api, sm, ppt
     assert await plan(sm, ch1) == []
 
 
-async def test_finishing_a_quiz_and_opening_the_studio_trigger_it(api, sm, pptx, monkeypatch):  # noqa: F811
+async def test_finishing_a_quiz_or_starting_a_generation_plans_the_next_chapter(  # noqa: F811
+    api, sm, pptx, monkeypatch
+):
     _, ch1, ch2 = await two_chapters(api, sm, pptx, monkeypatch)
     start = await api.post(
         "/api/quiz/start", json={"chapter_id": ch1, "level": "intermediate"}, headers=KID
@@ -341,8 +345,180 @@ async def test_finishing_a_quiz_and_opening_the_studio_trigger_it(api, sm, pptx,
     await api.post(f"/api/quiz/attempts/{attempt}/finish", headers=KID)
     kinds = {j.kind for j in await prefetch_jobs(sm, ch2)}
     assert kinds == {"STUDY_PACK", "AUDIO_EPISODE"}  # chapter 2's intermediate set exists
-    await api.get(f"/api/studio/{ch1}", params={"level": "advanced"}, headers=KID)
+    async with sm() as s:  # two paid generations: 30 coins
+        kid = await s.scalar(select(User).where(User.nickname == "NextStep9"))
+        s.add(
+            CoinLedger(
+                user_id=kid.id,
+                day=tunis_day(),
+                bucket="purchased",
+                kind="admin",
+                delta=50,
+                ref="test",
+            )
+        )
+        await s.commit()
+    for building in ("studio", "audio"):
+        r = await api.post(
+            f"/api/{building}/{ch1}/generate", json={"level": "advanced", "pay": "me"}, headers=KID
+        )
+        assert r.status_code == 200, r.text
     assert len(await prefetch_jobs(sm, ch2)) == 5  # + the advanced quiz set, pack and episode
+
+
+async def test_polling_the_studio_or_audio_status_never_plans(api, sm, pptx, monkeypatch):  # noqa: F811
+    _, ch1, ch2 = await two_chapters(api, sm, pptx, monkeypatch)
+    for path in (f"/api/studio/{ch1}", f"/api/audio/{ch1}"):
+        for _ in range(3):
+            assert (
+                await api.get(path, params={"level": "advanced"}, headers=KID)
+            ).status_code == 200
+    assert await prefetch_jobs(sm) == []
+
+
+async def opened(api, chapter, headers=KID, **extra):
+    return await api.post(
+        f"/api/chapters/{chapter}/opened", json={"building": "quiz_hall", **extra}, headers=headers
+    )
+
+
+async def test_opening_a_building_plans_the_next_chapter_at_the_students_own_level(  # noqa: F811
+    api, sm, pptx, monkeypatch
+):
+    world, ch1, ch2 = await two_chapters(api, sm, pptx, monkeypatch)
+    async with sm() as s:
+        calls = await s.scalar(select(func.count()).select_from(AICallLog))
+    r = await opened(api, ch1, level="advanced")  # a forged level is ignored
+    assert r.status_code == 204
+    jobs = await prefetch_jobs(sm)
+    assert what(jobs, ch1, ch2) == {
+        ("STUDY_PACK", "ch2", "intermediate", "fr"),  # KID isn't placed: intermediate
+        ("AUDIO_EPISODE", "ch2", "intermediate", "fr"),
+    }
+    for _ in range(50):
+        assert (await opened(api, ch1)).status_code == 204
+    assert len(await prefetch_jobs(sm)) == 2  # idempotent
+    async with sm() as s:
+        assert await s.scalar(select(func.count()).select_from(AICallLog)) == calls  # no AI call
+        kid = await s.scalar(select(User).where(User.nickname == "NextStep9"))
+        s.add(
+            CourseLevel(
+                user_id=kid.id, course_id=uuid.UUID(world["course"]["id"]), level="beginner"
+            )
+        )
+        await s.commit()
+    await opened(api, ch1)
+    levels = {j.payload["level"] for j in await prefetch_jobs(sm)}
+    assert levels == {"intermediate", "beginner"}  # the placed level, from the database
+
+
+async def test_opened_is_members_only(api, sm, pptx, monkeypatch):  # noqa: F811
+    _, ch1, _ = await two_chapters(api, sm, pptx, monkeypatch)
+    stranger = as_user("Stranger11", "en")
+    r = await opened(api, ch1, headers=stranger)
+    assert (r.status_code, r.json()["detail"]) == (404, "errors.world_not_found")
+    r = await opened(api, str(uuid.uuid4()))
+    assert (r.status_code, r.json()["detail"]) == (404, "errors.world_not_found")
+    bad = await api.post(f"/api/chapters/{ch1}/opened", json={"building": "x"}, headers=KID)
+    assert bad.status_code == 422
+    assert await prefetch_jobs(sm) == []
+
+
+async def test_a_member_with_a_new_language_gets_chapters_one_and_two(api, sm, pptx, monkeypatch):  # noqa: F811
+    world, ch1, ch2 = await two_chapters(api, sm, pptx, monkeypatch)
+    await join(api, world, OWL)  # the first English member
+    jobs = await prefetch_jobs(sm)
+    assert {j.payload["language"] for j in jobs} == {"en"}
+    assert what(jobs, ch1, ch2) >= {
+        ("PLACEMENT", "course", "-", "en"),
+        ("QUIZ_POOL", "ch1", "intermediate", "en"),
+        ("AUDIO_EPISODE", "ch2", "intermediate", "en"),
+    }
+    count = len(jobs)
+    await join(api, world, OWL)  # joining again
+    await join(api, world, as_user("Bird5", "en"))  # English is no longer new
+    await join(api, world, as_user("Bird6", "fr"))  # nor French (the creator's)
+    assert len(await prefetch_jobs(sm)) == count
+
+
+async def test_finishing_placement_plans_the_start_chapter_and_the_next(api, sm, pptx, monkeypatch):  # noqa: F811
+    world, ch1, ch2 = await two_chapters(api, sm, pptx, monkeypatch)
+    course = world["course"]["id"]
+    start = (await api.post("/api/placement/start", json={"course_id": course}, headers=KID)).json()
+    await Worker(sm).drain(timeout_s=60)  # the placement set (KID's own start)
+    questions = (await api.get(f"/api/placement/{course}", headers=KID)).json()["questions"]
+    assert start["job_id"] and questions
+    graded = (
+        await api.post(
+            "/api/placement/finish",
+            json={"course_id": course, "answers": [None] * len(questions)},
+            headers=KID,
+        )
+    ).json()
+    level = graded["level"]
+    jobs = [j for j in await prefetch_jobs(sm) if j.payload.get("level") == level]
+    assert {j.payload["chapter_id"] for j in jobs} == {ch1, ch2}  # start chapter and the next
+    assert {j.payload["reason"] for j in jobs} == {"placement"}
+
+
+async def test_a_later_chapter_is_planned_once_a_member_is_one_chapter_before_it(  # noqa: F811
+    api, sm, pptx, monkeypatch
+):
+    world, ch1, ch2 = await two_chapters(api, sm, pptx, monkeypatch, at_upload=True)
+    r = await api.post(
+        f"/api/courses/{world['course']['id']}/chapters", json={"title": "Trees"}, headers=SEA
+    )
+    ch3 = r.json()["id"]
+    up = await api.post(
+        f"/api/chapters/{ch3}/documents",
+        files={"file": (pptx.name, pptx.read_bytes())},
+        headers=SEA,
+    )
+    assert up.status_code == 202
+    await Worker(sm).drain(timeout_s=60)
+    assert await prefetch_jobs(sm, ch3) == []  # chapter 3, nobody on chapter 2 yet
+    await api.post(
+        "/api/quiz/start", json={"chapter_id": ch2, "level": "intermediate"}, headers=KID
+    )
+    async with sm() as s:
+        queued = await prefetch.precompute_chapter(s, uuid.UUID(ch3))  # e.g. a re-upload
+    assert queued and {j.payload["chapter_id"] for j in await prefetch_jobs(sm, ch3)} == {ch3}
+
+
+async def test_full_journey_queues_each_set_exactly_once(api, sm, pptx, monkeypatch):  # noqa: F811
+    """Upload, a new-language member, a placement and quizzes: the exact jobs, no duplicates."""
+    world, ch1, ch2 = await two_chapters(api, sm, pptx, monkeypatch, at_upload=True)
+    course = world["course"]["id"]
+    kinds = ("QUIZ_POOL", "STUDY_PACK", "AUDIO_EPISODE")
+    assert what(await prefetch_jobs(sm), ch1, ch2) == {
+        ("PLACEMENT", "course", "-", "fr"),
+        *{(k, ch, "intermediate", "fr") for k in kinds for ch in ("ch1", "ch2")},
+    }
+    await join(api, world, OWL)
+    await settle(sm)
+    questions = (await api.get(f"/api/placement/{course}", headers=KID)).json()["questions"]
+    graded = (
+        await api.post(
+            "/api/placement/finish",
+            json={"course_id": course, "answers": [None] * len(questions)},
+            headers=KID,
+        )
+    ).json()
+    level = graded["level"]
+    await settle(sm)
+    start = await api.post("/api/quiz/start", json={"chapter_id": ch1, "level": level}, headers=KID)
+    attempt = start.json()["attempt_id"]
+    await api.post(f"/api/quiz/attempts/{attempt}/finish", headers=KID)
+    for _ in range(3):  # every trigger again: nothing new
+        await opened(api, ch1)
+        await join(api, world, OWL)
+    jobs = await prefetch_jobs(sm)
+    sets = {(k, ch, lv, lang) for k, ch, lv, lang in what(jobs, ch1, ch2) if k != "PLACEMENT"}
+    pairs = {("intermediate", "fr"), ("intermediate", "en"), (level, "fr")}
+    assert sets == {(k, ch, lv, lang) for k in kinds for ch in ("ch1", "ch2") for lv, lang in pairs}
+    assert {lang for k, _, _, lang in what(jobs, ch1, ch2) if k == "PLACEMENT"} == {"fr", "en"}
+    keys = [j.share_key for j in jobs]
+    assert len(keys) == len(set(keys))  # one job per class asset
 
 
 async def test_a_prefetched_pack_waits_for_mid_instead_of_quick_mode(
