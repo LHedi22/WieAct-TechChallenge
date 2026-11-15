@@ -1110,6 +1110,7 @@
     "transcript": "Transcript",
     "darija": "Darija audio comes later: for now, read the transcript below.",
     "noVoice": "Your browser has no voice for this language, so here is the transcript to read.",
+    "voiceError": "The browser's voice stopped. Press Play to try again, or read the transcript below.",
     "make": {
       "title": "Make the audio episode for your class",
       "body": "A 2–3 minute spoken revision of this chapter at this level, written once from your course material and read aloud by your browser. Everyone in your class then listens for free."

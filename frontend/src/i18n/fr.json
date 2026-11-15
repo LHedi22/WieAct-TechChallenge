@@ -1110,6 +1110,7 @@
     "transcript": "Transcription",
     "darija": "L'audio en darija arrive plus tard : pour l'instant, lis la transcription ci-dessous.",
     "noVoice": "Ton navigateur n'a pas de voix pour cette langue : voici la transcription à lire.",
+    "voiceError": "La voix du navigateur s'est arrêtée. Appuie sur Écouter pour réessayer, ou lis la transcription ci-dessous.",
     "make": {
       "title": "Créer l'épisode audio pour ta classe",
       "body": "Une révision parlée de 2 à 3 minutes sur ce chapitre et ce niveau, écrite une seule fois à partir de vos supports et lue par ton navigateur. Ensuite, toute la classe l'écoute gratuitement."
