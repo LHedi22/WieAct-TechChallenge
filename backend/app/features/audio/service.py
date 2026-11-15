@@ -20,7 +20,7 @@ from app.features.studio import pack
 from app.features.studio.service import Pay, Rejected
 from app.gateway import BadOutput, Task, TaskKind
 from app.jobs.registry import JobContext, job
-from app.jobs.service import create_or_join_shared_job, share_key
+from app.jobs.service import create_or_join_shared_job, promote, share_key
 from app.models import Chapter, Course, User
 
 KIND = "AUDIO_EPISODE"
@@ -82,6 +82,7 @@ async def generate(
         return {"job_id": None, "cost": 0, "cached": True}
     job_id = await _pending(s, chapter.id, level, language)
     if job_id:
+        await promote(s, job_id)  # a queued prefetch: the student needs it now (Group E)
         return {"job_id": job_id, "cost": 0, "cached": False}
     course = await s.get(Course, chapter.course_id)
     # the full version of a Quick-mode script is free: the class already paid for the episode

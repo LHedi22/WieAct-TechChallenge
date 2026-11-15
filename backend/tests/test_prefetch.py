@@ -7,12 +7,16 @@ import asyncio
 import uuid
 
 import pytest
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 
 from app.core import economy
 from app.core.config import get_settings
+from app.features.audio import service as audio
+from app.features.placement import service as placement
+from app.features.quiz import pool as quiz_pool
+from app.features.studio import pack as studio_pack
 from app.jobs import prefetch
-from app.jobs.service import P_NEEDED_NOW, P_NEXT_CHAPTER
+from app.jobs.service import P_NEEDED_NOW, P_NEXT_CHAPTER, create_or_join_shared_job, share_key
 from app.jobs.worker import Worker
 from app.models import Chapter, CoinLedger, Job, User
 from tests.test_map import join
@@ -186,3 +190,97 @@ async def test_stats_count_prefetch_jobs_calls_promotions_and_use(api, sm, pptx,
     # mid: the quiz check + the notes; compact: the questions, the cards, the map
     assert pf["calls"]["mid"] >= 2 and pf["calls"]["compact"] >= 3
     assert pf["quiz_sets_used"] == 1
+
+
+# --- Step 2: a student who needs a queued prefetch now promotes it, whatever the building ------
+
+
+async def queue_background(sm, kind: str, key: str, payload: dict, world_id) -> uuid.UUID:
+    async with sm() as s:
+        job_id, created = await create_or_join_shared_job(
+            s,
+            kind=kind,
+            share_key=key,
+            lane="background",
+            payload={**payload, "prefetch": True},
+            world_id=uuid.UUID(world_id),
+            priority=P_NEXT_CHAPTER,
+        )
+    assert created
+    return job_id
+
+
+async def test_every_building_promotes_a_queued_prefetch_for_free(api, sm, pptx):  # noqa: F811
+    world, _, ch2 = await two_chapters(api, sm, pptx)
+    course = world["course"]["id"]
+    one = {"chapter_id": ch2, "level": "advanced", "language": "fr"}
+    jobs = {
+        "quiz": await queue_background(
+            sm,
+            quiz_pool.KIND,
+            quiz_pool.share(uuid.UUID(ch2), "advanced", "fr"),
+            {**one, "seed": 1},
+            world["id"],
+        ),
+        "studio": await queue_background(
+            sm,
+            studio_pack.KIND,
+            share_key(studio_pack.KIND, uuid.UUID(ch2), "advanced", "fr"),
+            {**one, "paid_by": None},
+            world["id"],
+        ),
+        "audio": await queue_background(
+            sm,
+            audio.KIND,
+            share_key(audio.KIND, uuid.UUID(ch2), "advanced", "fr"),
+            {**one, "paid_by": None},
+            world["id"],
+        ),
+        "placement": await queue_background(
+            sm,
+            placement.KIND,
+            share_key(placement.KIND, uuid.UUID(course), "fr"),
+            {"course_id": course, "language": "fr"},
+            world["id"],
+        ),
+    }
+    async with sm() as s:
+        coin_rows = await s.scalar(select(func.count()).select_from(CoinLedger))
+    level = {"level": "advanced"}
+    calls = {
+        "quiz": ("/api/quiz/start", {"chapter_id": ch2, **level}),
+        "studio": (f"/api/studio/{ch2}/generate", {**level, "pay": "me"}),
+        "audio": (f"/api/audio/{ch2}/generate", {**level, "pay": "me"}),
+        "placement": ("/api/placement/start", {"course_id": course}),
+    }
+    for name, (path, body) in calls.items():
+        got = (await api.post(path, json=body, headers=KID)).json()
+        assert (got["job_id"], got["cost"]) == (str(jobs[name]), 0), (name, got)
+    async with sm() as s:
+        for name, job_id in jobs.items():
+            j = await s.get(Job, job_id)
+            assert (j.lane, j.priority, j.user_id, j.cost) == (
+                "interactive",
+                P_NEEDED_NOW,
+                None,
+                0,
+            ), name
+            assert any(e["type"] == "promoted" for e in j.events), name
+        assert await s.scalar(select(func.count()).select_from(CoinLedger)) == coin_rows
+
+
+async def test_a_running_prefetch_keeps_its_lane_and_priority(api, sm, pptx):  # noqa: F811
+    world, _, ch2 = await two_chapters(api, sm, pptx)
+    one = {"chapter_id": ch2, "level": "advanced", "language": "fr", "paid_by": None}
+    key = share_key(audio.KIND, uuid.UUID(ch2), "advanced", "fr")
+    job_id = await queue_background(sm, audio.KIND, key, one, world["id"])
+    async with sm() as s:
+        await s.execute(update(Job).where(Job.id == job_id).values(status="running"))
+        await s.commit()
+    got = await api.post(
+        f"/api/audio/{ch2}/generate", json={"level": "advanced", "pay": "me"}, headers=KID
+    )
+    assert (got.json()["job_id"], got.json()["cost"]) == (str(job_id), 0)
+    async with sm() as s:
+        j = await s.get(Job, job_id)
+        assert (j.lane, j.priority) == ("background", P_NEXT_CHAPTER)  # its calls are under way
