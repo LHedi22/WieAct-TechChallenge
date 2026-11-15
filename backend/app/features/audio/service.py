@@ -18,10 +18,17 @@ from app.features.quiz.pool import chapter_context
 from app.features.quiz.service import LEVELS
 from app.features.studio import pack
 from app.features.studio.service import Pay, Rejected
+from app.features.wallet import service as wallet
 from app.gateway import BadOutput, Task, TaskKind
 from app.jobs import prefetch
 from app.jobs.registry import JobContext, job
-from app.jobs.service import create_or_join_shared_job, mark_opened, promote, share_key
+from app.jobs.service import (
+    create_or_join_shared_job,
+    mark_opened,
+    paid_job,
+    promote,
+    share_key,
+)
 from app.models import Chapter, Course, User
 
 KIND = "AUDIO_EPISODE"
@@ -61,7 +68,9 @@ async def status(s: AsyncSession, user: User, chapter: Chapter, level: str) -> d
     course = await s.get(Course, chapter.course_id)
     found = await pack.assets(s, chapter.id, level, language)
     if ASSET in found:  # served: a prefetch that made it was used (step 8 stats)
-        await mark_opened(s, share_key(KIND, chapter.id, level, language))
+        key = share_key(KIND, chapter.id, level, language)
+        await mark_opened(s, key)
+        await wallet.share_back(s, await paid_job(s, key), user.id)  # first-payer refund
     return {
         "chapter_id": chapter.id,
         "level": level,

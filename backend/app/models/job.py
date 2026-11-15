@@ -32,6 +32,12 @@ class Job(Base):
             "share_key",
             postgresql_where=text("opened_at IS NULL AND (payload ->> 'prefetch') = 'true'"),
         ),
+        # Shared jobs a student paid for: the first-payer refund's lookup (migration 0020).
+        Index(
+            "ix_jobs_paid_share",
+            "share_key",
+            postgresql_where=text("status = 'done' AND cost > 0 AND user_id IS NOT NULL"),
+        ),
     )
 
     id: Mapped[uuid.UUID] = uuid_pk()

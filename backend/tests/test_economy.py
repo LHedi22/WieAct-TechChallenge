@@ -14,6 +14,7 @@ def test_numbers_match_economy_md():
     assert economy.EARN["daily_challenge"] == 3 and economy.EARN["peer_answer_good"] == 3
     assert economy.BUILDINGS["socratic_tutor"]["cost"] == 8  # mockup said 3 (DESIGN.md fix 2)
     assert economy.EXAM_PASS_DAILY_LIMIT == 15
+    assert economy.FIRST_PAYER_REFUND_OPENS == 3 and economy.FIRST_PAYER_REFUND_SHARE == (2, 3)
 
 
 def test_refill_is_next_tunis_midnight():

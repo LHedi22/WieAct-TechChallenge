@@ -16,9 +16,16 @@ from app.features.daily import service as daily
 from app.features.pool import service as pool
 from app.features.quiz.service import LEVELS
 from app.features.studio import pack, srs
+from app.features.wallet import service as wallet
 from app.features.worlds.service import NotFound, member_chapter
 from app.jobs import prefetch
-from app.jobs.service import create_or_join_shared_job, mark_opened, promote, share_key
+from app.jobs.service import (
+    create_or_join_shared_job,
+    mark_opened,
+    paid_job,
+    promote,
+    share_key,
+)
 from app.models import (
     Chapter,
     Course,
@@ -72,7 +79,9 @@ async def status(s: AsyncSession, user: User, chapter: Chapter, level: str) -> d
     course = await s.get(Course, chapter.course_id)
     found = await pack.assets(s, chapter.id, level, language)
     if "notes" in found:  # served: a prefetch that made it was used (step 8 stats)
-        await mark_opened(s, share_key(pack.KIND, chapter.id, level, language))
+        key = share_key(pack.KIND, chapter.id, level, language)
+        await mark_opened(s, key)
+        await wallet.share_back(s, await paid_job(s, key), user.id)  # first-payer refund
     counts = (await queue(s, user, chapter, level))["counts"]
     return {
         "chapter_id": chapter.id,

@@ -4,7 +4,7 @@ from app.models.arena import PeerAnswer, PeerQuestion, PeerVote
 from app.models.base import Base
 from app.models.course import Chapter, Course
 from app.models.daily import DailyState, WisdomTip
-from app.models.economy import CoinLedger, PointsLedger
+from app.models.economy import AssetOpen, CoinLedger, PointsLedger
 from app.models.job import Job
 from app.models.learner import ChapterMastery, CourseLevel, PlacementSet, Presence, Profile
 from app.models.rag import Chunk, Document, QuizSet
@@ -23,6 +23,7 @@ __all__ = [
     "StudyAsset",
     "DailyState",
     "WisdomTip",
+    "AssetOpen",
     "CoinLedger",
     "PointsLedger",
     "PeerAnswer",

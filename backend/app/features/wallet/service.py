@@ -5,6 +5,8 @@
 - reserve when a paid job is created (spending order free → earned → purchased, or a 0-coin `pass`
   use while an Exam Pass is active), refund by reversing exactly those rows; commit is a no-op.
 - earned coins are capped per day; points are idempotent per (reason, ref).
+- first-payer refund: once FIRST_PAYER_REFUND_OPENS classmates opened a class asset a student
+  paid for, the payer gets FIRST_PAYER_REFUND_SHARE of those coins back (`share_back`, once).
 Every write for one user runs under a per-user advisory lock so two tabs can't overspend.
 """
 
@@ -20,7 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import economy
 from app.core.wallet_rules import capped_earn, split_spend, streak, tunis_day
-from app.models import CoinLedger, Job, PointsLedger
+from app.models import AssetOpen, CoinLedger, Job, PointsLedger
 
 
 class InsufficientCoins(Exception):
@@ -225,6 +227,57 @@ async def refund(s: AsyncSession, job: Job) -> None:
                 index_elements=["ref", "bucket"], index_where=text("kind = 'refund'")
             )
         )
+
+
+async def share_back(
+    s: AsyncSession, job: Job | None, opener_id: uuid.UUID, now: datetime | None = None
+) -> int:
+    """A classmate was served the class asset this paid job made: count them once, and at
+    FIRST_PAYER_REFUND_OPENS classmates give the payer FIRST_PAYER_REFUND_SHARE of the coins the
+    job spent, as one `share_back` row in the earned bucket (a rebate, not an earning: outside
+    the daily earn cap). Prefetched, Class Pool and Exam Pass jobs spent no coins: nothing back.
+    Returns the coins credited."""
+    if job is None or job.user_id is None or job.user_id == opener_id or job.cost <= 0:
+        return 0
+    added = await s.execute(
+        insert(AssetOpen).values(job_id=job.id, user_id=opener_id).on_conflict_do_nothing()
+    )
+    if not added.rowcount:
+        return 0  # this classmate already counted: nothing else to do on a repeat visit
+    opens = await s.scalar(select(func.count()).where(AssetOpen.job_id == job.id))
+    credited = 0
+    if opens >= economy.FIRST_PAYER_REFUND_OPENS:
+        await _lock(s, job.user_id)
+        paid = -int(
+            await s.scalar(
+                select(func.coalesce(func.sum(CoinLedger.delta), 0)).where(
+                    CoinLedger.ref == str(job.id),
+                    CoinLedger.user_id == job.user_id,
+                    CoinLedger.kind.in_(("spend", "refund")),
+                    CoinLedger.bucket.in_(economy.SPENDING_ORDER),
+                )
+            )
+        )
+        num, den = economy.FIRST_PAYER_REFUND_SHARE
+        if paid * num // den > 0:
+            done = await s.execute(
+                insert(CoinLedger)
+                .values(
+                    id=uuid.uuid4(),
+                    user_id=job.user_id,
+                    day=tunis_day(_now(now)),
+                    bucket="earned",
+                    kind="share_back",
+                    delta=paid * num // den,
+                    ref=str(job.id),
+                )
+                .on_conflict_do_nothing(
+                    index_elements=["ref"], index_where=text("kind = 'share_back'")
+                )
+            )
+            credited = paid * num // den if done.rowcount else 0
+    await s.commit()
+    return credited
 
 
 async def earn(

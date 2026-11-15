@@ -10,7 +10,8 @@ from app.models.base import Base, created_at, uuid_pk
 class CoinLedger(Base):
     """Every coin change is a row (docs/ECONOMY.md); balances are sums, never a mutable column.
     bucket: free | earned | purchased | pass.
-    kind: daily | earned | purchased | spend | refund | pass.
+    kind: daily | earned | purchased | spend | refund | pass | admin | share_back (the first-payer
+    refund, once per paid job: ref = the job id).
     `day` is the Tunis day the row counts for: free coins only count on their own day, and a refund
     keeps the day of the spend it reverses."""
 
@@ -30,6 +31,12 @@ class CoinLedger(Base):
             "bucket",
             unique=True,
             postgresql_where=text("kind = 'refund'"),
+        ),
+        Index(
+            "uq_coin_ledger_share_back",
+            "ref",
+            unique=True,
+            postgresql_where=text("kind = 'share_back'"),
         ),
     )
 
@@ -59,4 +66,19 @@ class PointsLedger(Base):
     delta: Mapped[int] = mapped_column(Integer)
     reason: Mapped[str] = mapped_column(String(32))
     ref: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = created_at()
+
+
+class AssetOpen(Base):
+    """A classmate opened a class asset another student paid for (the first-payer refund counts
+    distinct classmates per paid job). One row per (job, student)."""
+
+    __tablename__ = "asset_opens"
+
+    job_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("jobs.id", ondelete="CASCADE"), primary_key=True
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
     created_at: Mapped[datetime] = created_at()

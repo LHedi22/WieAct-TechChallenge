@@ -171,6 +171,23 @@ async def mark_opened(s: AsyncSession, share_key: str) -> None:
         await s.commit()
 
 
+async def paid_job(
+    s: AsyncSession, share_key: str, *, quiz_set_id: uuid.UUID | None = None
+) -> Job | None:
+    """The finished job a student paid for that made this class asset (`ix_jobs_paid_share`), or
+    None (made by a prefetch, the upload, or not at all). A quiz key covers every set of the
+    chapter, so a quiz set names its own job by the set id in the job's result."""
+    q = select(Job).where(
+        Job.share_key == share_key,
+        Job.status == "done",
+        Job.cost > 0,
+        Job.user_id.is_not(None),
+    )
+    if quiz_set_id is not None:
+        q = q.where(Job.result["quiz_set_id"].astext == str(quiz_set_id))
+    return await s.scalar(q.order_by(Job.finished_at.desc()).limit(1))
+
+
 async def promote(s: AsyncSession, job_id: uuid.UUID) -> bool:
     """A student needs this queued background job now: move it to the interactive lane at
     P_NEEDED_NOW. A running job keeps its lane (its calls are already under way)."""

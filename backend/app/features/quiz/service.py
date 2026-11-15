@@ -19,7 +19,7 @@ from app.features.daily import service as daily
 from app.features.quiz import pool
 from app.features.wallet import service as wallet
 from app.jobs import prefetch
-from app.jobs.service import create_job, create_or_join_shared_job, mark_opened
+from app.jobs.service import create_job, create_or_join_shared_job, mark_opened, paid_job
 from app.models import (
     Chapter,
     ChapterMastery,
@@ -95,7 +95,9 @@ async def start(s: AsyncSession, user: User, chapter: Chapter, level: str) -> di
     found = await unseen_set(s, user, chapter.id, level, language)
     if found:
         attempt = await create_attempt(s, user, found, course)
-        await mark_opened(s, pool.share(chapter.id, level, language))  # step 8 stats
+        key = pool.share(chapter.id, level, language)
+        await mark_opened(s, key)  # step 8 stats
+        await wallet.share_back(s, await paid_job(s, key, quiz_set_id=found.id), user.id)
         return {"attempt_id": attempt.id, "job_id": None, "cost": 0, "cached": True}
     # A classmate is already generating this chapter + level + language: share that job. The
     # key names "the next set", whatever seed the creator picks (audit OPT-01); joining is free.
@@ -156,7 +158,9 @@ async def attempt_from_job(s: AsyncSession, user: User, job: Job) -> QuizAttempt
         raise Rejected("errors.quiz_not_ready", 409)
     chapter = await s.get(Chapter, qs.chapter_id)
     course = await s.get(Course, chapter.course_id)
-    return await create_attempt(s, user, qs, course)
+    attempt = await create_attempt(s, user, qs, course)
+    await wallet.share_back(s, job, user.id)  # a classmate who joined the paid job
+    return attempt
 
 
 # --- the attempt ---------------------------------------------------------------------------------
