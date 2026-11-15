@@ -126,7 +126,7 @@ async def generate(ctx: JobContext) -> dict[str, Any]:
         await gateway.run(
             Task(
                 kind=TaskKind.PLACEMENT_QUIZ,
-                lane="interactive",
+                lane=ctx.lane,  # a prefetch runs in the background lane (no Quick-mode fallback)
                 messages=messages,
                 language=language,
                 cache_key=f"placement:{course_id}:{language}:{text_hash(context)}",  # OPT-17
@@ -148,7 +148,7 @@ async def generate(ctx: JobContext) -> dict[str, Any]:
         course=course.name,
         chapter=course.name,
         language=language,
-        lane="interactive",
+        lane=ctx.lane,
     )
     if ok is None:
         raise Defer(VERIFY_RETRY_S, "verify_unavailable")

@@ -77,9 +77,9 @@ async def refresh_content(ctx: JobContext) -> dict[str, Any]:
             await embed_document(doc, course.name, chapter.title, rows)
             embedded += 1
         chapters.add(chapter.id)  # its pool is queued only if no servable set exists
-    from app.features.quiz.pool import maybe_precompute  # noqa: PLC0415 (avoid an import cycle)
+    from app.rag.indexing import _precompute  # noqa: PLC0415
 
     for chapter_id in chapters:
-        await maybe_precompute(chapter_id)
+        await _precompute(chapter_id)
     log.info("refresh to %s: %d re-tagged, %d embedded", target, retagged, embedded)
     return {"provider": target, "documents": len(docs), "retagged": retagged, "embedded": embedded}

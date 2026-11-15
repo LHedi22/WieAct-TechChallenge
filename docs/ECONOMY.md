@@ -55,6 +55,16 @@ SPENDING_ORDER = ["free", "earned", "purchased"]   # burn expiring coins first
 - Exam Pass active → activities cost 0 up to `EXAM_PASS_DAILY_LIMIT = 15` AI activities/day
   (a *high daily limit*, never "unlimited" — the platform quota is finite).
 - Class Pool: members transfer coins to `class_pool`; shared asset generation can be paid from it.
+- **Prefetched content is free when opened** (`COST["cached_content"]`, decided 2026-11-14). The
+  prefetch planner (`app/jobs/prefetch.py`) makes the class's quiz sets, study packs, audio
+  episodes and placement quizzes in the background: chapters 1–2 when indexed, then one chapter
+  ahead of the students, in the languages the world's members use, at intermediate plus each placed
+  member's own level. Prefetch jobs have no owner and cost 0: they never reserve from a wallet or
+  the Class Pool, so a student who opens one, or joins one still queued ("Get it now"), pays 0.
+  Coins still pay for what nobody prefetched: another level or language, more quiz sets of a
+  chapter, and the Exam Pass. Spend is bounded by mid calls, not coins:
+  `PREFETCH_MAX_MID_PER_WORLD_PER_DAY` (40), `PREFETCH_MAX_MID_PER_CREATOR_PER_DAY` (40),
+  `PREFETCH_MAX_MID_PER_DAY` (120).
 
 ## Day examples (for the report)
 - Normal day: 1 quiz (5) + 1 tutor (8) = 13 ≤ 20 free.

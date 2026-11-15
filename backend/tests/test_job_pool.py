@@ -9,11 +9,11 @@ import uuid
 import pytest
 from sqlalchemy import select
 
-from app.core import db, flags
+from app.core import config, db, flags
 from app.jobs import demo, prefetch
 from app.jobs import service as jobs_service
 from app.jobs.service import create_job, create_or_join_shared_job
-from app.models import Chapter, User
+from app.models import User
 
 
 def no_second_session():
@@ -34,11 +34,12 @@ async def test_creating_a_job_reads_the_switches_through_the_callers_session(sm,
         await create_or_join_shared_job(s, kind=demo.KIND, share_key="P:1", lane="background")
 
 
-async def test_prefetch_planning_too(sm, one_session_only):
+async def test_prefetch_planning_too(sm, one_session_only, monkeypatch):
+    monkeypatch.setenv("PREFETCH_ENABLED", "true")  # off by default in tests
+    config.get_settings.cache_clear()
     async with sm() as s:
         user = User(nickname=f"pool{uuid.uuid4().hex[:6]}", password_hash="x", ui_language="en")
         s.add(user)
         await s.flush()
-        chapter = Chapter(id=uuid.uuid4(), course_id=uuid.uuid4(), idx=1, title="t")
-        assert await prefetch.plan_next(s, user, chapter, "beginner") == []
+        assert await prefetch.plan(s, uuid.uuid4(), reason="test") == []  # reads the switches
         assert await s.scalar(select(User.id).where(User.id == user.id))

@@ -27,8 +27,8 @@ from app.features.quiz import verify
 from app.gateway import BadOutput, Task, TaskKind
 from app.gateway.cache import text_hash
 from app.jobs.registry import JobContext, job
-from app.jobs.service import create_or_join_shared_job, share_key
-from app.models import Chapter, Chunk, Course, Document, Job, QuizSet, User, World
+from app.jobs.service import share_key
+from app.models import Chapter, Chunk, Course, Job, QuizSet
 from app.rag.search import search
 
 KIND = "QUIZ_POOL"
@@ -198,47 +198,6 @@ async def pending_generation(s, chapter_id: uuid.UUID, level: str, language: str
             Job.payload["language"].astext == language,
         )
     )
-
-
-async def maybe_precompute(chapter_id: uuid.UUID) -> uuid.UUID | None:
-    """When every document of the chapter is ready, queue the first set once (background lane)."""
-    async with db.get_sessionmaker()() as s:
-        statuses = list(
-            await s.scalars(select(Document.status).where(Document.chapter_id == chapter_id))
-        )
-        if not statuses or any(st not in ("ready", "failed") for st in statuses):
-            return None
-        if "ready" not in statuses:
-            return None
-        chapter = await s.get(Chapter, chapter_id)
-        course = await s.get(Course, chapter.course_id)
-        world = await s.get(World, course.world_id)
-        creator = await s.get(User, world.creator_id)
-        language = creator.ui_language if creator else "en"
-        exists = await s.scalar(
-            select(QuizSet.id).where(
-                QuizSet.chapter_id == chapter_id,
-                QuizSet.level == POOL_LEVEL,
-                QuizSet.language == language,
-                servable(QuizSet.provider),
-            )
-        )
-        if exists or await pending_generation(s, chapter_id, POOL_LEVEL, language):
-            return None
-        job_id, _ = await create_or_join_shared_job(
-            s,
-            kind=KIND,
-            share_key=share(chapter_id, POOL_LEVEL, language),
-            lane="background",
-            payload={
-                "chapter_id": str(chapter_id),
-                "level": POOL_LEVEL,
-                "language": language,
-                "seed": 1,
-            },
-            world_id=world.id,
-        )
-        return job_id
 
 
 async def chapter_context(

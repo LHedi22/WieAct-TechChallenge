@@ -62,6 +62,9 @@ def isolated_settings(monkeypatch, tmp_path):
     # Runtime switches live in UPLOAD_DIR (provider choice, force-Quick): never the developer's
     monkeypatch.setenv("UPLOAD_DIR", str(tmp_path / "uploads"))
     monkeypatch.setenv("MOCK_BASE_URL", "http://mock/v1")
+    # Prefetch queues class content after every upload and quiz: off unless a test is about it
+    # (tests/test_prefetch.py), so other tests count only the calls they make themselves.
+    monkeypatch.setenv("PREFETCH_ENABLED", "false")
     config.get_settings.cache_clear()
     flags.invalidate()  # runtime switches are cached per process for ~3 s
     economy_live.reset()  # admin economy overrides are applied to the economy module

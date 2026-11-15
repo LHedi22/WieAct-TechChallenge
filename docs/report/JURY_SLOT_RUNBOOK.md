@@ -37,9 +37,13 @@ Offline demo mode serves only results the platform already produced (DEPLOY.md �
 Check: sign out, switch Offline demo mode on in `/admin`, and open placement in each of the 4
 languages. It must open from the cache.
 
-Prefetch (`PREFETCH_ENABLED`, on by default) also makes chapter 2's quiz set and pack when step 1c
-opens the studio on chapter 1: up to 2 + 3 requests (≈ 2 mid) per level × language. That warms
-the offline cache further; set it to `false` before the slot if quota is tight.
+Prefetch (`PREFETCH_ENABLED`, on by default) runs **only while the key is live**: outside the
+slot it plans nothing. Run the planner once in the slot, before the demo, so the class finds
+chapters 1–2 ready in every member language (quiz set, study pack, audio, placement):
+`docker compose exec backend uv run python -m app.jobs.prefetch --world <join code>`. It only
+queues jobs (no call itself) and prints the mid used today against the three caps. One set
+(chapter × level × language) is ≈ 7 requests, 3 mid; placement 2 requests, 1 mid per language.
+Set it to `false` before the slot if quota is tight.
 
 ## 2. Evidence for the report and the pitch
 

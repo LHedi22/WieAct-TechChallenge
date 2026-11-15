@@ -97,8 +97,12 @@ class Settings(BaseSettings):
     LLM_MAX_CONCURRENCY: int = 2
     # Call slots kept for students: background calls use at most concurrency - this (min 1).
     LLM_INTERACTIVE_RESERVED: int = 1
-    # Queue the next chapter's quiz set and study pack in the background (app/jobs/prefetch.py).
+    # Make what the class opens next in the background, free when opened (app/jobs/prefetch.py).
     PREFETCH_ENABLED: bool = True
+    # Mid calls prefetch may spend per Tunis day: per world, per creator (all their worlds), app
+    PREFETCH_MAX_MID_PER_WORLD_PER_DAY: int = 40
+    PREFETCH_MAX_MID_PER_CREATOR_PER_DAY: int = 40
+    PREFETCH_MAX_MID_PER_DAY: int = 120
     # Embeddings are metered separately (own quota); they share the per-key concurrency limit
     LLM_EMBED_MAX_RPM: int = 18
     LLM_SLOT_GROUP: Literal["A", "B"] = "A"

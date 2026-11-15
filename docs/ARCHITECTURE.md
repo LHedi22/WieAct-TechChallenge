@@ -66,11 +66,17 @@ UI ◀── poll GET /api/jobs/{id} ──┤  {status, stage, stages[], queue_
   the interactive lane. The limiter keeps `LLM_INTERACTIVE_RESERVED` (1) call slot for students:
   background calls use at most concurrency − reserved (min 1), and the worker claims no more
   background jobs than that, so the background ETA counts one background job at a time.
-- **Prefetch** (`app/jobs/prefetch.py`): finishing a quiz or opening the Study Studio on chapter N
-  queues chapter N+1's quiz set and study pack for the student's level and language (background,
-  priority 50, ownerless, cost 0), unless they exist or are queued. Free when opened; the building
-  dialog shows "Being prepared · about N min" with "Get it now" while it runs. Off while AI is
-  paused or with `PREFETCH_ENABLED=false`. Counted on `/api/admin/stats` (`prefetch`).
+- **Prefetch** (`app/jobs/prefetch.py`, decided 2026-11-14): `plan(s, world_id, *, reason,
+  chapter_id, level, language)` queues what the class will open and nobody has made: per
+  (chapter, level, language) the quiz set, study pack and audio episode, per (course, language)
+  the placement quiz. Languages: the members'; levels: intermediate for every language plus each
+  placed member's level in their language; chapters: 1–2 when indexed, then N+1 as students reach
+  N. Background lane, ownerless, cost 0 (free when opened); placement 40, quiz and pack 50, audio
+  70. Three daily mid caps (per world 40, per creator 40, app 120) drop audio first, then packs.
+  Off with `PREFETCH_ENABLED=false` (an upload then still makes the chapter's first intermediate
+  quiz set), while AI is paused, offline or `pause_background_lane`. The building dialog shows
+  "Being prepared · about N min" with "Get it now". CLI: `python -m app.jobs.prefetch --world
+  <code>`. Counted on `/api/admin/stats` (`prefetch`).
 - Job stages are human-readable keys (`reading_chapter`, `matching_level`, `writing_questions`,
   `writing_hints`) so the loading screen shows real progress from the backend.
 - If the answer is already cached, the API returns the result directly with `cached=true` and

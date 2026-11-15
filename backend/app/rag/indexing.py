@@ -87,6 +87,14 @@ def upload_path(doc: Document) -> Path:
 UNIT = {"pdf": "page", "pptx": "slide", "docx": "section", "txt": "part", "image": "image"}
 
 
+async def _precompute(chapter_id: uuid.UUID) -> None:
+    """The chapter's material is indexed: queue what the class will open (app/jobs/prefetch.py)."""
+    from app.jobs import prefetch  # noqa: PLC0415 (avoid an import cycle)
+
+    async with db.get_sessionmaker()() as s:
+        await prefetch.precompute_chapter(s, chapter_id)
+
+
 async def _update_doc(doc_id: uuid.UUID, **values: Any) -> None:
     async with db.get_sessionmaker()() as s:
         await s.execute(update(Document).where(Document.id == doc_id).values(**values))
@@ -316,7 +324,5 @@ async def index_document(ctx: JobContext) -> dict[str, Any]:
         raise
 
     await _update_doc(doc_id, status="ready", progress=P_EMBED, detail=None, error=None)
-    from app.features.quiz.pool import maybe_precompute  # noqa: PLC0415 (avoid an import cycle)
-
-    await maybe_precompute(chapter.id)
+    await _precompute(chapter.id)
     return {"document_id": str(doc_id), "chunks": len(rows), "provider": provider}
