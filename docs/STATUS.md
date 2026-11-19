@@ -1,4 +1,7 @@
-# What's still missing — as of 1 Nov 2026
+# What's still missing — as of 15 Nov 2026
+
+> The team slots ended on 10 Nov. Everything under §2 now runs in the jury demo slot, in the
+> order of `docs/report/JURY_SLOT_RUNBOOK.md` (`scripts/jury_slot.py` prints it).
 
 Deadline **Tue 10 Nov** (report + repo + 90 s video); record the demo by **Mon 9 Nov**. M0–M7 are
 built and pass their Done-when checks on the mock. Remaining work, most urgent first. Details
@@ -20,7 +23,8 @@ Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
 - [ ] **First thing in the slot:** `docker compose exec backend uv run python -m app.evals slot --cloud`
       (with `LLM_PROVIDER=cloud` in `.env`, then `docker compose restart backend worker`). It runs
       study pack, audio, daily plan, Teach-Back (solid + partial answer) in EN, FR, AR and Darija
-      plus one Class Wisdom tip: about 30 calls, 17 mid, ~10–20 min. Outputs go to
+      plus one Class Wisdom tip: about 35 calls, 13 mid (14 Nov: daily plans on compact,
+      glossary calls added), ~10–20 min. Outputs go to
       `backend/tests/evals/slot/outputs/cloud-*.json`; then `python3 scripts/export_stats.py`
       on the host. Tested on the mock only (31/10). Afterwards switch back with
       `python3 scripts/llm.py use mock` (or `auto`).
@@ -32,12 +36,18 @@ Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
       Also review `scripts/out/probe-cloud-20261030-1806.json`; check Darija by hand.
 - [ ] Watch for prompts that small models break (JSON validity on `llama3.2-3b`; the probe said
       `qwen2.5-3b` failed quiz JSON, ours passed).
-- [ ] Load test against cloud once: `scripts/load.py --jobs 10 --faults ""` with the backend on
-      `LLM_PROVIDER=cloud`, then `scripts/export_stats.py --load <saved output>`.
+- [ ] Load test against cloud once: `scripts/load_class.py --code <join code> --chapter <id>
+      --students 10 --cloud` (real sign-ups and features; `load.py` only drives the mock, OPT-30)
+      with the backend on `LLM_PROVIDER=cloud`, then `scripts/export_stats.py --load <saved output>`.
 - [x] Record the real quota signal (9/11): quota headers on every 200 are `x-ratelimit-api_key-{remaining,limit}-{requests,max_parallel_requests}` and
       `x-litellm-key-rpm-limit` → DECISIONS.md 2026-11-09.
   - [ ] Still unseen: the status code for "team quota exhausted".
   - [x] `quota.py` no longer reads `remaining-max_parallel_requests` as requests remaining (9/11; it could pause the background lane).
+- [ ] **Prefetch the demo world** right after the slot run, before the warm-up:
+      `docker compose exec backend uv run python -m app.jobs.prefetch --world <join code>` (queues
+      only; the worker makes the calls). Prefetch runs only while the key is live, so nothing is
+      prepared outside the slot. Check `/admin/stats` → Prefetch (mid today under the caps, hit
+      rate later). Quality pass stays off unless the mid share stays under 40 % (runbook).
 - [ ] Warm up the deployed class cache (DEPLOY.md §4) so offline demo mode has real content.
 - [ ] User test with ~10 students at once; export stats for the report.
 - [ ] Record the demo video (`docs/report/VIDEO.md` shot list).
@@ -107,6 +117,11 @@ Check with `python3 scripts/slot.py`. On macOS, prefix the stdlib scripts with
       `scripts/debug_bundle.py`; `/fix-bug` + `bug-fixer` agent (CLAUDE.md §Fixing a bug).
       Migration 0016. **Keep prompt traces off during the user test and the demo** (they store
       course text and student answers for 24 h; the switch turns itself off after ≤ 120 min).
+- [x] **Background prefetch** (15/11, branch `fix/opt-audit-prefetch`, not merged): world
+      planner (quiz set, pack, audio, placement; member languages; intermediate + placed levels;
+      chapters 1–2 then N+1), event triggers, three daily mid caps, optional quality pass, UI
+      ("Being prepared · place k in line", Get it now), stats (hit rate, time to content, caps).
+      Mock only so far; numbers in `audit/opt-2026-11/REPORT.md` §12 and PITCH_NUMBERS.md.
 - [ ] Optional: the KaTeX swap for `MathText` if the npm registry allows it.
 - [ ] Optional: "ask the AI after 10 min without a peer answer" (deferred, DECISIONS.md).
 

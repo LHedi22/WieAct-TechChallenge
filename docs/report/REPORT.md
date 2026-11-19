@@ -19,10 +19,11 @@ stages, queue position and ETA instead of a spinner.
 ## 3. Models and API use
 Compact `llama3.2-3b`, mid `llama3.1-8b` (probe: 7/7 checks each, 2.5 s / 3.6 s median;
 `docs/MODELS.md`). Routing table per task kind (ARCHITECTURE.md), with the four official patterns
-and where each is used (README table). Calls per action: quiz set 1 compact · study pack 1 mid +
+and where each is used (README table). Calls per action: quiz set 1 compact + 1 mid answer check (2 + 2 when fewer than 5 of the 12
+items survive the check) · study pack 1 mid +
 2 compact · audio 1 mid · tutor turn 1 compact (mid on escalation) · Teach-Back 1 compact (+ mid
-review in the band; Arabic and Darija 1 mid, since the compact model is unreliable there) · tip 1 mid for every language of the class · daily plan 1 mid per student
-per day.
+review in the band; Arabic and Darija 1 mid, since the compact model is unreliable there) · tip 1 mid for every language of the class · daily plan 1 compact per student
+per day (mid only for a student with recorded weak spots).
 Compact/mid split on our key: **[in-slot]**. Repeated identical requests: **[in-slot]**. On the
 mock (5 Nov, after the audit's cache fix): 0 in our call log and 2 at an independent proxy, both
 retries of a request we forced to time out; before the fix, 37 (30 daily plans sent with
@@ -45,7 +46,8 @@ supports teachers and doesn't replace them.
 ## 6. Testing strategy and results
 - Gateway contract: one test per row of the error contract (quota, 503, 400 ceiling, 401, cache,
   malformed JSON → one repair call) against an in-process mock with fault injection.
-- 304 backend tests, 66 frontend tests, mock-llm tests; i18n check (793 keys × 4 languages).
+- 645 backend tests, 117 frontend tests, mock-llm tests; i18n check (832 keys × 4 languages)
+  (14 Nov, after the audit fixes and prefetch).
 - End-to-end through the real UI per milestone (EN, FR, AR; 1440×900 and 390×844, RTL).
 - Prompt eval on real outputs: **[in-slot]** (`python -m app.evals quiz` + `python -m app.evals
   slot --cloud`, then the prompt-evaluator over `backend/tests/evals/*/outputs/`). The mock run of
@@ -57,7 +59,8 @@ Priority lanes, 2-in-flight limiter, RPM bucket, quota delay → requeue with ET
 then compact (Quick mode), 400 → shrink once, cache-first shared outputs, single-flight,
 precompute at upload on the background lane, offline demo mode outside our slot (cached results
 only, no coins move). Load test: 30 jobs with 503 + quota faults, 30/30 done, ≤ 2 in flight,
-interactive p50 38 s vs background 126 s (mock); against cloud: **[in-slot]**.
+interactive p50 23.9 s vs background 113.4 s (mock, 14 Nov after the audit fixes; 10.0 s vs
+63.8 s without faults); against cloud: **[in-slot]**.
 The Quick mode shown in the demo video is switched on by an admin (a real compact call, logged
 `forced`): `/api/admin/stats` reports these as forced Quick mode, apart from the fallbacks the
 platform caused, and leaves them out of the compact/mid split.

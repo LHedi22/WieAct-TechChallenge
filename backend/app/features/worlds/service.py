@@ -18,6 +18,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
+from app.jobs import prefetch
 from app.jobs.service import _avg_call_s, create_job
 from app.models import Chapter, Course, Document, Job, QuizSet, User, World, WorldMember
 from app.rag.indexing import KIND as INDEX_KIND
@@ -107,6 +108,7 @@ async def join_world(s: AsyncSession, user: User, code: str) -> World:
     if member is None:
         s.add(WorldMember(world_id=world.id, user_id=user.id))
         await s.commit()
+        await prefetch.guard(s, prefetch.on_join(s, world, user))  # a new language: its content
     return world
 
 

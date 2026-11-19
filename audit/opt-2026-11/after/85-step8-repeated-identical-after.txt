@@ -1,0 +1,34 @@
+# 85 · after the fix · mock · fresh stack, prefetch on · 2026-11-15T12:04:31Z
+## planner with a member placed advanced
+9 prefetch job(s) queued for Engineering 2B (demo); the worker runs them
+mid today (made + expected): world 22/40, creator 22/40, all 22/120
+## prefetch jobs
+AUDIO_EPISODE|advanced|done|3
+AUDIO_EPISODE|intermediate|done|3
+PLACEMENT||done|2
+QUIZ_POOL|advanced|done|3
+QUIZ_POOL|intermediate|done|3
+STUDY_PACK|advanced|done|3
+STUDY_PACK|intermediate|done|3
+## calls sent per task (status 200, no cache hit) / served from the cache
+AUDIO_SCRIPT|6|0
+CHUNK_TAG|8|0
+EMBED|10|13
+FLASHCARDS|6|0
+MAP_WRITE|5|1
+NOTES_WRITE|6|0
+PLACEMENT_QUIZ|2|2
+QUIZ_GENERATE|6|0
+QUIZ_VERIFY|7|1
+## hashes answered more than once (HAVING count > 1, NULL hashes skipped like /api/admin/stats)
+(end)
+## /api/admin/stats
+{"calls": 60, "cache_hits": 17, "repeated_identical": 0, "compact_share": 0.56}
+{"jobs": 20, "done": 20, "calls": {"compact": 20, "embed": 6, "mid": 22}, "opened": 0, "hit_rate": 0.0}
+{"used": 22, "cap": 120}
+## EXPLAIN (seq scans off) of the opened UPDATE
+SET
+Update on jobs  (cost=0.14..8.16 rows=0 width=0)
+  ->  Index Scan using ix_jobs_prefetch_unopened on jobs  (cost=0.14..8.16 rows=1 width=14)
+        Index Cond: ((share_key)::text = 'x'::text)
+        Filter: ((opened_at IS NULL) AND ((payload ->> 'prefetch'::text) = 'true'::text))

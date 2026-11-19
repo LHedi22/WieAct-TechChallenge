@@ -36,6 +36,14 @@ def fragment(name: str) -> str:
     return "\n".join(line.strip() for line in body.strip().splitlines())
 
 
+def redraft(failed: list[str]) -> str:
+    """The {redraft} block of a quiz or placement regeneration: names the questions whose keys
+    the check could not confirm, so the second draft is a revision, not the same request sent
+    again (a repeated identical request on the organisers' metric; step 8, after/84)."""
+    stems = "\n".join(f"- {s.strip()[:160]}" for s in failed[:12])
+    return "\n\n" + fragment("redraft").format(stems=stems)
+
+
 def voice_rules() -> str:
     """Shared rules for student-facing prompts (_voice_rules.md), without its header comment."""
     return fragment("voice_rules")
@@ -66,6 +74,8 @@ def render(name: str, **values: Any) -> tuple[str, list[dict[str, str]]]:
         values.setdefault("language_name", LANGUAGE_NAMES.get(values["language"], "English"))
     values.setdefault("voice_rules", voice_rules())
     values.setdefault("teachback_rubric", fragment("teachback_rubric"))
+    values.setdefault("glossary", "")  # features/glossary (audit OPT-11); empty when not needed
+    values.setdefault("redraft", "")  # only in a regeneration (redraft() below)
     messages = [
         {"role": role, "content": sections[role].format(**values)}
         for role in ("system", "user")

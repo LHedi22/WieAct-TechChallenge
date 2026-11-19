@@ -12,14 +12,23 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import gateway, prompts
 from app.core import db, economy
+from app.features.glossary import service as glossary
 from app.features.pool import service as pool
 from app.features.quiz.pool import chapter_context
 from app.features.quiz.service import LEVELS
 from app.features.studio import pack
 from app.features.studio.service import Pay, Rejected
+from app.features.wallet import service as wallet
 from app.gateway import BadOutput, Task, TaskKind
+from app.jobs import prefetch
 from app.jobs.registry import JobContext, job
-from app.jobs.service import create_job
+from app.jobs.service import (
+    create_or_join_shared_job,
+    mark_opened,
+    paid_job,
+    promote,
+    share_key,
+)
 from app.models import Chapter, Course, User
 
 KIND = "AUDIO_EPISODE"
@@ -45,8 +54,10 @@ async def price(s: AsyncSession, chapter_id: uuid.UUID, level: str, language: st
     found = await pack.assets(s, chapter_id, level, language)
     if ASSET in found:  # free, and the full version of a Quick-mode script is free too
         return {"cost": economy.COST["cached_content"], "cached": not pack.is_quick(found[ASSET])}
-    if await _pending(s, chapter_id, level, language):
-        return {"cost": economy.COST["cached_content"], "cached": False}
+    if pending := await _pending(s, chapter_id, level, language):
+        # joining a classmate's or a prefetch's job is free (OPT-01, Group E)
+        preparing = await prefetch.preparing(s, pending)
+        return {"cost": economy.COST["cached_content"], "cached": False, "preparing": preparing}
     return {"cost": economy.COST["generate_shared_asset"], "cached": False}
 
 
@@ -56,6 +67,10 @@ async def status(s: AsyncSession, user: User, chapter: Chapter, level: str) -> d
     language = user.ui_language
     course = await s.get(Course, chapter.course_id)
     found = await pack.assets(s, chapter.id, level, language)
+    if ASSET in found:  # served: a prefetch that made it was used (step 8 stats)
+        key = share_key(KIND, chapter.id, level, language)
+        await mark_opened(s, key)
+        await wallet.share_back(s, await paid_job(s, key), user.id)  # first-payer refund
     return {
         "chapter_id": chapter.id,
         "level": level,
@@ -81,13 +96,18 @@ async def generate(
         return {"job_id": None, "cost": 0, "cached": True}
     job_id = await _pending(s, chapter.id, level, language)
     if job_id:
+        await promote(s, job_id)  # a queued prefetch: the student needs it now (Group E)
+        await mark_opened(s, share_key(KIND, chapter.id, level, language))
         return {"job_id": job_id, "cost": 0, "cached": False}
     course = await s.get(Course, chapter.course_id)
     # the full version of a Quick-mode script is free: the class already paid for the episode
     cost = 0 if existing is not None else economy.COST["generate_shared_asset"]
-    created = await create_job(  # reserves from the wallet or the pool (LedgerCoins.reserve)
+    # One job per episode even when classmates click together (audit OPT-01); only the creator
+    # reserves, from the wallet or the pool (LedgerCoins.reserve).
+    job_id, created = await create_or_join_shared_job(
         s,
         kind=KIND,
+        share_key=share_key(KIND, chapter.id, level, language),
         lane="interactive",
         payload={
             "chapter_id": str(chapter.id),
@@ -99,7 +119,7 @@ async def generate(
         world_id=course.world_id,
         cost=cost,
     )
-    return {"job_id": created.id, "cost": cost, "cached": False}
+    return {"job_id": job_id, "cost": cost if created else 0, "cached": False}
 
 
 @job(KIND, stages=("reading_chapter", "writing_script"))
@@ -122,6 +142,7 @@ async def audio_episode(ctx: JobContext) -> dict[str, Any]:
         course=course.name,
         chapter=chapter.title,
         context="\n\n".join(f"[{c.page_ref}] {c.text}" for c in rows),
+        glossary=await glossary.for_chapter(chapter_id, language, ctx.lane),
     )
     result = ctx.note(
         await gateway.run(

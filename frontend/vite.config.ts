@@ -20,5 +20,8 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
     css: false,
+    // The slowest flows take ~1.6 s on an idle machine and 3-4x that when the host is busy (CI,
+    // or Docker beside the backend suite); 5 s made them flaky (audit OPT-33). No retries.
+    testTimeout: 15_000,
   },
 });

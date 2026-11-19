@@ -50,13 +50,13 @@ Qdrant collection is created with that size and changing it later means re-index
   also gets `reasoning_effort: "none"`. Without it, qwen3:1.7b spent the whole tag budget on hidden
   reasoning and returned no JSON (7 Nov).
 - Keep `max_tokens` tight per task, at or below the ceiling the probe finds. Suggested budgets:
-  tag 800 per batch of 8 chunks (a full batch measured 498 tokens; 400 cut the JSON off) · tutor turn 220 · grade 300 · quiz (10 Q) 1,400, or two calls of 5 Q if the ceiling is lower · notes 700 · plan 400 · tip 160.
+  tag 800 per batch of 8 chunks (a full batch measured 498 tokens; 400 cut the JSON off) · tutor turn 220 · grade 300 · quiz (12 Q, a set keeps 10; OPT-14) 1,700, or two calls of 6 Q if the ceiling is lower · key check (12 answers with a one-line step) 800 · notes 700 · plan 400 · tip 160.
 - If the platform exposes only one model per class, the probe still confirms its JSON, language and speed
   behaviour and records the quota headers. That information matters as much as the pick itself.
 
 ## Current picks
-**Cloud (platform):** pending probe. Prefer the Qwen3 family if the platform lists it.
-_Not yet probed. Mock values in `.env.example`. The probe appends its results below._
+**Cloud (platform):** compact `llama3.2-3b`, mid `llama3.1-8b` (probe 30/10, results below;
+DECISIONS.md). No embeddings model on our key: our own Ollama with `bge-m3` (DECISIONS.md 2026-10-31).
 
 **Local (Ollama, dev only)** — never used in production or the demo (DECISIONS.md 2026-10-27)
 | Role | Model | Fallback | Why |
@@ -84,7 +84,8 @@ _20:50 follow-up (`scripts/probe_embeddings.py`):_ no embeddings model on our ke
 
 **Picked:** compact `llama3.2-3b` · mid `llama3.1-8b` · embeddings `None`
 
-Quota headers: `X-Frame-Options`
+Quota headers: `X-Frame-Options` (the probe's first guess; the real ones, seen 9/11:
+`x-ratelimit-api_key-{remaining,limit}-{requests,max_parallel_requests}`, `x-litellm-key-rpm-limit`)
 
 Ceiling probe: `HTTP 200: {"id": "chatcmpl-00156c22-9455-461f-affe-cacaf10cb5a1", "created": 1793380009, "model": "llama3.2-3b", "object": "chat.completion", "choices": [{"finish_reason": "stop", "index": 0, "message": {"content": "Hi!", "role": "assistant", "provid`
 

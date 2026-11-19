@@ -203,7 +203,9 @@ def test_quiz_verify_prompt_is_versioned():
 
 async def test_an_unusable_verifier_reply_is_not_cached(sm, monkeypatch, gw):  # noqa: F811
     """Found in the end-of-batch run: the first (unusable) reply was cached by content, so every
-    retry of the background pool replayed it and the set could never be published."""
+    retry of the background pool replayed it and the set could never be published. Since step 8
+    the check is keyed by its request again (two sets with the same questions are checked once,
+    after/84), so an unusable reply is dropped from the cache instead (gateway.forget)."""
     from app.jobs.registry import JobContext
 
     replies = [{"oops": True}, truthful_solver(ITEMS[:2])]
@@ -215,6 +217,12 @@ async def test_an_unusable_verifier_reply_is_not_cached(sm, monkeypatch, gw):  #
                       pattern="t")  # fmt: skip
 
     monkeypatch.setattr(gateway_module, "run", run)
+    forgotten = []
+
+    async def forget(result):
+        forgotten.append(result.content)
+
+    monkeypatch.setattr(gateway_module, "forget", forget)
 
     async def no_stage(_s):
         return None
@@ -226,7 +234,8 @@ async def test_an_unusable_verifier_reply_is_not_cached(sm, monkeypatch, gw):  #
     where = {"context": FIX["context"], "course": "c", "chapter": "ch", "language": "en"}
     assert await verify.check(ctx, qs, lane="background", **where) is None
     assert await verify.check(ctx, qs, lane="background", **where) == [True, False]
-    assert keys == [None, None]
+    assert forgotten == [{"oops": True}]  # only the unusable reply leaves the cache
+    assert keys[0] == keys[1] and keys[0].startswith("content:")
 
 
 def test_the_quiz_eval_scores_a_bare_string_item_as_invalid():
@@ -257,3 +266,70 @@ async def test_an_unusable_quiz_reply_is_forgotten(api, sm, pptx, gw, monkeypatc
     job = await new_set(api, sm, chapter)
     assert job["status"] == "failed"
     assert forgotten and all(r.startswith("ref:quiz:") for r in forgotten)
+
+
+# --- audit OPT-14/15: a worked step, a little over-generation, and the key's own explanation ----
+def q_with(expl: str, options=("FIFO", "LIFO", "random order", "sorted order"), key=0):
+    return {"question": "Which order does a queue serve?", "options": list(options),
+            "answer_index": key, "hint": "h", "explanation": expl, "concept": "queue"}  # fmt: skip
+
+
+@pytest.mark.parametrize(
+    "expl",
+    [
+        "The answer is B: a queue serves the newest item first.",
+        "La bonne réponse est (2).",
+        "الإجابة الصحيحة هي ب",
+        "A queue serves items in LIFO order.",  # only another option's text, not the key's
+    ],
+)
+def test_an_explanation_that_points_elsewhere_drops_the_item(expl):
+    from app.features.quiz.pool import contradicts, valid_questions  # noqa: PLC0415
+
+    assert contradicts(q_with(expl))
+    assert valid_questions({"questions": [q_with(expl)]}) == []
+
+
+@pytest.mark.parametrize(
+    "expl,options,key",
+    [
+        ("A queue is FIFO: the first in is the first out, unlike LIFO.", None, 0),
+        ("The material defines a queue this way.", None, 0),
+        ("The answer is 4 because 2 + 2 = 4.", ("2", "3", "4", "5"), 2),  # a number, not a label
+        ("The answer is a FIFO structure.", None, 0),
+    ],
+)
+def test_an_explanation_that_agrees_or_says_nothing_keeps_the_item(expl, options, key):
+    from app.features.quiz.pool import contradicts  # noqa: PLC0415
+
+    q = q_with(expl, key=key, **({"options": options} if options else {}))
+    assert not contradicts(q)
+
+
+def test_the_verifier_writes_a_worked_step_before_its_answer():
+    _, messages = prompts.render("quiz_verify", context="x", course="c", chapter="ch",
+                                 language="fr", questions="1. q")  # fmt: skip
+    assert '"step"' in messages[0]["content"]
+    reply = {"answers": [{"n": 1, "step": "FIFO means first in, first out", "answer": 1,
+                          "sure": True}]}  # fmt: skip
+    assert verify.verdicts(reply, [q_with("")]) == [True]
+
+
+async def test_compact_writes_more_than_a_set_holds(api, sm, pptx, monkeypatch):  # noqa: F811
+    from app.features.quiz import pool  # noqa: PLC0415
+
+    asked: list[str] = []
+    real_run = gateway_module.run
+
+    async def spy(task):
+        if task.kind == TaskKind.QUIZ_GENERATE:
+            asked.append(task.messages[0]["content"])
+        return await real_run(task)
+
+    monkeypatch.setattr(gateway_module, "run", spy)
+    await indexed(api, sm, pptx)  # the precomputed set
+    assert pool.GENERATE_COUNT > pool.POOL_SIZE
+    assert asked and f"exactly {pool.GENERATE_COUNT} " in asked[0]
+    async with sm() as s:
+        qs = await s.scalar(select(QuizSet))
+    assert len(qs.questions) == pool.POOL_SIZE  # the extras are spares for the key check

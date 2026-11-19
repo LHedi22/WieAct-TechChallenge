@@ -12,8 +12,8 @@ from app.models.base import Base, created_at, uuid_pk
 class DailyState(Base):
     """One row per student per Tunis day: the 3 challenges and their progress.
     `challenges[i]` = {type, world_id, course_id, chapter_id, title, target, progress, done, why}.
-    A rule-based plan is written at once; the DAILY_PLAN job (plan-once, mid) may replace it while
-    no progress has been made."""
+    A rule-based plan is written at once; the DAILY_PLAN job (compact; mid for weak spots) may
+    replace it while no progress has been made."""
 
     __tablename__ = "daily_state"
 

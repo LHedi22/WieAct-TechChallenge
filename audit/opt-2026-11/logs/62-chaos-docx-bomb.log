@@ -1,0 +1,32 @@
+create world 201 201 {'id': '3826425a-936a-4377-b25e-4fd365cb0e4f', 'name': 'Bomb course', 'color_key': 'island-1', 'exam_date': None, 'chapters': [{'id': '9a9ce25f-8780-4cc9-a1a0-7ed1752dce61', 'idx': 1, 'title': 'Ch1', 
+upload 202 1015554 bytes {'document': {'id': 'a837b00d-39ce-488a-97f0-75f717b5c328', 'chapter_id': '9a9ce25f-8780-4cc9-a1a0-7ed1752dce61', 'filename': 'bomb.docx', 'kind': 'docx', 'size': 1015554, 'status': 'uploaded', 'progr
+{
+ "bomb_bytes": 1015554,
+ "upload_http": 202,
+ "tutor_states": [
+  [
+   0,
+   "queued",
+   null,
+   null,
+   null
+  ],
+  [
+   2,
+   "running",
+   "thinking",
+   null,
+   null
+  ],
+  [
+   4,
+   "done",
+   "thinking",
+   null,
+   null
+  ]
+ ],
+ "tutor_secs": 4,
+ "doc": "{'world_id': '5f0ef374-327b-46bd-a5f3-96a70a9c54db', 'name': 'Bomb 1c6bc', 'join_code': 'CLIFF-E3P', 'percent': 100, 'eta_s': 0, 'done': True, 'chapters': [{'chapter_id': '9a9ce25f-8780-4cc9-a1a0-7ed1752dce61', 'course_id': '3826425a-936a-4377-b25e-4fd365cb0e4f', 'course_name': 'Bomb course', 'idx': 1, 'title': 'Ch1', 'state': 'failed', 'documents': [{'id': 'a837b00d-39ce-488a-97f0-75f717b5c328', ",
+ "since_upload_s": 7
+}

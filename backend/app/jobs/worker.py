@@ -27,16 +27,16 @@ import time
 import uuid
 from datetime import UTC, datetime, timedelta
 
-import asyncpg
 from sqlalchemy import and_, delete, literal, or_, select, update
 from sqlalchemy.dialects.postgresql import JSONB, insert
-from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core import economy_live, flags, slot
 from app.core.config import get_settings
+from app.core.db import DB_ERRORS, is_outage
 from app.gateway import Defer, EmbeddingsDown, GatewayError, OfflineMode, trace
 from app.gateway.context import JobRef, current_job
+from app.gateway.limiter import background_cap
 from app.gateway.providers import paused_until, resolve
 from app.jobs.coins import coins
 from app.jobs.registry import JobContext, spec_for
@@ -53,7 +53,7 @@ INTERRUPTED = "errors.job_interrupted"
 # DB_OUTAGE_LIMIT_S without the database it exits, so the supervisor (Railway, compose) restarts it.
 DB_RETRY_S = (1, 2, 4, 8, 15, 30)
 DB_OUTAGE_LIMIT_S = 300.0
-DB_ERRORS = (DBAPIError, OSError, asyncpg.PostgresError, asyncpg.InterfaceError)
+DB_REQUEUE_S = 5.0  # a job whose handler lost the database runs again after this (OPT-12)
 STATUS_S = 2.0  # worker_status heartbeat for /admin/debug
 STATUS_STALE_S = 3600  # rows of workers gone for this long are deleted
 HISTORY_S = 30.0  # a worker_heartbeats snapshot (kept HISTORY_KEEP_H) for debug bundles
@@ -76,11 +76,16 @@ class Worker:
         self,
         sm: async_sessionmaker[AsyncSession],
         *,
-        background_slots: int = 2,
+        background_slots: int | None = None,
         interactive_slots: int = 6,
         poll_s: float = 0.5,
     ) -> None:
         self.sm = sm
+        if background_slots is None:  # no more than can get a call slot (prefetch step 1)
+            settings = get_settings()
+            background_slots = background_cap(
+                settings.LLM_MAX_CONCURRENCY, settings.LLM_INTERACTIVE_RESERVED
+            )
         self.limits = {"interactive": interactive_slots, "background": background_slots}
         self.running: dict[str, set[asyncio.Task]] = {"interactive": set(), "background": set()}
         self.poll_s = poll_s
@@ -101,7 +106,7 @@ class Worker:
                     Job.lane == lane,
                     or_(Job.not_before.is_(None), Job.not_before <= now),
                 )
-                .order_by(Job.created_at)
+                .order_by(Job.priority, Job.created_at)
                 .limit(1)
                 .with_for_update(skip_locked=True)
             )
@@ -140,6 +145,12 @@ class Worker:
                                 or_(Job.started_at.is_(None), Job.started_at < legacy_cutoff),
                             ),
                         ),
+                    )
+                    # never our own: renew() may just have failed during a database outage (OPT-12)
+                    .where(
+                        ~and_(Job.worker_id == self.worker_id, Job.id.in_(self.job_ids))
+                        if self.job_ids
+                        else literal(True)
                     )
                     .with_for_update(skip_locked=True)
                 )
@@ -337,12 +348,45 @@ class Worker:
             detail = f"{type(e).__name__}: {e}"
             log.warning("job %s failed: %s", job.id, type(e).__name__)
         except Exception as e:
-            values = {"error": "errors.ai_failed"}
-            detail = f"{type(e).__name__}: {e}"
-            log.exception("job %s crashed", job.id)
+            if is_outage(e) and job.attempts < MAX_ATTEMPTS:
+                # Postgres restarting (audit OPT-12): run it again shortly instead of failing it.
+                # Calls already made are in ai_cache (keys carry the job id), so none repeat.
+                status = "queued"
+                values = {
+                    "not_before": datetime.now(UTC) + timedelta(seconds=DB_REQUEUE_S),
+                    "error": "deferred:database",
+                }
+                log.warning("job %s requeued: database unavailable (%s)", job.id, type(e).__name__)
+            else:
+                values = {"error": "errors.ai_failed"}
+                detail = f"{type(e).__name__}: {e}"
+                log.exception("job %s crashed", job.id)
         finally:
             current_job.reset(token)
-            self.job_ids.discard(job.id)
+        try:
+            await self._retry_db(lambda: self._finish(job, status, values, detail))
+        finally:
+            self.job_ids.discard(job.id)  # its lease stays renewed until the outcome is stored
+
+    async def _retry_db(self, write):
+        """Run a DB write, retrying with the loop's backoff while Postgres is away (OPT-12)."""
+        sleep = getattr(self, "_sleep", asyncio.sleep)
+        clock = getattr(self, "_clock", time.monotonic)
+        start, retries = clock(), 0
+        while True:
+            try:
+                return await write()
+            except DB_ERRORS as e:
+                if not is_outage(e) or clock() - start >= DB_OUTAGE_LIMIT_S:
+                    raise
+                wait = DB_RETRY_S[min(retries, len(DB_RETRY_S) - 1)]
+                retries += 1
+                log.warning("job write failed (%s); retrying in %ss", type(e).__name__, wait)
+                await sleep(wait)
+
+    async def _finish(self, job: Job, status: str, values: dict, detail: str | None) -> None:
+        """Store the job's outcome and commit or refund its coins, if this worker still owns it."""
+        values = dict(values)
         if status == "failed":
             self.last_error = {
                 "t": _ts(),
@@ -351,7 +395,10 @@ class Worker:
                 "error": str(values.get("error")),
             }
             if detail:
-                await trace.note_job_error(self.sm, job.id, detail)
+                try:
+                    await trace.note_job_error(self.sm, job.id, detail)
+                except DB_ERRORS:  # debugger nicety; the job's own outcome matters more
+                    log.warning("could not note job %s error in its trace", job.id)
         err = values.get("error")
         if status == "queued":
             delay = None

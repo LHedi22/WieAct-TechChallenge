@@ -1,6 +1,6 @@
-"""Daily challenges: instant rule plan + ONE plan-once DAILY_PLAN job per student per day,
-validated against the catalogue; progress from real events; coins (capped) + points per
-challenge and a bonus for all 3, each awarded once."""
+"""Daily challenges: instant rule plan + ONE DAILY_PLAN job per student per day (compact, mid
+on weak spots), validated against the catalogue; progress from real events; coins (capped) +
+points per challenge and a bonus for all 3, each awarded once."""
 
 import uuid
 from datetime import UTC, date, datetime, time
@@ -108,7 +108,7 @@ async def count(sm, *where) -> int:
         return await s.scalar(select(func.count()).where(*where))
 
 
-async def test_first_read_gives_a_rule_plan_now_and_one_mid_plan_job(api, sm, pptx):  # noqa: F811
+async def test_first_read_gives_a_rule_plan_now_and_one_compact_plan_job(api, sm, pptx):  # noqa: F811
     world, chapter = await indexed(api, sm, pptx)
     first = (await api.get("/api/daily", headers=OWL_FR)).json()
     assert len(first["challenges"]) == 3 and first["planned_by"] == "rule"
@@ -131,7 +131,8 @@ async def test_first_read_gives_a_rule_plan_now_and_one_mid_plan_job(api, sm, pp
     async with sm() as s:
         log = list(await s.scalars(select(AICallLog).where(AICallLog.task_kind == "DAILY_PLAN")))
         job = await s.scalar(select(Job).where(Job.kind == "DAILY_PLAN"))
-    assert len(log) == 1 and log[0].model_tier == "mid" and job.cost == 0
+    # a new student has no weak spot yet: compact writes the plan (audit OPT-09)
+    assert len(log) == 1 and log[0].model_tier == "compact" and job.cost == 0
 
     seen = (await api.post("/api/daily/seen", headers=OWL_FR)).json()
     assert not seen["first_open_today"]

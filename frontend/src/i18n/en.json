@@ -104,6 +104,7 @@
       "job_not_cancellable": "Too late to cancel: the AI is already working on it.",
       "job_interrupted": "This activity was interrupted by a server restart. Your coins were refunded: please try again.",
       "network": "Can't reach the server. Check your connection.",
+      "unavailable": "The server is restarting. Trying again in a few seconds.",
       "unexpected": "Something went wrong. Please try again.",
       "forbidden": "You don't have access to this.",
       "world_not_found": "This world doesn't exist, or you're not a member yet.",
@@ -150,7 +151,7 @@
       "arena_already_pinned": "A best answer is already pinned.",
       "arena_own_answer": "You can't vote for your own answer.",
       "pool_insufficient": "The Class Pool doesn't have enough coins for this yet.",
-      "pool_amount_invalid": "Give between 1 and 50 coins.",
+      "pool_amount_invalid": "Give between 1 and {max} coins.",
       "card_not_found": "This flashcard no longer exists.",
       "quiz_not_finished": "Finish the quiz first."
     },
@@ -216,7 +217,14 @@
       "upgrade": "Make the full version · Free"
     },
     "testData": "Test data ({provider})",
-    "unverifiedKeys": "Answers not double-checked yet"
+    "unverifiedKeys": "Answers not double-checked yet",
+    "prefetch": {
+      "ready": "Ready",
+      "preparing": "Being prepared · about {count, plural, one {# min} other {# min}}",
+      "inLine": "Place {position, number} in line",
+      "body": "Your class's copy is being made in the background. It's free.",
+      "getItNow": "Get it now"
+    }
   },
   "styleguide": {
     "title": "Captain Cat · style guide",
@@ -793,7 +801,9 @@
       "cancel": "Cancel",
       "confirm": "Enter",
       "fromPlacement": "From your placement",
-      "classMade": "Your class already made one"
+      "classMade": "Your class already made one",
+      "ready": "Ready",
+      "getItNow": "Get it now"
     }
   },
   "placement": {
@@ -1100,6 +1110,7 @@
     "transcript": "Transcript",
     "darija": "Darija audio comes later: for now, read the transcript below.",
     "noVoice": "Your browser has no voice for this language, so here is the transcript to read.",
+    "voiceError": "The browser's voice stopped. Press Play to try again, or read the transcript below.",
     "make": {
       "title": "Make the audio episode for your class",
       "body": "A 2–3 minute spoken revision of this chapter at this level, written once from your course material and read aloud by your browser. Everyone in your class then listens for free."

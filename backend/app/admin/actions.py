@@ -33,7 +33,7 @@ from app.features.studio.pack import Card, valid_map, valid_notes
 from app.features.wisdom.service import TipText
 from app.features.worlds.service import new_join_code, upload_root
 from app.jobs.coins import coins
-from app.jobs.service import create_job
+from app.jobs.service import active_shared_job, create_job
 from app.models import (
     AICache,
     Chapter,
@@ -617,6 +617,10 @@ async def retry_job(job_id: uuid.UUID, body: ReasonIn, admin: AdminActionDep, s:
     if job.status not in ("failed", "cancelled"):
         raise HTTPException(
             409, f"Only failed or cancelled jobs can be retried (it is {job.status})"
+        )
+    if job.share_key and await active_shared_job(s, job.share_key):
+        raise HTTPException(
+            409, "A classmate's job for the same asset is already queued or running"
         )
     before = {"status": job.status, "error": job.error, "attempts": job.attempts}
     job.status, job.error, job.attempts = "queued", None, 0

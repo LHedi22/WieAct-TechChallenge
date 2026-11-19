@@ -24,9 +24,14 @@ COST = {
 EARN = {
     "peer_answer_good": 3,  # only if AI score >= PEER_ANSWER_THRESHOLD
     "daily_challenge": 3,  # each, 3 per day
-    "creator_new_member": 5,
 }
 PEER_ANSWER_THRESHOLD = 70  # /100
+# First-payer refund: once this many classmates have opened a class asset a student paid for
+# (study pack, audio episode, quiz set), the payer gets this share of the coins back, once
+# (15 → 10, 5 → 3; rounded down). Nothing for what the class got free or the Class Pool paid.
+FIRST_PAYER_REFUND_OPENS = 3
+FIRST_PAYER_REFUND_SHARE = (2, 3)
+POOL_MAX_CONTRIBUTION = 50  # coins per Class Pool gift; keeps a misclick from emptying a wallet
 WISDOM_THRESHOLD = 3  # distinct students with the same (concept, mistake_type) in a world
 
 POINTS = {

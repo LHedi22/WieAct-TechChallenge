@@ -130,6 +130,9 @@ export const api = {
     request<void>(`/api/courses/${courseId}`, { method: "DELETE" }),
   addChapter: (courseId: string, title: string) =>
     post<ChapterOut>(`/api/courses/${courseId}/chapters`, { title }),
+  /** A building dialog opened on a chapter: the server prefetches the next one (no AI call). */
+  chapterOpened: (chapterId: string, building: string) =>
+    post<void>(`/api/chapters/${chapterId}/opened`, { building }),
   upload: (chapterId: string, file: File) => {
     const form = new FormData();
     form.append("file", file);

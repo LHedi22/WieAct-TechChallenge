@@ -212,9 +212,9 @@ economy.py and GET /api/economy.
 1. Wallet: coin_ledger with free/earned/purchased buckets, 20 free per day refilled at Tunis
    midnight (no carry-over), earned cap 10/day, spend order free→earned→purchased, reserve on job
    create, commit on success, refund on failure/cancel, cached results cost 0, Exam Pass = 15 AI
-   activities/day, clearly labelled demo purchase, Class Pool transfers, creator reward. Pure-
+   activities/day, clearly labelled demo purchase, Class Pool transfers. Pure-
    function tests for every rule first.
-2. Points ledger, streaks (Tunis days), badges (chapter mastery, Mentor), class and global
+2. Points ledger, streaks (Tunis days), class and global
    leaderboards weekly/all-time with opt-out. Out-of-coins screen (17-out-of-coins.png) with the
    DESIGN.md copy fixes (no "unlimited", correct rewards).
 3. Teach-Back peer room (15-teachback-peer-room.png): questions per chapter (2 coins, MODERATE_POST
@@ -262,6 +262,24 @@ Only if all of that passes /verify before Sat 7 evening: Audio Studio with AUDIO
 Web Speech API player (transcript, speed). Otherwise mark Audio Studio as cut in DECISIONS.md and
 hide its building behind a "coming soon" state.
 ```
+
+## Prefetch quality pass (14 Nov)
+Two app prompts run only on prefetched content still in the background lane, with
+`PREFETCH_QUALITY_PASS=true` (off by default; counted in the prefetch mid caps):
+`backend/app/prompts/notes_review.md` (mid, draft-then-revise: fixes up to 3 sections of the
+notes, lists missing concepts; aimed at audit N-5 language mixing in Arabic/Darija and N-6
+whole-chapter coverage) and `cards_check.md` (compact: card numbers the notes don't back).
+In-slot evaluation, after a warm-up with the pass on:
+```
+Run the prompt-evaluator agent over the study_assets notes whose content has a "review" key
+(export them to backend/tests/evals/notes_review/outputs/cloud-*.json first). For each: did the
+fixes make the section more correct or only different? Are the "missing" concepts really in the
+excerpts? Any English left inside Arabic or Darija points? Report what the 8B reviewer missed.
+```
+A quiz or placement regeneration (a first draft whose keys the check could not confirm) adds
+`prompts/_redraft.md` after the excerpts, naming the failed questions, so the second draft is a
+revision and never the same request again (15 Nov, audit after/84). In-slot, check that the
+regenerated questions are really new and not reworded copies of the failed ones.
 
 ## M8 · Ship
 ```

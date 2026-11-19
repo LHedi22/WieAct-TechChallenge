@@ -1,0 +1,21 @@
+
+> learning-world-frontend@0.1.0 lint /app
+> eslint .
+
+lint exit 0
+
+> learning-world-frontend@0.1.0 typecheck /app
+> tsc --noEmit
+
+tsc exit 0
+ Test Files  1 failed | 21 passed (22)
+      Tests  1 failed | 92 passed (93)
+   Start at  23:14:28
+   Duration  23.51s (transform 10.29s, setup 13.79s, collect 27.56s, tests 48.73s, environment 48.92s, prepare 4.41s)
+
+ ELIFECYCLE  Test failed. See above for more details.
+
+> learning-world-frontend@0.1.0 i18n:check /app
+> node scripts/i18n-check.mjs
+
+i18n ok: 828 keys in en, fr, ar, ar-TN

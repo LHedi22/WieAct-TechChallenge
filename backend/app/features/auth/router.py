@@ -87,6 +87,10 @@ async def signup(body: SignupIn, response: Response, s: Session) -> Me:
         raise HTTPException(400, "errors.nickname_invalid")
     if len(body.password) < MIN_PASSWORD:
         raise HTTPException(400, "errors.password_short")
+    # A case variant is the same nickname (audit OPT-28): "seaturtle42" can't pass for
+    # "SeaTurtle42". Nicknames are ASCII, so lower() is the full fold; sign-in stays exact.
+    if await s.scalar(select(User.id).where(func.lower(User.nickname) == nickname.lower())):
+        raise HTTPException(409, "errors.nickname_taken")
     user = User(
         nickname=nickname,
         password_hash=hash_password(body.password),

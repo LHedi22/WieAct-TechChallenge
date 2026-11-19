@@ -557,7 +557,7 @@ Outage suite:
 | --- | --- |
 | Embeddings 503 | 3 calls in 7 s, then failed with refund. Before: 16 calls in 46 s. |
 | Qdrant down | Health `degraded` and `ready: false`; the job fails with refund. Before: health said `ok`. |
-| Postgres restart mid-pack | The worker logged "database unavailable … back after 1s", **stayed up**, and the pack finished. Before: the worker process exited. |
+| Postgres restart mid-pack | The worker logged "database unavailable … back after 1s", **stayed up**, and the pack finished. Before: the worker process exited. _14 Nov re-measure: the worker stayed up but the running job failed (refunded); fixed by audit OPT-12, `audit/opt-2026-11/REPORT.md` §12._ |
 | API restart | Job finished |
 
 **Re-test on local models (Phase 6 rerun).** The setup and its limits are the same as the 5 Nov

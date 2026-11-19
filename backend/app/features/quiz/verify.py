@@ -12,6 +12,7 @@ from typing import Any
 
 from app import gateway, prompts
 from app.gateway import Task, TaskKind
+from app.gateway.cache import content_key
 from app.jobs.registry import JobContext
 
 
@@ -91,13 +92,17 @@ async def check(
                     language=language,
                     tier="mid",
                     allow_fallback=False,
-                    # Not cached: an unusable reply would otherwise be replayed on every retry,
-                    # and a set is verified once anyway (the verified set is the class cache).
-                    cache_key=None,
+                    # Keyed by the request: questions + excerpts, no level, so two sets with the
+                    # same questions are checked once (step 8, after/84). An unusable reply is
+                    # dropped below, so a retry never replays it.
+                    cache_key=content_key(messages),
                     prompt_version=version,
                 )
             )
         )
     except gateway.GatewayError:
         return None
-    return verdicts(result.content, questions)
+    found = verdicts(result.content, questions)
+    if found is None:
+        await gateway.forget(result)
+    return found

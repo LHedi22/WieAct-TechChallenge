@@ -1,7 +1,8 @@
 """Daily challenges: 3 per student per Tunis day. The first read writes an instant rule plan and
-enqueues ONE DAILY_PLAN job (mid, plan-once, background) that may replace it while no progress
-has been made. Progress comes from real events (`record`); each done challenge earns coins
-(within the daily cap) + points, all 3 a bonus — idempotent through the ledger refs."""
+enqueues ONE DAILY_PLAN job (background) that may replace it while no progress has been made:
+compact writes it, escalated to mid only for a student with recorded weak spots (audit OPT-09).
+Progress comes from real events (`record`); each done challenge earns coins (within the daily
+cap) + points, all 3 a bonus — idempotent through the ledger refs."""
 
 from __future__ import annotations
 
@@ -197,6 +198,9 @@ async def plan_day(ctx: JobContext) -> dict[str, Any]:
                 # no identity (audit F-CACHE-1: the per-user key repeated identical mid calls).
                 cache_key=content_key(messages, language=user.ui_language),
                 prompt_version=version,
+                # escalation: weak spots are where a better plan pays off; a new student's plan
+                # is the catalogue over the rule plan, which compact writes well enough
+                tier="mid" if mistakes or any(c.weak for c in cands) else None,
             )
         )
     )

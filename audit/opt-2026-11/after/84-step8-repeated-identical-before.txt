@@ -1,0 +1,29 @@
+# 84 · repeated identical requests on the mock, BEFORE the fix · 15 Nov 2026 · mock
+State: run 83 (prefetch on, 30 students, one level), then one load student placed "advanced" in both
+courses and `python -m app.jobs.prefetch --world OLIVE-7Q2` (9 jobs: quiz set, pack, audio per
+chapter at advanced). Query: ai_call_log rows with status 200, no cache hit, no debug, provider mock,
+grouped by request_hash (the organisers' "repeated identical" check), HAVING count > 1.
+
+hash          | task        | calls | levels                 | share keys
+5d39146c039c  | MAP_WRITE   | 2     | advanced,intermediate  | STUDY_PACK:42bf…:advanced:en ; STUDY_PACK:42bf…:intermediate:en
+d2a05f892f39  | QUIZ_VERIFY | 2     | advanced,intermediate  | QUIZ_POOL:42bf…:advanced:en ; QUIZ_POOL:42bf…:intermediate:en
+(empty hash)  | EMBED       | 10    | —                      | embeddings rows carry no request hash; not a repeat (the stats query skips NULL hashes)
+
+Distinct request hashes per task and level (all 3 chapters):
+NOTES_WRITE 3 / 3 · QUIZ_GENERATE 3 / 3 · FLASHCARDS 3 / 3 · AUDIO_SCRIPT 3 / 3 · MAP_WRITE 3 / 3 · QUIZ_VERIFY 3 / 3
+(intermediate / advanced), yet 1 MAP_WRITE and 1 QUIZ_VERIFY hash is shared ACROSS the two levels.
+
+Reading:
+- The requests whose prompt names the level (NOTES_WRITE, QUIZ_GENERATE, FLASHCARDS, AUDIO_SCRIPT) all
+  differ by level: their hashes include it.
+- MAP_WRITE (prompt = notes only) and QUIZ_VERIFY (prompt = questions + excerpts) do not name the level.
+  For chapter 42bf… the mock wrote the same notes and the same questions at both levels, so the two
+  downstream requests were byte-identical: a real repeated identical request, not a counting artefact.
+  It needs a model that writes the same notes for two levels, so it is rarer on the platform, but the
+  code allowed it. FIXED (not explained away): MAP_WRITE, CARDS_CHECK and QUIZ_VERIFY are cached by
+  their request (`content_key`), unusable replies are dropped (`gateway.forget`).
+- Found while fixing it: a quiz or placement REGENERATION sent the first prompt again (only the cache
+  key's salt changed), a repeated identical request by construction (quiz pool since OPT-14). FIXED: the
+  second draft names the questions whose keys failed (`prompts/_redraft.md`), so it is a revision.
+Tests: test_prefetch_metrics.py::test_a_derived_request_identical_across_levels_is_sent_once,
+test_prefetch_quality.py::test_placement_regenerates_once_when_too_few_keys_survive (2 distinct hashes).

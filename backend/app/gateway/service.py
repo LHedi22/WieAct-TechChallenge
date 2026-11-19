@@ -83,6 +83,7 @@ class Gateway:
             settings.LLM_MAX_CONCURRENCY,
             embed_rpm=settings.LLM_EMBED_MAX_RPM,
             background_pause=self._background_pause,
+            interactive_reserved=settings.LLM_INTERACTIVE_RESERVED,
         )
         self._client_factory = client_factory or self._default_client
         self._clients: dict[str, LLMClient] = {}
@@ -161,20 +162,22 @@ class Gateway:
                 # it still counts against the in-flight limit: keep its slot until the long
                 # budget has passed (no new quota unit). Found while re-measuring audit F-RES-2.
                 held_later = True
-                self._background.add(t := asyncio.create_task(self._release_after(hold_s)))
+                self._background.add(
+                    t := asyncio.create_task(self._release_after(hold_s, task.lane))
+                )
                 t.add_done_callback(self._background.discard)
             raise
         finally:
             if not held_later:
-                await self.limiter.release()
+                await self.limiter.release(task.lane)
         self.quota.update(profile.provider, reply.headers)
         return reply
 
-    async def _release_after(self, seconds: float) -> None:
+    async def _release_after(self, seconds: float, lane: Lane) -> None:
         try:
             await self._sleep(seconds)
         finally:
-            await self.limiter.release()
+            await self.limiter.release(lane)
 
     # --- the contract -----------------------------------------------------------------------------
     async def run(self, task: Task) -> Result:
@@ -184,13 +187,15 @@ class Gateway:
         if not task.cache_key:
             return await self._run(task)
         flight = (task.kind.value, task.prompt_version, task.cache_key)
-        if (pending := self._inflight.get(flight)) is not None:
+        followed = False
+        while (pending := self._inflight.get(flight)) is not None:
+            followed = True
             await asyncio.shield(pending)
-            # a cache hit now (or a fresh try if the first failed)
-            return await self._run(task, follower=True)
+        # Leader now: the first follower to wake after a failed leader takes over and the others
+        # wait for it again (audit OPT-18); after a successful leader this is a cache hit.
         self._inflight[flight] = asyncio.get_running_loop().create_future()
         try:
-            return await self._run(task)
+            return await self._run(task, follower=followed)
         finally:
             self._inflight.pop(flight).set_result(None)
 
@@ -260,7 +265,7 @@ class Gateway:
                 "compact",
                 self._model(profile, "compact"),
                 True,
-                "forced-fallback",
+                "fallback:forced",
             )
             notes.append("forced quick mode (admin switch)")
 
@@ -361,6 +366,11 @@ class Gateway:
                     )
                     notes.append("mid timed out: compact fallback")
                     continue
+                if failed.timed_out and task.lane == "interactive" and tier == "mid":
+                    # No fallback allowed (a check of compact's own work, audit OPT-05): resending
+                    # the identical request costs another unit and up to LLM_TIMEOUT_S more. The
+                    # caller's "mid unavailable" path runs now (unverified quiz / review later).
+                    raise Defer(INTERACTIVE_503_WAIT_CAP_S, "timeout")
                 if err.kind == "transient":
                     if not retried_net:
                         retried_net = True
@@ -465,7 +475,7 @@ class Gateway:
                 "compact",
                 model,
                 kind=TaskKind.JSON_REPAIR.value,
-                pattern="repair",
+                pattern="none:repair",
                 status_code=failed.error.status,
                 refusal_reason=failed.error.kind,
             )
@@ -483,7 +493,7 @@ class Gateway:
             "compact",
             model,
             kind=TaskKind.JSON_REPAIR.value,
-            pattern="repair",
+            pattern="none:repair",
             status_code=200,
             tokens_in=reply.tokens_in,
             tokens_out=reply.tokens_out,
@@ -573,7 +583,7 @@ class Gateway:
             model_tier="embed",
             provider=profile.provider,
             model=profile.embedding_model,
-            pattern="batch",
+            pattern="none:batch",
             **f,
         )
 

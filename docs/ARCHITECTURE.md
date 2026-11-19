@@ -59,6 +59,39 @@ UI ◀── poll GET /api/jobs/{id} ──┤  {status, stage, stages[], queue_
           coins: reservation committed on success, refunded on failure
 ```
 - Postgres-backed queue: `SELECT … FOR UPDATE SKIP LOCKED`. No Redis, no Celery.
+- Inside a lane, jobs run by `priority` (lower first: 10 a prefetch a student joined, 40 a
+  prefetched placement quiz, 50 a prefetched quiz set or study pack, 70 a prefetched audio
+  episode, 100 default; migration 0018, `prefetch.PRIORITY`), then age. One shared class asset has one
+  queued/running job (`share_key`); a student who joins a queued background job promotes it to
+  the interactive lane. The limiter keeps `LLM_INTERACTIVE_RESERVED` (1) call slot for students:
+  background calls use at most concurrency − reserved (min 1), and the worker claims no more
+  background jobs than that, so the background ETA counts one background job at a time.
+- **Prefetch** (`app/jobs/prefetch.py`, decided 2026-11-14): `plan(s, world_id, *, reason,
+  chapter_id, level, language)` queues what the class will open and nobody has made: per
+  (chapter, level, language) the quiz set, study pack and audio episode, per (course, language)
+  the placement quiz. Languages: the members'; levels: intermediate for every language plus each
+  placed member's level in their language; chapters: 1–2 when indexed, then N+1 as students reach
+  N. Background lane, ownerless, cost 0 (free when opened); placement 40, quiz and pack 50, audio
+  70. Three daily mid caps (per world 40, per creator 40, app 120) drop audio first, then packs.
+  Off with `PREFETCH_ENABLED=false` (an upload then still makes the chapter's first intermediate
+  quiz set), while AI is paused, offline or `pause_background_lane`. The building dialog shows
+  "Being prepared · about N min" with "Get it now". CLI: `python -m app.jobs.prefetch --world
+  <code>`. Counted on `/api/admin/stats` (`prefetch`): jobs done/failed/waiting, calls per
+  tier, promoted, `opened` (`jobs.opened_at`, set by one UPDATE on the partial index
+  `ix_jobs_prefetch_unopened` when a student is served the asset or joins its job: studio and
+  audio status with content, quiz start on a class set, placement start, Get it now), `hit_rate`
+  (opened ÷ done), `time_to_content_s` p50/p95 (0 when it was ready first) and `mid_today`, the
+  three caps: answered mid calls / cap (never above it; running jobs past it are `over`, "+n
+  finishing"), refused attempts apart. The UI shows "Being prepared · about N min · place k in line" on the
+  building dialog, Study Studio, Audio Studio and the island's placement banner (`PreparingNote`).
+  Triggers are events, never a polled GET, and each is idempotent: a chapter finishes indexing
+  (upload or `REFRESH_CONTENT`: planned if it is one of the course's first two ready chapters
+  or a member has a quiz attempt or presence on the chapter before it; one query decides); a
+  member joins with a language new to the world (chapters 1–2 + placement in it); placement
+  finished (the start chapter, the first weak one, at the student's level, and the next);
+  chapter N's quiz finished, a Study/Audio generation started, or a building dialog opened
+  (`POST /api/chapters/{id}/opened {building}`: members only, the level comes from
+  `course_levels`, never the body; no AI call) → chapter N+1.
 - Job stages are human-readable keys (`reading_chapter`, `matching_level`, `writing_questions`,
   `writing_hints`) so the loading screen shows real progress from the backend.
 - If the answer is already cached, the API returns the result directly with `cached=true` and
@@ -96,30 +129,35 @@ shows support; otherwise prompt for JSON, parse with a tolerant extractor, valid
 and on failure do ONE compact "fix this JSON" repair call. Small models break JSON — test it.
 
 ## Model routing table
+Logged patterns (`ai_call_log.pattern`, the Stats page) start with one of the official names
+(PLATFORM.md), `fallback`, or `none`; a step that is no orchestration pattern keeps its internal
+name after a colon (`none:guard`). Stats groups calls by the part before the colon (OPT-08).
 | TaskKind | Tier | Pattern | Lane | Cache key |
 | --- | --- | --- | --- | --- |
-| INTENT_LANG (detect intent + language) | compact | triage | interactive | text hash |
-| CHUNK_TAG (batch of chunks → concepts, chapter) | compact | batch at upload (burst) | background | doc hash |
-| QUIZ_GENERATE (10 Q, one call) | compact | narrow-before-generating | interactive / background pool | world+chapter+level+lang+seed |
-| QUIZ_GRADE_TAG (wrong answers → concept + mistake type) | compact | extraction | background | lang + missed items hash |
-| QUIZ_VERIFY (mid solves each new quiz / placement item blind; only items whose key it confirms are published; one regeneration if fewer than 5 survive; mid unavailable → a student's quiz is published marked unverified and never shared, background and placement wait) | mid | draft-then-revise | same as the set | questions + context hash |
+| INTENT_LANG (detect intent + language; **reserved**: no feature calls it yet, OPT-20) | compact | none:triage | interactive | text hash |
+| CHUNK_TAG (batch of chunks → concepts, chapter) | compact | none:batch (at upload, burst) | background | doc hash |
+| QUIZ_GENERATE (12 Q, one call; a set keeps 10, the spares cover items the key check drops, OPT-14; an item whose own explanation names another option is dropped on the server, OPT-15) | compact | narrow-before-generating | interactive / background pool | world+chapter+level+lang+seed |
+| QUIZ_GRADE_TAG (wrong answers → concept + mistake type) | compact | none:extraction | background | lang + missed items hash |
+| QUIZ_VERIFY (mid solves each new quiz / placement item blind, one short worked step per item before its answer (OPT-14); only items whose key it confirms are published; one regeneration if fewer than 5 survive; mid unavailable → a student's quiz is published marked unverified and never shared, background and placement wait) | mid | draft-then-revise | same as the set | questions + context hash |
 | TUTOR_TURN | compact → mid when stuck ≥ 2 turns or "complex" flag | escalation | interactive | plan: chapter+level+lang+style; turns: none |
-| TUTOR_GUARD (rewrite a reply that leaks the answer as a guiding question; only flagged replies) | compact | guard | interactive | none |
-| TUTOR_SUMMARY | compact | summary | interactive | session id |
+| TUTOR_GUARD (rewrite a reply that leaks the answer as a guiding question; only flagged replies) | compact | none:guard | interactive | none |
+| TUTOR_SUMMARY | compact | none:summary | interactive | session id |
 | NOTES_WRITE (STUDY_PACK job, step 1) | mid | plan-once + narrow-before-generating (quiz-pool narrowing, no filter call) | interactive | chapter+level+lang (+job; `study_assets` is the class cache) |
 | FLASHCARDS / MAP_WRITE (STUDY_PACK steps 2–3, from the notes only) | compact | execute-compact | interactive | chapter+level+lang (+job) |
+| NOTES_REVIEW (prefetch quality pass, `PREFETCH_QUALITY_PASS`: mid checks a prefetched pack's notes against the excerpts, the language (no stray English in Arabic or Darija; Darija not MSA; audit N-5) and the chapter's top concepts (N-6); up to 3 section fixes applied, missing concepts recorded, never invented; any failure keeps the notes) | mid | draft-then-revise | background only (a promoted job skips it) | chapter+level+lang (+job) |
+| CARDS_CHECK (prefetch quality pass: compact names the cards the notes don't back; dropped, never below `MIN_CARDS`) | compact | none:extraction | background only | chapter+level+lang (+job) |
 | AUDIO_SCRIPT (AUDIO_EPISODE job) | mid | narrow-before-generating, once then cached | interactive | chapter+level+lang (+job; `study_assets` is the class cache) |
-| DAILY_PLAN (first `GET /api/daily` of a Tunis day; an instant rule plan shows meanwhile and stays if the job fails; applied only while nothing is done) | mid, once / student / day | plan-once | background | user+date |
-| CHALLENGE_ITEMS (unused: flashcard challenges review existing cards) | compact | execute-compact | background | user+date |
-| WISDOM_TIP (at `WISDOM_THRESHOLD` distinct students per world+concept+mistake type; ONE call writes the tip in every language of the world's members; later students only raise the count) | mid, once per pattern | generate-once | background | world+concept+type+langs+count |
+| DAILY_PLAN (first `GET /api/daily` of a Tunis day; an instant rule plan shows meanwhile and stays if the job fails; applied only while nothing is done) | compact, once / student / day; mid only for a student with recorded weak spots (a mistake in 14 days or a weak chapter; OPT-09) | escalation | background | user+date |
+| CHALLENGE_ITEMS (**reserved**, OPT-20: flashcard challenges review existing cards) | compact | execute-compact | background | user+date |
+| WISDOM_TIP (at `WISDOM_THRESHOLD` distinct students per world+concept+mistake type; ONE call writes the tip in every language of the world's members; later students only raise the count) | mid, once per pattern | none:generate-once | background | world+concept+type+langs+count |
 | TEACHBACK_GRADE (ARENA_GRADE / ARENA_SOLO jobs; the same call moderates the answer via `flag`) | compact draft; mid reviews only when confidence is low or the score is within `TEACHBACK_REVIEW_BAND` of `PEER_ANSWER_THRESHOLD` (solo: low confidence only); mid busy → the draft stands (Quick mode). `ar` / `ar-TN`: one mid call, no draft (compact fallback when mid is busy). Still low-confidence after grading → `pending_review`: no rewards, author-only | draft-then-revise (ar/ar-TN: mid direct) | interactive | none (personal) |
-| MODERATE_POST (ARENA_ASK job: peer questions; rejected → coins refunded) | compact | classification | interactive | text hash |
-| TRANSLATE_SHORT | compact | rewriting | background | text+lang |
+| MODERATE_POST (ARENA_ASK job: peer questions; rejected → coins refunded) | compact | none:classification | interactive | text hash |
+| TRANSLATE_SHORT (chapter glossary, `features/glossary`: the chapter's top 12 concepts → the word to use in the student's language, placed as `{glossary}` in notes, audio, tutor and Teach-Back prompts; no call when the material is in that language; best effort; OPT-11) | compact, once per chapter × language | none:rewriting | the caller's | chapter+language+terms |
 | PLACEMENT_QUIZ (8 Q per course, 2 chunks per chapter, one call; graded server-side) | compact | narrow-before-generating | interactive | course+lang (shared by the class) |
-| any mid task when saturated | compact | fallback (`quick_mode`) | — | — |
-| JSON_REPAIR (internal: fix one broken JSON reply) | compact | repair | same as the task | none |
+| any mid task when saturated | compact | fallback (`quick_mode`; `fallback:forced` when an admin forces it) | — | — |
+| JSON_REPAIR (internal: fix one broken JSON reply) | compact | none:repair | same as the task | none |
 | DEMO_SUMMARY (dev-only M1 demo job) | mid | narrow-before-generating | interactive / background | optional |
-| EMBED (embeddings endpoint, own quota; logged as tier `embed`) | — | batch (32 texts/call) | background (upload) / interactive (search query) | search query text |
+| EMBED (embeddings endpoint, own quota; logged as tier `embed`) | — | none:batch (32 texts/call) | background (upload) / interactive (search query) | search query text |
 
 Identical cacheable tasks in flight at the same time are single-flighted: one model call, the
 others read the cache when it lands.
@@ -143,12 +181,15 @@ others read the cache when it lands.
   document_id, page_ref, tags, lang}` with keyword payload indexes on the filter fields.
   Text lives in Postgres; Qdrant holds vectors + payload only (keeps the collection small).
 - Tests use an in-memory Qdrant (`QdrantClient(":memory:")`) — no network.
-- narrow-before-generating: top-k=8 by vector → compact filter keeps the 3–4 most relevant → prompt.
+- narrow-before-generating (`quiz/pool.py`): vector search returns the chapter's top `SEARCH_K=12`
+  chunks, which go first in a round-robin over the chapter's parts and concepts, capped at
+  `CONTEXT_CHARS=7000` / `CONTEXT_MAX_CHUNKS=24` → prompt. No compact filter call (it would cost a
+  request per generation for little gain on chapter-sized material).
 - Precompute right after upload (background lane, burst reserve): chunk tags, quiz pool per level,
   notes for "intermediate" in the creator's language. M2 ships the quiz pool: when a chapter's
   last file is ready, `QUIZ_POOL` makes ONE compact QUIZ_GENERATE call (10 questions) from up to 8
   chunks picked round-robin across the chapter's concepts → `quiz_sets`.
-- `python -m app.rag.reindex --provider cloud` rebuilds a provider's collection from Postgres.
+- `python -m app.rag.reindex --provider cloud` rebuilds a provider's collection from Postgres. On cloud it refuses to start while a worker heartbeat is fresh (one limiter per key, OPT-19), like the in-process evals (`quiz`, `teachback`, `quiz-keys`); `slot` runs through the worker.
 
 ## Data model (Postgres)
 `users(id, nickname, password_hash, ui_language, created_at)` — nothing else identifying
@@ -158,7 +199,7 @@ others read the cache when it lands.
 `documents(id, chapter_id, filename, kind, size, status, error)` · `chunks(id, document_id, chapter_id, text, page_ref, tags[], lang)` — vectors in Qdrant
 `course_levels(user_id, course_id, level, placed_at, goal)` · `chapter_mastery(user_id, chapter_id, mastery, weak)`
 `placement_sets(id, course_id, language, questions jsonb)` — answers never leave the server · `presence(user_id, course_id, chapter_id, seen_at)` — "on this island now", 2-minute window
-`jobs(id, user_id, world_id, kind, lane, status, stage, stages, not_before, attempts, cost, result jsonb, error, quick_mode, created_at, finished_at, events jsonb)` — `events`: the timeline (claimed, stage, deferred, done, failed, swept)
+`jobs(id, user_id, world_id, kind, lane, priority, status, stage, stages, not_before, attempts, cost, result jsonb, error, quick_mode, created_at, finished_at, events jsonb, share_key, opened_at)` — `events`: the timeline (claimed, stage, deferred, done, failed, swept)
 `ai_cache(key PK, task_kind, content jsonb, model_tier, created_at, hits)`
 `ai_call_log(id, ts, task_kind, model_tier, pattern, status_code, tokens_in, tokens_out, latency_ms, cache_hit, fallback, refusal_reason, job_id, attempt, debug, single_flight)` — `debug` rows (replays) are left out of every metric
 `ai_call_trace(call_log_id, created_at, messages, reply, parsed, error)` — only while the `trace_prompts_until` switch is on; capped, redacted, deleted after 24 h
@@ -181,7 +222,7 @@ a ledger row — never mutate a balance without one.
 
 ## API surface (REST, JSON, cookie session)
 `/api/auth/{signup,login,logout,me,session}` (signed HttpOnly cookie) · `/api/profile` · `/api/onboarding/style`
-`/api/worlds/{id}/map` · `/api/courses/{id}` (island) · `/api/courses/{id}/presence` · `/api/placement/{course_id}`
+`/api/worlds/{id}/map` · `/api/courses/{id}` (island) · `/api/courses/{id}/presence` · `/api/chapters/{id}/opened` (prefetch trigger) · `/api/placement/{course_id}`
 `/api/worlds` (create) · `/api/worlds/join` · `/api/worlds/{id}` (map data) · `/api/worlds/{id}/courses|chapters|documents`
 `/api/jobs/{id}` · `/api/economy` · `/api/wallet` (+ `/demo-purchase`) · `/api/daily` (+ `/seen`: the daily return screen, shown to returning students on their first open of the day) — any paid start without enough coins → `402 errors.insufficient_coins`
 `/api/quiz/price` · `/api/quiz/start` · `/api/quiz/attempts/{id}` (+ `/answer`, `/skip`, `/finish`; `/api/quiz/attempts/from-job/{job}`) · `/api/placement/{start,finish}` · `/api/tutor/start` · `/api/tutor/{id}` (+ `/turn` with action message|hint|another_way|stuck, `/end`)

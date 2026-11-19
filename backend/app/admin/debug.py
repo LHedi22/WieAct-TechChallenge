@@ -24,7 +24,7 @@ from app.admin.auth import AdminActionDep, AdminDep
 from app.api.deps import Session
 from app.api.health import SettingsDep
 from app.core import flags
-from app.gateway.router import ROUTES
+from app.gateway.router import ROUTES, official
 from app.gateway.types import TaskKind
 from app.jobs import replay as replay_job
 from app.jobs.service import AIPaused, create_job
@@ -411,7 +411,7 @@ async def routing(
         )
     ).all()
     table = {k.value: {"tier": r.tier, "pattern": r.pattern} for k, r in ROUTES.items()}
-    table[TaskKind.EMBED.value] = {"tier": "embed", "pattern": "batch"}
+    table[TaskKind.EMBED.value] = {"tier": "embed", "pattern": "none:batch"}
     kinds: dict[str, dict[str, Any]] = {}
     for kind, tier, pattern, n in rows:
         expected = table.get(kind)
@@ -420,7 +420,7 @@ async def routing(
         if expected and tier == "mid" and expected["tier"] == "compact":
             flag = None if expected["pattern"] in ALLOWED_MID else "mid_where_compact"
         elif expected and tier == "compact" and expected["tier"] == "mid":
-            flag = "fallback" if pattern in ("fallback", "forced-fallback") else "compact_where_mid"
+            flag = "fallback" if official(pattern) == "fallback" else "compact_where_mid"
         k["actual"].append({"tier": tier, "pattern": pattern, "calls": n, "flag": flag})
     for kind, route in table.items():
         kinds.setdefault(kind, {"task_kind": kind, "expected": route, "actual": []})

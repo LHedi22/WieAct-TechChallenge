@@ -50,17 +50,28 @@ Official orchestration patterns — use these names in code comments, logs and t
 Implication: the economy of *requests* matters more than tokens. One call for 10 quiz questions,
 never 10 calls. Batch chunk-tagging several chunks per call.
 
+**Background prefetch spends idle quota, never a student's** (`app/jobs/prefetch.py`,
+ARCHITECTURE.md): it queues what the class will open next in the background lane, which uses at
+most concurrency − `LLM_INTERACTIVE_RESERVED` call slots (1 of 2), so a student's call never waits
+for it; a student who needs a prefetch early promotes it. Each asset is made once per class
+(share key + cache), and three daily caps bound its mid calls (per world 40, per creator 40,
+whole app 120; audio is dropped first, then packs). It runs **only while the key is live**: outside
+a slot (offline demo mode) it plans nothing, so the jury slot must run the planner first
+(`JURY_SLOT_RUNBOOK.md`). One set (chapter × level × language) costs about 7 requests, 3 of them
+mid (quiz 1 + 1, pack 3 + 1, audio 1 mid; 9 / 4 with `PREFETCH_QUALITY_PASS`).
+
 ## Response & error contract (official, stable for the whole challenge)
 | Situation | Service response | Required handling | Our gateway | User sees |
 | --- | --- | --- | --- | --- |
-| Normal | `200` + quota headers | read remaining quota, pace requests | parse headers → `QuotaState`; when low, pause background lane | nothing |
+| Normal | `200` + quota headers | read remaining quota, pace requests | parse headers → `QuotaState`; at ≤ 3 requests left, pause the background lane for the refill time, (4 − remaining) × 60 ÷ the limit header's rpm (no reset header is sent) | nothing |
 | Team quota exhausted | "team quota exhausted" + delay | wait the stated delay, retry | requeue with `not_before = now + delay`; expose queue position/ETA | "High demand, your quiz is in line (about N s)" + cached content |
 | Model class saturated | `503` + `Retry-After` | retry at intervals **or** fall back to compact | interactive: one retry then compact fallback (`quick_mode=true`); background: retry later | "Quick mode" badge |
 | Request beyond a ceiling | `400`, message names the ceiling | fix the request | parse message → reduce `max_tokens` / chunks / history, or split; resend once | nothing, or shorter answer |
 | Identical request | — | must not regenerate | `ai_cache` hit, no call | instant |
 
-The exact status code and header names for "quota exhausted" and for quota headers are not
-documented — the parser must be tolerant (log unknown `x-*`/`ratelimit-*` headers on first sight)
+The quota headers on every 200 are known since 9/11 (`x-ratelimit-api_key-{remaining,limit}-{requests,max_parallel_requests}`,
+`x-litellm-key-rpm-limit`; DECISIONS.md 2026-11-09). The status code for "quota exhausted" is still
+unseen — the parser must be tolerant (log unknown `x-*`/`ratelimit-*` headers on first sight)
 and the mock must make them configurable. Record real values in DECISIONS.md.
 
 "Normal latency and occasional queueing are expected, not a malfunction." Persistent errors →

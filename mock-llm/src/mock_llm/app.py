@@ -187,9 +187,11 @@ QUIZ_TEXT = {
 
 def _quiz(user: str, lang: str, system: str = "") -> dict[str, Any]:
     q, hint, expl, right, wrong = QUIZ_TEXT.get(lang[:2], QUIZ_TEXT["en"])
-    concepts = _concepts(user, 10) or ["the topic"]
+    count = re.search(r"exactly (\d+) ", system)
+    n = int(count.group(1)) if count else 10
+    concepts = _concepts(user, n) or ["the topic"]
     questions = []
-    for i in range(10):
+    for i in range(n):
         c = concepts[i % len(concepts)]
         answer = i % 4
         options = [f"{wrong.format(c=c)} ({k + 1})" for k in range(4)]
@@ -223,7 +225,8 @@ def _verify(user: str, lang: str, system: str = "") -> dict[str, Any]:
         options = OPTION_LINE.findall(block[at:end])
         plain = [int(i) for i, text in options if not DISTRACTOR.search(text)]
         one = plain[0] if len(plain) == 1 else None
-        answers.append({"n": n, "answer": one, "sure": one is not None})
+        step = "the option without a distractor mark"
+        answers.append({"n": n, "step": step, "answer": one, "sure": one is not None})
     return {"answers": answers}
 
 
@@ -543,7 +546,28 @@ def _audio(user: str, lang: str, system: str = "") -> dict[str, Any]:
     return {"title": title, "segments": segments}
 
 
+GLOSSARY_SAY = {"fr": "{t} (fr)", "ar": "مصطلح {t}", "ar-TN": "كلمة {t}", "en": "{t}"}
+
+
+def _glossary(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    """TRANSLATE_SHORT for the chapter glossary: every listed term with a marked rendering."""
+    terms = re.findall(r"^- (.+)$", user.split("TERMS:", 1)[-1], re.MULTILINE)
+    say = GLOSSARY_SAY.get(lang, "{t}")
+    return {"terms": [{"term": t.strip(), "say": say.format(t=t.strip())} for t in terms]}
+
+
+def _notes_review(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    """NOTES_REVIEW: the mock's notes are its own, so nothing to fix."""
+    return {"ok": True, "fixes": [], "missing": []}
+
+
+def _cards_check(user: str, lang: str, system: str = "") -> dict[str, Any]:
+    """CARDS_CHECK: every mock card comes from the notes."""
+    return {"unsupported": []}
+
+
 GENERATORS = {
+    "TRANSLATE_SHORT": _glossary,
     "MODERATE_POST": _moderate,
     "TEACHBACK_GRADE": _teachback,
     "TUTOR_TURN": _tutor,
@@ -560,6 +584,8 @@ GENERATORS = {
     "FLASHCARDS": _flashcards,
     "MAP_WRITE": _mind_map,
     "AUDIO_SCRIPT": _audio,
+    "NOTES_REVIEW": _notes_review,
+    "CARDS_CHECK": _cards_check,
 }
 
 

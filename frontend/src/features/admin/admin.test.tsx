@@ -59,10 +59,28 @@ const stats: Stats = {
   compact_share: 0.7,
   by_tier: { compact: { calls: 28, tokens_in: 1, tokens_out: 1, avg_latency_ms: 2000 } },
   by_task: { QUIZ_GENERATE: 4 },
+  by_pattern: { "narrow-before-generating": 4, escalation: 9, none: 2 },
   refusals: { saturated: 2 },
   fallbacks: 1,
   forced_fallbacks: 3,
   quota_headers_seen: [],
+  prefetch: {
+    jobs: 4,
+    done: 3,
+    failed: 0,
+    waiting: 1,
+    promoted: 1,
+    calls: { compact: 6, mid: 3 },
+    quiz_sets_used: 2,
+    opened: 2,
+    hit_rate: 0.667,
+    time_to_content_s: { p50: 0, p95: 12.5, n: 2 },
+    mid_today: {
+      all: { used: 43, cap: 120, over: 0, refused: 6 },
+      worlds: [{ world_id: "w1234567-aaaa", used: 40, cap: 40, over: 3, refused: 6 }],
+      creators: [{ creator_id: "c7654321-bbbb", used: 40, cap: 40, over: 3, refused: 6 }],
+    },
+  },
 };
 
 function serve({ signedIn = true, enabled = true } = {}) {
@@ -168,5 +186,40 @@ describe("Admin", () => {
     const forced = screen.getByText("Forced Quick mode").parentElement as HTMLElement;
     expect(within(real).getByText("1")).toBeInTheDocument();
     expect(within(forced).getByText("3")).toBeInTheDocument();
+  });
+
+  it("shows what the next-chapter prefetch cost and whether it was used (Group E)", async () => {
+    serve();
+    show("/admin/stats");
+    const table = (await screen.findByText("Prefetch (next chapter, background)")).closest(
+      "section",
+    );
+    const rows = within(table as HTMLElement).getAllByRole("row");
+    expect(rows[1]).toHaveTextContent("compact 6 · mid 3");
+    expect(rows[3]).toHaveTextContent("67 %");
+    expect(rows[3]).toHaveTextContent("0 s / 12.5 s (n 2)");
+    const caps = rows.slice(5).map((r) => r.textContent);
+    // answered calls only, never above the cap; refused attempts apart (the 43/40 seen on 15 Nov)
+    expect(caps).toEqual([
+      "All worlds" + "43 / 120" + "6",
+      "World w1234567" + "40 / 40 (+3 finishing)" + "6",
+      "Creator c7654321" + "40 / 40 (+3 finishing)" + "6",
+    ]);
+  });
+
+  it("groups calls by the official orchestration pattern (audit OPT-08)", async () => {
+    serve();
+    show("/admin/stats");
+    const table = (await screen.findByText("By orchestration pattern")).closest("section");
+    expect(table).not.toBeNull();
+    const rows = within(table as HTMLElement)
+      .getAllByRole("row")
+      .map((r) => r.textContent);
+    expect(rows).toEqual([
+      "PatternCalls",
+      "escalation9",
+      "narrow-before-generating4",
+      "none (not an orchestration step)2",
+    ]);
   });
 });

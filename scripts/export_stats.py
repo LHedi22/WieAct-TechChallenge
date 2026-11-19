@@ -7,7 +7,8 @@ requests, refusals and how they were handled).
     python3 scripts/export_stats.py --api https://<site> --load scripts/out/load-cloud.txt
     ADMIN_TOKEN=… python3 scripts/export_stats.py --api https://<site>
 
-Writes docs/report/stats-<provider>-<date>.md. `--load` appends a saved `scripts/load.py` output.
+Writes docs/report/stats-<provider>-<date>.md. `--load` appends a saved `scripts/load.py` or
+`load_class.py` output.
 Standard library only. The admin token is read from the environment, never from the command line.
 """
 
@@ -22,6 +23,42 @@ from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+
+
+def _prefetch_rows(p: dict | None) -> list[str]:
+    """Background prefetch of the next chapter (Group E): what it cost and whether it was used."""
+    if not p or not p.get("jobs"):
+        return []
+    calls = " · ".join(f"{t} {n}" for t, n in p["calls"].items()) or "0"
+    return [
+        f"| Prefetch jobs (next chapter, background) | {p['jobs']} ({p['done']} done, "
+        f"{p['waiting']} waiting, {p['failed']} failed) |",
+        f"| Prefetch calls | {calls} |",
+        f"| Prefetches a student needed early (promoted) | {p['promoted']} |",
+        f"| Prefetched quiz sets later started | {p['quiz_sets_used']} |",
+        *_prefetch_use_rows(p),
+    ]
+
+
+def _prefetch_use_rows(p: dict) -> list[str]:
+    """Step 8: how much of the prefetch was opened, how long students still waited, the caps."""
+    if "opened" not in p:  # an older backend
+        return []
+    hit = "–" if p["hit_rate"] is None else f"{round(p['hit_rate'] * 100)} %"
+    ttc = p["time_to_content_s"]
+    mid = p["mid_today"]
+
+    def busiest(rows: list[dict]) -> str:
+        top = max(rows, key=lambda r: r["used"], default=None)
+        return f"{top['used']}/{top['cap']}" if top else "0"
+
+    return [
+        f"| Prefetches opened / hit rate (opened ÷ done) | {p['opened']} / {hit} |",
+        f"| Time to content, p50 / p95 (n) | {ttc['p50']} s / {ttc['p95']} s ({ttc['n']}) |",
+        f"| Prefetch mid today: all / busiest world / busiest creator | "
+        f"{mid['all']['used']}/{mid['all']['cap']} · {busiest(mid['worlds'])} · "
+        f"{busiest(mid['creators'])} |",
+    ]
 
 
 def fetch(api: str, provider: str) -> dict:
@@ -51,6 +88,7 @@ def render(s: dict, load: str | None) -> str:
         f"| Compact fallbacks (Quick mode, caused by the platform) | {s['fallbacks']} |",
         f"| Quick mode forced by an admin (demo switch, not a fallback) | "
         f"{s.get('forced_fallbacks', 0)} |",
+        *_prefetch_rows(s.get("prefetch")),
         "",
         "| Tier | Calls | Share | Tokens in | Tokens out | Avg latency |",
         "| --- | --- | --- | --- | --- | --- |",
@@ -74,7 +112,7 @@ def render(s: dict, load: str | None) -> str:
     if s.get("quota_headers_seen"):
         out += ["", f"Quota headers seen: {', '.join(s['quota_headers_seen'])}"]
     if load:
-        out += ["", "## Load test (`scripts/load.py`)", "", "```", load.strip(), "```"]
+        out += ["", "## Load test (`scripts/load*.py`)", "", "```", load.strip(), "```"]
     return "\n".join(out) + "\n"
 
 

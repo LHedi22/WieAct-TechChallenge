@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 
 from app import admin
 from app.api import dev, economy, health, jobs, system
+from app.api.sanitize import StripNul
 from app.core import db, economy_live
 from app.core.config import get_settings
 from app.features.arena import router as arena
@@ -32,8 +33,10 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="Captain Cat API",
         docs_url="/api/docs" if settings.APP_ENV != "production" else None,
-        openapi_url="/openapi.json",
+        # dev only: the frontend's types are generated from it (audit OPT-25, F-SEC-3)
+        openapi_url="/openapi.json" if settings.APP_ENV != "production" else None,
     )
+    app.add_middleware(StripNul)  # NUL bytes never reach Postgres (audit OPT-26)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
@@ -56,11 +59,32 @@ def create_app() -> FastAPI:
         # Any paid start without enough coins: the UI opens the out-of-coins screen.
         return JSONResponse(status_code=402, content={"detail": e.key})
 
+    def _db_down() -> JSONResponse:
+        # Postgres restarting (audit OPT-12): ask the client to come back, never a 500.
+        return JSONResponse(
+            status_code=503,
+            content={"detail": "errors.unavailable"},
+            headers={"Retry-After": str(db.DB_RETRY_AFTER_S)},
+        )
+
+    async def _db_error(_: Request, e: Exception) -> JSONResponse:
+        if not db.is_outage(e):
+            raise e  # a bug (constraint, bad data): stays a 500 with its traceback
+        return _db_down()
+
+    for err in db.DB_ERRORS:
+        app.add_exception_handler(err, _db_error)
+
     @app.middleware("http")
     async def _live_economy(request: Request, call_next):
         # Admin overrides of economy.py (core/economy_live.py), re-read at most every 3 s
         if request.url.path.startswith("/api/"):
-            await economy_live.refresh(db.get_sessionmaker())
+            try:
+                await economy_live.refresh(db.get_sessionmaker())
+            except db.DB_ERRORS as e:
+                if not db.is_outage(e):
+                    raise
+                return _db_down()
         return await call_next(request)
 
     app.include_router(health.router)

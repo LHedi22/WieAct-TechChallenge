@@ -274,6 +274,10 @@ describe("Socratic Tutor", () => {
     expect(screen.getByRole("img", { name: "Found" })).toBeInTheDocument();
     expect(screen.getAllByRole("img", { name: "Not yet" })).toHaveLength(2);
     expect(screen.getAllByText(/Quick mode/).length).toBeGreaterThan(0);
+    // audit OPT-24 (F-A11Y-2, axe "list"): the conversation list holds list items only
+    for (const list of document.querySelectorAll("ol, ul")) {
+      for (const child of list.children) expect(child.tagName).toBe("LI");
+    }
     await user.type(screen.getByPlaceholderText(/Type your thinking/), "factor the top?");
     await user.click(screen.getByRole("button", { name: "Send" }));
     await waitFor(() =>
@@ -369,33 +373,33 @@ describe("Socratic Tutor", () => {
 });
 
 describe("Entry dialog", () => {
+  const island: IslandOut = {
+    id: C,
+    placement: { ready: false, preparing: null },
+    world_id: W,
+    name: "Calculus I",
+    color_key: "island-1",
+    level: "advanced",
+    mastery: 0,
+    chapters: [{ id: "ch1", idx: 1, title: "Limits", ready: true, mastery: null, weak: false }],
+    buildings: [],
+    visitors: [],
+  };
+  const wallet = {
+    coins: 20,
+    free_today: 20,
+    earned: 0,
+    purchased: 0,
+    points: 0,
+    streak: 0,
+    earned_today: 0,
+    refill_at: "2026-10-30T23:00:00Z",
+    exam_pass_until: null,
+    exam_pass_left_today: null,
+  };
+
   it("asks the server for the quiz price before Confirm", async () => {
-    const island: IslandOut = {
-      id: C,
-      world_id: W,
-      name: "Calculus I",
-      color_key: "island-1",
-      level: "advanced",
-      mastery: 0,
-      chapters: [{ id: "ch1", idx: 1, title: "Limits", ready: true, mastery: null, weak: false }],
-      buildings: [],
-      visitors: [],
-    };
-    serve({
-      "GET /api/quiz/price": { cost: 0, cached: true },
-      "GET /api/wallet": {
-        coins: 20,
-        free_today: 20,
-        earned: 0,
-        purchased: 0,
-        points: 0,
-        streak: 0,
-        earned_today: 0,
-        refill_at: "2026-10-30T23:00:00Z",
-        exam_pass_until: null,
-        exam_pass_left_today: null,
-      },
-    });
+    serve({ "GET /api/quiz/price": { cost: 0, cached: true }, "GET /api/wallet": wallet });
     show(
       <BuildingDialog
         island={island}
@@ -408,6 +412,61 @@ describe("Entry dialog", () => {
     );
     expect(await screen.findByText("Your class already made one")).toBeInTheDocument();
     expect(screen.getByText("Free")).toBeInTheDocument();
+    expect(screen.getByText("Ready")).toBeInTheDocument();
     expect(screen.getByText("From your placement")).toBeInTheDocument();
+  });
+
+  it("tells the server which chapter it opened (prefetch trigger), without a level", async () => {
+    const calls = serve({
+      "GET /api/quiz/price": { cost: 0, cached: true },
+      "GET /api/wallet": wallet,
+      "POST /api/chapters/ch1/opened": {},
+    });
+    show(
+      <BuildingDialog
+        island={island}
+        building={{ key: "quiz_hall", cost: 5, free_if_cached: false, answer_cost: null }}
+        onClose={() => undefined}
+        onConfirm={() => undefined}
+      />,
+      "/",
+      "/",
+    );
+    await screen.findByText("Ready");
+    const opened = calls.filter((c) => c.key === "POST /api/chapters/ch1/opened");
+    expect(opened).toEqual([
+      { key: "POST /api/chapters/ch1/opened", body: { building: "quiz_hall" } },
+    ]);
+  });
+
+  // Group E: the next chapter is being prefetched in the background; Confirm moves it up.
+  it.each([
+    ["en" as Language, "Being prepared · about 2 min · Place 3 in line", "Get it now"],
+    ["ar" as Language, "قيد التحضير · حوالي دقيقتين", "احصل عليه الآن"],
+  ])("shows a prefetch in progress (%s)", async (lang, note, button) => {
+    serve({
+      "GET /api/studio/ch1/price": {
+        cost: 0,
+        cached: false,
+        preparing: { job_id: "j1", eta_s: 70, queue_position: 3 },
+      },
+      "GET /api/wallet": wallet,
+    });
+    const picked = vi.fn();
+    show(
+      <BuildingDialog
+        island={island}
+        building={{ key: "study_studio", cost: 15, free_if_cached: true, answer_cost: null }}
+        onClose={() => undefined}
+        onConfirm={picked}
+      />,
+      "/",
+      "/",
+      lang,
+    );
+    expect(await screen.findByRole("status")).toHaveTextContent(note);
+    expect(screen.queryByText(lang === "en" ? "Ready" : "جاهز")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: button }));
+    expect(picked).toHaveBeenCalledWith("ch1", "advanced", true);
   });
 });

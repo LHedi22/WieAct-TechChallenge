@@ -1,0 +1,14 @@
+# pick_context on the cc-opt DB chunks (mock, 14 Nov). "before" = the old function on the same rows (the old chapter_context also cut to 12 search hits first).
+Stacks and queues before: 6 of 12 chunks, 486 chars, refs slide:1 slide:2 slide:3 slide:4 slide:5 slide:7
+Stacks and queues after: 12 of 12 chunks, 978 chars, refs slide:1 slide:2 slide:3 slide:4 slide:5 slide:6 slide:7 slide:8 slide:9 slide:10 slide:11 slide:12
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+RuntimeError: Task <Task pending name='Task-5' coro=<main() running at /opt-audit/ctx_compare.py:11> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181]> got Future <Future pending cb=[BaseProtocol._on_waiter_completed()]> attached to a different loop
+Limits and derivatives before: 6 of 34 chunks, 2820 chars, refs page:1 page:2 page:16 section:2 section:4 section:5
+Limits and derivatives after: 11 of 34 chunks, 6556 chars, refs page:1 page:2 page:3 page:12 page:13 page:16 page:23 section:2 section:3 section:4 section:5
+Integrals before: 1 of 1 chunks, 76 chars, refs image:1
+Integrals after: 1 of 1 chunks, 76 chars, refs image:1

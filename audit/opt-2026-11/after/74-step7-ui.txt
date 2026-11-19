@@ -1,0 +1,12 @@
+Step 7 (prefetch UI), mock only, cc-opt stack (API :18000, worker paused while queued), 15 Nov 2026.
+World OLIVE-7Q2, members en (SmokeEn) + ar (SmokeAr); `python -m app.jobs.prefetch --world OLIVE-7Q2`
+queued 8 en + 11 ar prefetch jobs (mid today: world 19/40, creator 19/40, all 19/120).
+
+Real browser (Chromium, built dist, API proxied to cc-opt):
+- Studio, Calculus ch 2, EN 1440x900: "Free · Being prepared · about 1 min · Place 7 in line · Get it now", overflowX 0, no page errors, no POST sent on load  -> 70-step7-studio-en-1440.png
+- Studio, AR 390x844: dir=rtl, "قيد التحضير · حوالي دقيقتين · المرتبة 13 في الدور", overflowX 0  -> 71-step7-studio-ar-390.png
+- Island, EN 1440x900: placement banner "Being prepared · about 1 min · Place 1 in line"  -> 72-step7-island-en-1440.png
+- Island, AR 390x844: rtl, "قيد التحضير · حوالي دقيقة واحدة · المرتبة 3 في الدور", overflowX 0  -> 73-step7-island-ar-390.png
+
+"Get it now" through the API (SmokeEn): POST /api/studio/<ch2>/generate {pay: me} -> {"cost":0}; the prefetch
+job is now lane=interactive, priority=10, cost=0, owner NULL; wallet still 20 coins.

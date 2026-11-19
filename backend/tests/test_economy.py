@@ -14,6 +14,7 @@ def test_numbers_match_economy_md():
     assert economy.EARN["daily_challenge"] == 3 and economy.EARN["peer_answer_good"] == 3
     assert economy.BUILDINGS["socratic_tutor"]["cost"] == 8  # mockup said 3 (DESIGN.md fix 2)
     assert economy.EXAM_PASS_DAILY_LIMIT == 15
+    assert economy.FIRST_PAYER_REFUND_OPENS == 3 and economy.FIRST_PAYER_REFUND_SHARE == (2, 3)
 
 
 def test_refill_is_next_tunis_midnight():
@@ -34,3 +35,16 @@ async def test_economy_endpoint_is_public_and_wallet_needs_sign_in(api):  # noqa
     await api.post("/api/auth/signup", json=SIGNUP)
     wallet = (await api.get("/api/wallet")).json()
     assert wallet["coins"] == economy.DAILY_FREE_COINS and wallet["points"] == 0
+
+
+def test_every_reward_in_economy_py_is_paid_somewhere():
+    """Audit OPT-31: EARN.creator_new_member (5 coins) was defined and shown by /api/economy but
+    never paid. Every EARN key must be used by app code outside economy.py itself."""
+    from pathlib import Path  # noqa: PLC0415
+
+    app = Path(__file__).resolve().parents[1] / "app"
+    code = "\n".join(
+        p.read_text() for p in app.rglob("*.py") if p.name not in ("economy.py", "economy_live.py")
+    )
+    unused = [k for k in economy.EARN if f'"{k}"' not in code and f"'{k}'" not in code]
+    assert unused == []

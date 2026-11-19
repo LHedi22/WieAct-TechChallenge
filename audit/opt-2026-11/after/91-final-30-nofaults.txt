@@ -1,0 +1,17 @@
+ Container cc-opt-backend-run-3d3690ff6225 Creating 
+ Container cc-opt-backend-run-3d3690ff6225 Created 
+Bytecode compiled 5680 files in 1.79s
+firing 30 jobs (10 interactive), faults: none …
+
+finished in 93 s
+jobs done            30/30
+wait p50 / p95       43.6 s / 90.3 s
+  interactive        p50 10.0 s · p95 26.3 s
+  background         p50 63.8 s · p95 90.3 s
+max queue position   30
+max concurrency      2 (mock-side)
+calls at the mock    30 · by status {'200': 30}
+quick-mode jobs      0 · fallbacks 0
+refusals handled     {'quota': 0, 'saturated': 0, 'ceiling': 0}
+
+RESULT PASS

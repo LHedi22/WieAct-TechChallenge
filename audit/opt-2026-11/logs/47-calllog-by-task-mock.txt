@@ -1,0 +1,14 @@
+   task_kind   | model_tier | count | avg_in | max_in | avg_out | cache_hits | fb | non200 
+---------------+------------+-------+--------+--------+---------+------------+----+--------
+ CHUNK_TAG     | compact    |     8 |   1007 |   2078 |     151 |          0 |  0 |      0
+ DEMO_SUMMARY  | mid        |    89 |    150 |    202 |      68 |          0 |  0 |     23
+ DEMO_SUMMARY  | compact    |     2 |    202 |    202 |      92 |          0 |  2 |      0
+ EMBED         | embed      |    33 |    214 |   6534 |       0 |         20 |  0 |      0
+ FLASHCARDS    | compact    |     6 |    507 |    507 |     352 |          0 |  0 |      0
+ MAP_WRITE     | compact    |     6 |    483 |    483 |      64 |          0 |  0 |      0
+ NOTES_WRITE   | mid        |     7 |    539 |    629 |     204 |          0 |  0 |      1
+ QUIZ_GENERATE | compact    |    13 |    206 |    965 |     296 |          7 |  0 |      2
+ QUIZ_VERIFY   | mid        |    12 |    618 |   1266 |      64 |          0 |  0 |      4
+ TUTOR_TURN    | compact    |    11 |     93 |    516 |      10 |          9 |  0 |      0
+(10 rows)
+

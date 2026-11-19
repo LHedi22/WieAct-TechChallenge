@@ -90,3 +90,8 @@ def test_app_starts_in_production_with_cloud(monkeypatch):
         monkeypatch.setenv(k, v)
     app = create_app()
     assert app.docs_url is None
+    assert app.openapi_url is None  # no API map for strangers in production (audit OPT-25)
+
+
+def test_dev_keeps_the_openapi_schema_for_type_generation():
+    assert create_app().openapi_url == "/openapi.json"  # frontend/src/api/schema.d.ts

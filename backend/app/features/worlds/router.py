@@ -18,12 +18,14 @@ from app.features.worlds.schemas import (
     DocumentOut,
     IndexingOut,
     JoinIn,
+    OpenedIn,
     UploadOut,
     WorldIn,
     WorldOut,
     WorldSummary,
 )
 from app.features.worlds.service import Forbidden, NotFound, Rejected
+from app.jobs import prefetch
 from app.models import Chapter, Course, Document, World, WorldMember
 
 router = APIRouter(prefix="/api", tags=["worlds"])
@@ -159,6 +161,20 @@ async def add_chapter(course_id: uuid.UUID, body: ChapterIn, s: Session, user: C
     course = await _course(s, user, course_id, creator=True)
     chapter = await service.add_chapter(s, course, body.title)
     return ChapterOut(id=chapter.id, idx=chapter.idx, title=chapter.title)
+
+
+@router.post("/chapters/{chapter_id}/opened", status_code=204)
+async def chapter_opened(chapter_id: uuid.UUID, body: OpenedIn, s: Session, user: CurrentUser):
+    """A building dialog opened on chapter N: queue chapter N+1 for this student's level and
+    language (prefetch). Members only; no AI call here; idempotent, so every dialog mount may send
+    it."""
+    try:
+        chapter = await service.member_chapter(s, user, chapter_id)
+    except NotFound as e:
+        raise _http(e) from e
+    level = await prefetch.student_level(s, user, chapter.course_id)
+    await prefetch.guard(s, prefetch.plan_next(s, user, chapter, level, reason="opened"))
+    return Response(status_code=204)
 
 
 @router.post("/chapters/{chapter_id}/documents", response_model=UploadOut, status_code=202)

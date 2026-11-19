@@ -1,0 +1,7 @@
+{
+  "_review": "Drafted by Claude Code on 2026-11-14 (audit OPT-07); every entry needs review by native speakers, Darija especially. Only clear insults belong here: a question that merely says 'stupid' or 'nul' about itself must pass. Phrases match whole words after normalisation (case, Arabic diacritics and letter forms).",
+  "en": ["you idiot", "you moron", "idiots", "moron", "retard", "dumbass", "asshole", "bitch", "fuck you", "fuck off", "son of a bitch", "motherfucker"],
+  "fr": ["idiots", "bande d'idiots", "connard", "connasse", "salope", "pute", "enculé", "encule", "nique ta mère", "nique ta mere", "ta gueule", "fils de pute", "bâtard", "batard"],
+  "ar": ["يا غبي", "اغبياء", "يا حمار", "يا كلب", "ابن الكلب", "يلعن", "تفو", "يا حقير"],
+  "ar-TN": ["قحبة", "زبي", "ميبون", "يا بهيم", "بهايم", "نيك", "نيكمك", "طحان", "9a7ba", "9ahba", "zebi", "zabbi", "zbi", "miboun", "mibboun", "ya bhim", "bhayem", "nik", "nikomok", "t7an", "ta7an"]
+}

@@ -1,0 +1,20 @@
+Group E step 7: the building dialog with prefetch (real Chromium, `mock`, cc-opt stack, 14 Nov)
+
+Setup: cc-opt worker stopped so the prefetch stays queued; dev user SmokeRtl (ar) joined OLIVE-7Q2,
+placed intermediate in Calculus I; GET /api/studio/<Limits>?level=intermediate queued chapter 2
+(Integrals): QUIZ_POOL + STUDY_PACK, background, priority 50, cost 0, user_id NULL.
+The built frontend was served from disk; API calls were proxied to the cc-opt API (:18000) with
+the dev-user header (scratchpad smoke/prefetch.cjs). Nothing reached the dev stack.
+
+AR 390x844 (Study Studio, chapter 2):
+ dir rtl · status "قيد التحضير · حوالي دقيقة واحدة" · chips [cost:مجاني] · buttons [إلغاء, احصل عليه الآن]
+ overflowX 0 · page errors 0           → 56-prefetch-dialog-ar-390.png
+EN 1440x900 (chapter 2 English notes already made by the class):
+ dir ltr · chips [ready:Ready, cost:Free] · "Your class already made one" · buttons [Cancel, Enter]
+ overflowX 0 · page errors 0           → 56-prefetch-dialog-en-1440.png
+
+"Get it now" (POST /api/studio/<Integrals>/generate as SmokeRtl, ar):
+ {"job_id":"da96cfd7-…","cost":0,"cached":false}
+ STUDY_PACK | interactive | priority 10 | queued | cost 0 | user_id NULL | event "promoted"
+ QUIZ_POOL  | background  | priority 50 | queued (not asked for: unchanged)
+Worker started again afterwards.

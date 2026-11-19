@@ -26,5 +26,6 @@ These calls are logged as `forced` (pattern `forced-fallback`) and Stats shows t
 Quick mode**, apart from real fallbacks: say so in the report, and don't count them as platform
 saturation.
 The queue shot (0:22) needs real concurrent students in the slot: `scripts/load.py` only drives the
-mock and the dev endpoint, and cannot create load on the deployed site.
+mock and the dev endpoint; `scripts/load_class.py --cloud` signs up N real students on one chapter
+and works against the deployed site (OPT-30; it spends quota).
 

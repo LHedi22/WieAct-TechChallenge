@@ -17,6 +17,7 @@ import uuid
 
 from sqlalchemy import select
 
+from app.core import cli_guard
 from app.core.config import get_settings
 
 
@@ -66,6 +67,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--provider", choices=["cloud", "local", "mock"], required=True)
     p.add_argument("--world", type=uuid.UUID, default=None)
     args = p.parse_args(argv)
+    if (refused := cli_guard.refuse_beside_worker(args.provider)) is not None:
+        return refused  # audit OPT-19: one limiter per key
     # Embed with exactly this provider; chat stays as configured (production keeps cloud chat
     # and may embed with our own Ollama: `--provider local`).
     os.environ["EMBED_PROVIDER"] = args.provider

@@ -1,0 +1,11 @@
+ Container cc-opt-backend-run-8cb845c8e7b9 Creating 
+ Container cc-opt-backend-run-8cb845c8e7b9 Created 
+Bytecode compiled 5680 files in 429ms
+{"provider": "mock", "run": "087b5", "joined": [200]}
+{"phase": "studio", "students": 10, "http": [200], "coins_charged": 15, "distinct_jobs": 1, "status": ["done"], "quick_mode": 0, "wait_p50_s": 20.7, "wait_p95_s": 20.8, "max_queue_position": 1, "stats_delta": {"calls": 4, "cache_hits": 1, "repeated_identical": 0, "fallbacks": 0, "mid": 1, "compact": 3, "embed": 0, "refusals": 0}}
+{"phase": "quiz", "students": 10, "http": [200], "coins_charged": 5, "distinct_jobs": 1, "status": ["done"], "quick_mode": 0, "wait_p50_s": 12.7, "wait_p95_s": 12.7, "max_queue_position": 1, "stats_delta": {"calls": 3, "cache_hits": 1, "repeated_identical": 0, "fallbacks": 0, "mid": 1, "compact": 2, "embed": 0, "refusals": 1}}
+{"thinking_s": 90}
+{"phase": "next:studio", "students": 10, "http": [200], "coins_charged": 15, "distinct_jobs": 1, "status": ["done"], "quick_mode": 0, "wait_p50_s": 17.2, "wait_p95_s": 17.2, "max_queue_position": 0, "stats_delta": {"calls": 6, "cache_hits": 1, "repeated_identical": 0, "fallbacks": 0, "mid": 2, "compact": 3, "embed": 1, "refusals": 0}}
+{"phase": "next:quiz", "students": 10, "http": [200], "coins_charged": 5, "distinct_jobs": 1, "status": ["done"], "quick_mode": 0, "wait_p50_s": 14.2, "wait_p95_s": 14.2, "max_queue_position": 1, "stats_delta": {"calls": 2, "cache_hits": 1, "repeated_identical": 0, "fallbacks": 0, "mid": 1, "compact": 1, "embed": 0, "refusals": 0}}
+RESULT PASS
+exit=0

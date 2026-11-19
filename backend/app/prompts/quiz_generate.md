@@ -1,4 +1,4 @@
-<!-- version: 3 · tier: compact · pattern: narrow-before-generating · output: {"questions": [{"question": str, "options": [str, str, str, str], "answer_index": 0-3, "hint": str, "explanation": str, "concept": str}]} -->
+<!-- version: 4 · tier: compact · pattern: narrow-before-generating · output: {"questions": [{"question": str, "options": [str, str, str, str], "answer_index": 0-3, "hint": str, "explanation": str, "concept": str}]} -->
 
 ## system
 
@@ -20,4 +20,4 @@ Reply with JSON only: {{"questions": [{{"question": "...", "options": ["...", ".
 
 Course: {course} · Chapter: {chapter} · Level: {level}
 
-{context}
+{context}{redraft}

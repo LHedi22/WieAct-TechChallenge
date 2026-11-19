@@ -284,3 +284,12 @@ async def test_study_pack_notes_cards_and_map_follow_the_request():
 async def test_audio_script_is_segments_in_the_language():
     out = await _reply("Audio. <!-- task: AUDIO_SCRIPT --> <!-- lang: fr -->", "limits continuity")
     assert out["title"] == "Épisode de révision" and len(out["segments"]) >= 3
+
+
+async def test_glossary_renders_every_listed_term_in_the_language():
+    out = await _reply(
+        "Glossary. <!-- task: TRANSLATE_SHORT --> <!-- lang: ar -->", "TERMS:\n- stack\n- queue"
+    )
+    assert out == {
+        "terms": [{"term": "stack", "say": "مصطلح stack"}, {"term": "queue", "say": "مصطلح queue"}]
+    }

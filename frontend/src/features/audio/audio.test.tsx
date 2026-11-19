@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { I18nextProvider } from "react-i18next";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -13,6 +13,7 @@ class FakeUtterance {
   lang = "";
   rate = 1;
   onend: (() => void) | null = null;
+  onerror: ((e: { error: string }) => void) | null = null;
   constructor(public text: string) {}
 }
 
@@ -68,6 +69,37 @@ describe("Audio player", () => {
     expect(spoken.at(-1)?.text).toBe("Recap.");
     expect(spoken.at(-1)?.rate).toBe(1.5);
     expect(screen.getByText("Part 3 of 3")).toBeInTheDocument();
+  });
+
+  it("resets when the browser voice fails, says so and keeps the transcript", async () => {
+    show("fr", "fr");
+    await userEvent.click(await screen.findByRole("button", { name: "Écouter" }));
+    expect(screen.getByRole("button", { name: "Pause" })).toBeInTheDocument();
+    act(() => spoken[0]?.onerror?.({ error: "synthesis-failed" }));
+    // no stuck Pause button: back to Play, nothing highlighted, nothing more spoken
+    expect(await screen.findByRole("button", { name: "Écouter" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Pause" })).not.toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("La voix du navigateur s'est arrêtée");
+    expect(spoken).toHaveLength(1);
+    const list = screen.getByRole("list");
+    expect(within(list).getAllByRole("button")).toHaveLength(3);
+    expect(within(list).getByRole("button", { name: "First idea." })).toBeEnabled();
+    expect(within(list).getByRole("button", { name: "First idea." })).not.toHaveAttribute(
+      "aria-current",
+    );
+    // trying again clears the message and restarts from the part that failed
+    await userEvent.click(screen.getByRole("button", { name: "Écouter" }));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(spoken.map((u) => u.text)).toEqual(["First idea.", "First idea."]);
+  });
+
+  it("ignores the error of a part it cancelled itself", async () => {
+    show("en");
+    await userEvent.click(screen.getByRole("button", { name: "Play" }));
+    await userEvent.click(screen.getByRole("button", { name: "Recap." })); // cancels part 1
+    act(() => spoken[0]?.onerror?.({ error: "interrupted" }));
+    expect(screen.getByRole("button", { name: "Pause" })).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("is transcript-only in Darija", () => {

@@ -1,0 +1,25 @@
+Group E step 8: class load test across two chapters, prefetch off vs on (`mock`, cc-opt stack, 14 Nov)
+
+scripts/load_class.py --code OLIVE-7Q2 --chapter <Calculus 1: Limits> --next-chapter <Calculus 2:
+Integrals> --phases studio,quiz --think 90. Each student studies chapter 1 like the UI (opens the
+studio page, asks for the pack, starts and finishes the quiz), waits 90 s, then asks for chapter
+2's pack and quiz. Toggle: PREFETCH_ENABLED on the cc-opt backend + worker. Each run uses a
+level × language nobody had used on these chapters, so every run starts cold. Logs: 57-prefetch-*.txt
+
+| Run | Chapter 2 pack: wait p50 / coins | Chapter 2 quiz: wait p50 / coins | HTTP | Calls, whole run |
+| --- | --- | --- | --- | --- |
+| 10 students, off (fr beginner)  | 17.2 s / 15 | 14.2 s / 5 | all 200 | 15 |
+| 10 students, on  (fr advanced)  | 0.1 s / 0   | 0.0 s / 0  | all 200 | 10 |
+| 30 students, off (ar beginner)  | 17.6 s / 15 | 6.6 s / 5  | all 200 | 13 |
+| 30 students, on  (ar advanced)  | 0.2 s / 0   | 0.1 s / 0  | all 200 | 12 |
+| 30 students, off, before OPT-34 (ar-TN beginner) | 53.9 s | 30.1 s (p95 44.7 s) | **500s** in 3 phases (DB pool) | 13 |
+
+- Prefetch moves chapter 2's calls into the 90 s the class spends on chapter 1: the same number
+  of calls (one pack, one set per class, shared), made before anyone asks. Nobody waits and
+  nobody pays for chapter 2.
+- No Quick mode and no failed job in any run; queue position never above 1.
+- repeated_identical +2 in each "on" run: chapter-1 MAP_WRITE and QUIZ_VERIFY of the beginner
+  and advanced runs of the same language were byte-identical because the mock writes the same
+  notes and questions whatever the level (checked in ai_call_log). No prefetch job is involved,
+  and real models write per level.
+- The first 30-student run found OPT-34 (fixed in 1a07d5c).

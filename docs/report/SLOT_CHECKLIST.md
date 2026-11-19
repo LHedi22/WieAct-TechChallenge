@@ -1,5 +1,8 @@
 # Slot checklist — confirm audit N-1 … N-6 on the platform models
 
+> The jury-slot plan (warm-up, these runs, the stats export, with request counts after the
+> 14 Nov fixes) is `JURY_SLOT_RUNBOOK.md`; `scripts/jury_slot.py` prints it.
+
 The smallest set of runs that tells us whether the fixes hold on the real models (`llama3.2-3b`
 compact, `llama3.1-8b` mid). Everything below has only been measured on **local substitutes**
 (Ollama `llama3.2:3b` / `llama3.1:8b` Q4_K_M, context 4096, laptop GPU+CPU) and on the mock.

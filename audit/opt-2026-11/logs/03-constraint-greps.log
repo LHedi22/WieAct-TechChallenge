@@ -1,0 +1,5 @@
+$ git ls-files | grep -E "(^|/)\.env$"
+$ grep felcloud
+$ openai outside gateway
+$ frontend keys
+done

@@ -20,6 +20,8 @@ class TaskKind(StrEnum):
     MAP_WRITE = "MAP_WRITE"
     AUDIO_SCRIPT = "AUDIO_SCRIPT"
     FLASHCARDS = "FLASHCARDS"
+    NOTES_REVIEW = "NOTES_REVIEW"  # prefetch quality pass: mid checks prefetched notes
+    CARDS_CHECK = "CARDS_CHECK"  # prefetch quality pass: compact drops cards the notes don't back
     DAILY_PLAN = "DAILY_PLAN"
     CHALLENGE_ITEMS = "CHALLENGE_ITEMS"
     WISDOM_TIP = "WISDOM_TIP"

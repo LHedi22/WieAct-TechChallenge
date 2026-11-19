@@ -1,17 +1,32 @@
-"""A separate `<name>_test` database, so tests never touch dev data. Skipped if Postgres is down."""
+"""A separate `<name>_test` database, so tests never touch dev data. Skipped if Postgres is down,
+except in CI, where that fails the run (audit OPT-29)."""
 
 from __future__ import annotations
 
 import asyncio
+import os
 from pathlib import Path
+from typing import NoReturn
 
 import asyncpg
+import pytest
 from alembic.config import Config
 from sqlalchemy.engine import make_url
 
 from alembic import command
 
 BACKEND = Path(__file__).resolve().parents[1]
+
+
+MESSAGE = "Postgres not reachable at DATABASE_URL (docker compose up -d db)"
+
+
+def unreachable() -> NoReturn:
+    """Skip the DB tests on a laptop without Postgres; fail them in CI, where a skip would turn
+    most of the suite into a green no-op."""
+    if os.environ.get("CI", "").lower() in ("1", "true", "yes"):
+        pytest.fail(f"{MESSAGE}; CI requires the database")
+    pytest.skip(MESSAGE)
 
 
 def test_url(dev_url: str) -> str:

@@ -14,6 +14,8 @@ from app.api.deps import CurrentUser, Session
 from app.core import economy
 from app.features.worlds import service
 from app.features.worlds.service import NotFound
+from app.jobs import prefetch
+from app.jobs.prefetch import Preparing
 from app.models import (
     Chapter,
     ChapterMastery,
@@ -79,6 +81,11 @@ class Visitor(BaseModel):
     chapter: str | None
 
 
+class PlacementState(BaseModel):
+    ready: bool
+    preparing: Preparing | None = None
+
+
 class IslandOut(BaseModel):
     id: uuid.UUID
     world_id: uuid.UUID
@@ -89,6 +96,7 @@ class IslandOut(BaseModel):
     chapters: list[IslandChapter]
     buildings: list[Building]
     visitors: list[Visitor]  # classmates on this island in the last 2 minutes (not me)
+    placement: PlacementState  # the class's placement quiz in my language: ready or being made
 
 
 class PresenceIn(BaseModel):
@@ -249,6 +257,7 @@ async def island(course_id: uuid.UUID, s: Session, user: CurrentUser) -> IslandO
         ],
         buildings=[Building(key=k, **v) for k, v in economy.BUILDINGS.items()],
         visitors=[Visitor(nickname=n, avatar=a, chapter=t) for n, a, t in visitors],
+        placement=await prefetch.placement_state(s, course.id, user.ui_language),
     )
 
 

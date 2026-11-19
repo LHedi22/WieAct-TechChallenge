@@ -11,6 +11,7 @@ from app.api.deps import CurrentUser, Session
 from app.features.quiz import service
 from app.features.quiz.service import AttemptView, QuestionView, Rejected, Results
 from app.features.worlds.service import NotFound, member_chapter
+from app.jobs.prefetch import Preparing
 from app.models import Job, QuizAttempt
 
 router = APIRouter(prefix="/api/quiz", tags=["quiz"])
@@ -19,6 +20,8 @@ router = APIRouter(prefix="/api/quiz", tags=["quiz"])
 class Price(BaseModel):
     cost: int
     cached: bool
+    # A background job (prefetch) is making it: free, and "Get it now" moves it up (Group E).
+    preparing: Preparing | None = None
 
 
 class QuizStartIn(BaseModel):

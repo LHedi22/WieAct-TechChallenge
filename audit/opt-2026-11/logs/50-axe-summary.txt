@@ -1,0 +1,16 @@
+source: audit/artifacts/axe/*.json (2-3 Nov audit; 144 scans; mock)
+color-contrast impact=serious scans=112 nodes=181 screens=14: ['audio_studio', 'audio_studio-dialog', 'island', 'leaderboard', 'map', 'map-list', 'quiz_hall-dialog', 'socratic_tutor', 'socratic_tutor-dialog', 'study_studio', 'study_studio-dialog', 'teachback_arena', 'teachback_arena-dialog', 'today']
+list impact=serious scans=8 nodes=8 screens=1: ['socratic_tutor']
+top targets:
+60 color-contrast .bg-olive-light\/30
+28 color-contrast .bg-terracotta-light\/25
+24 color-contrast .bg-terracotta-light\/30
+20 color-contrast .py-0\.5
+16 color-contrast .px-2
+8 color-contrast .gap-1
+8 color-contrast .items-start:nth-child(1) > .text-ink\/60[dir="auto"] > span
+8 list .gap-4
+8 color-contrast .self-start
+4 color-contrast .items-start:nth-child(2) > .text-ink\/60[dir="auto"] > span
+4 color-contrast .items-start:nth-child(3) > .text-ink\/60[dir="auto"] > span
+1 color-contrast button[data-building="audio_studio"] > .py-1.group-hover\:bg

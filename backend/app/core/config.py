@@ -95,9 +95,19 @@ class Settings(BaseSettings):
     TEACHBACK_REVIEW_USER_DAILY_CAP: int = Field(6, ge=0)
     LLM_MAX_RPM: int = 18
     LLM_MAX_CONCURRENCY: int = 2
+    # Call slots kept for students: background calls use at most concurrency - this (min 1).
+    LLM_INTERACTIVE_RESERVED: int = 1
+    # Make what the class opens next in the background, free when opened (app/jobs/prefetch.py).
+    PREFETCH_ENABLED: bool = True
+    # Mid calls prefetch may spend per Tunis day: per world, per creator (all their worlds), app
+    PREFETCH_MAX_MID_PER_WORLD_PER_DAY: int = 40
+    PREFETCH_MAX_MID_PER_CREATOR_PER_DAY: int = 40
+    PREFETCH_MAX_MID_PER_DAY: int = 120
+    # Background quality checks on prefetched content (mid notes review, compact card check,
+    # placement regeneration); counted in the mid caps. Off: they raise the mid share.
+    PREFETCH_QUALITY_PASS: bool = False
     # Embeddings are metered separately (own quota); they share the per-key concurrency limit
     LLM_EMBED_MAX_RPM: int = 18
-    LLM_MAX_TOKENS_DEFAULT: int = 700
     LLM_SLOT_GROUP: Literal["A", "B"] = "A"
     # auto: send response_format=json_object, drop it for that model on a 400 (support is OPEN)
     LLM_JSON_MODE: Literal["auto", "on", "off"] = "auto"
@@ -121,10 +131,8 @@ class Settings(BaseSettings):
     SESSION_COOKIE_SAMESITE: Literal["lax", "strict", "none"] = "lax"
     # Empty or "auto" = Secure whenever APP_ENV=production (audit F-SEC-1), plain in development
     SESSION_COOKIE_SECURE: bool | None = None
-    APP_TIMEZONE: str = "Africa/Tunis"
     CORS_ORIGINS: str = "http://localhost:5173"
     OFFLINE_DEMO_MODE: Literal["auto", "on", "off"] = "auto"
-    LOG_PROMPTS: bool = False
     UPLOAD_MAX_MB: int = 50
     UPLOAD_DIR: str = "./data/uploads"
     TESSERACT_LANGS: str = "ara+fra+eng"

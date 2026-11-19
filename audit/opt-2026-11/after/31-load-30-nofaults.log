@@ -1,0 +1,17 @@
+ Container cc-opt-backend-run-a8800149e3d3 Creating 
+ Container cc-opt-backend-run-a8800149e3d3 Created 
+Bytecode compiled 5680 files in 370ms
+firing 30 jobs (10 interactive), faults: none …
+
+finished in 93 s
+jobs done            30/30
+wait p50 / p95       43.8 s / 89.9 s
+  interactive        p50 9.7 s · p95 26.8 s
+  background         p50 65.3 s · p95 89.9 s
+max queue position   29
+max concurrency      2 (mock-side)
+calls at the mock    30 · by status {'200': 30}
+quick-mode jobs      0 · fallbacks 0
+refusals handled     {'quota': 0, 'saturated': 0, 'ceiling': 0}
+
+RESULT PASS

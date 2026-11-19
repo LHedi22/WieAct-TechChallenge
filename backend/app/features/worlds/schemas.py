@@ -25,6 +25,15 @@ class ChapterIn(BaseModel):
     title: str = Field(min_length=1, max_length=120)
 
 
+class OpenedIn(BaseModel):
+    """A building dialog opened on a chapter (prefetch trigger). No level: the student's own
+    level for the course is read from the database; anything else in the body is ignored."""
+
+    building: Literal[
+        "quiz_hall", "socratic_tutor", "study_studio", "audio_studio", "teachback_arena"
+    ]  # economy.BUILDINGS
+
+
 class DocumentOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

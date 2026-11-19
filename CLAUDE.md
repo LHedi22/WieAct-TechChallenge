@@ -5,10 +5,12 @@ IEEE WIE ACT 5.0). Each course becomes an island on a Mediterranean archipelago 
 has five AI "buildings". **Phase 1 deadline: 10 Nov 2026** (report + repo + 90 s demo video).
 A working end-to-end app is required — no mockups, no notebooks.
 
-## Where we are (1 Nov)
-M0–M7 built and green on the mock; M8 (ship) in progress (offline mode, avatar redesign and drawn
-map/island art done; deploy, in-slot run, report, video left). M5 onward was built by a second team
-member on branch `m5-economy-arena`, merged into `main` on 1 Nov (PR #1). **@docs/STATUS.md lists everything still
+## Where we are (14 Nov)
+M0–M7 built and green on the mock; M8 (ship) done except deploy and the platform runs. M5 onward
+was built by a second team member (PR #1, merged 1 Nov). The Phase 1 deadline (10 Nov) has passed
+and the team slots have ended: the next platform time is the jury demo slot, and
+`docs/report/JURY_SLOT_RUNBOOK.md` lists what to run in it. The Nov audit and its fixes:
+`audit/opt-2026-11/REPORT.md`. **@docs/STATUS.md lists everything still
 missing** (blockers, in-slot work, deploy, deliverables). Read it first and tick items there as
 they close. Our cloud key has **no embeddings model**, so embeddings come from our own Ollama with
 `bge-m3` (`EMBED_PROVIDER=local`; Mac in dev, a Railway service in production). Cloud models: compact `llama3.2-3b`, mid `llama3.1-8b`

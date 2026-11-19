@@ -34,7 +34,7 @@ WORD = re.compile(r"[^\W\d_]{4,}", re.UNICODE)
 
 
 def check(q: dict[str, Any], lang: str, context: str) -> dict[str, bool]:
-    from app.features.quiz.pool import Question
+    from app.features.quiz.pool import Question, contradicts
 
     try:
         Question.model_validate(q)
@@ -43,7 +43,7 @@ def check(q: dict[str, Any], lang: str, context: str) -> dict[str, bool]:
         valid = False
     if not isinstance(q, dict):  # e.g. a bare string (Darija, Phase 6 rerun): nothing passes
         names = ("valid", "four_distinct_options", "answer_in_range", "language_script")
-        names += ("concept_in_context", "hint_hides_answer")
+        names += ("concept_in_context", "hint_hides_answer", "explanation_agrees")
         return dict.fromkeys(names, False)
     options = q.get("options") or []
     answer = q.get("answer_index")
@@ -65,6 +65,8 @@ def check(q: dict[str, Any], lang: str, context: str) -> dict[str, bool]:
         "language_script": script,
         "concept_in_context": grounded,
         "hint_hides_answer": bool(hint) and (not right or right.lower() not in hint.lower()),
+        # the server drops an item whose explanation points at another option (audit OPT-15)
+        "explanation_agrees": valid and not contradicts(q),
     }
 
 
@@ -115,7 +117,7 @@ async def quiz_eval(langs: list[str], n: int, world_code: str, fresh: bool, out:
     from app import gateway, prompts
     from app.core import db
     from app.core.config import get_settings
-    from app.features.quiz.pool import CONTEXT_CHUNKS, pick_context
+    from app.features.quiz.pool import GENERATE_COUNT, pick_context
     from app.gateway import Task, TaskKind
     from app.models import Chapter, Chunk, Course, World
 
@@ -150,11 +152,11 @@ async def quiz_eval(langs: list[str], n: int, world_code: str, fresh: bool, out:
         calls = 0
         while len(questions) < n and calls < max(2, n // 5):
             chapter, course = chapters[calls % len(chapters)]
-            picked = pick_context(chunks[chapter.id], CONTEXT_CHUNKS, offset=calls)
+            picked = pick_context(chunks[chapter.id], offset=calls)
             context = "\n\n".join(f"[{c.page_ref}] {c.text}" for c in picked)
             version, messages = prompts.render(
                 "quiz_generate",
-                count=10,
+                count=GENERATE_COUNT,  # what production asks for (audit OPT-14)
                 level="intermediate",
                 language=lang,
                 course=course.name,
@@ -237,6 +239,13 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--regrade", action="store_true", help="slot: send Teach-Back answers again")
     args = p.parse_args(argv)
     langs = [x.strip() for x in args.langs.split(",") if x.strip()]
+    if args.task != "slot":  # slot sends its jobs through the running API and worker
+        from app.core import cli_guard
+        from app.core.config import get_settings
+
+        provider = "cloud" if args.cloud else get_settings().llm.provider
+        if (refused := cli_guard.refuse_beside_worker(provider)) is not None:
+            return refused
     if args.task == "quiz-keys":
         from app.evals import quiz_keys
 

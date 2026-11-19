@@ -1,0 +1,18 @@
+ Container cc-opt-backend-run-54cc8443304e Creating 
+ Container cc-opt-backend-run-54cc8443304e Created 
+Bytecode compiled 5680 files in 443ms
+firing 30 jobs (10 interactive), faults: 503,quota …
+
+finished in 163 s
+jobs done            30/30
+wait p50 / p95       66.7 s / 156.9 s
+  interactive        p50 25.6 s · p95 49.5 s
+  background         p50 106.3 s · p95 156.9 s
+max queue position   23
+max concurrency      2 (mock-side)
+calls at the mock    54 · by status {'200': 31, '503': 16, '429': 7}
+quick-mode jobs      1 · fallbacks 2
+refusals handled     {'quota': 7, 'saturated': 16, 'ceiling': 0}
+forced 503 job        done · quick mode True
+
+RESULT PASS

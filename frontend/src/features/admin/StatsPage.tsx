@@ -125,6 +125,14 @@ function StatsView({ s }: { s: Stats }) {
           ])}
         />
       </Section>
+      <Section title="By orchestration pattern">
+        <Table
+          head={["Pattern", "Calls"]}
+          rows={Object.entries(s.by_pattern)
+            .sort((a, b) => b[1] - a[1])
+            .map(([p, n]) => [p === "none" ? "none (not an orchestration step)" : p, n])}
+        />
+      </Section>
       <div className="grid gap-4 md:grid-cols-2">
         <Section title="By task">
           <Table
@@ -136,10 +144,60 @@ function StatsView({ s }: { s: Stats }) {
           <Table head={["Reason", "Count"]} rows={Object.entries(s.refusals)} />
         </Section>
       </div>
+      <Section title="Prefetch (next chapter, background)">
+        <Table
+          head={["Jobs", "Done", "Waiting", "Failed", "Promoted", "Calls", "Quiz sets used"]}
+          rows={[
+            [
+              s.prefetch.jobs,
+              s.prefetch.done,
+              s.prefetch.waiting,
+              s.prefetch.failed,
+              s.prefetch.promoted,
+              Object.entries(s.prefetch.calls)
+                .map(([t, n]) => `${t} ${n}`)
+                .join(" · ") || "0",
+              s.prefetch.quiz_sets_used,
+            ],
+          ]}
+        />
+        <Table
+          head={["Opened", "Hit rate (opened ÷ done)", "Time to content p50 / p95"]}
+          rows={[
+            [
+              s.prefetch.opened,
+              s.prefetch.hit_rate == null ? "–" : `${Math.round(s.prefetch.hit_rate * 100)} %`,
+              `${s.prefetch.time_to_content_s.p50} s / ${s.prefetch.time_to_content_s.p95} s (n ${s.prefetch.time_to_content_s.n})`,
+            ],
+          ]}
+        />
+        <Table
+          head={["Mid cap today", "Answered / cap", "Refused (retried)"]}
+          rows={[
+            ["All worlds", capUse(s.prefetch.mid_today.all), s.prefetch.mid_today.all.refused],
+            ...s.prefetch.mid_today.worlds.map((w) => [
+              `World ${w.world_id.slice(0, 8)}`,
+              capUse(w),
+              w.refused,
+            ]),
+            ...s.prefetch.mid_today.creators.map((c) => [
+              `Creator ${c.creator_id.slice(0, 8)}`,
+              capUse(c),
+              c.refused,
+            ]),
+          ]}
+        />
+      </Section>
       <p className="text-small text-ink/70">
         Quota headers seen:{" "}
         {s.quota_headers_seen.length ? s.quota_headers_seen.join(", ") : "none yet"}
       </p>
     </>
   );
+}
+
+/** Never above the cap: what running jobs add past it shows as "(+n finishing)". */
+function capUse({ used, cap, over }: { used: number; cap: number; over: number }) {
+  if (over > 0) return `${used} / ${cap} (+${over} finishing)`;
+  return `${used} / ${cap}${used >= cap ? " (full)" : ""}`;
 }

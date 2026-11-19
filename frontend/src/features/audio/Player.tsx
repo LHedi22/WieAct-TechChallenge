@@ -40,6 +40,7 @@ export function Player({ script, language }: { script: Script; language: string 
   const [current, setCurrent] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [rate, setRate] = useState(1);
+  const [failed, setFailed] = useState(false);
   const run = useRef(0); // bumped on every stop/restart: stale `onend`s are ignored
   const rateId = useId();
   const canSpeak = !!synth && !!voice;
@@ -63,8 +64,17 @@ export function Player({ script, language }: { script: Script; language: string 
         u.onend = () => {
           if (run.current === id) say(k + 1);
         };
+        // the voice failed (not one we cancelled ourselves): back to Play on this part, say so
+        u.onerror = () => {
+          if (run.current !== id) return;
+          run.current++;
+          synth.cancel();
+          setPlaying(false);
+          setFailed(true);
+        };
         synth.speak(u);
       };
+      setFailed(false);
       setPlaying(true);
       say(i);
     },
@@ -86,6 +96,11 @@ export function Player({ script, language }: { script: Script; language: string 
       {!canSpeak && (
         <SoftCard className="bg-sand/20" data-testid="transcript-only">
           {darija ? t("darija") : t("noVoice")}
+        </SoftCard>
+      )}
+      {failed && (
+        <SoftCard role="alert" className="bg-sand/20">
+          {t("voiceError")}
         </SoftCard>
       )}
       {canSpeak && (

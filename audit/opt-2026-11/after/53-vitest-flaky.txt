@@ -1,0 +1,33 @@
+# OPT-33 flaky vitest, 2026-11-14
+## Before: 10 full runs while the backend suite ran on the same host
+run 1: ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+   × Out of coins > shows refill, +3 per good answer, an honest Exam Pass and a labelled demo purchase 2058ms
+   × Teach-Back peer room > lets the asker see a classmate's score and pin it as the best answer 5369ms
+   × Create-world wizard > walks name → courses → chapters, creates the world once, then shows uploads 5302ms
+   × Create-world wizard > uploads files and shows each one's state; rejects unsupported types locally 7550ms
+   × Quiz attempt > wrong → hint → second try → explanation → results with points and next step 7102ms
+run 2:       Tests  95 passed (95)
+run 3: ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+   × Quiz attempt > wrong → hint → second try → explanation → results with points and next step 5270ms
+   × Create-world wizard > walks name → courses → chapters, creates the world once, then shows uploads 5092ms
+   × Audio player > reads the segments one by one and highlights the current one 2458ms
+run 4: ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+   × Quiz attempt > wrong → hint → second try → explanation → results with points and next step 5281ms
+   × Create-world wizard > walks name → courses → chapters, creates the world once, then shows uploads 5385ms
+   × Sign up / sign in > checks the password length locally and shows the server's message key 5327ms
+   × Onboarding > scores the style test on the server and shows the mix, then locks priced extras 5374ms
+   × Placement > answers 8 cached questions and shows the level 6222ms
+   × Student inspector > shows failing invariants with their rows and explains a price 2050ms
+run 5:       Tests  95 passed (95)
+run 6:       Tests  95 passed (95)
+run 7:       Tests  95 passed (95)
+run 8:       Tests  95 passed (95)
+run 9: ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+   × Quiz attempt > wrong → hint → second try → explanation → results with points and next step 5594ms
+   × Create-world wizard > walks name → courses → chapters, creates the world once, then shows uploads 5164ms
+   × Sign up / sign in > checks the password length locally and shows the server's message key 5049ms
+   × Student inspector > shows failing invariants with their rows and explains a price 1502ms
+run 10:       Tests  95 passed (95)
+
+## Idle machine, slowest tests (ms): create-world 1618, quiz attempt 1438, sign-up 1047, inspector 750
+## After (testTimeout 15 s, asyncUtilTimeout 3 s): 10 full runs with the backend suite running alongside: 10/10 × 95 passed

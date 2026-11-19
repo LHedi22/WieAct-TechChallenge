@@ -43,6 +43,7 @@ def gw(sm, mock_llm, monkeypatch, rag_env):
         ),
     )
     monkeypatch.setattr(gateway_module, "run", g.run)
+    monkeypatch.setattr(gateway_module, "forget", g.forget)
     monkeypatch.setattr(gateway_module, "embed", g.embed)
     return g
 

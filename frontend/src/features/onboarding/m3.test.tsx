@@ -84,6 +84,7 @@ const map: MapOut = {
 };
 const island: IslandOut = {
   id: C,
+  placement: { ready: false, preparing: null },
   world_id: W,
   name: "Calculus I",
   color_key: "island-1",
@@ -339,6 +340,22 @@ describe("Island", () => {
     expect(within(dialog).getByText("12")).toBeInTheDocument(); // 20 - 8, from /api/wallet
     await user.keyboard("{Escape}");
     expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it.each([
+    [{ ready: true, preparing: null }, "Ready"],
+    [
+      { ready: false, preparing: { job_id: "j1", eta_s: 50, queue_position: 1 } },
+      "Being prepared · about 1 min · Place 1 in line",
+    ],
+  ])("shows whether the class's placement quiz is ready (%#)", async (placement, text) => {
+    serve({
+      ...BASE,
+      [`GET /api/courses/${C}`]: { ...island, placement },
+      [`POST /api/courses/${C}/presence`]: null,
+    });
+    show(<IslandPage />, "/worlds/:worldId/courses/:courseId", `/worlds/${W}/courses/${C}`);
+    expect(await screen.findByText(text)).toBeInTheDocument();
   });
 });
 

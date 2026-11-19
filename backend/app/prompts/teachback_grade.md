@@ -1,4 +1,4 @@
-<!-- version: 4 · tier: compact (draft; mid revises it with teachback_review when unsure, high, flagged or near the reward threshold) · pattern: draft-then-revise · output: {"flag": "ok|off_topic|abusive", "criteria": {"accuracy|coverage|reasoning|example": {"level": int}}, "confidence": "high|medium|low", "errors": [{"quote": str, "fix": str}], "good": str, "missing": [str]} · the server totals the levels (audit N-2) and checks the evidence (N-1) -->
+<!-- version: 5 · tier: compact (draft; mid revises it with teachback_review when unsure, high, flagged or near the reward threshold) · pattern: draft-then-revise · output: {"flag": "ok|off_topic|abusive", "criteria": {"accuracy|coverage|reasoning|example": {"level": int}}, "confidence": "high|medium|low", "errors": [{"quote": str, "fix": str}], "good": str, "missing": [str]} · the server totals the levels (audit N-2) and checks the evidence (N-1) -->
 
 ## system
 
@@ -28,6 +28,7 @@ Reply with JSON only, no markdown, with the keys "flag", "criteria" (each criter
 "errors", "good" and "missing".
 
 {voice_rules}
+{glossary}
 
 ## user
 

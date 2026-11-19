@@ -18,7 +18,8 @@ from app.core.provenance import servable
 from app.features.daily import service as daily
 from app.features.quiz import pool
 from app.features.wallet import service as wallet
-from app.jobs.service import create_job
+from app.jobs import prefetch
+from app.jobs.service import create_job, create_or_join_shared_job, mark_opened, paid_job
 from app.models import (
     Chapter,
     ChapterMastery,
@@ -66,6 +67,10 @@ async def price(s, user, chapter_id, level, language) -> dict[str, Any]:
     """What Confirm will cost, told to the UI before the student confirms (ECONOMY.md)."""
     if await unseen_set(s, user, chapter_id, level, language):
         return {"cost": economy.COST["cached_content"], "cached": True}
+    if pending := await pool.pending_generation(s, chapter_id, level, language):
+        # joining a classmate's or a prefetch's generation is free (OPT-01, Group E)
+        preparing = await prefetch.preparing(s, pending)
+        return {"cost": economy.COST["cached_content"], "cached": False, "preparing": preparing}
     return {"cost": economy.COST["quiz"], "cached": False}
 
 
@@ -90,28 +95,29 @@ async def start(s: AsyncSession, user: User, chapter: Chapter, level: str) -> di
     found = await unseen_set(s, user, chapter.id, level, language)
     if found:
         attempt = await create_attempt(s, user, found, course)
+        key = pool.share(chapter.id, level, language)
+        await mark_opened(s, key)  # step 8 stats
+        await wallet.share_back(s, await paid_job(s, key, quiz_set_id=found.id), user.id)
         return {"attempt_id": attempt.id, "job_id": None, "cost": 0, "cached": True}
-    # A classmate is already generating this chapter + level + language: share that job.
-    job_id = await pool.pending_generation(s, chapter.id, level, language)
-    cost = 0  # sharing that job reserves nothing: this student gets the class's set for free
-    if job_id is None:
-        cost = economy.COST["quiz"]
-        seed = await pool.next_seed(s, chapter.id, level, language)
-        job = await create_job(
-            s,
-            kind=pool.KIND,
-            lane="interactive",
-            payload={
-                "chapter_id": str(chapter.id),
-                "level": level,
-                "language": language,
-                "seed": seed,
-            },
-            user_id=user.id,
-            world_id=course.world_id,
-            cost=cost,
-        )
-        job_id = job.id
+    # A classmate is already generating this chapter + level + language: share that job. The
+    # key names "the next set", whatever seed the creator picks (audit OPT-01); joining is free.
+    seed = await pool.next_seed(s, chapter.id, level, language)
+    job_id, created = await create_or_join_shared_job(
+        s,
+        kind=pool.KIND,
+        share_key=pool.share(chapter.id, level, language),
+        lane="interactive",
+        payload={
+            "chapter_id": str(chapter.id),
+            "level": level,
+            "language": language,
+            "seed": seed,
+        },
+        user_id=user.id,
+        world_id=course.world_id,
+        cost=economy.COST["quiz"],
+    )
+    cost = economy.COST["quiz"] if created else 0
     return {"attempt_id": None, "job_id": job_id, "cost": cost, "cached": False}
 
 
@@ -152,7 +158,9 @@ async def attempt_from_job(s: AsyncSession, user: User, job: Job) -> QuizAttempt
         raise Rejected("errors.quiz_not_ready", 409)
     chapter = await s.get(Chapter, qs.chapter_id)
     course = await s.get(Course, chapter.course_id)
-    return await create_attempt(s, user, qs, course)
+    attempt = await create_attempt(s, user, qs, course)
+    await wallet.share_back(s, job, user.id)  # a classmate who joined the paid job
+    return attempt
 
 
 # --- the attempt ---------------------------------------------------------------------------------
@@ -236,6 +244,12 @@ async def _load(s: AsyncSession, attempt: QuizAttempt, i: int) -> tuple[dict, di
     return qs.questions[i], answers[i], answers
 
 
+def _check_current(attempt: QuizAttempt, i: int) -> None:
+    # One question at a time, in order (audit OPT-27): the UI only ever sends the current one.
+    if i != attempt.current:
+        raise Rejected("errors.quiz_question_invalid", 409)
+
+
 def _advance(attempt: QuizAttempt, answers: list[dict]) -> None:
     attempt.answers = answers  # reassign: JSONB changes are tracked per attribute
     pending = [k for k, a in enumerate(answers) if a["status"] not in DONE]
@@ -248,6 +262,7 @@ async def answer(s: AsyncSession, attempt: QuizAttempt, i: int, choice: int) -> 
         raise Rejected("errors.quiz_choice_invalid")
     if a["status"] in DONE:
         raise Rejected("errors.quiz_question_done", 409)
+    _check_current(attempt, i)
     right = choice == q["answer_index"]
     if a["status"] == "pending":
         a["first"] = choice
@@ -276,6 +291,7 @@ async def skip(s: AsyncSession, attempt: QuizAttempt, i: int) -> QuestionView:
     q, a, answers = await _load(s, attempt, i)
     if a["status"] in DONE:
         raise Rejected("errors.quiz_question_done", 409)
+    _check_current(attempt, i)
     a["status"] = "skipped"
     answers[i] = a
     _advance(attempt, answers)
@@ -367,6 +383,8 @@ async def finish(s: AsyncSession, user: User, attempt: QuizAttempt) -> Results:
     else:
         mastery = mastery_row.mastery if mastery_row else pct
     await s.commit()
+    if first_finish:
+        await prefetch.safely(s, user, chapter, attempt.level)  # the next chapter, in background
 
     missed = []
     right: list[str] = []

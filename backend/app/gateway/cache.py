@@ -29,6 +29,11 @@ def content_key(messages: list[dict[str, Any]], **params: Any) -> str:
     return "content:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
+def text_hash(text: str) -> str:
+    """A short hash of the material behind a prompt, for keys that must change with it (OPT-17)."""
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+
+
 def request_hash(provider: str, model: str, messages: list[dict[str, Any]], **params: Any) -> str:
     raw = json.dumps([provider, model, messages, params], sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()

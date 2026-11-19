@@ -31,6 +31,8 @@ EARN = {
     "daily_challenge": 3,        # each, 3 per day
 }
 PEER_ANSWER_THRESHOLD = 70       # /100
+FIRST_PAYER_REFUND_OPENS = 3     # classmates who open a class asset a student paid for …
+FIRST_PAYER_REFUND_SHARE = (2, 3)  # … give the payer 2/3 of it back, once (15 → 10, 5 → 3)
 WISDOM_THRESHOLD = 3             # distinct students with the same (concept, mistake_type) in a world
 
 POINTS = {
@@ -55,8 +57,24 @@ SPENDING_ORDER = ["free", "earned", "purchased"]   # burn expiring coins first
 - Exam Pass active → activities cost 0 up to `EXAM_PASS_DAILY_LIMIT = 15` AI activities/day
   (a *high daily limit*, never "unlimited" — the platform quota is finite).
 - Class Pool: members transfer coins to `class_pool`; shared asset generation can be paid from it.
-- Creator reward: +5 coins (counts toward the daily earn cap) when a new member joins and completes
-  a first activity in their world.
+- **First-payer refund** (decided 2026-11-15): the student who paid coins for a class asset (study
+  pack, audio episode or quiz set: the class opens it free) gets `FIRST_PAYER_REFUND_SHARE` of
+  those coins back once `FIRST_PAYER_REFUND_OPENS` other classmates have opened it: 15 → 10 back,
+  5 → 3 back (rounded down). One `coin_ledger` row, kind `share_back`, bucket `earned` (it keeps,
+  like earned coins, but is a rebate: outside `DAILY_EARN_CAP`), ref = the paid job, unique per
+  job. Opens are counted once per classmate (`asset_opens`); the payer's own visits don't count.
+  Nothing is paid back for content nobody paid coins for: prefetched or upload-made content,
+  assets the Class Pool paid, or a job paid with an Exam Pass (0 coins).
+- **Prefetched content is free when opened** (`COST["cached_content"]`, decided 2026-11-14). The
+  prefetch planner (`app/jobs/prefetch.py`) makes the class's quiz sets, study packs, audio
+  episodes and placement quizzes in the background: chapters 1–2 when indexed, then one chapter
+  ahead of the students, in the languages the world's members use, at intermediate plus each placed
+  member's own level. Prefetch jobs have no owner and cost 0: they never reserve from a wallet or
+  the Class Pool, so a student who opens one, or joins one still queued ("Get it now"), pays 0.
+  Coins still pay for what nobody prefetched: another level or language, more quiz sets of a
+  chapter, and the Exam Pass. Spend is bounded by mid calls, not coins:
+  `PREFETCH_MAX_MID_PER_WORLD_PER_DAY` (40), `PREFETCH_MAX_MID_PER_CREATOR_PER_DAY` (40),
+  `PREFETCH_MAX_MID_PER_DAY` (120).
 
 ## Day examples (for the report)
 - Normal day: 1 quiz (5) + 1 tutor (8) = 13 ≤ 20 free.

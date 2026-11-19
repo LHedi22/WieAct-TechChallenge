@@ -3,15 +3,18 @@
 from __future__ import annotations
 
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
 
 from pydantic import BaseModel
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, func, literal, or_, select, update
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
-from app.core.db import get_sessionmaker
+from app.core.db import reuse
+from app.gateway.limiter import background_cap
 from app.gateway.providers import paused_until
 from app.jobs.coins import coins
 from app.jobs.registry import spec_for
@@ -19,6 +22,14 @@ from app.models import AICallLog, Job
 
 LANE_RANK = {"interactive": 0, "background": 1}
 DEFAULT_CALL_S = 8.0  # until the call log has history
+HISTORY_JOBS = 20  # finished jobs per kind and lane behind the ETA
+JOB_CALLS = 3  # a kind with no finished job yet: about this many calls (most make 2-4)
+# jobs.priority inside a lane, lower first (Group E, migration 0018)
+P_NEEDED_NOW = 10  # a queued prefetch a student has just joined
+P_COURSE_START = 40  # prefetch of a course's placement quiz: the first screen of a course
+P_NEXT_CHAPTER = 50  # prefetch of the chapter after the one a student is on
+P_EXTRA = 70  # prefetch nobody needs to start studying (audio: first in the scope guard)
+P_DEFAULT = 100
 
 
 class AIPaused(Exception):
@@ -44,6 +55,8 @@ class JobView(BaseModel):
     error: str | None  # i18n key, never a raw model error
     created_at: datetime
     finished_at: datetime | None
+    # The viewer owns it, so may cancel it; false for a classmate's or the class's prefetch job
+    mine: bool = False
 
 
 async def create_job(
@@ -55,9 +68,20 @@ async def create_job(
     user_id: uuid.UUID | None = None,
     world_id: uuid.UUID | None = None,
     cost: int = 0,
+    priority: int = P_DEFAULT,
+) -> Job:
+    job = await _new_job(s, kind, lane, payload, user_id, world_id, cost, priority=priority)
+    await s.flush()
+    await coins.reserve(s, job)
+    await s.commit()
+    return job
+
+
+async def _new_job(
+    s, kind, lane, payload, user_id, world_id, cost, share_key=None, priority=P_DEFAULT
 ) -> Job:
     spec = spec_for(kind)
-    offline, resume_at = await paused_until(get_settings(), get_sessionmaker())
+    offline, resume_at = await paused_until(get_settings(), reuse(s))  # no 2nd connection
     if offline and (lane == "interactive" or resume_at is None):
         raise AIPaused()
     job = Job(
@@ -69,14 +93,116 @@ async def create_job(
         user_id=user_id,
         world_id=world_id,
         cost=cost,
+        share_key=share_key,
+        priority=priority,
         # Background work (tagging, tips, plans, pools, indexing) waits for the next live slot.
         not_before=resume_at if offline else None,
     )
     s.add(job)
-    await s.flush()
-    await coins.reserve(s, job)
-    await s.commit()
     return job
+
+
+def share_key(kind: str, *parts: object) -> str:
+    """The class asset a job makes, e.g. share_key("STUDY_PACK", chapter, level, language)."""
+    return ":".join([kind, *(str(p) for p in parts)])
+
+
+async def active_shared_job(s: AsyncSession, key: str) -> uuid.UUID | None:
+    return await s.scalar(
+        select(Job.id).where(Job.share_key == key, Job.status.in_(("queued", "running")))
+    )
+
+
+async def create_or_join_shared_job(
+    s: AsyncSession,
+    *,
+    kind: str,
+    share_key: str,
+    lane: str,
+    payload: dict[str, Any] | None = None,
+    user_id: uuid.UUID | None = None,
+    world_id: uuid.UUID | None = None,
+    cost: int = 0,
+    priority: int = P_DEFAULT,
+) -> tuple[uuid.UUID, bool]:
+    """One queued/running job per shared class asset (audit OPT-01). Returns (job id, created).
+
+    The insert is guarded by the partial unique index on `share_key` (migration 0017): a
+    classmate's concurrent insert waits for ours and then conflicts, so whoever loses joins the
+    winner's job, across API processes too. Only the creator reserves coins, in the same
+    transaction as the insert; anyone who joins pays nothing.
+
+    A student (interactive lane) who joins a queued background job, e.g. a prefetch, promotes it
+    to the interactive lane at P_NEEDED_NOW; it stays free and ownerless (Group E)."""
+    for _ in range(5):
+        if (found := await active_shared_job(s, share_key)) is not None:
+            if lane == "interactive":
+                await promote(s, found)
+                await mark_opened(s, share_key)
+            return found, False
+        try:
+            async with s.begin_nested():
+                job = await _new_job(
+                    s, kind, lane, payload, user_id, world_id, cost, share_key, priority
+                )
+                await s.flush()
+        except IntegrityError:
+            continue  # a classmate created it a moment ago: join theirs
+        await coins.reserve(s, job)
+        await s.commit()
+        return job.id, True
+    raise RuntimeError(f"shared job {share_key} kept changing")  # pragma: no cover
+
+
+async def mark_opened(s: AsyncSession, share_key: str) -> None:
+    """A student was served this class asset, or joined the job making it: the prefetch jobs
+    that made it count as used (the hit rate and time to content on /api/admin/stats). Matches
+    `ix_jobs_prefetch_unopened`, so after the first open it finds no row and writes nothing."""
+    done = await s.execute(
+        update(Job)
+        .where(
+            Job.share_key == share_key,
+            Job.opened_at.is_(None),
+            Job.payload["prefetch"].astext == "true",
+        )
+        .values(opened_at=func.now())
+    )
+    if done.rowcount:
+        await s.commit()
+
+
+async def paid_job(
+    s: AsyncSession, share_key: str, *, quiz_set_id: uuid.UUID | None = None
+) -> Job | None:
+    """The finished job a student paid for that made this class asset (`ix_jobs_paid_share`), or
+    None (made by a prefetch, the upload, or not at all). A quiz key covers every set of the
+    chapter, so a quiz set names its own job by the set id in the job's result."""
+    q = select(Job).where(
+        Job.share_key == share_key,
+        Job.status == "done",
+        Job.cost > 0,
+        Job.user_id.is_not(None),
+    )
+    if quiz_set_id is not None:
+        q = q.where(Job.result["quiz_set_id"].astext == str(quiz_set_id))
+    return await s.scalar(q.order_by(Job.finished_at.desc()).limit(1))
+
+
+async def promote(s: AsyncSession, job_id: uuid.UUID) -> bool:
+    """A student needs this queued background job now: move it to the interactive lane at
+    P_NEEDED_NOW. A running job keeps its lane (its calls are already under way)."""
+    entry = {"t": datetime.now(UTC).isoformat(timespec="milliseconds"), "type": "promoted"}
+    done = await s.execute(
+        update(Job)
+        .where(Job.id == job_id, Job.status == "queued", Job.lane == "background")
+        .values(
+            lane="interactive",
+            priority=func.least(Job.priority, P_NEEDED_NOW),
+            events=Job.events.op("||")(literal([entry], type_=JSONB)),
+        )
+    )
+    await s.commit()
+    return bool(done.rowcount)
 
 
 async def _avg_call_s(s: AsyncSession) -> float:
@@ -91,20 +217,90 @@ async def _avg_call_s(s: AsyncSession) -> float:
     return float(avg) / 1000 if avg else DEFAULT_CALL_S
 
 
-async def queue_position(s: AsyncSession, job: Job) -> int:
-    """Jobs that will run before this one (higher-priority lane, or same lane and older) + 1."""
-    ahead = await s.scalar(
-        select(func.count()).where(
-            Job.status == "queued",
-            Job.id != job.id,
-            Job.kind != "DEBUG_REPLAY",  # admin replays (dev only) aren't a student's wait
-            or_(
-                and_(Job.lane == "interactive", job.lane == "background"),
-                and_(Job.lane == job.lane, Job.created_at < job.created_at),
+def _ahead_of(job: Job, now: datetime):
+    """Queued jobs that will run before this one: a higher-priority lane, or the same lane and a
+    lower `priority`, or the same priority and older; never one deferred to a later `not_before`
+    (audit OPT-10)."""
+    return and_(
+        Job.status == "queued",
+        Job.id != job.id,
+        Job.kind != "DEBUG_REPLAY",  # admin replays (dev only) aren't a student's wait
+        or_(Job.not_before.is_(None), Job.not_before <= now),
+        or_(
+            and_(Job.lane == "interactive", job.lane == "background"),
+            and_(Job.lane == job.lane, Job.priority < job.priority),
+            and_(
+                Job.lane == job.lane,
+                Job.priority == job.priority,
+                Job.created_at < job.created_at,
             ),
+        ),
+    )
+
+
+async def queue_position(s: AsyncSession, job: Job) -> int:
+    """Jobs that will run before this one + 1."""
+    ahead = await s.scalar(select(func.count()).where(_ahead_of(job, datetime.now(UTC))))
+    return int(ahead or 0) + 1
+
+
+async def _avg_job_s(s: AsyncSession) -> dict[tuple[str, str], float]:
+    """Average run time of the last HISTORY_JOBS finished jobs of each (kind, lane), the last day:
+    a student's quiz start and the background quiz pool share a kind but not a wait."""
+    took = func.extract("epoch", Job.finished_at - Job.started_at)
+    recent = (
+        select(
+            Job.kind,
+            Job.lane,
+            took.label("s"),
+            func.row_number()
+            .over(partition_by=(Job.kind, Job.lane), order_by=Job.finished_at.desc())
+            .label("n"),
+        )
+        .where(
+            Job.status == "done",
+            Job.started_at.is_not(None),
+            Job.finished_at > datetime.now(UTC) - timedelta(days=1),
+        )
+        .subquery()
+    )
+    rows = await s.execute(
+        select(recent.c.kind, recent.c.lane, func.avg(recent.c.s))
+        .where(recent.c.n <= HISTORY_JOBS)
+        .group_by(recent.c.kind, recent.c.lane)
+    )
+    return {(kind, lane): float(avg) for kind, lane, avg in rows}
+
+
+async def eta_s(s: AsyncSession, job: Job) -> float:
+    """Seconds until this job is done: the work ahead of it (each job at its kind and lane's
+    recent duration, running jobs at what is left of theirs) over the calls that run at once,
+    then its own duration (a job's calls run one after another). A kind with no history counts
+    as JOB_CALLS calls (audit OPT-10)."""
+    now = datetime.now(UTC)
+    avg = await _avg_job_s(s)
+    fallback = JOB_CALLS * await _avg_call_s(s)
+    ahead = await s.execute(
+        select(Job.kind, Job.lane, Job.status, Job.started_at).where(
+            or_(
+                _ahead_of(job, now),
+                and_(Job.status == "running", Job.kind != "DEBUG_REPLAY", Job.id != job.id),
+            )
         )
     )
-    return int(ahead or 0) + 1
+    work = {"interactive": 0.0, "background": 0.0}
+    for kind, lane, status, started in ahead:
+        took = avg.get((kind, lane), fallback)
+        if status == "running" and started is not None:
+            took = max(0.0, took - (now - started).total_seconds())
+        work[lane] += took
+    own = avg.get((job.kind, job.lane), fallback)
+    settings = get_settings()
+    slots = max(1, settings.LLM_MAX_CONCURRENCY)
+    if job.lane == "interactive":  # background calls never take the student's reserved slot
+        return sum(work.values()) / slots + own
+    bg_slots = background_cap(slots, settings.LLM_INTERACTIVE_RESERVED)
+    return work["interactive"] / slots + work["background"] / bg_slots + own
 
 
 async def view(s: AsyncSession, job: Job) -> JobView:
@@ -112,10 +308,9 @@ async def view(s: AsyncSession, job: Job) -> JobView:
     waiting = None
     if job.status == "queued":
         position = await queue_position(s, job)
-        per_call = await _avg_call_s(s)
-        concurrency = max(1, get_settings().LLM_MAX_CONCURRENCY)
-        eta_f = position * per_call / concurrency
+        eta_f = await eta_s(s, job)
         if job.not_before:
+            per_call = await _avg_call_s(s)
             eta_f = max(eta_f, (job.not_before - datetime.now(UTC)).total_seconds() + per_call)
         eta = max(1, round(eta_f))
         if job.error and job.error.startswith("deferred:"):

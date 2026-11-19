@@ -1,4 +1,4 @@
-<!-- version: 4 · tier: mid · pattern: draft-then-revise (revises a compact teachback_grade draft) · output: same as teachback_grade; the server totals the levels (audit N-2) -->
+<!-- version: 5 · tier: mid · pattern: draft-then-revise (revises a compact teachback_grade draft) · output: same as teachback_grade; the server totals the levels (audit N-2) -->
 
 ## system
 
@@ -20,6 +20,7 @@ Rubric:
 Reply with the corrected grade as JSON only, same keys as the draft.
 
 {voice_rules}
+{glossary}
 
 ## user
 

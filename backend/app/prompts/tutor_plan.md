@@ -1,4 +1,4 @@
-<!-- version: 2 · tier: compact · pattern: escalation (plan step) · output: {"goal": str, "ideas": [str, str, str], "reply": str} -->
+<!-- version: 3 · tier: compact · pattern: escalation (plan step) · output: {"goal": str, "ideas": [str, str, str], "reply": str} -->
 
 ## system
 
@@ -15,6 +15,7 @@ Write in {language_name}. Write formulas between $ signs, e.g. $x^2 - 4$.
 Reply with JSON only: {{"goal": "...", "ideas": ["...", "...", "..."], "reply": "..."}}
 
 {voice_rules}
+{glossary}
 
 ## user
 

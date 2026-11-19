@@ -1,0 +1,15 @@
+firing 30 jobs (10 interactive), faults: 503,quota …
+
+finished in 192 s
+jobs done            30/30
+wait p50 / p95       85.4 s / 188.8 s
+  interactive        p50 20.7 s · p95 58.7 s
+  background         p50 135.0 s · p95 188.8 s
+max queue position   23
+max concurrency      1 (mock-side)
+calls at the mock    61 · by status {'200': 32, '503': 23, '429': 6}
+quick-mode jobs      2 · fallbacks 3
+refusals handled     {'quota': 6, 'ceiling': 0, 'saturated': 23}
+forced 503 job        done · quick mode True
+
+RESULT PASS

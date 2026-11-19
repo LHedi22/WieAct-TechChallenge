@@ -104,6 +104,7 @@
       "job_not_cancellable": "Trop tard pour annuler : l'IA y travaille déjà.",
       "job_interrupted": "Cette activité a été interrompue par un redémarrage du serveur. Tes pièces ont été remboursées : réessaie.",
       "network": "Impossible de joindre le serveur. Vérifie ta connexion.",
+      "unavailable": "Le serveur redémarre. Nouvel essai dans quelques secondes.",
       "unexpected": "Un problème est survenu. Réessaie.",
       "forbidden": "Tu n'as pas accès à cette page.",
       "world_not_found": "Ce monde n'existe pas, ou tu n'en fais pas encore partie.",
@@ -150,7 +151,7 @@
       "arena_already_pinned": "Une meilleure réponse est déjà épinglée.",
       "arena_own_answer": "Tu ne peux pas voter pour ta propre réponse.",
       "pool_insufficient": "La cagnotte de classe n'a pas encore assez de pièces pour ça.",
-      "pool_amount_invalid": "Donne entre 1 et 50 pièces.",
+      "pool_amount_invalid": "Donne entre 1 et {max} pièces.",
       "card_not_found": "Cette carte n'existe plus.",
       "quiz_not_finished": "Termine d'abord le quiz."
     },
@@ -216,7 +217,14 @@
       "upgrade": "Faire la version complète · Gratuit"
     },
     "testData": "Données de test ({provider})",
-    "unverifiedKeys": "Réponses pas encore vérifiées"
+    "unverifiedKeys": "Réponses pas encore vérifiées",
+    "prefetch": {
+      "ready": "Prêt",
+      "preparing": "En préparation · environ {count, plural, one {# min} other {# min}}",
+      "inLine": "Place {position, number} dans la file",
+      "body": "La copie de ta classe se prépare en arrière-plan. C'est gratuit.",
+      "getItNow": "Tout de suite"
+    }
   },
   "styleguide": {
     "title": "Captain Cat · guide de style",
@@ -793,7 +801,9 @@
       "cancel": "Annuler",
       "confirm": "Entrer",
       "fromPlacement": "D'après ton placement",
-      "classMade": "Ta classe en a déjà fait un"
+      "classMade": "Ta classe en a déjà fait un",
+      "ready": "Prêt",
+      "getItNow": "Tout de suite"
     }
   },
   "placement": {
@@ -1100,6 +1110,7 @@
     "transcript": "Transcription",
     "darija": "L'audio en darija arrive plus tard : pour l'instant, lis la transcription ci-dessous.",
     "noVoice": "Ton navigateur n'a pas de voix pour cette langue : voici la transcription à lire.",
+    "voiceError": "La voix du navigateur s'est arrêtée. Appuie sur Écouter pour réessayer, ou lis la transcription ci-dessous.",
     "make": {
       "title": "Créer l'épisode audio pour ta classe",
       "body": "Une révision parlée de 2 à 3 minutes sur ce chapitre et ce niveau, écrite une seule fois à partir de vos supports et lue par ton navigateur. Ensuite, toute la classe l'écoute gratuitement."

@@ -13,6 +13,7 @@ import {
   Chip,
   MasteryRing,
   PixelButton,
+  PreparingNote,
   SoftCard,
   Sprite,
   type SpriteName,
@@ -105,6 +106,17 @@ export function IslandPage() {
                   >
                     <span className="font-semibold">{t("placement.title")}</span>{" "}
                     {t("placement.body")}
+                    {island.placement?.ready ? (
+                      <span className="ms-2 inline-block">
+                        <Chip kind="ready">{tc("prefetch.ready")}</Chip>
+                      </span>
+                    ) : (
+                      island.placement?.preparing && (
+                        <span className="block">
+                          <PreparingNote preparing={island.placement.preparing} compact />
+                        </span>
+                      )
+                    )}
                   </Banner>
                 </div>
               )}
@@ -184,9 +196,9 @@ export function IslandPage() {
           island={island}
           building={picked}
           onClose={() => setPicked(null)}
-          onConfirm={(chapter, level) => {
+          onConfirm={(chapter, level, now) => {
             const base = `/worlds/${worldId}/courses/${courseId}`;
-            const q = `?chapter=${chapter}&level=${level}`;
+            const q = `?chapter=${chapter}&level=${level}${now ? "&now=1" : ""}`;
             const open: Record<string, string> = {
               quiz_hall: `${base}/quiz/new${q}`,
               socratic_tutor: `${base}/tutor/new${q}`,

@@ -38,7 +38,7 @@ Each island has five buildings:
 
 Mistakes that several classmates share become anonymous **Class Wisdom** tips, written once by
 the mid model in every language of the class. A **daily plan** (3 challenges) is written once per
-student per day. Coins (free daily refill, earned, optional purchase) pay for new AI work; anything
+student per day, by compact, or by mid for a student with recorded weak spots. Coins (free daily refill, earned, optional purchase) pay for new AI work; anything
 the class already made is free. The UI is in English, French, Arabic and Tunisian Darija (RTL).
 
 Challenge fit: `docs/PRODUCT.md` → Challenge fit.
@@ -105,9 +105,9 @@ queue position and ETA. Coins are committed on success and refunded on failure.
 
 | Pattern | Used for |
 | --- | --- |
-| escalation | Tutor turns: compact by default, mid only when the student is stuck |
+| escalation | Tutor turns: compact by default, mid only when the student is stuck. Daily plan: compact, mid only for a student with recorded weak spots |
 | draft-then-revise | Teach-Back grading: compact drafts; mid reviews low-confidence or borderline scores. Arabic and Darija go straight to mid (the compact model is unreliable there); a grade still unsure pays nothing until it's reviewed |
-| plan-once / execute-compact | Study pack: mid writes the notes once, compact turns them into cards and a map; daily plan |
+| plan-once / execute-compact | Study pack: mid writes the notes once, compact turns them into cards and a map |
 | narrow-before-generating | Quiz sets, notes, audio scripts: vector search on the chapter, then only the relevant chunks reach the model |
 | fallback | Any mid task when mid is saturated → compact, shown as a "Quick mode" badge |
 
@@ -134,8 +134,9 @@ daily plans (`docs/report/AUDIT.md`, F-CACHE-1).
 | identical request | `ai_cache` hit, no call | instant |
 
 **Resilience under load.** `scripts/load.py` fires N jobs at once with 503 and quota faults. Last
-runs: 30/30 jobs done, never more than 2 calls in flight, every fault handled; interactive p50 38 s
-against background 126 s on the slow mock. The final forced-503 job always falls back to compact.
+runs (14 Nov, after the audit fixes): 30/30 jobs done, never more than 2 calls in flight and 20 in
+any minute, every fault handled; interactive p50 23.9 s against background 113.4 s on the slow mock
+(10.0 s vs 63.8 s without faults). The final forced-503 job always falls back to compact.
 
 **RAG.** PDF, PPTX, DOCX, TXT and images (Tesseract OCR, `ara+fra+eng`, for scanned pages) →
 ~2,000-character chunks that never cross a page or slide, so every chunk keeps a reference

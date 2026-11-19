@@ -19,9 +19,10 @@ Pixel art may add darker/lighter steps of each, plus cat orange and bougainville
 
 **Contrast (measured):** white on terracotta 3.9:1, terracotta on whitewash 3.65:1, white on olive
 4.45:1, sea on whitewash 2.7:1 — all **fail AA for body text**. Use the `*-ink` shades from
-`tokens.json` (terracotta-ink #A9502A 5.4:1, olive-ink #5F7134 5.4:1, sea-ink #1B7598 4.9:1) for
+`tokens.json` (terracotta-ink #843C1C 7.9:1, olive-ink #475524 8.1:1 with white; ≥ 4.9:1 on their
+own light tints over sand, audit OPT-24; sea-ink #1B7598 4.9:1 on whitewash but 3.7:1 on sand) for
 button fills with white text and for any text; keep base colors for fills, icons, the sea and large
-headings. Primary blue with white text is fine (6.4:1).
+headings. `frontend/src/theme/contrast.test.ts` checks the tinted chip pairs. Primary blue with white text is fine (6.4:1).
 Island accents: one per course from a fixed list of 6 (`island-1…6`), assigned in creation order.
 
 Type: **Baloo Bhaijaan 2** 600 for headings (Display 64, H1 40, H2 28, H3 20);

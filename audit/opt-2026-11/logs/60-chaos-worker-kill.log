@@ -1,0 +1,27 @@
+generate 200 {'job_id': 'd7e4d08c-edc3-4406-a807-40aed51879b6', 'cost': 15, 'cached': False}
+cc-opt-worker-1
+cc-opt-worker-1
+{
+ "action": "worker",
+ "job_cost": 15,
+ "states": [
+  [
+   0,
+   "running",
+   "writing_notes",
+   null,
+   null
+  ],
+  [
+   63,
+   "failed",
+   "writing_notes",
+   null,
+   "errors.job_interrupted"
+  ]
+ ],
+ "secs_after_fault": 68,
+ "coins_before_start": 70,
+ "coins_after": 70,
+ "worker": "running restarts=0"
+}

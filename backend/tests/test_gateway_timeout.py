@@ -84,6 +84,28 @@ async def test_background_mid_timeout_keeps_the_long_budget_and_is_deferred(setu
     assert not [c for c in transport.calls if c[0] == "mock-compact"]  # no fallback in background
 
 
+async def test_a_timed_out_check_with_no_fallback_is_not_resent(setup):
+    """Audit OPT-05: a QUIZ_VERIFY or Teach-Back review (mid, no compact fallback) that hit the
+    45 s budget was classed transient and sent again identically (a second quota unit and up to
+    90 s more), then deferred. Now it goes straight to the caller's "mid unavailable" path:
+    unverified quiz for that student, or the review waits."""
+    gw, transport = setup
+    with pytest.raises(Defer) as e:
+        await gw.run(
+            Task(
+                kind=TaskKind.QUIZ_VERIFY,
+                lane="interactive",
+                messages=MESSAGES,
+                tier="mid",
+                allow_fallback=False,
+            )
+        )
+    assert e.value.reason == "timeout"
+    mids = [c for c in transport.calls if c[0] == "mock-mid"]
+    assert len(mids) == 1 and mids[0][1] == 45  # one call, on the short budget
+    assert not [c for c in transport.calls if c[0] == "mock-compact"]
+
+
 async def test_an_abandoned_mid_call_keeps_its_concurrency_slot(sm, monkeypatch):
     """Found while re-measuring Tier 2: after the client gives up at 45 s, the platform may still
     be working on that request, so it still counts against the 2-in-flight limit. The gateway now

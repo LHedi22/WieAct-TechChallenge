@@ -2,7 +2,6 @@ import { MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react
 import { lazy, Suspense, useState, type ReactNode } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ApiError } from "@/api/client";
-import { ArenaPage } from "@/features/arena/ArenaPage";
 import { AuthPage } from "@/features/auth/AuthPage";
 import { IslandPage } from "@/features/island/IslandPage";
 import { DevJobsPage } from "@/features/jobs/DevJobsPage";
@@ -11,14 +10,7 @@ import { LandingPage } from "@/features/landing/LandingPage";
 import { LeaderboardPage } from "@/features/leaderboard/Leaderboard";
 import { MapPage } from "@/features/map/MapPage";
 import { OnboardingPage } from "@/features/onboarding/OnboardingPage";
-import { PlacementPage } from "@/features/placement/PlacementPage";
-import { QuizAttemptPage } from "@/features/quiz/QuizAttemptPage";
-import { QuizStartPage } from "@/features/quiz/QuizStartPage";
-import { StyleguidePage } from "@/features/styleguide/StyleguidePage";
-import { StudioPage } from "@/features/studio/StudioPage";
-import { AudioPage } from "@/features/audio/AudioPage";
 import { OutOfCoinsDialog } from "@/features/wallet/OutOfCoinsDialog";
-import { TutorPage, TutorStartPage } from "@/features/tutor/TutorPage";
 import { AddMaterialPage } from "@/features/worlds/AddMaterialPage";
 import { CreateOrJoinPage } from "@/features/worlds/CreateOrJoinPage";
 import { IndexingPage } from "@/features/worlds/IndexingPage";
@@ -28,9 +20,40 @@ import { RequireAuth } from "./RequireAuth";
 import { useUiStore } from "./uiStore";
 import { useDocumentLanguage } from "./useDocumentLanguage";
 
-const signedIn = (element: ReactNode) => <RequireAuth>{element}</RequireAuth>;
+// Suspense for the lazy pages; a chunk is a few kB, so no fallback flashes a spinner.
+const page = (element: ReactNode) => <Suspense fallback={null}>{element}</Suspense>;
+const signedIn = (element: ReactNode) => <RequireAuth>{page(element)}</RequireAuth>;
 // The admin side is its own chunk: students never download it (English only, DECISIONS.md).
 const AdminApp = lazy(() => import("@/features/admin/AdminApp"));
+// The buildings, placement and the styleguide are their own chunks too (audit OPT-21): the map
+// loads first, a building's code when the student enters it.
+const QuizStartPage = lazy(() =>
+  import("@/features/quiz/QuizStartPage").then((m) => ({ default: m.QuizStartPage })),
+);
+const QuizAttemptPage = lazy(() =>
+  import("@/features/quiz/QuizAttemptPage").then((m) => ({ default: m.QuizAttemptPage })),
+);
+const TutorStartPage = lazy(() =>
+  import("@/features/tutor/TutorPage").then((m) => ({ default: m.TutorStartPage })),
+);
+const TutorPage = lazy(() =>
+  import("@/features/tutor/TutorPage").then((m) => ({ default: m.TutorPage })),
+);
+const ArenaPage = lazy(() =>
+  import("@/features/arena/ArenaPage").then((m) => ({ default: m.ArenaPage })),
+);
+const StudioPage = lazy(() =>
+  import("@/features/studio/StudioPage").then((m) => ({ default: m.StudioPage })),
+);
+const AudioPage = lazy(() =>
+  import("@/features/audio/AudioPage").then((m) => ({ default: m.AudioPage })),
+);
+const PlacementPage = lazy(() =>
+  import("@/features/placement/PlacementPage").then((m) => ({ default: m.PlacementPage })),
+);
+const StyleguidePage = lazy(() =>
+  import("@/features/styleguide/StyleguidePage").then((m) => ({ default: m.StyleguidePage })),
+);
 const W = "/worlds/:worldId";
 const C = `${W}/courses/:courseId`;
 
@@ -55,7 +78,7 @@ const router = createBrowserRouter([
   { path: `${C}/arena`, element: signedIn(<ArenaPage />) },
   { path: `${C}/studio`, element: signedIn(<StudioPage />) },
   { path: `${C}/audio`, element: signedIn(<AudioPage />) },
-  { path: "/styleguide", element: <StyleguidePage /> },
+  { path: "/styleguide", element: page(<StyleguidePage />) },
   {
     path: "/admin/*",
     element: (

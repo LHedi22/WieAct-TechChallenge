@@ -72,9 +72,9 @@ After each quiz, compact tags wrong answers. Count distinct students per (world,
 mistake_type). At threshold (3), mid-size writes one anonymous tip: the trap, why it's wrong, the
 right reasoning. Shown on loading screens and in Quiz Hall. "Names are hidden. Only the pattern is shared."
 
-## Leaderboards, streaks, badges, cosmetics
+## Leaderboards, streaks, cosmetics
 Per world and global, weekly and all-time, opt-out respected (shown as "Hidden explorer" or excluded).
-Badges: chapter mastery, Mentor (top-rated peer answers). Cosmetics unlocked by points only.
+Cosmetics unlocked by points only. (Badges and a creator reward were cut on 2026-11-14, DECISIONS.md.)
 
 ## Privacy & ethics (enforced in code review)
 Nicknames only; no real names, photos, age, gender, addresses, voices. Profile = level, style,

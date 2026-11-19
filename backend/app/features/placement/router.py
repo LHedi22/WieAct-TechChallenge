@@ -14,8 +14,9 @@ from app.core import economy
 from app.features.placement import service
 from app.features.worlds.map import course_for_member
 from app.features.worlds.service import NotFound
-from app.jobs.service import create_job
-from app.models import Chapter, Chunk, Job
+from app.jobs import prefetch
+from app.jobs.service import create_or_join_shared_job, mark_opened, share_key
+from app.models import Chapter, Chunk
 
 router = APIRouter(prefix="/api/placement", tags=["placement"])
 
@@ -66,6 +67,7 @@ async def start(body: PlacementStartIn, s: Session, user: CurrentUser) -> Placem
     cost = economy.COST["placement_quiz"]
     existing = await service.find_set(course.id, language)
     if existing:
+        await mark_opened(s, share_key(service.KIND, course.id, language))  # step 8 stats
         return PlacementStartOut(
             course_id=course.id,
             cached=True,
@@ -83,27 +85,23 @@ async def start(body: PlacementStartIn, s: Session, user: CurrentUser) -> Placem
     if not has_material:
         raise HTTPException(409, "errors.placement_no_material")
     # Classmates starting at the same moment share one job (and one AI call).
-    pending = await s.scalar(
-        select(Job.id).where(
-            Job.kind == service.KIND,
-            Job.status.in_(("queued", "running")),
-            Job.payload["course_id"].astext == str(course.id),
-            Job.payload["language"].astext == language,
-        )
+    # Classmates starting at the same moment share one job and one AI call (audit OPT-01).
+    pending, created = await create_or_join_shared_job(
+        s,
+        kind=service.KIND,
+        share_key=share_key(service.KIND, course.id, language),
+        lane="interactive",
+        payload={"course_id": str(course.id), "language": language},
+        user_id=user.id,
+        world_id=course.world_id,
+        cost=cost,
     )
-    if pending is None:
-        created = await create_job(
-            s,
-            kind=service.KIND,
-            lane="interactive",
-            payload={"course_id": str(course.id), "language": language},
-            user_id=user.id,
-            world_id=course.world_id,
-            cost=cost,
-        )
-        pending = created.id
     return PlacementStartOut(
-        course_id=course.id, cached=False, cost=cost, job_id=pending, questions=None
+        course_id=course.id,
+        cached=False,
+        cost=cost if created else 0,
+        job_id=pending,
+        questions=None,
     )
 
 
@@ -128,4 +126,11 @@ async def finish(body: FinishIn, s: Session, user: CurrentUser) -> service.Grade
         raise HTTPException(404, "errors.placement_not_ready")
     if len(body.answers) != len(placement.questions):
         raise HTTPException(400, "errors.placement_incomplete")
-    return await service.grade(user.id, course.id, placement, body.answers)
+    graded = await service.grade(user.id, course.id, placement, body.answers)
+    weak = [
+        uuid.UUID(c.chapter_id)
+        for c in graded.chapters
+        if c.asked and 100 * c.correct < service.WEAK_BELOW * c.asked
+    ]
+    await prefetch.guard(s, prefetch.on_placement(s, user, course, graded.level, weak))
+    return graded

@@ -1,0 +1,73 @@
+== row counts
+ jobs | calls | cache | points 
+------+-------+-------+--------
+   68 |    87 |    14 |      0
+(1 row)
+
+== job poll: by id
+                                                         QUERY PLAN                                                          
+-----------------------------------------------------------------------------------------------------------------------------
+ Index Scan using pk_jobs on jobs  (cost=10.86..18.88 rows=1 width=1297) (actual time=0.033..0.034 rows=1 loops=1)
+   Index Cond: (id = $0)
+   InitPlan 1 (returns $0)
+     ->  Limit  (cost=10.72..10.72 rows=1 width=24) (actual time=0.024..0.025 rows=1 loops=1)
+           ->  Sort  (cost=10.72..10.84 rows=48 width=24) (actual time=0.024..0.024 rows=1 loops=1)
+                 Sort Key: jobs_1.created_at DESC
+                 Sort Method: top-N heapsort  Memory: 25kB
+                 ->  Seq Scan on jobs jobs_1  (cost=0.00..10.48 rows=48 width=24) (actual time=0.002..0.014 rows=68 loops=1)
+ Planning Time: 0.119 ms
+ Execution Time: 0.051 ms
+(10 rows)
+
+== queue_position (jobs/service.py:94)
+                                                                              QUERY PLAN                                                                               
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=8.17..8.18 rows=1 width=8) (actual time=0.022..0.023 rows=1 loops=1)
+   ->  Index Scan using ix_jobs_lease on jobs  (cost=0.14..8.17 rows=1 width=0) (actual time=0.015..0.021 rows=18 loops=1)
+         Index Cond: ((status)::text = 'queued'::text)
+         Filter: (((kind)::text <> 'DEBUG_REPLAY'::text) AND (((lane)::text = 'interactive'::text) OR (((lane)::text = 'background'::text) AND (created_at < now()))))
+ Planning Time: 0.048 ms
+ Execution Time: 0.031 ms
+(6 rows)
+
+== avg call latency (jobs/service.py:~80)
+                                                        QUERY PLAN                                                        
+--------------------------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=8.50..8.51 rows=1 width=32) (actual time=0.033..0.033 rows=1 loops=1)
+   ->  Limit  (cost=8.04..8.12 rows=30 width=12) (actual time=0.026..0.028 rows=30 loops=1)
+         ->  Sort  (cost=8.04..8.15 rows=41 width=12) (actual time=0.025..0.027 rows=30 loops=1)
+               Sort Key: ai_call_log.id DESC
+               Sort Method: quicksort  Memory: 27kB
+               ->  Seq Scan on ai_call_log  (cost=0.00..6.95 rows=41 width=12) (actual time=0.003..0.017 rows=57 loops=1)
+                     Filter: ((debug IS FALSE) AND (latency_ms > 0) AND (status_code = 200))
+                     Rows Removed by Filter: 30
+ Planning Time: 0.089 ms
+ Execution Time: 0.042 ms
+(10 rows)
+
+== ai_cache lookup
+                                                       QUERY PLAN                                                       
+------------------------------------------------------------------------------------------------------------------------
+ Index Scan using pk_ai_cache on ai_cache  (cost=0.14..8.16 rows=1 width=742) (actual time=0.009..0.009 rows=0 loops=1)
+   Index Cond: ((key)::text = 'x'::text)
+ Planning Time: 0.020 ms
+ Execution Time: 0.013 ms
+(4 rows)
+
+== leaderboard week (leaderboard/service.py:57)
+                                                                      QUERY PLAN                                                                      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+ GroupAggregate  (cost=8.23..8.25 rows=1 width=24) (actual time=0.020..0.021 rows=0 loops=1)
+   Group Key: points_ledger.user_id
+   InitPlan 1 (returns $0)
+     ->  Limit  (cost=0.00..0.05 rows=1 width=16) (actual time=0.008..0.008 rows=1 loops=1)
+           ->  Seq Scan on worlds  (cost=0.00..12.80 rows=280 width=16) (actual time=0.008..0.008 rows=1 loops=1)
+   ->  Sort  (cost=8.18..8.18 rows=1 width=20) (actual time=0.020..0.020 rows=0 loops=1)
+         Sort Key: points_ledger.user_id
+         Sort Method: quicksort  Memory: 25kB
+         ->  Index Scan using ix_points_ledger_world_ts on points_ledger  (cost=0.15..8.17 rows=1 width=20) (actual time=0.011..0.011 rows=0 loops=1)
+               Index Cond: ((world_id = $0) AND (created_at >= (now() - '7 days'::interval)))
+ Planning Time: 0.122 ms
+ Execution Time: 0.029 ms
+(12 rows)
+

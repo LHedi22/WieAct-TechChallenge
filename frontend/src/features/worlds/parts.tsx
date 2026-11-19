@@ -75,11 +75,18 @@ export function JoinCard({ initialCode = "" }: { initialCode?: string }) {
   );
 }
 
-/** Error banner for a failed mutation/query (the message is always an i18n key). */
-export function ErrorBanner({ error }: { error: unknown }) {
+/** Error banner for a failed mutation/query (the message is always an i18n key; `values` fills
+ * its placeholders, e.g. a limit read from the server). */
+export function ErrorBanner({
+  error,
+  values,
+}: {
+  error: unknown;
+  values?: Record<string, string | number>;
+}) {
   const { t } = useTranslation();
   if (!error) return null;
-  return <Banner kind="error">{t((error as ApiError).key ?? "errors.unexpected")}</Banner>;
+  return <Banner kind="error">{t((error as ApiError).key ?? "errors.unexpected", values)}</Banner>;
 }
 
 /** World name + course chips summary bar (mockup 04, above the upload area). */

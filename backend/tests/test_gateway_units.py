@@ -88,6 +88,31 @@ def test_platform_parallel_headers_are_not_requests_remaining():
     assert parse(only_parallel) is None
 
 
+PLATFORM_LOW = {  # the real header names (DECISIONS 2026-11-09); there is no reset header
+    "x-ratelimit-api_key-remaining-requests": "2",
+    "x-ratelimit-api_key-limit-requests": "20",
+    "x-ratelimit-api_key-remaining-max_parallel_requests": "1",
+    "x-ratelimit-api_key-limit-max_parallel_requests": "2",
+    "x-litellm-key-rpm-limit": "20",
+}
+
+
+def test_low_quota_without_a_reset_header_pauses_for_the_refill_time():
+    """Audit OPT-06: resume_in_s() was 0 whenever no reset header came, and the platform sends
+    none, so the background lane never paused on low quota. The pause is now the time the bucket
+    needs to refill above LOW_WATERMARK at the limit's rate: (3 + 1 - 2) × 60 / 20 = 6 s."""
+    s = parse(PLATFORM_LOW)
+    assert s.remaining == 2 and s.limit_rpm == 20 and s.reset_s is None
+    assert s.low and 5.5 <= s.resume_in_s() <= 6.0
+    s.observed_at -= 6.1  # the bucket has refilled since: background resumes
+    assert not s.low and s.resume_in_s() == 0.0
+
+
+def test_low_quota_with_no_limit_header_assumes_the_platform_rate():
+    s = parse({"x-ratelimit-api_key-remaining-requests": "0"})
+    assert s.low and 11.5 <= s.resume_in_s() <= 12.0  # (3 + 1 - 0) × 60 / 20
+
+
 def test_no_quota_headers():
     assert parse({"content-type": "application/json"}) is None
 

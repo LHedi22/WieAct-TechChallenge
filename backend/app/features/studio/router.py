@@ -14,6 +14,8 @@ from app.features.quiz.router import Price
 from app.features.studio import service, srs
 from app.features.studio.service import Pay, Rejected
 from app.features.worlds.service import NotFound, member_chapter
+from app.jobs import prefetch
+from app.jobs.prefetch import Preparing
 from app.models import QuizAttempt
 
 router = APIRouter(prefix="/api/studio", tags=["studio"])
@@ -65,6 +67,7 @@ class Studio(BaseModel):
     quick_mode: bool = False  # notes written by the compact fallback; full version is free
     made_by: str | None = None  # provider that wrote it; the UI labels non-platform test data
     pending_job_id: uuid.UUID | None
+    preparing: Preparing | None = None  # the pending job is a background prefetch
     cards: CardCounts
     pool_balance: int
     cost: int
@@ -150,9 +153,11 @@ async def generate(
 ) -> GenerateOut:
     chapter = await chapter_or_404(s, user, chapter_id)
     try:
-        return GenerateOut(**await service.generate(s, user, chapter, body.level, body.pay))
+        out = GenerateOut(**await service.generate(s, user, chapter, body.level, body.pay))
     except Rejected as e:
         raise http_error(e) from e
+    await prefetch.safely(s, user, chapter, body.level)  # the next chapter, in background
+    return out
 
 
 @router.get("/{chapter_id}/cards", response_model=Queue)

@@ -16,8 +16,16 @@ from app.features.daily import service as daily
 from app.features.pool import service as pool
 from app.features.quiz.service import LEVELS
 from app.features.studio import pack, srs
+from app.features.wallet import service as wallet
 from app.features.worlds.service import NotFound, member_chapter
-from app.jobs.service import create_job
+from app.jobs import prefetch
+from app.jobs.service import (
+    create_or_join_shared_job,
+    mark_opened,
+    paid_job,
+    promote,
+    share_key,
+)
 from app.models import (
     Chapter,
     Course,
@@ -49,9 +57,15 @@ async def price(s: AsyncSession, chapter_id: uuid.UUID, level: str, language: st
     """What Confirm will cost (DESIGN.md: "Free" when the class already has the pack). Filling a
     part that failed earlier is free too: the class already paid for the pack."""
     missing = await pack.missing(s, chapter_id, level, language)
-    if "notes" not in missing or await pack.pending_generation(s, chapter_id, level, language):
-        # also free: the full version of a Quick-mode copy (the class already paid for the pack)
-        return {"cost": economy.COST["cached_content"], "cached": not missing}
+    pending = await pack.pending_generation(s, chapter_id, level, language)
+    if "notes" not in missing or pending:
+        # also free: the full version of a Quick-mode copy (the class already paid for the pack),
+        # and joining a classmate's or a prefetch's job (Group E)
+        return {
+            "cost": economy.COST["cached_content"],
+            "cached": not missing,
+            "preparing": await prefetch.preparing(s, pending),
+        }
     return {"cost": economy.COST["generate_shared_asset"], "cached": False}
 
 
@@ -64,6 +78,10 @@ async def status(s: AsyncSession, user: User, chapter: Chapter, level: str) -> d
     language = user.ui_language
     course = await s.get(Course, chapter.course_id)
     found = await pack.assets(s, chapter.id, level, language)
+    if "notes" in found:  # served: a prefetch that made it was used (step 8 stats)
+        key = share_key(pack.KIND, chapter.id, level, language)
+        await mark_opened(s, key)
+        await wallet.share_back(s, await paid_job(s, key), user.id)  # first-payer refund
     counts = (await queue(s, user, chapter, level))["counts"]
     return {
         "chapter_id": chapter.id,
@@ -94,12 +112,17 @@ async def generate(
         return {"job_id": None, "cost": 0, "cached": True}
     job_id = await pack.pending_generation(s, chapter.id, level, language)
     if job_id:
+        await promote(s, job_id)  # a queued prefetch: the student needs it now (Group E)
+        await mark_opened(s, share_key(pack.KIND, chapter.id, level, language))
         return {"job_id": job_id, "cost": 0, "cached": False}
     course = await s.get(Course, chapter.course_id)
     cost = economy.COST["generate_shared_asset"] if "notes" in missing else 0
-    job = await create_job(  # reserves from the wallet, or from the pool (LedgerCoins.reserve)
+    # One job per pack even when classmates click at the same moment (audit OPT-01); only the
+    # creator reserves, from the wallet or the pool (LedgerCoins.reserve).
+    job_id, created = await create_or_join_shared_job(
         s,
         kind=pack.KIND,
+        share_key=share_key(pack.KIND, chapter.id, level, language),
         lane="interactive",
         payload={
             "chapter_id": str(chapter.id),
@@ -111,7 +134,7 @@ async def generate(
         world_id=course.world_id,
         cost=cost,
     )
-    return {"job_id": job.id, "cost": cost, "cached": False}
+    return {"job_id": job_id, "cost": cost if created else 0, "cached": False}
 
 
 # --- flashcards --------------------------------------------------------------------------------
